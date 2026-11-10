@@ -614,9 +614,9 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             if log:
                 log('  block relocation: ' + str({k: v for k, v in reloc.items() if k != 'rows'}))
             dump(folder / 'map.json', data)
-        if os.environ.get('OPM_EXPERT_SUBMODULE', 'off') in ('on', 'branch'):   # experimental, off by default: constrained relocation of exchange+transport modules inside big expert blocks
+        if os.environ.get('OPM_EXPERT_SUBMODULE', 'branch') in ('on', 'branch'):   # on by default: constrained relocation of exchange + transport modules inside big expert blocks; OPM_EXPERT_SUBMODULE=off disables it
             import block_relocation
-            data, sub = block_relocation.relocate_sub(data, model, scene, blocks, currency(model), skip_edges, log=log, simple=os.environ.get('OPM_EXPERT_SUBMODULE') != 'branch')
+            data, sub = block_relocation.relocate_sub(data, model, scene, blocks, currency(model), skip_edges, log=log, simple=os.environ.get('OPM_EXPERT_SUBMODULE', 'branch') != 'branch')
             metric['expert_submodule'] = sub
             data[0].setdefault('metadata', {})['regenerated_expert_edges'] = sub['regenerated_expert_edges']
             if log:

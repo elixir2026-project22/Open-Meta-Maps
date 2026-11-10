@@ -38,7 +38,7 @@ The tool and `compose` expose the layout style (`--layout-style legacy|expert`, 
 | `OPM_COMPOSE`, `OPM_COMPOSE_LONG` | on | whole-map composition; relocation threshold normalised by reaction spacing |
 | `OPM_PERIPHERAL` | on | attach exchange + transport modules to the pathway they belong to |
 | `OPM_BLOCK_RELOC`, `OPM_RELOC_ACCEPT` | on, `balanced` | relocate expert blocks with a long connection; `strict` uses the strict quality gate |
-| `OPM_EXPERT_SUBMODULE` | off | `on` / `branch`: move exchange + transport modules inside large expert blocks (regenerates the connections that cross the boundary) |
+| `OPM_EXPERT_SUBMODULE` | `branch` | move exchange + transport modules (including coupled transporters) that sit far from the rest of a large expert block next to it; the connections that cross the module boundary are re-drawn and recorded as `regenerated_expert_edges`. `on` = simple transports only, `off` = disabled |
 | `OPM_RELOC_CLEAR` | off | experimental local space-making for relocations |
 | `OPM_LOWCONF` | off | experimental: split topology-only structures whose reactions have unrelated neighbourhoods |
 | `OPM_REGIONS`, `OPM_REGION_PLACE` | off | experimental region-level arrangement (did not improve the example maps) |
