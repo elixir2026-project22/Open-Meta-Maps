@@ -3,28 +3,26 @@
 *.py[cod]
 **/node_modules/
 
-# generated outputs, local runs, backups and third-party material that must not be redistributed from this repository
+# generated outputs of the tool and local experiments.  The real folders live OUTSIDE this repository (../Experiments); the entries below are
+# local symlinks (or generated files) that keep the tool working on the developer's machine.
 /results/
 /layout_atlas/results/*
 !/layout_atlas/results/tool/
-/layout_atlas/stable/
-/layout_atlas/build/
-/layout_atlas/build_native/
-/Ref/
-/.presentation-build/
-/Presentation/
-
-# data that is not redistributable (CC BY-NC-SA 4.0 / unverified provenance) or only referenced
-/layout_atlas/data/atlas.sqlite
-/layout_atlas/data/extensions/micromap/
-/layout_atlas/data/extensions/brenda/
-/layout_atlas/data/references/
-
-# research notes and navigation page are not part of the published tool + dataset
-/Proposal/
-/index.html
-
-# the cached identifier bridge (built from public GEM annotations) is needed to run the tool on a fresh clone
 !/layout_atlas/results/micromap_extension/
 /layout_atlas/results/micromap_extension/*
 !/layout_atlas/results/micromap_extension/annotation_bridge.json
+
+# build outputs (rebuilt by `python3 project.py setup`)
+/layout_atlas/build/
+/layout_atlas/build_native/
+
+# data that is not redistributable (CC BY-NC-SA 4.0 / unverified provenance / licence conflicts); the real files live OUTSIDE this repository (../LocalData)
+/layout_atlas/data/atlas.sqlite
+/layout_atlas/data/extensions/micromap
+/layout_atlas/data/extensions/brenda
+/layout_atlas/data/references
+/layout_atlas/data/source_inputs/archives/human_maps.zip*
+/layout_atlas/data/source_inputs/archives/yeast_maps.zip*
+
+# the generated home page
+/index.html
