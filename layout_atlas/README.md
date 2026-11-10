@@ -54,4 +54,4 @@ python3 test_ec_provenance.py
 
 ## Data
 
-See [`data/README.md`](data/README.md). Sources, licences and attribution: [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md) and [`docs/licensing_audit.md`](../docs/licensing_audit.md).
+See [`data/README.md`](../data/README.md). Sources, licences and attribution: [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md) and [`docs/licensing_audit.md`](../docs/licensing_audit.md).

@@ -18,7 +18,7 @@ python3 project.py setup
 
 `setup` downloads the pinned libavoid source and builds the two edge routers into `layout_atlas/build/`. It is needed once.
 
-On first run, if `layout_atlas/data/atlas.sqlite` is missing it is created as a copy of `layout_atlas/data/open_core.sqlite`.
+On first run, if `data/atlas.sqlite` is missing it is created as a copy of `data/open_core.sqlite`.
 
 ## Run
 
@@ -31,4 +31,4 @@ The `e_coli_core` example takes roughly two minutes on a laptop (the structure-s
 
 ## Bundled third-party files
 
-A minimal subset of the `sbml2escher` reference implementation (SBML reader, currency-metabolite roles, Escher map schema, example models) is vendored in `layout_atlas/vendor/sbml2escher/`; see `NOTICE.md` there. If a `Ref/sbml2escher-main/` checkout exists next to the code it is used instead.
+A minimal subset of the `sbml2escher` reference implementation (SBML reader, currency-metabolite roles, Escher map schema, example models) is vendored in `third_party/sbml2escher/`; see `NOTICE.md` there. If a `Ref/sbml2escher-main/` checkout exists next to the code it is used instead.

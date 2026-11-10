@@ -32,8 +32,8 @@ import numpy as np
 
 from core import BASE, CURRENCY
 
-RAW = BASE / 'data/source_inputs/raw/community'
-EXT = BASE / 'data/extensions/reaction_geometry_templates'
+RAW = BASE.parent / 'data/source_inputs/raw/community'
+EXT = BASE.parent / 'data/extensions/reaction_geometry_templates'
 FILE = EXT / 'templates.json.gz'
 _cache = {}
 

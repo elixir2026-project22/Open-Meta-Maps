@@ -8,8 +8,8 @@ import networkx as nx
 BASE=Path(__file__).resolve().parent
 ROOT=BASE.parent
 REF=ROOT/'Ref/sbml2escher-main'
-if not (REF/'model_input.py').exists():REF=BASE/'vendor/sbml2escher'  # minimal vendored subset for clones without Ref/
-DATA=BASE/'data';OUT=BASE/'results';INPUTS=DATA/'source_inputs'
+if not (REF/'model_input.py').exists():REF=ROOT/'third_party/sbml2escher'  # minimal vendored subset for clones without Ref/
+DATA=ROOT/'data';OUT=BASE/'results';INPUTS=DATA/'source_inputs'
 if not (DATA/'atlas.sqlite').exists() and (DATA/'open_core.sqlite').exists():__import__('shutil').copyfile(DATA/'open_core.sqlite',DATA/'atlas.sqlite')  # fresh clone: default to the redistributable open core
 sys.dont_write_bytecode=True
 spec=importlib.util.spec_from_file_location('v03_sbml_input',REF/'model_input.py');reader=importlib.util.module_from_spec(spec);spec.loader.exec_module(reader);load_model=reader.load_model

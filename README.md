@@ -67,7 +67,7 @@ The GEM reactions and stoichiometry are preserved. Layout quality and expert-geo
 
 ## Data sources
 
-The default Atlas (`layout_atlas/data/open_core.sqlite`, copied automatically to `atlas.sqlite` on first run) integrates pathway knowledge from Escher community maps, WikiPathways and Reactome. Source versions, hashes and licence evidence are in `layout_atlas/data/source_inputs/`. Additional sources (for example MicroMap, CC BY-NC-SA 4.0) are not part of this repository. See [docs/data_sources.md](docs/data_sources.md).
+The default Atlas (`data/open_core.sqlite`, copied automatically to `atlas.sqlite` on first run) integrates pathway knowledge from Escher community maps, WikiPathways and Reactome. Source versions, hashes and licence evidence are in `data/source_inputs/`. Additional sources (for example MicroMap, CC BY-NC-SA 4.0) are not part of this repository. See [docs/data_sources.md](docs/data_sources.md).
 
 ## Documentation
 
@@ -75,7 +75,7 @@ The default Atlas (`layout_atlas/data/open_core.sqlite`, copied automatically to
 - [Data sources and licensing](docs/data_sources.md)
 - [Methodology](docs/methodology.md)
 - [Limitations](docs/limitations.md)
-- [Atlas data layout](layout_atlas/data/README.md)
+- [Atlas data layout](data/README.md)
 
 ## Project status
 

@@ -18,10 +18,10 @@
 /layout_atlas/build_native/
 
 # data that is not redistributable (CC BY-NC-SA 4.0 / unverified provenance / licence conflicts); the real files live OUTSIDE this repository (../LocalData)
-/layout_atlas/data/atlas.sqlite
-/layout_atlas/data/extensions/micromap
-/layout_atlas/data/extensions/brenda
-/layout_atlas/data/references
-/layout_atlas/data/source_inputs/archives/human_maps.zip*
-/layout_atlas/data/source_inputs/archives/yeast_maps.zip*
+/data/atlas.sqlite
+/data/extensions/micromap
+/data/extensions/brenda
+/data/references
+/data/source_inputs/archives/human_maps.zip*
+/data/source_inputs/archives/yeast_maps.zip*
 

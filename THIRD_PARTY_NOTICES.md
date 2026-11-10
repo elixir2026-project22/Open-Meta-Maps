@@ -6,26 +6,26 @@ Open Meta Maps publishes **processed structures**: the module graphs, reaction i
 
 | Source | What is used | Where it comes from | Licence as recorded |
 |---|---|---|---|
-| **Escher community maps** (RECON1, e_coli_core, iAF1260, iJO1366, iMM904; 22 maps) | module structures and layouts extracted from the maps; the original map files are kept as input in `layout_atlas/data/source_inputs/raw/community/` | <https://github.com/escher/community-maps> (commit `6aa92abded6d0f9c4502ff681e14e40c5c00d61f`) | recorded as CC0-1.0; **to be confirmed** with the map authors (no licence text found in the map files) |
-| **WikiPathways** | GPML pathway maps and structures extracted from them | <https://www.wikipathways.org>; terms snapshot `layout_atlas/data/source_inputs/terms/wikipathways.html` (accessed 2026-11-05) | CC0 |
-| **Reactome** (release 97) | pathway diagram and graph data, structures extracted from them | <https://reactome.org>; terms snapshot `layout_atlas/data/source_inputs/terms/reactome.html` (accessed 2026-11-05) | CC0 for data; pathway illustrations are CC BY 4.0 and are not used |
+| **Escher community maps** (RECON1, e_coli_core, iAF1260, iJO1366, iMM904; 22 maps) | module structures and layouts extracted from the maps; the original map files are kept as input in `data/source_inputs/raw/community/` | <https://github.com/escher/community-maps> (commit `6aa92abded6d0f9c4502ff681e14e40c5c00d61f`) | recorded as CC0-1.0; **to be confirmed** with the map authors (no licence text found in the map files) |
+| **WikiPathways** | GPML pathway maps and structures extracted from them | <https://www.wikipathways.org>; terms snapshot `data/source_inputs/terms/wikipathways.html` (accessed 2026-11-05) | CC0 |
+| **Reactome** (release 97) | pathway diagram and graph data, structures extracted from them | <https://reactome.org>; terms snapshot `data/source_inputs/terms/reactome.html` (accessed 2026-11-05) | CC0 for data; pathway illustrations are CC BY 4.0 and are not used |
 
 ## Reference data
 
 | Source | What is used | Licence as recorded |
 |---|---|---|
-| **Rhea** (release 143) | reaction identities, directions and mappings (`layout_atlas/data/rhea/`) | CC BY 4.0; the Rhea copyright statement is kept in `layout_atlas/data/rhea/LICENSE.txt` |
-| **BiGG Models** | example genome-scale models in `examples/` (e_coli_core, iML1515, iMM904) and `layout_atlas/data/models/iYO844.xml` | BiGG licence; **non-commercial / educational terms apply and are to be reviewed**; the source of `iIT341.xml` is **not recorded** |
-| **AraCore** (Arabidopsis core model v2.1, P. Wendering et al.) | `layout_atlas/data/models/AraCore_v2_1.xml` | MIT (`layout_atlas/data/models/LICENSE.AraCore`) |
-| **Human-GEM** (SysBioChalmers) | `layout_atlas/vendor/sbml2escher/models/Human-GEM.xml` | CC BY 4.0 according to the project page; please cite Human-GEM when using it |
+| **Rhea** (release 143) | reaction identities, directions and mappings (`data/rhea/`) | CC BY 4.0; the Rhea copyright statement is kept in `data/rhea/LICENSE.txt` |
+| **BiGG Models** | example genome-scale models in `examples/` (e_coli_core, iML1515, iMM904) and `data/models/iYO844.xml` | BiGG licence; **non-commercial / educational terms apply and are to be reviewed**; the source of `iIT341.xml` is **not recorded** |
+| **AraCore** (Arabidopsis core model v2.1, P. Wendering et al.) | `data/models/AraCore_v2_1.xml` | MIT (`data/models/LICENSE.AraCore`) |
+| **Human-GEM** (SysBioChalmers) | `third_party/sbml2escher/models/Human-GEM.xml` | CC BY 4.0 according to the project page; please cite Human-GEM when using it |
 
 ## Software and schemas
 
 | Component | Licence as recorded |
 |---|---|
-| **Escher** map schema (`layout_atlas/vendor/sbml2escher/vendor/escher/`) | MIT |
-| **sbml2escher** (model reader and currency-metabolite roles, vendored subset) | upstream licence **to be confirmed** (see `layout_atlas/vendor/sbml2escher/NOTICE.md`) |
-| **adaptagrams / libavoid** (edge routing, `layout_atlas/data/routing/`) | LGPL; exact terms **to be confirmed**, notice to be added |
+| **Escher** map schema (`third_party/sbml2escher/vendor/escher/`) | MIT |
+| **sbml2escher** (model reader and currency-metabolite roles, vendored subset) | upstream licence **to be confirmed** (see `third_party/sbml2escher/NOTICE.md`) |
+| **adaptagrams / libavoid** (edge routing, `data/routing/`) | LGPL; exact terms **to be confirmed**, notice to be added |
 
 ## Not included in this repository
 

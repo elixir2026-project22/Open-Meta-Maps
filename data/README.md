@@ -1,6 +1,6 @@
 # Data
 
-Everything in this directory is read by the tool at run time. The Atlas (the structure database) is built from existing expert-drawn maps; sources, versions and licences are in [`THIRD_PARTY_NOTICES.md`](../../THIRD_PARTY_NOTICES.md) and [`docs/licensing_audit.md`](../../docs/licensing_audit.md).
+Everything in this directory is read by the tool at run time. The Atlas (the structure database) is built from existing expert-drawn maps; sources, versions and licences are in [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md) and [`docs/licensing_audit.md`](../docs/licensing_audit.md).
 
 ## In this repository
 
@@ -28,4 +28,4 @@ python3 project.py data list
 python3 project.py data fetch micromap     # or: brenda, reference-maps, atlas-full, all
 ```
 
-Details and terms: [`docs/data_packages.md`](../../docs/data_packages.md). A normal run needs none of them.
+Details and terms: [`docs/data_packages.md`](../docs/data_packages.md). A normal run needs none of them.
