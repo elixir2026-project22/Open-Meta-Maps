@@ -29,7 +29,7 @@ Action: confirm the licence of each of the 22 maps with their authors or the Esc
 | `data/models/iYO844.xml` | from BiGG (BiGG License) | **Open**: non-commercial/educational terms |
 | `examples/` (e_coli_core, iML1515, iMM904, iIT341) | BiGG models (BiGG License) | **Open**: same as above; iIT341 source not recorded |
 | `data/identifier_bridge.json` | annotations extracted from BiGG models and Human-GEM (CC-BY-4.0 according to its GitHub page); the Human-GEM file itself is no longer in the repository | cite BiGG and Human-GEM; terms of the source models apply |
-| `data/escher_schema/vendor/escher/map-schema-1-0-0.json` | Escher, MIT (`LICENSE` copied) | OK |
+| `data/escher_schema/map-schema-1-0-0.json` | Escher, MIT (`LICENSE` copied) | OK |
 | ~~`model_input.py`, `central_reference.json` (sbml2escher)~~ | removed 2026-11-10: the SBML reader is now libSBML-based (`layout_atlas/model_io.py`), the currency list is `data/currency_metabolites.json` | **Resolved** |
 | `data/routing/source.zip` (adaptagrams, libavoid) | adaptagrams is LGPL; exact terms not re-checked | **Open**: confirm and add the LGPL notice |
 | `human_maps.zip`, `yeast_maps.zip` (Human-maps, Yeast-maps) | recorded as "repository CC-BY-4.0 / GPL-3.0; embedded SVG BY-SA-4.0 conflict" | **Removed** (2026-11-10), together with their 251 map observations; they contributed 0 modules to the open core. `input_manifest.json`, `source_registry.json` and `extensions/source_paths/SOURCE.json` were updated to match. `acquire.py` still contains the download code for them (not run by default); they are not redistributed |

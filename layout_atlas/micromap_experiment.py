@@ -78,7 +78,7 @@ def draw_case(model,selected,folder,full_model=None):
     dump(folder/'source_licenses.json',dict(layout_sources=sources,policy='Original licenses preserved; MicroMap-derived artifacts remain in the NC-SA research partition'))
     data=read(folder/'map.json');data[0]['metadata']['layout_sources']=sources
     from jsonschema import Draft4Validator
-    Draft4Validator(read(REF/'vendor/escher/map-schema-1-0-0.json')).validate(data);dump(folder/'map.json',data)
+    Draft4Validator(read(ESCHER_SCHEMA)).validate(data);dump(folder/'map.json',data)
     from xml.sax.saxutils import escape
     svg=folder/'map.svg';text=svg.read_text();offset=text.index('>')+1;text=text[:offset]+'<metadata>'+escape(json.dumps(dict(layout_sources=sources),ensure_ascii=False))+'</metadata>'+text[offset:];svg.write_text(text)
     metric.update(metric_details(folder/'map.json'));metric['constraints']=audit;assert_chemistry(model,folder/'map.json');assert uid(model)==original

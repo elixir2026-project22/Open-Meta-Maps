@@ -664,11 +664,11 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     if protected_report is not None:
         data[0]['metadata']['protected_connections'] = [dict(r) for r in scene.get('protected', [])]
     try:
-        Draft4Validator(read(REF / 'vendor/escher/map-schema-1-0-0.json')).validate(data)
+        Draft4Validator(read(ESCHER_SCHEMA)).validate(data)
     except Exception:
         # the extension keys are not accepted by the strict schema: keep the map interoperable and store the groups beside it
         dump(folder / 'protected_connections.json', data[0]['metadata'].pop('protected_connections', []))
-        Draft4Validator(read(REF / 'vendor/escher/map-schema-1-0-0.json')).validate(data)
+        Draft4Validator(read(ESCHER_SCHEMA)).validate(data)
     dump(folder / 'map.json', data)
     svg = folder / 'map.svg'
     text = svg.read_text()

@@ -7,9 +7,9 @@ import numpy as np
 import networkx as nx
 BASE=Path(__file__).resolve().parent
 ROOT=BASE.parent
-REF=ROOT/'data/escher_schema'  # the official Escher map schema (MIT) used to validate every exported map.json: REF/'vendor/escher/map-schema-1-0-0.json'
 EXAMPLES=ROOT/'examples';HUMAN_GEM=Path(os.environ.get('OPM_HUMAN_GEM',ROOT/'external/Human-GEM.xml'))  # reference models; Human-GEM is only needed to rebuild the identifier tables
 DATA=ROOT/'data';OUT=BASE/'results';INPUTS=DATA/'source_inputs'
+ESCHER_SCHEMA=DATA/'escher_schema/map-schema-1-0-0.json'  # the official Escher map schema (MIT, licence next to it) used to validate every exported map.json
 if not (DATA/'atlas.sqlite').exists() and (DATA/'open_core.sqlite').exists():__import__('shutil').copyfile(DATA/'open_core.sqlite',DATA/'atlas.sqlite')  # fresh clone: default to the redistributable open core
 sys.dont_write_bytecode=True
 from model_io import load_model

@@ -160,7 +160,7 @@ def export(model,corexy,folder,name,blocks=(),full_model=None,route=False,scene=
   reactions[str(i)]=dict(bigg_id=r['id'],name=r.get('name') or r['id'],reversibility=r['lower_bound']<0<r['upper_bound'],label_x=x+offsets[rk][0],label_y=y+offsets[rk][1],gene_reaction_rule=r.get('gene_reaction_rule',''),genes=[],metabolites=[dict(bigg_id=mid,coefficient=c*sign) for mid,c in r['metabolites'].items()],segments=segs)
   original[r['id']]=dict(stoichiometry=r['metabolites'],lower_bound=r['lower_bound'],upper_bound=r['upper_bound'])
  values=np.array(list(positions.values()));label_max=np.max([[v[0]+offsets[k][0]+FONT.getlength(labels[k]),v[1]+offsets[k][1]+5] for k,v in positions.items()],0);width,height=(np.maximum(values.max(0),label_max)+[40,40]).tolist();data=[dict(schema='https://escher.github.io/escher/jsonschema/1-0-0#',homepage='https://escher.github.io',map_id=uid([model['id'],name,corexy]),map_name=model['id']+' '+name,map_description='v0.3; observed expert layouts, derived arrangements and algorithmic completion distinguished in skeleton manifest',metadata=dict(source_reactions=original,source_metabolites={k:{field:v for field,v in m.items() if field in ('id','name','compartment','chemicalFormula','charge')} for k,m in metlookup.items()},model_hash=uid(model),glyph_identity=copies,external_reactions={mid:[rid for rid in full_uses(full_model)[mid] if rid not in rlookup] for mid in metlookup} if full_model else {})),dict(nodes=nodes,reactions=reactions,text_labels={},canvas=dict(x=0,y=0,width=width,height=height))]
- Draft4Validator(read(REF/'vendor/escher/map-schema-1-0-0.json')).validate(data);dump(folder/(name+'.json'),data)
+ Draft4Validator(read(ESCHER_SCHEMA)).validate(data);dump(folder/(name+'.json'),data)
  paths={};routing=dict(status='straight',method='straight')
  if route:
   try:
@@ -185,7 +185,7 @@ def export(model,corexy,folder,name,blocks=(),full_model=None,route=False,scene=
     chain.append(ids[mk])
     for a,b in zip(chain,chain[1:]):newsegments['route'+str(len(newsegments))]=dict(from_node_id=a,to_node_id=b,b1=None,b2=None)
    rx['segments']=newsegments
-  Draft4Validator(read(REF/'vendor/escher/map-schema-1-0-0.json')).validate(data);dump(folder/(name+'.json'),data)
+  Draft4Validator(read(ESCHER_SCHEMA)).validate(data);dump(folder/(name+'.json'),data)
  svg=[f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}"><rect width="100%" height="100%" fill="white"/><defs><marker id="a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0L8,4L0,8Z" fill="#70838c"/></marker></defs>']
  for i,(a,b) in enumerate(segments):
   points=paths.get(i,[positions[a],positions[b]]);d='M'+' L'.join(f'{p[0]},{p[1]}' for p in points);r=rlookup[(a if a.startswith('r:') else b)[2:]];marker='' if r['lower_bound']==r['upper_bound']==0 else ' marker-end="url(#a)"'
