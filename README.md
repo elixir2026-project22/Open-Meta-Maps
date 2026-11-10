@@ -85,6 +85,8 @@ Open Meta Maps is under active development. It supports expert-informed map comp
 
 The software and the Atlas data have separate licensing requirements. The repository software licence is **to be specified before the public release**. Source-specific terms and provenance are documented in [docs/data_sources.md](docs/data_sources.md).
 
+See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the original sources of every structure and dataset used, with the licence recorded for each.
+
 ## Acknowledgements
 
 Developed during ELIXIR BioHackathon Europe 2026, building on the work of the Escher, WikiPathways, Reactome and wider metabolic modelling communities.
