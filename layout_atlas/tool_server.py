@@ -246,7 +246,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 return self.send_json(404, error('not_found', 'Not found.', '没有找到。'))
             return self.send_bytes(200, self.html_bytes(target.read_bytes()), 'text/html; charset=utf-8')
         target = (RESULTS / rel).resolve()
-        if RESULTS.resolve() not in target.parents or RUNS.resolve() in (target, *target.parents) or not target.is_file():
+        # files under results/ are served; a developer may keep big generated folders outside the repository and link them in as FIRST-LEVEL symlinks of results/
+        # (`results/catalog -> ../../../Experiments/...`): those link targets are allowed too, nothing else outside results/ is
+        roots = [RESULTS.resolve()] + [c.resolve() for c in RESULTS.iterdir() if c.is_symlink()]
+        if not any(r == target or r in target.parents for r in roots) or RUNS.resolve() in (target, *target.parents) or not target.is_file():
             return self.send_json(404, error('not_found', 'Not found.', '没有找到。'))
         ctype = mimetypes.guess_type(target.name)[0] or 'application/octet-stream'
         if target.suffix == '.js':

@@ -8,6 +8,7 @@
 /results/
 /layout_atlas/results/*
 !/layout_atlas/results/tool/
+!/layout_atlas/results/about/
 !/layout_atlas/results/micromap_extension/
 /layout_atlas/results/micromap_extension/*
 !/layout_atlas/results/micromap_extension/annotation_bridge.json
@@ -24,5 +25,3 @@
 /layout_atlas/data/source_inputs/archives/human_maps.zip*
 /layout_atlas/data/source_inputs/archives/yeast_maps.zip*
 
-# the generated home page
-/index.html
