@@ -18,6 +18,7 @@ A run writes `map.json` (Escher), `map.svg`, `report.json`, `reaction_provenance
 
 | Stage | Modules |
 |---|---|
+| Model input and identifiers | `model_io.py` (SBML via libSBML, COBRA / BiGG JSON), `identifier_bridge.py` (BiGG → ChEBI / EC tables from `data/identifier_bridge.json`), `build_identifier_bridge.py` (rebuilds them from the public models) |
 | Matching and selection | `retrieval.py`, `semantic_transfer.py`, `ec_channel.py`, `ec_provenance.py`, `database.py` (reads `data/atlas.sqlite`) |
 | Skeleton and global layout | `drawing.py`, `global_layout.py`, `pathway_backbone.py`, `completion.py` |
 | Context and anchors for unmatched reactions | `context.py`, `completion_context.py`, `instances.py` (metabolite instances and protected shared connections), `orientation.py` |

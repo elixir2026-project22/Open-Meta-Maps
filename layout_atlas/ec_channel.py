@@ -42,19 +42,9 @@ def rhea_to_ec():
 
 @lru_cache(maxsize=1)
 def bigg_to_ec():
-    """BiGG reaction id -> EC numbers, from explicit annotations in the fixed public Ref models."""
-    table = defaultdict(set)
-    for name in ('e_coli_core', 'iML1515', 'iMM904', 'Human-GEM'):
-        model = load_model(REF / 'models' / (name + '.xml'))
-        for r in model['reactions']:
-            ann = r.get('annotations', [])
-            ecs = full_ecs(re.search(r'ec-code/([^/?#]+)', a.get('uri', ''))[1] for a in ann if 'ec-code/' in a.get('uri', ''))
-            ids = set(xrefs(ann).get('bigg.reaction', []))
-            if name != 'Human-GEM':
-                ids.add(r['id'])
-            for b in ids:
-                table[b] |= ecs
-    return table
+    """BiGG reaction id -> fully specified EC numbers, from `data/identifier_bridge.json` (explicit annotations of the public BiGG / Human-GEM models)."""
+    import identifier_bridge
+    return identifier_bridge.bigg_to_ec()
 
 
 def source_ecs(reaction):

@@ -230,6 +230,10 @@ def load_bridge():
         return read(cache)
     import semantic_transfer as st
     import ec_experiment
+    missing = [str(p) for _, p, _ in ec_experiment.MODELS if not p.exists()]
+    if missing:
+        raise FileNotFoundError('annotation_bridge.json is missing and the models needed to rebuild it are not available: ' + ', '.join(missing) +
+                                ' (BiGG models are in examples/; point OPM_HUMAN_GEM to Human-GEM.xml)')
     return st.annotation_bridge(ec_experiment.MODELS)
 
 

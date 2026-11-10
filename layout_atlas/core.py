@@ -7,14 +7,14 @@ import numpy as np
 import networkx as nx
 BASE=Path(__file__).resolve().parent
 ROOT=BASE.parent
-REF=ROOT/'Ref/sbml2escher-main'
-if not (REF/'model_input.py').exists():REF=ROOT/'third_party/sbml2escher'  # minimal vendored subset for clones without Ref/
+REF=ROOT/'data/escher_schema'  # the official Escher map schema (MIT) used to validate every exported map.json: REF/'vendor/escher/map-schema-1-0-0.json'
+EXAMPLES=ROOT/'examples';HUMAN_GEM=Path(os.environ.get('OPM_HUMAN_GEM',ROOT/'external/Human-GEM.xml'))  # reference models; Human-GEM is only needed to rebuild the identifier tables
 DATA=ROOT/'data';OUT=BASE/'results';INPUTS=DATA/'source_inputs'
 if not (DATA/'atlas.sqlite').exists() and (DATA/'open_core.sqlite').exists():__import__('shutil').copyfile(DATA/'open_core.sqlite',DATA/'atlas.sqlite')  # fresh clone: default to the redistributable open core
 sys.dont_write_bytecode=True
-spec=importlib.util.spec_from_file_location('v03_sbml_input',REF/'model_input.py');reader=importlib.util.module_from_spec(spec);spec.loader.exec_module(reader);load_model=reader.load_model
+from model_io import load_model
 SEEDS=[20261105,20261106,20261107]
-CURRENCY={k for k,v in json.loads((REF/'data/bacteria/central_reference.json').read_text())['roles'].items() if v['kind'] in ('inorganic','coenzyme')}
+CURRENCY={e['id'] for e in json.loads((DATA/'currency_metabolites.json').read_text())['currency']}  # BiGG ids of currency / cofactor metabolites (see the file for provenance)
 def read(p):return json.loads(Path(p).read_text())
 def dump(p,v):
  p=Path(p);p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(v,ensure_ascii=False,indent=2,allow_nan=False)+'\n')

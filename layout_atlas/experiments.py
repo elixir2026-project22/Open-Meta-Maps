@@ -60,7 +60,7 @@ def ranking(mods):
  with gzip.open(OUT/'ranking_queries.json.gz','wt') as f:json.dump(allrows,f,ensure_ascii=False)
  return rankers
 
-MODELS=[('e_coli_core',REF/'models/e_coli_core.xml','Escherichia coli'),('iML1515',REF/'models/iML1515.xml','Escherichia coli'),('iMM904',REF/'models/iMM904.xml','Saccharomyces cerevisiae'),('Human-GEM',REF/'models/Human-GEM.xml','Homo sapiens'),('iYO844',DATA/'models/iYO844.xml','Bacillus subtilis'),('AraCore_v2_1',DATA/'models/AraCore_v2_1.xml','Arabidopsis thaliana')]
+MODELS=[('e_coli_core',EXAMPLES/'e_coli_core.xml','Escherichia coli'),('iML1515',EXAMPLES/'iML1515.xml','Escherichia coli'),('iMM904',EXAMPLES/'iMM904.xml','Saccharomyces cerevisiae'),('Human-GEM',HUMAN_GEM,'Homo sapiens'),('iYO844',DATA/'models/iYO844.xml','Bacillus subtilis'),('AraCore_v2_1',DATA/'models/AraCore_v2_1.xml','Arabidopsis thaliana')]
 
 def fixed_views(model,g,max_size=50):
  metas={m['id']:m for m in model['metabolites']};bycomp=defaultdict(list)

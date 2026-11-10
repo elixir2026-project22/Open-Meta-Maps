@@ -17,14 +17,16 @@ Open Meta Maps publishes **processed structures**: the module graphs, reaction i
 | **Rhea** (release 143) | reaction identities, directions and mappings (`data/rhea/`) | CC BY 4.0; the Rhea copyright statement is kept in `data/rhea/LICENSE.txt` |
 | **BiGG Models** | example genome-scale models in `examples/` (e_coli_core, iML1515, iMM904) and `data/models/iYO844.xml` | BiGG licence; **non-commercial / educational terms apply and are to be reviewed**; the source of `iIT341.xml` is **not recorded** |
 | **AraCore** (Arabidopsis core model v2.1, P. Wendering et al.) | `data/models/AraCore_v2_1.xml` | MIT (`data/models/LICENSE.AraCore`) |
-| **Human-GEM** (SysBioChalmers) | `third_party/sbml2escher/models/Human-GEM.xml` | CC BY 4.0 according to the project page; please cite Human-GEM when using it |
+| **Human-GEM** (SysBioChalmers) | its model annotations are the source of part of `data/identifier_bridge.json` (the model file itself is not included) | CC BY 4.0 according to the project page; please cite Human-GEM when using it |
+| **Identifier tables** (`data/identifier_bridge.json`) | BiGG metabolite → ChEBI and BiGG reaction → EC, extracted from the annotations of e_coli_core, iML1515, iMM904 (BiGG) and Human-GEM; every entry lists the models it comes from | the terms of those models apply (BiGG licence; CC BY 4.0 for Human-GEM) |
+| **Currency / cofactor list** (`data/currency_metabolites.json`) | 65 BiGG metabolite ids (ions, small inorganics, coenzymes); each checked against the BiGG models | identifiers only; provenance in the file |
 
 ## Software and schemas
 
 | Component | Licence as recorded |
 |---|---|
-| **Escher** map schema (`third_party/sbml2escher/vendor/escher/`) | MIT |
-| **sbml2escher** (model reader and currency-metabolite roles, vendored subset) | upstream licence **to be confirmed** (see `third_party/sbml2escher/NOTICE.md`) |
+| **Escher** map schema (`data/escher_schema/`, used unchanged) | MIT (licence kept next to the file) |
+| **libSBML** (`python-libsbml`, SBML reader; installed as a dependency, not redistributed) | LGPL 2.1 |
 | **adaptagrams / libavoid** (edge routing, `data/routing/`) | LGPL; exact terms **to be confirmed**, notice to be added |
 
 ## Not included in this repository

@@ -15,8 +15,8 @@ import brenda_library as bl
 
 RESULTS = OUT / 'ec_channel'
 # Same six targets as MODELS (copied so this retrieval-level study does not import the drawing stack).
-MODELS = [('e_coli_core', REF / 'models/e_coli_core.xml', 'Escherichia coli'), ('iML1515', REF / 'models/iML1515.xml', 'Escherichia coli'),
-          ('iMM904', REF / 'models/iMM904.xml', 'Saccharomyces cerevisiae'), ('Human-GEM', REF / 'models/Human-GEM.xml', 'Homo sapiens'),
+MODELS = [('e_coli_core', EXAMPLES / 'e_coli_core.xml', 'Escherichia coli'), ('iML1515', EXAMPLES / 'iML1515.xml', 'Escherichia coli'),
+          ('iMM904', EXAMPLES / 'iMM904.xml', 'Saccharomyces cerevisiae'), ('Human-GEM', HUMAN_GEM, 'Homo sapiens'),
           ('iYO844', DATA / 'models/iYO844.xml', 'Bacillus subtilis'), ('AraCore_v2_1', DATA / 'models/AraCore_v2_1.xml', 'Arabidopsis thaliana')]
 
 

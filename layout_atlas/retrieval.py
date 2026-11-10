@@ -12,13 +12,10 @@ FEATURES=['size','biochemical_level','port_mismatch','port_direction_cost','aspe
 
 @lru_cache(maxsize=1)
 def public_metabolite_links():
+ """BiGG metabolite id -> ChEBI ids, from `data/identifier_bridge.json` (explicit annotations of the public BiGG / Human-GEM models, with their origin)."""
+ import identifier_bridge
  links=defaultdict(set)
- for path in sorted((REF/'models').glob('*.xml')):
-  if path.name not in ('Human-GEM.xml','iML1515.xml','iMM904.xml','e_coli_core.xml'):continue
-  model=load_model(path)
-  for m in model['metabolites']:
-   refs=xrefs(m.get('annotations',[]))
-   for bigg in refs.get('bigg.metabolite',[]):links[bigg].update(refs.get('chebi',[]))
+ for bigg,chebis in identifier_bridge.metabolite_chebi().items():links[bigg].update(chebis)
  return links
 
 def target_info(model):

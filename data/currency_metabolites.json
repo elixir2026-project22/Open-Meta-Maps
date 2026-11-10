@@ -1,0 +1,574 @@
+{
+ "format_version": 1,
+ "description": "BiGG metabolite ids (without compartment suffix) that the layout treats as currency / cofactor metabolites: small inorganic ions and gases (kind \"inorganic\") and coenzymes and electron carriers (kind \"coenzyme\"). Such metabolites are drawn as local copies beside each reaction and do not decide the main chain of a pathway.",
+ "provenance": "The 65 ids and their two kinds were taken over unchanged from the role table that the tool used before (kinds inorganic and coenzyme of the sbml2escher bacterial central-carbon reference, itself built from BiGG models). Each id was checked against the BiGG models e_coli_core, iML1515 and iMM904 (`found_in`, names from those models); 59 of the 65 ids occur in these models; co, n2, q10, q10h2, alipoa and lipoamide do not, they were kept because they are BiGG ids from the other BiGG models of the original table (names empty). The set of ids is identical to the previously used CURRENCY set. Identifiers are BiGG namespace ids (factual identifiers); change this file deliberately: it affects every layout.",
+ "currency": [
+  {
+   "id": "10fthf",
+   "kind": "coenzyme",
+   "name": "10-Formyltetrahydrofolate",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "5mthf",
+   "kind": "coenzyme",
+   "name": "5-Methyltetrahydrofolate",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "adp",
+   "kind": "coenzyme",
+   "name": "ADP C10H12N5O10P2",
+   "found_in": [
+    "e_coli_core",
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "alipoa",
+   "kind": "coenzyme",
+   "name": "",
+   "found_in": []
+  },
+  {
+   "id": "amp",
+   "kind": "coenzyme",
+   "name": "AMP C10H12N5O7P",
+   "found_in": [
+    "e_coli_core",
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "atp",
+   "kind": "coenzyme",
+   "name": "ATP C10H12N5O13P3",
+   "found_in": [
+    "e_coli_core",
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "btn",
+   "kind": "coenzyme",
+   "name": "Biotin",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "ca2",
+   "kind": "inorganic",
+   "name": "Calcium",
+   "found_in": [
+    "iML1515"
+   ]
+  },
+  {
+   "id": "cdp",
+   "kind": "coenzyme",
+   "name": "CDP C9H12N3O11P2",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "cl",
+   "kind": "inorganic",
+   "name": "Chloride",
+   "found_in": [
+    "iML1515"
+   ]
+  },
+  {
+   "id": "cmp",
+   "kind": "coenzyme",
+   "name": "CMP C9H12N3O8P",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "co",
+   "kind": "inorganic",
+   "name": "",
+   "found_in": []
+  },
+  {
+   "id": "co2",
+   "kind": "inorganic",
+   "name": "CO2 CO2",
+   "found_in": [
+    "e_coli_core",
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "coa",
+   "kind": "coenzyme",
+   "name": "Coenzyme A",
+   "found_in": [
+    "e_coli_core",
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "ctp",
+   "kind": "coenzyme",
+   "name": "CTP C9H12N3O14P3",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "cu2",
+   "kind": "inorganic",
+   "name": "Copper",
+   "found_in": [
+    "iML1515"
+   ]
+  },
+  {
+   "id": "dhf",
+   "kind": "coenzyme",
+   "name": "7,8-Dihydrofolate",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "dhlam",
+   "kind": "coenzyme",
+   "name": "Dihydrolipoamide C8H17NOS2",
+   "found_in": [
+    "iMM904"
+   ]
+  },
+  {
+   "id": "fad",
+   "kind": "coenzyme",
+   "name": "Flavin adenine dinucleotide oxidized",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "fadh2",
+   "kind": "coenzyme",
+   "name": "Flavin adenine dinucleotide reduced",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "fe2",
+   "kind": "inorganic",
+   "name": "Fe2+ mitochondria",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "fe3",
+   "kind": "inorganic",
+   "name": "Iron (Fe3+)",
+   "found_in": [
+    "iML1515"
+   ]
+  },
+  {
+   "id": "fmn",
+   "kind": "coenzyme",
+   "name": "FMN C17H19N4O9P",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "fmnh2",
+   "kind": "coenzyme",
+   "name": "Reduced FMN",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "gdp",
+   "kind": "coenzyme",
+   "name": "GDP C10H12N5O11P2",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "gmp",
+   "kind": "coenzyme",
+   "name": "GMP C10H12N5O8P",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "gtp",
+   "kind": "coenzyme",
+   "name": "GTP C10H12N5O14P3",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "h",
+   "kind": "inorganic",
+   "name": "H+",
+   "found_in": [
+    "e_coli_core",
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "h2",
+   "kind": "inorganic",
+   "name": "Hydrogen",
+   "found_in": [
+    "iML1515"
+   ]
+  },
+  {
+   "id": "h2o",
+   "kind": "inorganic",
+   "name": "H2O H2O",
+   "found_in": [
+    "e_coli_core",
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "h2s",
+   "kind": "inorganic",
+   "name": "Hydrogen sulfide",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "hco3",
+   "kind": "inorganic",
+   "name": "Bicarbonate",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "hhlipa",
+   "kind": "coenzyme",
+   "name": "Heptosyl-heptosyl-kdo2-lipidA",
+   "found_in": [
+    "iML1515"
+   ]
+  },
+  {
+   "id": "k",
+   "kind": "inorganic",
+   "name": "Potassium",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "lipoamide",
+   "kind": "coenzyme",
+   "name": "",
+   "found_in": []
+  },
+  {
+   "id": "lipoamp",
+   "kind": "coenzyme",
+   "name": "Lipoyl-AMP",
+   "found_in": [
+    "iML1515"
+   ]
+  },
+  {
+   "id": "mg2",
+   "kind": "inorganic",
+   "name": "Magnesium",
+   "found_in": [
+    "iML1515"
+   ]
+  },
+  {
+   "id": "mlthf",
+   "kind": "coenzyme",
+   "name": "5,10-Methylenetetrahydrofolate",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "mql8",
+   "kind": "coenzyme",
+   "name": "Menaquinol 8",
+   "found_in": [
+    "iML1515"
+   ]
+  },
+  {
+   "id": "mqn8",
+   "kind": "coenzyme",
+   "name": "Menaquinone 8",
+   "found_in": [
+    "iML1515"
+   ]
+  },
+  {
+   "id": "n2",
+   "kind": "inorganic",
+   "name": "",
+   "found_in": []
+  },
+  {
+   "id": "na1",
+   "kind": "inorganic",
+   "name": "Sodium",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "nad",
+   "kind": "coenzyme",
+   "name": "Nicotinamide adenine dinucleotide",
+   "found_in": [
+    "e_coli_core",
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "nadh",
+   "kind": "coenzyme",
+   "name": "Nicotinamide adenine dinucleotide - reduced",
+   "found_in": [
+    "e_coli_core",
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "nadp",
+   "kind": "coenzyme",
+   "name": "Nicotinamide adenine dinucleotide phosphate",
+   "found_in": [
+    "e_coli_core",
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "nadph",
+   "kind": "coenzyme",
+   "name": "Nicotinamide adenine dinucleotide phosphate - reduced",
+   "found_in": [
+    "e_coli_core",
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "nh4",
+   "kind": "inorganic",
+   "name": "Ammonium",
+   "found_in": [
+    "e_coli_core",
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "no2",
+   "kind": "inorganic",
+   "name": "Nitrite",
+   "found_in": [
+    "iML1515"
+   ]
+  },
+  {
+   "id": "no3",
+   "kind": "inorganic",
+   "name": "Nitrate",
+   "found_in": [
+    "iML1515"
+   ]
+  },
+  {
+   "id": "o2",
+   "kind": "inorganic",
+   "name": "O2 O2",
+   "found_in": [
+    "e_coli_core",
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "pi",
+   "kind": "inorganic",
+   "name": "Phosphate",
+   "found_in": [
+    "e_coli_core",
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "ppi",
+   "kind": "inorganic",
+   "name": "Diphosphate",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "pydx5p",
+   "kind": "coenzyme",
+   "name": "Pyridoxal 5'-phosphate",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "q10",
+   "kind": "coenzyme",
+   "name": "",
+   "found_in": []
+  },
+  {
+   "id": "q10h2",
+   "kind": "coenzyme",
+   "name": "",
+   "found_in": []
+  },
+  {
+   "id": "q8",
+   "kind": "coenzyme",
+   "name": "Ubiquinone-8",
+   "found_in": [
+    "e_coli_core",
+    "iML1515"
+   ]
+  },
+  {
+   "id": "q8h2",
+   "kind": "coenzyme",
+   "name": "Ubiquinol-8",
+   "found_in": [
+    "e_coli_core",
+    "iML1515"
+   ]
+  },
+  {
+   "id": "so3",
+   "kind": "inorganic",
+   "name": "Sulfite",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "so4",
+   "kind": "inorganic",
+   "name": "Sulfate",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "thf",
+   "kind": "coenzyme",
+   "name": "5,6,7,8-Tetrahydrofolate",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "thmpp",
+   "kind": "coenzyme",
+   "name": "Thiamine diphosphate",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "udp",
+   "kind": "coenzyme",
+   "name": "UDP C9H11N2O12P2",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "ump",
+   "kind": "coenzyme",
+   "name": "UMP C9H11N2O9P",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "utp",
+   "kind": "coenzyme",
+   "name": "UTP C9H11N2O15P3",
+   "found_in": [
+    "iML1515",
+    "iMM904"
+   ]
+  },
+  {
+   "id": "zn2",
+   "kind": "inorganic",
+   "name": "Zinc",
+   "found_in": [
+    "iML1515"
+   ]
+  }
+ ]
+}

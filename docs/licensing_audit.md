@@ -27,10 +27,10 @@ Action: confirm the licence of each of the 22 maps with their authors or the Esc
 | `data/reactome/` | CC0 data (Reactome v97) | OK |
 | `data/models/AraCore_v2_1.xml` | MIT (`LICENSE.AraCore`, Philipp Wendering) | OK |
 | `data/models/iYO844.xml` | from BiGG (BiGG License) | **Open**: non-commercial/educational terms |
-| `examples/` and `vendor/sbml2escher/models/` (e_coli_core, iML1515, iMM904, iIT341) | BiGG models (BiGG License) | **Open**: same as above; iIT341 source not recorded |
-| `vendor/sbml2escher/models/Human-GEM.xml` | Human-GEM is CC-BY-4.0 according to its GitHub page | OK with attribution (Human-GEM, SysBioChalmers); add a citation |
-| `vendor/sbml2escher/vendor/escher/map-schema-1-0-0.json` | Escher, MIT (`LICENSE` copied) | OK |
-| `vendor/sbml2escher/model_input.py`, `data/bacteria/central_reference.json` | sbml2escher, upstream licence not recorded | **Open** |
+| `examples/` (e_coli_core, iML1515, iMM904, iIT341) | BiGG models (BiGG License) | **Open**: same as above; iIT341 source not recorded |
+| `data/identifier_bridge.json` | annotations extracted from BiGG models and Human-GEM (CC-BY-4.0 according to its GitHub page); the Human-GEM file itself is no longer in the repository | cite BiGG and Human-GEM; terms of the source models apply |
+| `data/escher_schema/vendor/escher/map-schema-1-0-0.json` | Escher, MIT (`LICENSE` copied) | OK |
+| ~~`model_input.py`, `central_reference.json` (sbml2escher)~~ | removed 2026-11-10: the SBML reader is now libSBML-based (`layout_atlas/model_io.py`), the currency list is `data/currency_metabolites.json` | **Resolved** |
 | `data/routing/source.zip` (adaptagrams, libavoid) | adaptagrams is LGPL; exact terms not re-checked | **Open**: confirm and add the LGPL notice |
 | `human_maps.zip`, `yeast_maps.zip` (Human-maps, Yeast-maps) | recorded as "repository CC-BY-4.0 / GPL-3.0; embedded SVG BY-SA-4.0 conflict" | **Removed** (2026-11-10), together with their 251 map observations; they contributed 0 modules to the open core. `input_manifest.json`, `source_registry.json` and `extensions/source_paths/SOURCE.json` were updated to match. `acquire.py` still contains the download code for them (not run by default); they are not redistributed |
 | `data/extensions/{units,source_paths,reaction_geometry_templates}` | derived from the open-core maps | inherits the Escher-map status above |
@@ -47,6 +47,6 @@ Action: confirm the licence of each of the 22 maps with their authors or the Esc
 
 1. ~~Remove `human_maps.zip`, `yeast_maps.zip` and their derived observations~~ (done; repository history rewritten).
 2. Decide how to handle the BiGG-licensed example models and the Escher community maps: obtain written confirmation, replace them with permissively licensed equivalents, or state the non-commercial restriction in the README.
-3. Record the upstream licence of `sbml2escher` files and of adaptagrams/libavoid; add `THIRD_PARTY_NOTICES.md`.
+3. ~~Record the upstream licence of the `sbml2escher` files~~ (resolved: dependency removed); record the licence of adaptagrams/libavoid; `THIRD_PARTY_NOTICES.md` exists.
 4. Add Rhea and Human-GEM citations; keep every upstream `LICENSE` next to its data.
 5. Choose the software licence (not chosen yet) after step 2, since it determines what can be combined.

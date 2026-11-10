@@ -29,6 +29,6 @@ python3 project.py compose --gem examples/e_coli_core.xml --out results/e_coli_c
 
 The `e_coli_core` example takes roughly two minutes on a laptop (the structure-selection step dominates).
 
-## Bundled third-party files
+## Dependencies and bundled files
 
-A minimal subset of the `sbml2escher` reference implementation (SBML reader, currency-metabolite roles, Escher map schema, example models) is vendored in `third_party/sbml2escher/`; see `NOTICE.md` there. If a `Ref/sbml2escher-main/` checkout exists next to the code it is used instead.
+SBML files are read with [libSBML](https://sbml.org/software/libsbml/) (`python-libsbml`, installed by `pip install -r layout_atlas/requirements.txt`); COBRA / BiGG JSON is read directly (`layout_atlas/model_io.py`). The official Escher map schema is kept in `data/escher_schema/` (MIT, with its licence); the currency / cofactor list is `data/currency_metabolites.json` and the identifier tables (BiGG to ChEBI and EC) are `data/identifier_bridge.json`, both with their provenance inside the file.
