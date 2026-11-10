@@ -1,0 +1,8 @@
+{
+  "source": "wikipathways",
+  "version": "20261010",
+  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Daphnia_magna.zip",
+  "sha256": "25457e3dff5817747d966b32a1f04de3caad0b41e31e3db9fcc591a7bcac5b7d",
+  "bytes": 8303,
+  "local_path": "data/archives/wp-Daphnia_magna.zip"
+}

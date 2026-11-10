@@ -1,0 +1,56 @@
+{
+  "dbId" : 8877627,
+  "stId" : "R-HSA-8877627",
+  "speciesName" : "Homo sapiens",
+  "nodes" : [ {
+    "dbId" : 8874708,
+    "stId" : "R-ALL-8874708",
+    "displayName" : "alpha-TOH [lysosomal membrane]",
+    "schemaClass" : "SimpleEntity",
+    "speciesId" : 0,
+    "diagramIds" : [ 164 ],
+    "identifier" : "18145",
+    "standardIdentifier" : "chebi:18145",
+    "referenceType" : "ReferenceMolecule",
+    "parents" : [ ],
+    "children" : [ ]
+  }, {
+    "dbId" : 8874706,
+    "stId" : "R-ALL-8874706",
+    "displayName" : "alpha-TOH [plasma membrane]",
+    "schemaClass" : "SimpleEntity",
+    "speciesId" : 0,
+    "diagramIds" : [ 183 ],
+    "identifier" : "18145",
+    "standardIdentifier" : "chebi:18145",
+    "referenceType" : "ReferenceMolecule",
+    "parents" : [ ],
+    "children" : [ ]
+  }, {
+    "dbId" : 2980979,
+    "stId" : "R-HSA-2980979",
+    "displayName" : "TTPA [cytosol]",
+    "schemaClass" : "EntityWithAccessionedSequence",
+    "speciesId" : 48887,
+    "diagramIds" : [ 162 ],
+    "identifier" : "P49638",
+    "standardIdentifier" : "uniprot:P49638",
+    "referenceType" : "ReferenceGeneProduct",
+    "geneNames" : [ "TTPA", "TPP1" ],
+    "parents" : [ ],
+    "children" : [ ]
+  } ],
+  "edges" : [ {
+    "dbId" : 8874705,
+    "stId" : "R-HSA-8874705",
+    "displayName" : "TTPA transports alpha-TOH from lysosomal membrane to plasma membrane",
+    "schemaClass" : "Reaction",
+    "speciesId" : 0,
+    "inputs" : [ 8874708 ],
+    "outputs" : [ 8874706 ],
+    "catalysts" : [ 2980979 ],
+    "efs" : [ ],
+    "diagramIds" : [ 163 ],
+    "entityFunctionalStatus" : [ ]
+  } ]
+}

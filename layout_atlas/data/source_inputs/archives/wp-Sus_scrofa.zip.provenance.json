@@ -1,0 +1,8 @@
+{
+  "source": "wikipathways",
+  "version": "20261010",
+  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Sus_scrofa.zip",
+  "sha256": "784f0d1723a5e70ea588f5c6000ae92491c81cba08ee98813ee3c617798f4d47",
+  "bytes": 5143,
+  "local_path": "data/archives/wp-Sus_scrofa.zip"
+}

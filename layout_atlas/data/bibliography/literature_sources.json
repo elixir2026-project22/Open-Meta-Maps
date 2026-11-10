@@ -1,0 +1,77 @@
+[
+  {
+    "title": "Schreiber et al. 2009",
+    "url": "https://link.springer.com/article/10.1186/1471-2105-10-375",
+    "inspection": "Methods: motif transfer, cycles, compartments and constraints",
+    "accessed_on": "2026-11-05"
+  },
+  {
+    "title": "SBGN Bricks official",
+    "url": "https://sbgn.github.io/learning",
+    "inspection": "Official documentation and examples; not a learned template mining method",
+    "accessed_on": "2026-11-05"
+  },
+  {
+    "title": "SetCoLa 2018",
+    "url": "https://idl.uw.edu/papers/setcola",
+    "inspection": "Author abstract and bibliographic record; DOI 10.1111/cgf.13440",
+    "accessed_on": "2026-11-05"
+  },
+  {
+    "title": "Metabopolis 2019",
+    "url": "https://doi.org/10.1186/s12859-019-2779-4",
+    "inspection": "Publisher abstract and method sections; author page checked",
+    "accessed_on": "2026-11-05"
+  },
+  {
+    "title": "DeepDrawing",
+    "url": "https://yong-wang.org/proj/deepDrawing.html",
+    "inspection": "Author description; algorithm-produced examples, not metabolic expert supervision",
+    "accessed_on": "2026-11-05"
+  },
+  {
+    "title": "DeepGD 2021",
+    "url": "https://arxiv.org/html/2106.15347v1",
+    "inspection": "Methods 3.1 and experimental setup 4.1; Rome 10000/1000/532 split",
+    "accessed_on": "2026-11-05"
+  },
+  {
+    "title": "SmartGD v3 2023",
+    "url": "https://arxiv.org/abs/2206.06434v3",
+    "inspection": "Abstract and official implementation README; no independent reproduction",
+    "accessed_on": "2026-11-05"
+  },
+  {
+    "title": "Escher schema",
+    "url": "https://raw.githubusercontent.com/zakandrewking/escher/master/jsonschema/1-0-0",
+    "inspection": "Schema inspected; export validated against local bundled copy",
+    "accessed_on": "2026-11-05"
+  },
+  {
+    "title": "MetaCarto plan.md",
+    "url": "https://raw.githubusercontent.com/forxhunter/MetaCarto/bd7abd532dd98b93e023f77244455a365823d351/plan.md",
+    "sha256": "cc8e10a3c2ed7b49749017c56fb5491b03194166a45eaea6bb5b5a9187ec00ad",
+    "inspection": "Source design document inspected; historical nonimplementation distinguished from experiments",
+    "accessed_on": "2026-11-05",
+    "commit": "bd7abd532dd98b93e023f77244455a365823d351",
+    "commit_date": "2026-10-11T23:37:45Z"
+  },
+  {
+    "title": "MetaCarto README.md",
+    "url": "https://raw.githubusercontent.com/forxhunter/MetaCarto/bd7abd532dd98b93e023f77244455a365823d351/README.md",
+    "sha256": "f66619fd735741028da0f74f878c613b55b0238f94c402cc1be3b4b90717d3ea",
+    "inspection": "Source design document inspected; historical nonimplementation distinguished from experiments",
+    "accessed_on": "2026-11-05",
+    "commit": "bd7abd532dd98b93e023f77244455a365823d351",
+    "commit_date": "2026-10-11T23:37:45Z"
+  },
+  {
+    "title": "MetaCarto layout_algorithm.md",
+    "url": "https://raw.githubusercontent.com/forxhunter/MetaCarto/bd7abd532dd98b93e023f77244455a365823d351/layout_algorithm.md",
+    "sha256": "f29560172b2741c2c97e87f851e5b1c6dfe7a292b2bd95e3a5446913575292c4",
+    "inspection": "Source design document inspected; historical nonimplementation distinguished from experiments",
+    "accessed_on": "2026-11-05",
+    "commit": "bd7abd532dd98b93e023f77244455a365823d351",
+    "commit_date": "2026-10-11T23:37:45Z"
+  }
+]

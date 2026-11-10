@@ -1,0 +1,8 @@
+{
+  "source": "wikipathways",
+  "version": "20261010",
+  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Gallus_gallus.zip",
+  "sha256": "d9ea469d87743de419e1bb829567783c20b166ea004581d375a2041e78de39a6",
+  "bytes": 331368,
+  "local_path": "data/archives/wp-Gallus_gallus.zip"
+}

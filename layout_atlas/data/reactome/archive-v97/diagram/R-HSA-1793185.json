@@ -1,0 +1,91 @@
+{
+  "dbId" : 1793185,
+  "stableId" : "R-HSA-1793185",
+  "displayName" : "Chondroitin sulfate/dermatan sulfate metabolism",
+  "nodes" : [ {
+    "id" : 1,
+    "reactomeId" : 2022870,
+    "displayName" : "CS-GAG biosynthesis",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 63,
+      "y" : 26
+    },
+    "minX" : 0,
+    "maxX" : 127,
+    "minY" : 1,
+    "maxY" : 52,
+    "prop" : {
+      "x" : 0,
+      "y" : 1,
+      "width" : 127,
+      "height" : 51
+    },
+    "textPosition" : {
+      "x" : 16,
+      "y" : 5
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 2,
+    "reactomeId" : 2022923,
+    "displayName" : "DS-GAG biosynthesis",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 275,
+      "y" : 25
+    },
+    "minX" : 213,
+    "maxX" : 338,
+    "minY" : 0,
+    "maxY" : 51,
+    "prop" : {
+      "x" : 213,
+      "y" : 0,
+      "width" : 125,
+      "height" : 51
+    },
+    "textPosition" : {
+      "x" : 228,
+      "y" : 4
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 15,
+    "reactomeId" : 2024101,
+    "displayName" : "CS/DS degradation",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 495,
+      "y" : 25
+    },
+    "minX" : 430,
+    "maxX" : 560,
+    "minY" : 2,
+    "maxY" : 48,
+    "prop" : {
+      "x" : 430,
+      "y" : 2,
+      "width" : 130,
+      "height" : 46
+    },
+    "textPosition" : {
+      "x" : 448,
+      "y" : 3
+    },
+    "connectors" : [ ]
+  } ],
+  "edges" : [ ],
+  "compartments" : [ ],
+  "notes" : [ ],
+  "links" : [ ],
+  "shadows" : [ ],
+  "minX" : 0,
+  "maxX" : 560,
+  "minY" : 0,
+  "maxY" : 52,
+  "disease" : false
+}

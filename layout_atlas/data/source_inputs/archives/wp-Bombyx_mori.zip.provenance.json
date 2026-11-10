@@ -1,0 +1,8 @@
+{
+  "source": "wikipathways",
+  "version": "20261010",
+  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Bombyx_mori.zip",
+  "sha256": "3c658e1094975141c383858dc8ec49daca56b33f6b016989575d807cee468b2c",
+  "bytes": 50883,
+  "local_path": "data/archives/wp-Bombyx_mori.zip"
+}

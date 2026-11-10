@@ -1,0 +1,8 @@
+{
+  "source": "wikipathways",
+  "version": "20261010",
+  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Pan_troglodytes.zip",
+  "sha256": "1f30dac7ae0ef0be52cd14ef43b97ed506e1eadb0d473408a71d7311a389c474",
+  "bytes": 344347,
+  "local_path": "data/archives/wp-Pan_troglodytes.zip"
+}

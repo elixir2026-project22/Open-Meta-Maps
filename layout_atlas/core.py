@@ -1,0 +1,64 @@
+"""v0.3 shared contracts and independently stored source-observation inputs."""
+from pathlib import Path
+import hashlib,json,sys,re,os,sqlite3,math,gzip
+from collections import defaultdict,Counter
+import importlib.util
+import numpy as np
+import networkx as nx
+BASE=Path(__file__).resolve().parent
+ROOT=BASE.parent
+REF=ROOT/'Ref/sbml2escher-main'
+if not (REF/'model_input.py').exists():REF=BASE/'vendor/sbml2escher'  # minimal vendored subset for clones without Ref/
+DATA=BASE/'data';OUT=BASE/'results';INPUTS=DATA/'source_inputs'
+if not (DATA/'atlas.sqlite').exists() and (DATA/'open_core.sqlite').exists():__import__('shutil').copyfile(DATA/'open_core.sqlite',DATA/'atlas.sqlite')  # fresh clone: default to the redistributable open core
+sys.dont_write_bytecode=True
+spec=importlib.util.spec_from_file_location('v03_sbml_input',REF/'model_input.py');reader=importlib.util.module_from_spec(spec);spec.loader.exec_module(reader);load_model=reader.load_model
+SEEDS=[20261105,20261106,20261107]
+CURRENCY={k for k,v in json.loads((REF/'data/bacteria/central_reference.json').read_text())['roles'].items() if v['kind'] in ('inorganic','coenzyme')}
+def read(p):return json.loads(Path(p).read_text())
+def dump(p,v):
+ p=Path(p);p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(v,ensure_ascii=False,indent=2,allow_nan=False)+'\n')
+def sha(b):return hashlib.sha256(b).hexdigest()
+def uid(v):return sha(json.dumps(v,sort_keys=True,ensure_ascii=False).encode())[:24]
+def local(e):return e.tag.rsplit('}',1)[-1]
+def freeze():
+ dest=DATA/'input_manifest.json'
+ if dest.exists():return read(dest)
+ result=dict(version='0.3-source-inputs',files={str(p.relative_to(INPUTS)):sha(p.read_bytes()) for p in sorted(INPUTS.rglob('*')) if p.is_file()})
+ dump(dest,result);return result
+
+def source_module_records():
+ with gzip.open(INPUTS/'module_observations.json.gz','rt') as f:return json.load(f)
+def source_modules(quality=None):return [r['observation'] for r in source_module_records() if quality is None or r['observation']['quality']==quality]
+def source_maps():
+ with gzip.open(INPUTS/'map_observations.json.gz','rt') as f:return json.load(f)
+def chem(mid):return mid.split('@')[0] if '@' in mid else re.sub(r'_[a-z][0-9]?$','',mid)
+def comp(mid):return mid.split('@')[-1] if '@' in mid else (re.search(r'_([a-z][0-9]?)$',mid)[1] if re.search(r'_([a-z][0-9]?)$',mid) else 'unknown')
+def xrefs(annotations):
+ out=defaultdict(set)
+ for a in annotations:
+  if not a.get('qualifier','').endswith('}is'):continue
+  u=a.get('uri','');m=re.search(r'/(chebi|bigg.metabolite|rhea|reactome|bigg.reaction|metanetx.chemical|metanetx.reaction)[/:](?:CHEBI[:_])?([^/?#]+)',u,re.I)
+  if m:out[m[1].lower()].add(m[2])
+ return {k:sorted(v) for k,v in out.items()}
+def currency(model):
+ out=set();names={'water','h2o','proton','h+','atp','adp','amp','nad+','nadh','nadp+','nadph','coenzyme a','coa','phosphate','diphosphate'}
+ for m in model['metabolites']:
+  if chem(m['id']) in CURRENCY or m.get('name','').lower() in names or set(xrefs(m.get('annotations',[])).get('bigg.metabolite',[]))&CURRENCY:out.add(m['id'])
+ return out
+
+def model_graph(model):
+ g=nx.Graph();cur=currency(model);met={m['id']:m for m in model['metabolites']}
+ for r in model['reactions']:
+  rk='r:'+r['id'];g.add_node(rk,role='reaction',reversible=r['lower_bound']<0<r['upper_bound'],compartment='|'.join(sorted({met[m].get('compartment','unknown') for m in r['metabolites']})))
+  for mid,c in r['metabolites'].items():
+   if mid in cur:continue
+   mk='m:'+mid;g.add_node(mk,role='metabolite',compartment=met[mid].get('compartment','unknown'));g.add_edge(rk,mk,coefficient=float(c),role='substrate' if c<0 else 'product')
+ return g
+
+def normalize(xy):
+ arr=np.array(list(xy.values()),float);center=arr.mean(0);sc=max(float(np.sqrt(np.mean(np.sum((arr-center)**2,1)))),1e-8);return {k:((np.array(v)-center)/sc).tolist() for k,v in xy.items()}
+def fit_frame(source,target):
+ a=np.array(source,float);b=np.array(target,float);ac=a-a.mean(0);bc=b-b.mean(0);u,_,vt=np.linalg.svd(ac.T@bc);rot=u@vt;scale=max(float(np.sum((ac@rot)*bc)/max(np.sum(ac*ac),1e-12)),1e-8)
+ return dict(rotation=rot.tolist(),scale=scale,source_center=a.mean(0).tolist(),target_center=b.mean(0).tolist())
+def transform(xy,frame):return {k:((np.array(v)-frame['source_center'])@np.array(frame['rotation'])*frame['scale']+frame['target_center']).tolist() for k,v in xy.items()}

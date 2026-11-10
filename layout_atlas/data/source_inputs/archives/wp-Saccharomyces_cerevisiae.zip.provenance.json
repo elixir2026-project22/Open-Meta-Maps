@@ -1,0 +1,8 @@
+{
+  "source": "wikipathways",
+  "version": "20261010",
+  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Saccharomyces_cerevisiae.zip",
+  "sha256": "756a6cb62b1ba7b2b5ffaf7ede041551348178f35387fe409eaae1e9affcca81",
+  "bytes": 520604,
+  "local_path": "data/archives/wp-Saccharomyces_cerevisiae.zip"
+}

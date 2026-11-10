@@ -1,0 +1,8 @@
+{
+  "source": "wikipathways",
+  "version": "20261010",
+  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Vitis_vinifera.zip",
+  "sha256": "e469582833b5a5ca1c054f9c6bac4d5b29762957e5896568987252745abd6aa5",
+  "bytes": 4791,
+  "local_path": "data/archives/wp-Vitis_vinifera.zip"
+}

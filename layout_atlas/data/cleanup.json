@@ -1,0 +1,12 @@
+{
+  "date": "2026-11-06",
+  "instruction": "Delete obsolete versions rather than archive them",
+  "deleted": [
+    "Archive/",
+    "layout_atlas/data/frozen_v02.json"
+  ],
+  "retained": "Only required original maps, source observations, source archives/licenses and cited bibliography migrated into current data/",
+  "source_observations_lossless": true,
+  "module_observations": 15509,
+  "map_observations": 2490
+}

@@ -1,0 +1,166 @@
+{
+  "dbId" : 1428517,
+  "stableId" : "R-HSA-1428517",
+  "displayName" : "Aerobic respiration and respiratory electron transport",
+  "nodes" : [ {
+    "id" : 3,
+    "reactomeId" : 71403,
+    "displayName" : "Citric acid cycle (TCA cycle)",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 221,
+      "y" : 32
+    },
+    "minX" : 148,
+    "maxX" : 295,
+    "minY" : 7,
+    "maxY" : 58,
+    "prop" : {
+      "x" : 148,
+      "y" : 7,
+      "width" : 147,
+      "height" : 51
+    },
+    "textPosition" : {
+      "x" : 148,
+      "y" : 11
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 4,
+    "reactomeId" : 70268,
+    "displayName" : "Pyruvate metabolism",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 59,
+      "y" : 30
+    },
+    "minX" : 0,
+    "maxX" : 119,
+    "minY" : 6,
+    "maxY" : 54,
+    "prop" : {
+      "x" : 0,
+      "y" : 6,
+      "width" : 119,
+      "height" : 48
+    },
+    "textPosition" : {
+      "x" : 15,
+      "y" : 8
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 5,
+    "reactomeId" : 880009,
+    "displayName" : "Interconversion of 2-oxoglutarate and 2-hydroxyglutarate",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 869,
+      "y" : 34
+    },
+    "minX" : 774,
+    "maxX" : 965,
+    "minY" : 0,
+    "maxY" : 69,
+    "prop" : {
+      "x" : 774,
+      "y" : 0,
+      "width" : 191,
+      "height" : 69
+    },
+    "textPosition" : {
+      "x" : 797,
+      "y" : 6
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 7,
+    "reactomeId" : 611105,
+    "displayName" : "Respiratory electron transport",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 388,
+      "y" : 36
+    },
+    "minX" : 315,
+    "maxX" : 461,
+    "minY" : 12,
+    "maxY" : 60,
+    "prop" : {
+      "x" : 315,
+      "y" : 12,
+      "width" : 146,
+      "height" : 48
+    },
+    "textPosition" : {
+      "x" : 315,
+      "y" : 14
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 8,
+    "reactomeId" : 163210,
+    "displayName" : "Formation of ATP by chemiosmotic coupling",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 557,
+      "y" : 35
+    },
+    "minX" : 486,
+    "maxX" : 629,
+    "minY" : 4,
+    "maxY" : 66,
+    "prop" : {
+      "x" : 486,
+      "y" : 4,
+      "width" : 143,
+      "height" : 62
+    },
+    "textPosition" : {
+      "x" : 486,
+      "y" : 6
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 9,
+    "reactomeId" : 166187,
+    "displayName" : "Mitochondrial Uncoupling",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 702,
+      "y" : 37
+    },
+    "minX" : 641,
+    "maxX" : 763,
+    "minY" : 11,
+    "maxY" : 64,
+    "prop" : {
+      "x" : 641,
+      "y" : 11,
+      "width" : 122,
+      "height" : 53
+    },
+    "textPosition" : {
+      "x" : 650,
+      "y" : 16
+    },
+    "connectors" : [ ]
+  } ],
+  "edges" : [ ],
+  "compartments" : [ ],
+  "notes" : [ ],
+  "links" : [ ],
+  "shadows" : [ ],
+  "minX" : 0,
+  "maxX" : 965,
+  "minY" : 0,
+  "maxY" : 69,
+  "disease" : false
+}

@@ -1,0 +1,8 @@
+{
+  "kind": "Current pipeline source observations, not an old executable version",
+  "module_observations": 15509,
+  "map_observations": 2490,
+  "export_checked_lossless": true,
+  "original_database_sha256": "7a06d990492a5c7641bc25ae75bb2cc5177f93c8cbe077d55e9bfdcab2ded459",
+  "provenance": "Previously acquired fixed source maps and recorded observations; original reaction/layout identifiers retained"
+}

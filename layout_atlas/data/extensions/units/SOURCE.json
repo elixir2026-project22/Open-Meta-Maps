@@ -1,0 +1,34 @@
+{
+  "extension": "structure units (non-overlapping recut of the open-core source maps)",
+  "config": {
+    "min_size": 3,
+    "max_size": 12,
+    "max_appendix_total": 16,
+    "ring_rule": true,
+    "ring_min_reactions": 6,
+    "fuse_min_shared": 2,
+    "fuse_max_new": 4,
+    "fork_max_arms": 8,
+    "fork_arm_depth": 3,
+    "cycle_max_reactions": 12,
+    "variant_threshold": 0.25,
+    "mapping_cap": 3000,
+    "step_budget": 400000,
+    "max_module_nodes": 100
+  },
+  "partition": "open_core",
+  "admitted_to_open_core": false,
+  "source_maps": 1075,
+  "source_map_ids_by_source": {
+    "community": 22,
+    "reactome": 115,
+    "wikipathways": 938
+  },
+  "licenses": {
+    "CC0-1.0": 960,
+    "CC0-1.0-data": 115
+  },
+  "license_note": "Each unit keeps the licence, source_sha256 and original_instance pointer of its source map; no data from outside the open core.",
+  "changes": "Source maps recut into non-overlapping 3-12 reaction structure units; coordinates normalised per unit, originals kept in original_coordinates.",
+  "geometry_only": "WikiPathways maps without reaction identity are segmented by shape only (pseudo-reactions = drawn interactions between metabolite glyphs) and flagged quality=geometry_only; maps that also have semantic units are not duplicated."
+}

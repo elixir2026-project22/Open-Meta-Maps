@@ -1,0 +1,8 @@
+{
+  "source": "wikipathways",
+  "version": "20261010",
+  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Zea_mays.zip",
+  "sha256": "ed41f57f7d2459013a10627e2bc1634cb44bbe3f7a5d8fcb6f259831f4dae500",
+  "bytes": 51196,
+  "local_path": "data/archives/wp-Zea_mays.zip"
+}

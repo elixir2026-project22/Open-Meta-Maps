@@ -1,0 +1,8 @@
+{
+  "source": "wikipathways",
+  "version": "20261010",
+  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Plasmodium_falciparum.zip",
+  "sha256": "38f4f018ecc21292dad601d7b6cbb14bb24534826a80ceb14dbc81a84454585e",
+  "bytes": 5260,
+  "local_path": "data/archives/wp-Plasmodium_falciparum.zip"
+}

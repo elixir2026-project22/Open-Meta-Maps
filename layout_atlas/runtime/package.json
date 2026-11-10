@@ -1,0 +1,6 @@
+{
+  "name": "open-pathway-layout-atlas",
+  "version": "0.2.0",
+  "private": true,
+  "dependencies": {"elkjs":"0.12.1","cytoscape":"3.34.4","cytoscape-fcose":"2.2.0"}
+}

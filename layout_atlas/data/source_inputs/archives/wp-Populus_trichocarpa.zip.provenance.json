@@ -1,0 +1,8 @@
+{
+  "source": "wikipathways",
+  "version": "20261010",
+  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Populus_trichocarpa.zip",
+  "sha256": "36a8d897ab3605b121c327055d4bae3902ccff409522a0d59d63610e387430f8",
+  "bytes": 27684,
+  "local_path": "data/archives/wp-Populus_trichocarpa.zip"
+}

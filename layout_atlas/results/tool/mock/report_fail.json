@@ -1,0 +1,10 @@
+{
+ "integrity": {
+  "model_integrity": true,
+  "visualization_coverage": true,
+  "identity_integrity": {
+   "ok": false,
+   "direction_normalized_reverse_only": []
+  }
+ }
+}

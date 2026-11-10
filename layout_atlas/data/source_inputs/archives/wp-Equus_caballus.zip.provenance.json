@@ -1,0 +1,8 @@
+{
+  "source": "wikipathways",
+  "version": "20261010",
+  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Equus_caballus.zip",
+  "sha256": "7300816e57cbb734159ff644d6d78364c38cf2f5423e6c27f74ea8a62208d59d",
+  "bytes": 21650,
+  "local_path": "data/archives/wp-Equus_caballus.zip"
+}

@@ -1,0 +1,9 @@
+{
+  "source": "reactome",
+  "kind": "license_evidence",
+  "access_date": "2026-11-05",
+  "url": "https://reactome.org/license",
+  "sha256": "799de2b67c7ce220d349f57df4ae878e66266bdbe14cc0dedba4133e7d5858df",
+  "bytes": 58429,
+  "local_path": "data/terms/reactome.html"
+}

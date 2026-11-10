@@ -1,0 +1,21 @@
+{
+  "dbId" : 1638091,
+  "stId" : "R-HSA-1638091",
+  "speciesName" : "Homo sapiens",
+  "nodes" : [ {
+    "dbId" : 2022928,
+    "stId" : "R-HSA-2022928",
+    "displayName" : "HS-GAG biosynthesis",
+    "schemaClass" : "Pathway",
+    "speciesId" : 48887,
+    "diagramIds" : [ 1 ]
+  }, {
+    "dbId" : 2024096,
+    "stId" : "R-HSA-2024096",
+    "displayName" : "HS-GAG degradation",
+    "schemaClass" : "Pathway",
+    "speciesId" : 48887,
+    "diagramIds" : [ 2 ]
+  } ],
+  "edges" : [ ]
+}

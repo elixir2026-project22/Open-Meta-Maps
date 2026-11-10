@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Pathway xmlns="http://pathvisio.org/GPML/2013a" Name="FOXA2 pathway" Data-Source="WikiPathways" Version="WP5066_r141217" Author="[ChesdeWindt, Egonw, Fehrhart, Khanspers, Eweitz]" Last-Modified="20251106231012" Organism="Homo sapiens">
+  <Comment Source="WikiPathways-description">Role of Foxa2 in homeostatis of metabolic processes.</Comment>
+  <BiopaxRef>ee2</BiopaxRef>
+  <BiopaxRef>bda</BiopaxRef>
+  <Graphics BoardWidth="830.8407579390616" BoardHeight="600.8825927514542" />
+  <DataNode TextLabel="IRS2" GraphId="a4688" Type="GeneProduct" GroupRef="ccb29">
+    <Graphics CenterX="551.7650623139392" CenterY="102.84893305344185" Width="86.03292803559079" Height="24.993913611367724" ZOrder="32768" FontSize="12" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000185950" />
+  </DataNode>
+  <DataNode TextLabel="Apolipoprotein B-100" GraphId="a6507" Type="Protein">
+    <Graphics CenterX="76.30287966897487" CenterY="384.9136117854116" Width="133.3977900552483" Height="29.074585635358602" ZOrder="32768" FontSize="12" Valign="Middle" />
+    <Xref Database="Uniprot-TrEMBL" ID="P04114" />
+  </DataNode>
+  <DataNode TextLabel="FOXA2" GraphId="a809b" Type="GeneProduct" GroupRef="a2154">
+    <Graphics CenterX="320.15016983453404" CenterY="444.83062544744234" Width="90.0" Height="25.0" ZOrder="32768" FontSize="12" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000125798" />
+  </DataNode>
+  <DataNode TextLabel="PPARGC1B" GraphId="ab370" Type="GeneProduct">
+    <Graphics CenterX="446.6777189262051" CenterY="241.68591908969313" Width="90.0" Height="25.0" ZOrder="32768" FontSize="12" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000155846" />
+  </DataNode>
+  <DataNode TextLabel="FASN" GraphId="ada54" Type="GeneProduct" GroupRef="c3fc0">
+    <Graphics CenterX="299.60461244835824" CenterY="521.6991768032415" Width="90.0" Height="25.0" ZOrder="32768" FontSize="12" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000169710" />
+  </DataNode>
+  <DataNode TextLabel="GSTA1" GraphId="afba4" Type="GeneProduct" GroupRef="d84c1">
+    <Graphics CenterX="754.6298046133779" CenterY="311.0582222391545" Width="90.0" Height="25.0" ZOrder="32768" FontSize="12" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000243955" />
+  </DataNode>
+  <DataNode TextLabel="Acetyl-CoA carboxylase 1" GraphId="afc0c" Type="Protein" GroupRef="c3fc0">
+    <Graphics CenterX="266.3414177818431" CenterY="547.468107133388" Width="156.6022099447514" Height="27.969613259668677" ZOrder="32768" FontSize="12" Valign="Middle" />
+    <Xref Database="Uniprot-TrEMBL" ID="Q13085" />
+  </DataNode>
+  <DataNode TextLabel="IRS1" GraphId="b22e0" Type="GeneProduct" GroupRef="ccb29">
+    <Graphics CenterX="639.249" CenterY="102.84027682690234" Width="90.0" Height="25.0" ZOrder="32768" FontSize="12" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000169047" />
+  </DataNode>
+  <DataNode TextLabel="ABCC4" GraphId="b45fc" Type="GeneProduct" GroupRef="c6dc5">
+    <Graphics CenterX="755.1749560135638" CenterY="397.8614745175745" Width="90.0" Height="25.0" ZOrder="32768" FontSize="12" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000125257" />
+  </DataNode>
+  <DataNode TextLabel="ABCC3" GraphId="b4ce9" Type="GeneProduct" GroupRef="c6dc5">
+    <Graphics CenterX="755.1819335824803" CenterY="373.4788080651665" Width="90.0" Height="25.0" ZOrder="32768" FontSize="12" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000108846" />
+  </DataNode>
+  <DataNode TextLabel="ABCC2" GraphId="b7e83" Type="GeneProduct" GroupRef="edced">
+    <Graphics CenterX="755.8407579390616" CenterY="230.2605670114844" Width="90.0" Height="25.0" ZOrder="32768" FontSize="12" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000023839" />
+  </DataNode>
+  <DataNode TextLabel="ChREBP" GraphId="c5c85" Type="Protein" GroupRef="bd627">
+    <Graphics CenterX="463.559956306481" CenterY="457.193753421633" Width="87.23954559434195" Height="25.02492119400631" ZOrder="32768" FontSize="12" Valign="Middle" />
+    <Xref Database="Uniprot-TrEMBL" ID="Q9NP71" />
+  </DataNode>
+  <DataNode TextLabel="SLC27A5" GraphId="cb143" Type="GeneProduct">
+    <Graphics CenterX="754.8304735350132" CenterY="170.02446632016492" Width="90.0" Height="25.0" ZOrder="32768" FontSize="12" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000083807" />
+  </DataNode>
+  <DataNode TextLabel="SLCO1B1" GraphId="d08a5" Type="GeneProduct" GroupRef="edced">
+    <Graphics CenterX="755.8407579390621" CenterY="254.66978169739002" Width="90.0" Height="25.0" ZOrder="32768" FontSize="12" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000134538" />
+  </DataNode>
+  <DataNode TextLabel="SREBP-1c" GraphId="d7dc6" Type="Protein" GroupRef="bd627">
+    <BiopaxRef>ee2</BiopaxRef>
+    <Graphics CenterX="551.8455366888896" CenterY="457.1933582593574" Width="90.0" Height="25.0" ZOrder="32768" FontSize="12" Valign="Middle" />
+    <Xref Database="Uniprot-TrEMBL" ID="P36956" />
+  </DataNode>
+  <DataNode TextLabel="FOXO1" GraphId="d94fb" Type="GeneProduct">
+    <Graphics CenterX="551.4100412709516" CenterY="354.40167035977777" Width="90.0" Height="25.0" ZOrder="32768" FontSize="12" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000150907" />
+  </DataNode>
+  <DataNode TextLabel="GSTA2" GraphId="e6298" Type="GeneProduct" GroupRef="d84c1">
+    <Graphics CenterX="754.6301404538442" CenterY="286.1343049955611" Width="90.0" Height="25.0" ZOrder="32768" FontSize="12" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000244067" />
+  </DataNode>
+  <DataNode TextLabel="Insulin" GraphId="f01e6" Type="Protein">
+    <Graphics CenterX="644.249" CenterY="36.450987534522554" Width="90.0" Height="25.0" ZOrder="32768" FontSize="12" Valign="Middle" Color="0000ff" />
+    <Xref Database="Uniprot-TrEMBL" ID="A6XGL2" />
+  </DataNode>
+  <DataNode TextLabel="TAGs" GraphId="f5258" Type="Metabolite">
+    <Graphics CenterX="266.73113328059935" CenterY="384.78954663555186" Width="90.0" Height="25.0" ZOrder="32768" FontSize="12" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="17855" />
+  </DataNode>
+  <DataNode TextLabel="FOXA1" GraphId="f73b3" Type="GeneProduct" GroupRef="a2154">
+    <Graphics CenterX="320.15016983453324" CenterY="469.1938591130022" Width="90.0" Height="25.0" ZOrder="32768" FontSize="12" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000129514" />
+  </DataNode>
+  <DataNode TextLabel="GSTM2" GraphId="fc7cf" Type="GeneProduct" GroupRef="d84c1">
+    <Graphics CenterX="754.6415742759748" CenterY="335.9962644806705" Width="90.0" Height="25.0" ZOrder="32768" FontSize="12" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000213366" />
+  </DataNode>
+  <DataNode TextLabel="MTTP" GraphId="fcda0" Type="GeneProduct">
+    <BiopaxRef>ee2</BiopaxRef>
+    <Graphics CenterX="190.80993751509715" CenterY="320.19531670959344" Width="90.0" Height="25.0" ZOrder="32768" FontSize="12" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000138823" />
+  </DataNode>
+  <DataNode TextLabel="FOXA2&#xA;" GraphId="ce4ba" Type="GeneProduct">
+    <BiopaxRef>ef1</BiopaxRef>
+    <Graphics CenterX="619.5605525194735" CenterY="242.05985222674758" Width="90.0" Height="18.879629629628567" ZOrder="32769" FontSize="12" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000125798" />
+  </DataNode>
+  <DataNode TextLabel="Insulin" GraphId="f7346" Type="Protein">
+    <Graphics CenterX="574.3195237777331" CenterY="558.3825927514542" Width="90.0" Height="25.0" ZOrder="32772" FontSize="12" Valign="Middle" Color="0000ff" />
+    <Xref Database="Uniprot-TrEMBL" ID="A6XGL2" />
+  </DataNode>
+  <Interaction GraphId="id1c483919">
+    <Graphics ConnectorType="Elbow" ZOrder="12288" LineThickness="1.0">
+      <Point X="642.0605525194735" Y="251.49966704156185" GraphRef="ce4ba" RelX="0.5" RelY="1.0" />
+      <Point X="701.6298046133779" Y="311.0652847381158" GraphRef="dd599" RelX="-1.0" RelY="0.0" ArrowHead="mim-stimulation" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id22c8cfde">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="644.249" Y="48.950987534522554" GraphRef="f01e6" RelX="0.0" RelY="1.0" />
+      <Point X="644.3738995740359" Y="82.34027682690234" GraphRef="f4d71" RelX="0.5" RelY="-1.0" ArrowHead="mim-binding" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id2d57e4a">
+    <Graphics ConnectorType="Elbow" ZOrder="12288" LineThickness="1.0">
+      <Point X="529.3455366888896" Y="469.6933582593574" GraphRef="d7dc6" RelX="-0.5" RelY="1.0" />
+      <Point X="344.60461244835824" Y="521.6991768032415" GraphRef="ada54" RelX="1.0" RelY="0.0" ArrowHead="mim-binding" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id3003e4d5">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="574.3195237777331" Y="545.8825927514542" GraphRef="f7346" RelX="0.0" RelY="-1.0" />
+      <Point X="574.3455366888896" Y="469.6933582593574" GraphRef="d7dc6" RelX="0.5" RelY="1.0" ArrowHead="mim-stimulation" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id427f3e2d" GroupRef="ccb29">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="684.249" Y="102.84027682690234" GraphRef="b22e0" RelX="1.0" RelY="0.0" />
+      <Point X="508.74859829614377" Y="102.84893305344185" GraphRef="a4688" RelX="-1.0" RelY="0.0" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id4caf0c71">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="266.3414177818431" Y="501.19917680324147" GraphRef="fd486" RelX="0.0" RelY="-1.0" />
+      <Point X="266.73113328059935" Y="397.28954663555186" GraphRef="f5258" RelX="0.0" RelY="1.0" ArrowHead="mim-stimulation" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id72f771c5">
+    <BiopaxRef>a02</BiopaxRef>
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="596.4987991480718" Y="123.34588985912572" GraphRef="f4d71" RelX="0.0" RelY="1.0" />
+      <Point X="597.0605525194735" Y="232.6200374119333" GraphRef="ce4ba" RelX="-0.5" RelY="-1.0" ArrowHead="mim-inhibition" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id8ced6009">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="491.6777189262051" Y="241.68591908969313" GraphRef="ab370" RelX="1.0" RelY="0.0" />
+      <Point X="574.5605525194735" Y="242.05985222674758" GraphRef="ce4ba" RelX="-1.0" RelY="0.0" ArrowHead="mim-modification" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="idaa5b0ae9">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="373.15016983453404" Y="457.01224228022227" GraphRef="b8a95" RelX="1.0" RelY="0.0" />
+      <Point X="419.94018350931003" Y="457.193753421633" GraphRef="c5c85" RelX="-1.0" RelY="0.0" ArrowHead="mim-necessary-stimulation" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="idaffde6db">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="221.73113328059935" Y="384.78954663555186" GraphRef="f5258" RelX="-1.0" RelY="0.0" />
+      <Point X="143.001774696599" Y="384.9136117854116" GraphRef="a6507" RelX="1.0" RelY="0.0" ArrowHead="Arrow" />
+      <Anchor Position="0.4" Shape="None" GraphId="ce5bb" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="idb581a328">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="664.5605525194735" Y="242.05985222674758" GraphRef="ce4ba" RelX="1.0" RelY="0.0" />
+      <Point X="702.8407579390616" Y="242.4651743544372" GraphRef="aa291" RelX="-1.0" RelY="0.0" ArrowHead="mim-necessary-stimulation" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="idc3057a5">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="551.7650623139392" Y="115.34588985912572" GraphRef="a4688" RelX="0.0" RelY="1.0" />
+      <Point X="551.4100412709516" Y="341.90167035977777" GraphRef="d94fb" RelX="0.0" RelY="-1.0" ArrowHead="mim-inhibition" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="idc6286b17">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="190.80993751509715" Y="332.69531670959344" GraphRef="fcda0" RelX="0.0" RelY="1.0" />
+      <Point X="190.23938984699922" Y="384.83917269549573" GraphRef="ce5bb" RelX="0.0" RelY="0.0" ArrowHead="mim-catalysis" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="idcc07d85e">
+    <Graphics ConnectorType="Elbow" ZOrder="12288" LineThickness="1.0">
+      <Point X="642.0605525194735" Y="232.6200374119333" GraphRef="ce4ba" RelX="0.5" RelY="-1.0" />
+      <Point X="709.8304735350132" Y="170.02446632016492" GraphRef="cb143" RelX="-1.0" RelY="0.0" ArrowHead="mim-necessary-stimulation" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="ide1d9e254">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="551.8455366888896" Y="444.6933582593574" GraphRef="d7dc6" RelX="0.0" RelY="-1.0" />
+      <Point X="551.4100412709516" Y="366.90167035977777" GraphRef="d94fb" RelX="0.0" RelY="1.0" ArrowHead="mim-inhibition" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="ide766640c">
+    <Graphics ConnectorType="Elbow" ZOrder="12288" LineThickness="1.0">
+      <Point X="597.0605525194735" Y="251.49966704156185" GraphRef="ce4ba" RelX="-0.5" RelY="1.0" />
+      <Point X="190.80993751509715" Y="307.69531670959344" GraphRef="fcda0" RelX="0.0" RelY="-1.0" ArrowHead="mim-stimulation" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="ided63a06e">
+    <Graphics ConnectorType="Elbow" ZOrder="12288" LineThickness="1.0">
+      <Point X="642.0605525194735" Y="251.49966704156185" GraphRef="ce4ba" RelX="0.5" RelY="1.0" />
+      <Point X="702.1749560135638" Y="385.6701412913705" GraphRef="ae716" RelX="-1.0" RelY="0.0" ArrowHead="mim-stimulation" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Group GroupId="bd627" Style="Group" />
+  <Group GroupId="edced" GraphId="aa291" Style="Group" />
+  <Group GroupId="c6dc5" GraphId="ae716" Style="Group" />
+  <Group GroupId="a2154" GraphId="b8a95" Style="Group">
+    <BiopaxRef>dc4</BiopaxRef>
+  </Group>
+  <Group GroupId="d84c1" GraphId="dd599" Style="Group" />
+  <Group GroupId="ccb29" GraphId="f4d71" Style="Group" />
+  <Group GroupId="c3fc0" GraphId="fd486" Style="Group" />
+  <InfoBox CenterX="0.0" CenterY="0.0" />
+  <Biopax>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="bda">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">18660816</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Hepatocyte-specific ablation of Foxa2 alters bile acid homeostasis and results in endoplasmic reticulum stress.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Nat Med</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2008</bp:YEAR>
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">18660816</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Hepatocyte-specific ablation of Foxa2 alters bile acid homeostasis and results in endoplasmic reticulum stress.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Nat Med</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2008</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Bochkis IM</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Rubins NE</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">White P</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Furth EE</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Friedman JR</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Kaestner KH</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="a02">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">14500912</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Insulin regulates the activity of forkhead transcription factor Hnf-3beta/Foxa-2 by Akt-mediated phosphorylation and nuclear/cytosolic localization.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Proc Natl Acad Sci U S A</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2003</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Wolfrum C</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Besser D</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Luca E</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Stoffel M</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="ee2">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">12440980</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Sterol regulatory element-binding proteins: transcriptional activators of lipid synthesis.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Biochem Soc Trans</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2002</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Horton JD</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="ef1">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">16459311</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Coactivation of Foxa2 through Pgc-1beta promotes liver fatty acid oxidation and triglyceride/VLDL secretion.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Cell Metab</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2006</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Wolfrum C</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Stoffel M</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:openControlledVocabulary xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#">
+      <bp:TERM xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">regulatory pathway</bp:TERM>
+      <bp:ID xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PW:0000004</bp:ID>
+      <bp:Ontology xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pathway Ontology</bp:Ontology>
+    </bp:openControlledVocabulary>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="dc4">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">20534694</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Foxa1 and Foxa2 maintain the metabolic and secretory features of the mature beta-cell.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Mol Endocrinol</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2010</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Gao N</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Le Lay J</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Qin W</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Doliba N</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Schug J</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Fox AJ</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Smirnova O</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Matschinsky FM</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Kaestner KH</bp:AUTHORS>
+    </bp:PublicationXref>
+  </Biopax>
+</Pathway>
+

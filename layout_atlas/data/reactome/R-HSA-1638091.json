@@ -1,0 +1,66 @@
+{
+  "dbId" : 1638091,
+  "stableId" : "R-HSA-1638091",
+  "displayName" : "Heparan sulfate/heparin (HS-GAG) metabolism",
+  "nodes" : [ {
+    "id" : 1,
+    "reactomeId" : 2022928,
+    "displayName" : "HS-GAG biosynthesis",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 61,
+      "y" : 26
+    },
+    "minX" : 0,
+    "maxX" : 123,
+    "minY" : 0,
+    "maxY" : 53,
+    "prop" : {
+      "x" : 0,
+      "y" : 0,
+      "width" : 123,
+      "height" : 53
+    },
+    "textPosition" : {
+      "x" : 14,
+      "y" : 5
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 2,
+    "reactomeId" : 2024096,
+    "displayName" : "HS-GAG degradation",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 255,
+      "y" : 26
+    },
+    "minX" : 195,
+    "maxX" : 316,
+    "minY" : 1,
+    "maxY" : 52,
+    "prop" : {
+      "x" : 195,
+      "y" : 1,
+      "width" : 121,
+      "height" : 51
+    },
+    "textPosition" : {
+      "x" : 209,
+      "y" : 5
+    },
+    "connectors" : [ ]
+  } ],
+  "edges" : [ ],
+  "compartments" : [ ],
+  "notes" : [ ],
+  "links" : [ ],
+  "shadows" : [ ],
+  "minX" : 0,
+  "maxX" : 316,
+  "minY" : 0,
+  "maxY" : 53,
+  "disease" : false
+}

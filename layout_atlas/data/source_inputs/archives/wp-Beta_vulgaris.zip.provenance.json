@@ -1,0 +1,8 @@
+{
+  "source": "wikipathways",
+  "version": "20261010",
+  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Beta_vulgaris.zip",
+  "sha256": "2262bffc6616fa11bb39da091dd32fa53f87bc356e6935fc7b7ddc4d6849ec96",
+  "bytes": 7324,
+  "local_path": "data/archives/wp-Beta_vulgaris.zip"
+}

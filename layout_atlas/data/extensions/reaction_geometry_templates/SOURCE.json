@@ -1,0 +1,9 @@
+{
+ "builder": "reaction_templates.py",
+ "maps": 22,
+ "templates": 4475,
+ "signatures": 79,
+ "raw_files_sha256": "53fa7f984ef98be322e5edd3e021a87fed8945b1785f2b7dd81e60681e5525ac",
+ "licence": "Expert Escher community maps (CC0 / CC BY, see data/source_inputs/source_registry.json); only drawing constraints are stored, not curves or chemistry",
+ "stored": "per participant: role, currency flag, side, chord angle, start/end tangent angle relative to the chord, handle length ratios, stub ratio, deviation ratio"
+}

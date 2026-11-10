@@ -1,0 +1,8 @@
+{
+  "source": "wikipathways",
+  "version": "20261010",
+  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Anopheles_gambiae.zip",
+  "sha256": "61bd7eeb731a441217e4a320ac708c83a61c56c90497b89b71080e90fd6e38e9",
+  "bytes": 62181,
+  "local_path": "data/archives/wp-Anopheles_gambiae.zip"
+}

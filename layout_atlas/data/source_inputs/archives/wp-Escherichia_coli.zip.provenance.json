@@ -1,0 +1,8 @@
+{
+  "source": "wikipathways",
+  "version": "20261010",
+  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Escherichia_coli.zip",
+  "sha256": "9750a26827685f8041a24262e379102fb643b0cf5b3f472d1da4edb82d846019",
+  "bytes": 106156,
+  "local_path": "data/archives/wp-Escherichia_coli.zip"
+}

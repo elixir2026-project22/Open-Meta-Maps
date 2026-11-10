@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Pathway xmlns="http://pathvisio.org/GPML/2013a" Name="eIF5A regulation in response to inhibition of the nuclear export system" Data-Source="WikiPathways" Version="WP3302_r136355" Author="[Khanspers, MaintBot, AlexanderPico, Susan, Egonw]" Last-Modified="20250129202502" Organism="Homo sapiens">
+  <Comment Source="WikiPathways-description">Model of eIF5A regulation in response to inhibition of the nuclear export system. Under normal conditions, IGF2BP1 is exported by XPO1 and binds to eIF5A in cytoplasm. The binding with IGF2BP1 prevents eIF5A from accumulating in mitochondria and inducing apoptosis. SINE (Selective Inhibitors of Nuclear Export) inhibits the nuclear export of IGF2BP1, resulting in decreased cytoplasmic IGF2BP1.
+Based on figure Figure 6 in Miyake et al (https://europepmc.org/article/MED/25878333)</Comment>
+  <BiopaxRef>b57</BiopaxRef>
+  <Graphics BoardWidth="850.0" BoardHeight="373.5" />
+  <DataNode TextLabel="EXP4" GraphId="ace16" Type="GeneProduct" GroupRef="c264b">
+    <Graphics CenterX="241.0" CenterY="280.0" Width="51.0" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000132953" />
+  </DataNode>
+  <DataNode TextLabel="SINE" GraphId="d44ae" Type="Metabolite">
+    <Graphics CenterX="160.0" CenterY="174.0" Width="60.0" Height="20.0" ZOrder="32768" FontWeight="Bold" FontSize="12" Valign="Middle" Color="0000ff" />
+    <Xref Database="Wikidata" ID="Q65122840" />
+  </DataNode>
+  <DataNode TextLabel="EIF5A" GraphId="d5475" Type="GeneProduct" GroupRef="c264b">
+    <Graphics CenterX="241.0" CenterY="260.0" Width="46.0" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000132507" />
+  </DataNode>
+  <DataNode TextLabel="IGF2BP1" GraphId="a2cd3" Type="GeneProduct" GroupRef="aa209">
+    <Graphics CenterX="605.0" CenterY="183.0" Width="54.0" Height="20.0" ZOrder="32770" FontSize="10" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000159217" />
+  </DataNode>
+  <DataNode TextLabel="EIF5A" GraphId="bfcd5" Type="GeneProduct">
+    <Graphics CenterX="527.0" CenterY="271.0" Width="46.0" Height="20.0" ZOrder="32772" FontSize="10" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000132507" />
+  </DataNode>
+  <DataNode TextLabel="EIF5A" GraphId="b698b" Type="GeneProduct" GroupRef="ce2a2">
+    <Graphics CenterX="419.0" CenterY="261.0" Width="46.0" Height="20.0" ZOrder="32774" FontSize="10" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000132507" />
+  </DataNode>
+  <DataNode TextLabel="EXP4" GraphId="de3be" Type="GeneProduct" GroupRef="ce2a2">
+    <Graphics CenterX="419.0" CenterY="281.0" Width="51.0" Height="20.0" ZOrder="32775" FontSize="10" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000132953" />
+  </DataNode>
+  <DataNode TextLabel="IGF2BP1" GraphId="faa51" Type="GeneProduct" GroupRef="cf092">
+    <Graphics CenterX="417.0" CenterY="151.0" Width="54.0" Height="20.0" ZOrder="32779" FontSize="10" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000159217" />
+  </DataNode>
+  <DataNode TextLabel="XPO1" GraphId="e970e" Type="GeneProduct" GroupRef="cf092">
+    <Graphics CenterX="417.0" CenterY="131.0" Width="48.0" Height="20.0" ZOrder="32780" FontSize="10" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000082898" />
+  </DataNode>
+  <DataNode TextLabel="EIF5A" GraphId="a57ba" Type="GeneProduct" GroupRef="aa209">
+    <Graphics CenterX="605.0" CenterY="203.0" Width="46.0" Height="20.0" ZOrder="32781" FontSize="10" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000132507" />
+  </DataNode>
+  <DataNode TextLabel="IGF2BP1" GraphId="b02a6" Type="GeneProduct" GroupRef="f53db">
+    <Graphics CenterX="249.0" CenterY="151.0" Width="54.0" Height="20.0" ZOrder="32782" FontSize="10" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000159217" />
+  </DataNode>
+  <DataNode TextLabel="XPO1" GraphId="ebdf0" Type="GeneProduct" GroupRef="f53db">
+    <Graphics CenterX="249.0" CenterY="131.0" Width="48.0" Height="20.0" ZOrder="32783" FontSize="10" Valign="Middle" />
+    <Xref Database="Ensembl" ID="ENSG00000082898" />
+  </DataNode>
+  <Interaction GraphId="id26779fbb">
+    <Graphics ZOrder="12288" LineStyle="Broken" LineThickness="1.0">
+      <Point X="644.0" Y="193.0" GraphRef="f5557" RelX="1.0" RelY="0.0" />
+      <Point X="730.0" Y="193.0" GraphRef="d05b8" RelX="-1.0" RelY="0.0" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id26b4db4f">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="456.0" Y="141.0" GraphRef="f5777" RelX="1.0" RelY="0.0" />
+      <Point X="566.0" Y="177.0" GraphRef="f5557" RelX="-1.0" RelY="-0.5" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id2ca87cd4">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="527.0" Y="261.0" GraphRef="bfcd5" RelX="0.0" RelY="-1.0" />
+      <Point X="566.0" Y="209.0" GraphRef="f5557" RelX="-1.0" RelY="0.5" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id523509c8">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="288.0" Y="141.0" GraphRef="f2c9f" RelX="1.0" RelY="0.0" />
+      <Point X="378.0" Y="141.0" GraphRef="f5777" RelX="-1.0" RelY="0.0" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id580a2022">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="456.5" Y="271.0" GraphRef="c0db7" RelX="1.0" RelY="0.0" />
+      <Point X="504.0" Y="271.0" GraphRef="bfcd5" RelX="-1.0" RelY="0.0" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="ida3c2409">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="278.5" Y="270.0" GraphRef="d3810" RelX="1.0" RelY="0.0" />
+      <Point X="381.5" Y="271.0" GraphRef="c0db7" RelX="-1.0" RelY="0.0" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="idcaffb1a4">
+    <Graphics ConnectorType="Elbow" ZOrder="12288" LineThickness="1.0">
+      <Point X="160.0" Y="164.0" GraphRef="d44ae" RelX="0.0" RelY="-1.0" />
+      <Point X="225.0" Y="131.0" GraphRef="ebdf0" RelX="-1.0" RelY="0.0" ArrowHead="TBar" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Label TextLabel="Cell survival" GraphId="d05b8">
+    <Graphics CenterX="775.0" CenterY="193.0" Width="90.0" Height="25.0" ZOrder="28672" FillColor="ffffff" FontWeight="Bold" FontSize="12" Valign="Middle" />
+  </Label>
+  <Shape TextLabel="Nucleus" GraphId="cab1b">
+    <Attribute Key="org.pathvisio.CellularComponentProperty" Value="Nucleus" />
+    <Attribute Key="org.pathvisio.DoubleLineProperty" Value="Double" />
+    <Graphics CenterX="212.5" CenterY="208.25" Width="271.0" Height="270.5" ZOrder="-4" FontSize="12" ShapeType="Oval" LineThickness="3.0" Color="c0c0c0" Rotation="0.0" />
+  </Shape>
+  <Group GroupId="ce2a2" GraphId="c0db7" Style="Complex" />
+  <Group GroupId="c264b" GraphId="d3810" Style="Complex" />
+  <Group GroupId="b28ea" GraphId="d8a0b" Style="Group" />
+  <Group GroupId="f53db" GraphId="f2c9f" Style="Complex" />
+  <Group GroupId="aa209" GraphId="f5557" Style="Complex" />
+  <Group GroupId="cf092" GraphId="f5777" Style="Complex" />
+  <Group GroupId="b4220" GraphId="fd2b0" Style="Group" />
+  <InfoBox CenterX="0.0" CenterY="0.0" />
+  <Biopax>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="b57">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">25878333</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">XPO1/CRM1 Inhibition Causes Antitumor Effects by Mitochondrial Accumulation of eIF5A.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Clin Cancer Res</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2015</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Miyake T</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pradeep S</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Wu SY</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Rupaimoole R</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Zand B</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Wen Y</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Gharpure KM</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Nagaraja AS</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Hu W</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Cho MS</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Dalton HJ</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Previs RA</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Taylor ML</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Hisamatsu T</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Kang Y</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Liu T</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Shacham S</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">McCauley D</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Hawke DH</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Wiktorowicz JE</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Coleman RL</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Sood AK</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:openControlledVocabulary xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#">
+      <bp:TERM xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">cancer pathway</bp:TERM>
+      <bp:ID xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PW:0000605</bp:ID>
+      <bp:Ontology xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pathway Ontology</bp:Ontology>
+    </bp:openControlledVocabulary>
+    <bp:openControlledVocabulary xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#">
+      <bp:TERM xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">nuclear protein transport pathway</bp:TERM>
+      <bp:ID xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PW:0000538</bp:ID>
+      <bp:Ontology xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pathway Ontology</bp:Ontology>
+    </bp:openControlledVocabulary>
+  </Biopax>
+</Pathway>
+

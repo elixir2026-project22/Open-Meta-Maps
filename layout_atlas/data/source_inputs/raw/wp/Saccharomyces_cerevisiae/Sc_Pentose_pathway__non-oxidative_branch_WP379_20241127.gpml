@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Pathway xmlns="http://pathvisio.org/GPML/2013a" Name="Pentose pathway, non-oxidative branch" Data-Source="WikiPathways" Version="WP379_r135907" Author="[M.Braymer, MaintBot, Ddigles, Egonw, DeSl, Eweitz, Khanspers]" Last-Modified="20241127015141" Organism="Saccharomyces cerevisiae">
+  <Comment Source="WikiPathways-description">The reactions of the non-oxidative branch of the pentose phosphate pathway are reversible and are important for generating ribose-5-phosphate, which is required for the biosynthesis of several biomolecules, including RNA and DNA.
+The flow of glucose 6-phosphate through glycolysis and the pentose phosphate pathway is linked through two enzymes of the non-oxidative branch of the pentose phosphate pathway, transketolase (Tkl1p and Tkl2p) and transaldolase (Tal1p). The ability of these enzymes to convert one type of sugar into another allows them to convert the byproduct of one pathway into the substrate of another pathway in order to meet the metabolic needs of the cell. For example, if the cell needs ribose 5-phosphate, glyceraldehyde 3-phosphate and fructose 6-phosphate will be converted to ribose 5-phosphate. If the cell needs NADPH or ATP more than ribose 5-phosphate, ribose 5-phosphate will be converted to glyceraldehyde 3-phosphate and fructose 6-phosphate for use by the oxidative branch of the pentose phosphate pathway or glycolysis, respectively.</Comment>
+  <BiopaxRef>cfb</BiopaxRef>
+  <BiopaxRef>a3a</BiopaxRef>
+  <BiopaxRef>c80</BiopaxRef>
+  <Graphics BoardWidth="692.0" BoardHeight="662.123734305387" />
+  <DataNode TextLabel="fructose-6-phosphate" GraphId="a29" Type="Metabolite" GroupRef="a806c">
+    <Graphics CenterX="207.54556500607413" CenterY="463.365735115431" Width="140.0" Height="19.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="Chemspider" ID="26330295" />
+  </DataNode>
+  <DataNode TextLabel="RKI1" GraphId="a3b" Type="GeneProduct">
+    <Attribute Key="org.pathvisio.model.BackpageHead" Value="RKI1" />
+    <Graphics CenterX="182.33333333333331" CenterY="129.33333333333331" Width="40.0" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" />
+    <Xref Database="SGD" ID="S000005621" />
+  </DataNode>
+  <DataNode TextLabel="xylulose degradation" GraphId="aa7b7" Type="Pathway">
+    <Graphics CenterX="592.0" CenterY="142.0" Width="140.0" Height="25.0" ZOrder="32768" FontWeight="Bold" FontSize="12" Valign="Middle" ShapeType="None" Color="14961e" />
+    <Xref Database="" ID="" />
+  </DataNode>
+  <DataNode TextLabel="TKL2" GraphId="c16" Type="GeneProduct" GroupRef="f39ac">
+    <Attribute Key="org.pathvisio.model.BackpageHead" Value="TKL2" />
+    <Graphics CenterX="354.3087533485783" CenterY="280.05145167217927" Width="40.0" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" />
+    <Xref Database="SGD" ID="S000000321" />
+  </DataNode>
+  <DataNode TextLabel="D-xylulose 5-phosphate" GraphId="c6227" Type="Metabolite">
+    <Graphics CenterX="268.0" CenterY="503.0" Width="122.0" Height="25.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="57737" />
+  </DataNode>
+  <DataNode TextLabel="glyceraldehyde-3-phosphate" GraphId="c7d" Type="Metabolite">
+    <Graphics CenterX="377.4293236127967" CenterY="622.623734305387" Width="140.0" Height="19.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="CAS" ID="591-57-1" />
+  </DataNode>
+  <DataNode TextLabel="ribulose-5-phosphate" GraphId="ce5" Type="Metabolite">
+    <Graphics CenterX="287.20453624949397" CenterY="93.0" Width="140.0" Height="19.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="CAS" ID="4151-19-3" />
+  </DataNode>
+  <DataNode TextLabel="TKL1" GraphId="d00" Type="GeneProduct" GroupRef="f39ac">
+    <Attribute Key="org.pathvisio.model.BackpageHead" Value="TKL1" />
+    <Graphics CenterX="354.3087533485783" CenterY="260.05145167217927" Width="40.0" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" />
+    <Xref Database="SGD" ID="S000006278" />
+  </DataNode>
+  <DataNode TextLabel="sedoheptulose-7-phosphate" GraphId="d44" Type="Metabolite" GroupRef="e2c6a">
+    <Graphics CenterX="377.0" CenterY="341.66666666666663" Width="160.0" Height="19.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="CAS" ID="2646-35-7" />
+  </DataNode>
+  <DataNode TextLabel="xylulose-5-phosphate" GraphId="dfc" Type="Metabolite" GroupRef="bf483">
+    <Graphics CenterX="385.66666666666663" CenterY="194.0" Width="130.0" Height="19.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="57737" />
+  </DataNode>
+  <DataNode TextLabel="TAL1" GraphId="e2c" Type="GeneProduct" GroupRef="ef0b2">
+    <Attribute Key="org.pathvisio.model.BackpageHead" Value="TAL1" />
+    <Graphics CenterX="363.87861969122787" CenterY="394.0538679627383" Width="66.66666666666667" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" />
+    <Xref Database="SGD" ID="S000004346" />
+  </DataNode>
+  <DataNode TextLabel="glyceraldehyde-3-phosphate" GraphId="e4e" Type="Metabolite" GroupRef="e2c6a">
+    <Graphics CenterX="207.0" CenterY="341.66666666666663" Width="160.0" Height="19.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="CAS" ID="591-57-1" />
+  </DataNode>
+  <DataNode TextLabel="TKL1" GraphId="e7b" Type="GeneProduct">
+    <Attribute Key="org.pathvisio.model.BackpageHead" Value="TKL1" />
+    <Graphics CenterX="440.7857432158768" CenterY="528.2373430538678" Width="40.0" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" />
+    <Xref Database="SGD" ID="S000006278" />
+  </DataNode>
+  <DataNode TextLabel="β-D-fructofuranose 6-phosphate" GraphId="ed5bd" Type="Metabolite">
+    <Graphics CenterX="262.5" CenterY="576.0" Width="153.0" Height="25.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="57634" />
+  </DataNode>
+  <DataNode TextLabel="D-ribose 5-phosphate" GraphId="f3b" Type="Metabolite" GroupRef="bf483">
+    <Graphics CenterX="195.66666666666669" CenterY="194.0" Width="130.0" Height="19.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="78346" />
+  </DataNode>
+  <DataNode TextLabel="RPE1" GraphId="f53" Type="GeneProduct">
+    <Attribute Key="org.pathvisio.model.BackpageHead" Value="RPE1" />
+    <Graphics CenterX="394.0" CenterY="125.33333333333331" Width="41.1537" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" />
+    <Xref Database="SGD" ID="S000003657" />
+  </DataNode>
+  <DataNode TextLabel="erythrose-4-phosphate" GraphId="f8f" Type="Metabolite" GroupRef="a806c">
+    <Graphics CenterX="377.86350749291137" CenterY="463.365735115431" Width="140.0" Height="19.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="CHEBI:48153" />
+  </DataNode>
+  <Interaction GraphId="id120e1d82">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="329.0" Y="503.0" GraphRef="c6227" RelX="1.0" RelY="0.0" />
+      <Point X="377.68983394086547" Y="528.9689347914134" GraphRef="c1fff" RelX="0.0" RelY="0.0" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id5a7b9965">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="373.42314999999996" Y="125.33333333333331" GraphRef="f53" RelX="-1.0" RelY="0.0" />
+      <Point X="326.589388416363" Y="135.3" GraphRef="a5e43" RelX="0.0" RelY="0.0" ArrowHead="mim-catalysis" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id6bca7e43">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="287.20453624949397" Y="102.5" GraphRef="ce5" RelX="0.0" RelY="1.0" />
+      <Point X="385.66666666666663" Y="184.5" GraphRef="dfc" RelX="0.0" RelY="-1.0" ArrowHead="mim-conversion" />
+      <Anchor Position="0.4" Shape="None" GraphId="a5e43" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id6c6607ff">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="202.33333333333331" Y="129.33333333333331" GraphRef="a3b" RelX="1.0" RelY="0.0" />
+      <Point X="250.58938841636305" Y="135.3" GraphRef="b6e00" RelX="0.0" RelY="0.0" ArrowHead="mim-catalysis" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id769e8626">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="292.0" Y="359.16666666666663" GraphRef="a3377" RelX="0.0" RelY="1.0" />
+      <Point X="292.7045362494928" Y="445.865735115431" GraphRef="e081d" RelX="0.0" RelY="-1.0" ArrowHead="mim-conversion" />
+      <Anchor Position="0.4" Shape="None" GraphId="b2781" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id8b65e498">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="287.20453624949397" Y="102.5" GraphRef="ce5" RelX="0.0" RelY="1.0" />
+      <Point X="195.66666666666669" Y="184.5" GraphRef="f3b" RelX="0.0" RelY="-1.0" ArrowHead="mim-conversion" />
+      <Anchor Position="0.4" Shape="None" GraphId="b6e00" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id996bc359">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="290.66666666666663" Y="211.5" GraphRef="b4dc2" RelX="0.0" RelY="1.0" />
+      <Point X="292.0" Y="324.16666666666663" GraphRef="a3377" RelX="0.0" RelY="-1.0" ArrowHead="mim-conversion" />
+      <Anchor Position="0.5198046890769379" Shape="None" GraphId="aa2f2" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="ida38c224a">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="377.68983394086547" Y="528.9689347914134" GraphRef="c1fff" RelX="0.0" RelY="0.0" />
+      <Point X="339.0" Y="576.0" GraphRef="ed5bd" RelX="1.0" RelY="0.0" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="idaa087d">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="420.7857432158768" Y="528.2373430538678" GraphRef="e7b" RelX="-1.0" RelY="0.0" />
+      <Point X="377.68983394086547" Y="528.9689347914134" GraphRef="c1fff" RelX="0.0" RelY="0.0" ArrowHead="mim-catalysis" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="idbbce2450">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="522.0" Y="142.0" GraphRef="aa7b7" RelX="-1.0" RelY="0.0" />
+      <Point X="418.16666666666663" Y="184.5" GraphRef="dfc" RelX="0.5" RelY="-1.0" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="idbfb87ba8">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="326.3087533485783" Y="270.05145167217927" GraphRef="b5f8c" RelX="-1.0" RelY="0.0" />
+      <Point X="291.3597395854359" Y="270.06466163600163" GraphRef="aa2f2" RelX="0.0" RelY="0.0" ArrowHead="mim-catalysis" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="ide095753">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="377.86350749291137" Y="472.865735115431" GraphRef="f8f" RelX="0.0" RelY="1.0" />
+      <Point X="377.4293236127967" Y="613.123734305387" GraphRef="c7d" RelX="0.0" RelY="-1.0" ArrowHead="mim-conversion" />
+      <Anchor Position="0.4" Shape="None" GraphId="c1fff" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="idfc30aa80">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="322.5452863578945" Y="394.0538679627383" GraphRef="b220f" RelX="-1.0" RelY="0.0" />
+      <Point X="292.2818144997971" Y="393.8462940461724" GraphRef="b2781" RelX="0.0" RelY="0.0" ArrowHead="mim-catalysis" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Group GroupId="e2c6a" GraphId="a3377" />
+  <Group GroupId="ef0b2" GraphId="b220f" Style="Group" />
+  <Group GroupId="bf483" GraphId="b4dc2" />
+  <Group GroupId="f39ac" GraphId="b5f8c" Style="Group" />
+  <Group GroupId="a806c" GraphId="e081d" />
+  <InfoBox CenterX="11.666666666666666" CenterY="51.666666666666664" />
+  <Biopax>
+    <bp:openControlledVocabulary xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#">
+      <bp:TERM xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">classic metabolic pathway</bp:TERM>
+      <bp:ID xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PW:0000002</bp:ID>
+      <bp:Ontology xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pathway Ontology</bp:Ontology>
+    </bp:openControlledVocabulary>
+    <bp:openControlledVocabulary xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#">
+      <bp:TERM xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">pentose phosphate pathway - non-oxidative phase</bp:TERM>
+      <bp:ID xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PW:0000574</bp:ID>
+      <bp:Ontology xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pathway Ontology</bp:Ontology>
+    </bp:openControlledVocabulary>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="cfb">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">11298766</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Central carbon metabolism of Saccharomyces cerevisiae explored by biosynthetic fractional (13)C labeling of common amino acids.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Eur J Biochem</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2001</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Maaheimo H</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Fiaux J</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Cakar ZP</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Bailey JE</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Sauer U</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Szyperski T</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="c80">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">https://pathway.yeastgenome.org/YEAST/NEW-IMAGE?type=PATHWAY&amp;object=NONOXIPENT-PWY</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">URL</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">pentose phosphate pathway (non-oxidative branch)</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">YeastGenome</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string"></bp:YEAR>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="a3a">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">15960801</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Large-scale 13C-flux analysis reveals mechanistic principles of metabolic network robustness to null mutations in yeast.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Genome Biol</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2005</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Blank LM</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Kuepfer L</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Sauer U</bp:AUTHORS>
+    </bp:PublicationXref>
+  </Biopax>
+</Pathway>
+

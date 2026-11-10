@@ -1,0 +1,4404 @@
+{
+  "dbId" : 9864848,
+  "stableId" : "R-HSA-9864848",
+  "displayName" : "Complex IV assembly",
+  "nodes" : [ {
+    "id" : 320,
+    "reactomeId" : 9865631,
+    "displayName" : "MT-CO2:Mg2+:CuA",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 1227,
+      "y" : 249
+    },
+    "minX" : 1141,
+    "maxX" : 1407,
+    "minY" : 189,
+    "maxY" : 304,
+    "prop" : {
+      "x" : 1190,
+      "y" : 195,
+      "width" : 75,
+      "height" : 109
+    },
+    "textPosition" : {
+      "x" : 1191,
+      "y" : 269
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1265,
+          "y" : 195
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1265,
+          "y" : 195
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 311,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1187,
+          "y" : 249
+        },
+        "to" : {
+          "x" : 1141,
+          "y" : 250
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 1180,
+          "y" : 253
+        },
+        "b" : {
+          "x" : 1187,
+          "y" : 249
+        },
+        "c" : {
+          "x" : 1180,
+          "y" : 245
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 1180,
+          "y" : 245
+        }
+      }
+    }, {
+      "edgeId" : 267,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1268,
+          "y" : 249
+        },
+        "to" : {
+          "x" : 1407,
+          "y" : 249
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 388,
+    "reactomeId" : 611105,
+    "displayName" : "Respiratory electron transport",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "EncapsulatedNode",
+    "position" : {
+      "x" : 2290,
+      "y" : 213
+    },
+    "minX" : 2220,
+    "maxX" : 2360,
+    "minY" : 184,
+    "maxY" : 243,
+    "prop" : {
+      "x" : 2220,
+      "y" : 184,
+      "width" : 140,
+      "height" : 59
+    },
+    "textPosition" : {
+      "x" : 2224,
+      "y" : 192
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 325,
+    "reactomeId" : 5336142,
+    "displayName" : "COX8A,C",
+    "schemaClass" : "DefinedSet",
+    "renderableClass" : "EntitySet",
+    "position" : {
+      "x" : 1319,
+      "y" : 227
+    },
+    "minX" : 1288,
+    "maxX" : 1407,
+    "minY" : 218,
+    "maxY" : 249,
+    "prop" : {
+      "x" : 1288,
+      "y" : 218,
+      "width" : 62,
+      "height" : 19
+    },
+    "textPosition" : {
+      "x" : 1289,
+      "y" : 217
+    },
+    "connectors" : [ {
+      "edgeId" : 267,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1356,
+          "y" : 234
+        },
+        "to" : {
+          "x" : 1407,
+          "y" : 249
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 6,
+    "reactomeId" : 9865306,
+    "displayName" : "TACO1:PET117:PET100:MR-1S",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 432,
+      "y" : 725
+    },
+    "minX" : 403,
+    "maxX" : 468,
+    "minY" : 652,
+    "maxY" : 758,
+    "prop" : {
+      "x" : 403,
+      "y" : 692,
+      "width" : 59,
+      "height" : 66
+    },
+    "textPosition" : {
+      "x" : 403,
+      "y" : 695
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 462,
+          "y" : 692
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 462,
+          "y" : 692
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 3,
+      "type" : "ACTIVATOR",
+      "segments" : [ {
+        "from" : {
+          "x" : 432,
+          "y" : 689
+        },
+        "to" : {
+          "x" : 432,
+          "y" : 652
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 436,
+          "y" : 659
+        },
+        "b" : {
+          "x" : 432,
+          "y" : 652
+        },
+        "c" : {
+          "x" : 428,
+          "y" : 659
+        },
+        "type" : "ARROW",
+        "empty" : true,
+        "centre" : {
+          "x" : 428,
+          "y" : 659
+        }
+      }
+    } ]
+  }, {
+    "id" : 262,
+    "reactomeId" : 109496,
+    "displayName" : "Mg2+",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 747,
+      "y" : 354
+    },
+    "minX" : 724,
+    "maxX" : 815,
+    "minY" : 338,
+    "maxY" : 370,
+    "prop" : {
+      "x" : 724,
+      "y" : 339,
+      "width" : 47,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 725,
+      "y" : 344
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 766,
+          "y" : 344
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 766,
+          "y" : 344
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 387,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 774,
+          "y" : 354
+        },
+        "to" : {
+          "x" : 815,
+          "y" : 354
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 7,
+    "reactomeId" : 6793012,
+    "displayName" : "MT-CO1 mRNA",
+    "schemaClass" : "EntityWithAccessionedSequence",
+    "renderableClass" : "RNA",
+    "position" : {
+      "x" : 540,
+      "y" : 644
+    },
+    "minX" : 487,
+    "maxX" : 593,
+    "minY" : 625,
+    "maxY" : 664,
+    "prop" : {
+      "x" : 487,
+      "y" : 625,
+      "width" : 106,
+      "height" : 39
+    },
+    "textPosition" : {
+      "x" : 493,
+      "y" : 634
+    },
+    "connectors" : [ {
+      "edgeId" : 3,
+      "type" : "INPUT",
+      "segments" : [ ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 8,
+    "reactomeId" : 164314,
+    "displayName" : "nascent MT-CO1",
+    "schemaClass" : "EntityWithAccessionedSequence",
+    "renderableClass" : "Protein",
+    "position" : {
+      "x" : 285,
+      "y" : 644
+    },
+    "minX" : 255,
+    "maxX" : 322,
+    "minY" : 580,
+    "maxY" : 661,
+    "prop" : {
+      "x" : 255,
+      "y" : 627,
+      "width" : 61,
+      "height" : 34
+    },
+    "textPosition" : {
+      "x" : 254,
+      "y" : 627
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 316,
+          "y" : 627
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 316,
+          "y" : 627
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 3,
+      "type" : "OUTPUT",
+      "segments" : [ ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    }, {
+      "edgeId" : 29,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 285,
+          "y" : 624
+        },
+        "to" : {
+          "x" : 285,
+          "y" : 580
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 396,
+    "reactomeId" : 5368287,
+    "displayName" : "Mitochondrial translation",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "EncapsulatedNode",
+    "position" : {
+      "x" : 686,
+      "y" : 607
+    },
+    "minX" : 637,
+    "maxX" : 735,
+    "minY" : 583,
+    "maxY" : 631,
+    "prop" : {
+      "x" : 637,
+      "y" : 583,
+      "width" : 98,
+      "height" : 48
+    },
+    "textPosition" : {
+      "x" : 637,
+      "y" : 585
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 268,
+    "reactomeId" : 164309,
+    "displayName" : "COX7B",
+    "schemaClass" : "EntityWithAccessionedSequence",
+    "renderableClass" : "Protein",
+    "position" : {
+      "x" : 1308,
+      "y" : 276
+    },
+    "minX" : 1283,
+    "maxX" : 1407,
+    "minY" : 249,
+    "maxY" : 287,
+    "prop" : {
+      "x" : 1283,
+      "y" : 266,
+      "width" : 50,
+      "height" : 21
+    },
+    "textPosition" : {
+      "x" : 1284,
+      "y" : 266
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1333,
+          "y" : 266
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1333,
+          "y" : 266
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 267,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1336,
+          "y" : 269
+        },
+        "to" : {
+          "x" : 1407,
+          "y" : 249
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 397,
+    "reactomeId" : 189445,
+    "displayName" : "Metabolism of porphyrins",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "EncapsulatedNode",
+    "position" : {
+      "x" : 1433,
+      "y" : 437
+    },
+    "minX" : 1384,
+    "maxX" : 1483,
+    "minY" : 415,
+    "maxY" : 460,
+    "prop" : {
+      "x" : 1384,
+      "y" : 415,
+      "width" : 99,
+      "height" : 45
+    },
+    "textPosition" : {
+      "x" : 1384,
+      "y" : 416
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 270,
+    "reactomeId" : 164306,
+    "displayName" : "COX7C",
+    "schemaClass" : "EntityWithAccessionedSequence",
+    "renderableClass" : "Protein",
+    "position" : {
+      "x" : 1374,
+      "y" : 280
+    },
+    "minX" : 1348,
+    "maxX" : 1407,
+    "minY" : 249,
+    "maxY" : 290,
+    "prop" : {
+      "x" : 1348,
+      "y" : 270,
+      "width" : 53,
+      "height" : 20
+    },
+    "textPosition" : {
+      "x" : 1350,
+      "y" : 270
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1401,
+          "y" : 270
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1401,
+          "y" : 270
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 267,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1384,
+          "y" : 267
+        },
+        "to" : {
+          "x" : 1407,
+          "y" : 249
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 79,
+    "reactomeId" : 9865410,
+    "displayName" : "MT-CO1:Mg2+:PE:CL:MITRAC:TIMM21:COX4:COX5A:COX6C",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 308,
+      "y" : 386
+    },
+    "minX" : 238,
+    "maxX" : 436,
+    "minY" : 221,
+    "maxY" : 634,
+    "prop" : {
+      "x" : 238,
+      "y" : 358,
+      "width" : 140,
+      "height" : 57
+    },
+    "textPosition" : {
+      "x" : 240,
+      "y" : 366
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 378,
+          "y" : 358
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 378,
+          "y" : 358
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 80,
+      "type" : "OUTPUT",
+      "segments" : [ ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    }, {
+      "edgeId" : 3,
+      "type" : "ACTIVATOR",
+      "segments" : [ {
+        "from" : {
+          "x" : 345,
+          "y" : 418
+        },
+        "to" : {
+          "x" : 432,
+          "y" : 480
+        }
+      }, {
+        "from" : {
+          "x" : 432,
+          "y" : 480
+        },
+        "to" : {
+          "x" : 432,
+          "y" : 634
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 428,
+          "y" : 627
+        },
+        "b" : {
+          "x" : 432,
+          "y" : 634
+        },
+        "c" : {
+          "x" : 436,
+          "y" : 627
+        },
+        "type" : "ARROW",
+        "empty" : true,
+        "centre" : {
+          "x" : 436,
+          "y" : 627
+        }
+      }
+    }, {
+      "edgeId" : 116,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 308,
+          "y" : 355
+        },
+        "to" : {
+          "x" : 310,
+          "y" : 221
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 271,
+    "reactomeId" : 9865416,
+    "displayName" : "TIMM21",
+    "schemaClass" : "EntityWithAccessionedSequence",
+    "renderableClass" : "Protein",
+    "position" : {
+      "x" : 1476,
+      "y" : 200
+    },
+    "minX" : 1444,
+    "maxX" : 1510,
+    "minY" : 185,
+    "maxY" : 249,
+    "prop" : {
+      "x" : 1448,
+      "y" : 191,
+      "width" : 56,
+      "height" : 19
+    },
+    "textPosition" : {
+      "x" : 1449,
+      "y" : 190
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1504,
+          "y" : 191
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1504,
+          "y" : 191
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 267,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1469,
+          "y" : 213
+        },
+        "to" : {
+          "x" : 1444,
+          "y" : 249
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 1468,
+          "y" : 221
+        },
+        "b" : {
+          "x" : 1469,
+          "y" : 213
+        },
+        "c" : {
+          "x" : 1462,
+          "y" : 216
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 1462,
+          "y" : 216
+        }
+      }
+    } ]
+  }, {
+    "id" : 399,
+    "reactomeId" : 1268020,
+    "displayName" : "Mitochondrial protein import",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "EncapsulatedNode",
+    "position" : {
+      "x" : 55,
+      "y" : 394
+    },
+    "minX" : 0,
+    "maxX" : 110,
+    "minY" : 365,
+    "maxY" : 423,
+    "prop" : {
+      "x" : 0,
+      "y" : 365,
+      "width" : 110,
+      "height" : 58
+    },
+    "textPosition" : {
+      "x" : 2,
+      "y" : 372
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 336,
+    "reactomeId" : 9864460,
+    "displayName" : "COX6A:PE",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 1757,
+      "y" : 228
+    },
+    "minX" : 1724,
+    "maxX" : 1880,
+    "minY" : 211,
+    "maxY" : 251,
+    "prop" : {
+      "x" : 1724,
+      "y" : 217,
+      "width" : 67,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 1731,
+      "y" : 205
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1791,
+          "y" : 217
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1791,
+          "y" : 217
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 335,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1794,
+          "y" : 234
+        },
+        "to" : {
+          "x" : 1880,
+          "y" : 251
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 272,
+    "reactomeId" : 9865576,
+    "displayName" : "holo-MT-CO1,2 complex",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 1571,
+      "y" : 249
+    },
+    "minX" : 1444,
+    "maxX" : 1880,
+    "minY" : 190,
+    "maxY" : 302,
+    "prop" : {
+      "x" : 1520,
+      "y" : 196,
+      "width" : 103,
+      "height" : 106
+    },
+    "textPosition" : {
+      "x" : 1521,
+      "y" : 267
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1623,
+          "y" : 196
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1623,
+          "y" : 196
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 267,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1517,
+          "y" : 249
+        },
+        "to" : {
+          "x" : 1444,
+          "y" : 249
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 1510,
+          "y" : 253
+        },
+        "b" : {
+          "x" : 1517,
+          "y" : 249
+        },
+        "c" : {
+          "x" : 1510,
+          "y" : 245
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 1510,
+          "y" : 245
+        }
+      }
+    }, {
+      "edgeId" : 335,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1626,
+          "y" : 249
+        },
+        "to" : {
+          "x" : 1880,
+          "y" : 251
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 81,
+    "reactomeId" : 9865418,
+    "displayName" : "TIMM21:COX4:COX5A:COX6C",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 123,
+      "y" : 489
+    },
+    "minX" : 92,
+    "maxX" : 308,
+    "minY" : 450,
+    "maxY" : 523,
+    "prop" : {
+      "x" : 92,
+      "y" : 456,
+      "width" : 63,
+      "height" : 67
+    },
+    "textPosition" : {
+      "x" : 94,
+      "y" : 460
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 155,
+          "y" : 456
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 155,
+          "y" : 456
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 80,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 158,
+          "y" : 483
+        },
+        "to" : {
+          "x" : 308,
+          "y" : 459
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 273,
+    "reactomeId" : 9865587,
+    "displayName" : "COX20:TMEM177",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 749,
+      "y" : 255
+    },
+    "minX" : 716,
+    "maxX" : 1262,
+    "minY" : 70,
+    "maxY" : 354,
+    "prop" : {
+      "x" : 716,
+      "y" : 200,
+      "width" : 67,
+      "height" : 110
+    },
+    "textPosition" : {
+      "x" : 716,
+      "y" : 275
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 783,
+          "y" : 200
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 783,
+          "y" : 200
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 387,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 786,
+          "y" : 305
+        },
+        "to" : {
+          "x" : 815,
+          "y" : 354
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    }, {
+      "edgeId" : 311,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 781,
+          "y" : 197
+        },
+        "to" : {
+          "x" : 859,
+          "y" : 70
+        }
+      }, {
+        "from" : {
+          "x" : 859,
+          "y" : 70
+        },
+        "to" : {
+          "x" : 1262,
+          "y" : 70
+        }
+      }, {
+        "from" : {
+          "x" : 1262,
+          "y" : 70
+        },
+        "to" : {
+          "x" : 1141,
+          "y" : 250
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 781,
+          "y" : 189
+        },
+        "b" : {
+          "x" : 781,
+          "y" : 197
+        },
+        "c" : {
+          "x" : 788,
+          "y" : 193
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 788,
+          "y" : 193
+        }
+      }
+    } ]
+  }, {
+    "id" : 337,
+    "reactomeId" : 9864495,
+    "displayName" : "MT-CO3:PE:CL",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 1767,
+      "y" : 290
+    },
+    "minX" : 1738,
+    "maxX" : 1880,
+    "minY" : 251,
+    "maxY" : 307,
+    "prop" : {
+      "x" : 1738,
+      "y" : 273,
+      "width" : 58,
+      "height" : 34
+    },
+    "textPosition" : {
+      "x" : 1738,
+      "y" : 272
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1796,
+          "y" : 273
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1796,
+          "y" : 273
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 335,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1799,
+          "y" : 279
+        },
+        "to" : {
+          "x" : 1880,
+          "y" : 251
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 338,
+    "reactomeId" : 9864472,
+    "displayName" : "NDUFA4:CL",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 1673,
+      "y" : 294
+    },
+    "minX" : 1636,
+    "maxX" : 1880,
+    "minY" : 251,
+    "maxY" : 306,
+    "prop" : {
+      "x" : 1636,
+      "y" : 283,
+      "width" : 74,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 1642,
+      "y" : 271
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1710,
+          "y" : 283
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1710,
+          "y" : 283
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 335,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1694,
+          "y" : 280
+        },
+        "to" : {
+          "x" : 1734,
+          "y" : 262
+        }
+      }, {
+        "from" : {
+          "x" : 1734,
+          "y" : 262
+        },
+        "to" : {
+          "x" : 1880,
+          "y" : 251
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 82,
+    "reactomeId" : 1524083,
+    "displayName" : "PE",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 163,
+      "y" : 659
+    },
+    "minX" : 148,
+    "maxX" : 285,
+    "minY" : 580,
+    "maxY" : 675,
+    "prop" : {
+      "x" : 148,
+      "y" : 644,
+      "width" : 30,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 151,
+      "y" : 649
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 173,
+          "y" : 649
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 173,
+          "y" : 649
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 29,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 181,
+          "y" : 649
+        },
+        "to" : {
+          "x" : 285,
+          "y" : 580
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 83,
+    "reactomeId" : 109496,
+    "displayName" : "Mg2+",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 391,
+      "y" : 601
+    },
+    "minX" : 285,
+    "maxX" : 416,
+    "minY" : 580,
+    "maxY" : 617,
+    "prop" : {
+      "x" : 368,
+      "y" : 586,
+      "width" : 47,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 369,
+      "y" : 591
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 410,
+          "y" : 591
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 410,
+          "y" : 591
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 29,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 365,
+          "y" : 596
+        },
+        "to" : {
+          "x" : 285,
+          "y" : 580
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 339,
+    "reactomeId" : 5336172,
+    "displayName" : "COX6B1,2",
+    "schemaClass" : "DefinedSet",
+    "renderableClass" : "EntitySet",
+    "position" : {
+      "x" : 1853,
+      "y" : 289
+    },
+    "minX" : 1820,
+    "maxX" : 1887,
+    "minY" : 251,
+    "maxY" : 301,
+    "prop" : {
+      "x" : 1820,
+      "y" : 278,
+      "width" : 67,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 1823,
+      "y" : 272
+    },
+    "connectors" : [ {
+      "edgeId" : 335,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1861,
+          "y" : 272
+        },
+        "to" : {
+          "x" : 1880,
+          "y" : 251
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 340,
+    "reactomeId" : 5336144,
+    "displayName" : "COX7A1,2,2L",
+    "schemaClass" : "DefinedSet",
+    "renderableClass" : "EntitySet",
+    "position" : {
+      "x" : 1667,
+      "y" : 228
+    },
+    "minX" : 1641,
+    "maxX" : 1880,
+    "minY" : 214,
+    "maxY" : 251,
+    "prop" : {
+      "x" : 1641,
+      "y" : 214,
+      "width" : 52,
+      "height" : 28
+    },
+    "textPosition" : {
+      "x" : 1643,
+      "y" : 211
+    },
+    "connectors" : [ {
+      "edgeId" : 335,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1699,
+          "y" : 237
+        },
+        "to" : {
+          "x" : 1713,
+          "y" : 244
+        }
+      }, {
+        "from" : {
+          "x" : 1713,
+          "y" : 244
+        },
+        "to" : {
+          "x" : 1880,
+          "y" : 251
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 84,
+    "reactomeId" : 1524072,
+    "displayName" : "cardiolipin",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 190,
+      "y" : 719
+    },
+    "minX" : 154,
+    "maxX" : 285,
+    "minY" : 580,
+    "maxY" : 735,
+    "prop" : {
+      "x" : 154,
+      "y" : 704,
+      "width" : 72,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 154,
+      "y" : 709
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 221,
+          "y" : 709
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 221,
+          "y" : 709
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 29,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 200,
+          "y" : 701
+        },
+        "to" : {
+          "x" : 285,
+          "y" : 580
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 85,
+    "reactomeId" : 9865433,
+    "displayName" : "MT-CO1:Mg2+:PE:CL:MITRAC",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 309,
+      "y" : 524
+    },
+    "minX" : 254,
+    "maxX" : 370,
+    "minY" : 459,
+    "maxY" : 543,
+    "prop" : {
+      "x" : 254,
+      "y" : 506,
+      "width" : 110,
+      "height" : 37
+    },
+    "textPosition" : {
+      "x" : 260,
+      "y" : 508
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 364,
+          "y" : 506
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 364,
+          "y" : 506
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 80,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 308,
+          "y" : 503
+        },
+        "to" : {
+          "x" : 308,
+          "y" : 459
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    }, {
+      "edgeId" : 29,
+      "type" : "OUTPUT",
+      "segments" : [ ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 341,
+    "reactomeId" : 164316,
+    "displayName" : "Cytochrome c oxidase",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 2003,
+      "y" : 250
+    },
+    "minX" : 1918,
+    "maxX" : 2053,
+    "minY" : 187,
+    "maxY" : 308,
+    "prop" : {
+      "x" : 1960,
+      "y" : 193,
+      "width" : 87,
+      "height" : 115
+    },
+    "textPosition" : {
+      "x" : 1960,
+      "y" : 273
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 2047,
+          "y" : 193
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 2047,
+          "y" : 193
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 335,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1957,
+          "y" : 250
+        },
+        "to" : {
+          "x" : 1918,
+          "y" : 250
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 1950,
+          "y" : 254
+        },
+        "b" : {
+          "x" : 1957,
+          "y" : 250
+        },
+        "c" : {
+          "x" : 1950,
+          "y" : 246
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 1950,
+          "y" : 246
+        }
+      }
+    } ]
+  }, {
+    "id" : 347,
+    "reactomeId" : 9865338,
+    "displayName" : "MITRAC",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 1917,
+      "y" : 216
+    },
+    "minX" : 1888,
+    "maxX" : 1952,
+    "minY" : 200,
+    "maxY" : 250,
+    "prop" : {
+      "x" : 1888,
+      "y" : 206,
+      "width" : 58,
+      "height" : 20
+    },
+    "textPosition" : {
+      "x" : 1891,
+      "y" : 205
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1946,
+          "y" : 206
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1946,
+          "y" : 206
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 335,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1917,
+          "y" : 229
+        },
+        "to" : {
+          "x" : 1918,
+          "y" : 250
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 1921,
+          "y" : 236
+        },
+        "b" : {
+          "x" : 1917,
+          "y" : 229
+        },
+        "c" : {
+          "x" : 1913,
+          "y" : 236
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 1913,
+          "y" : 236
+        }
+      }
+    } ]
+  }, {
+    "id" : 30,
+    "reactomeId" : 9865338,
+    "displayName" : "MITRAC",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 332,
+      "y" : 609
+    },
+    "minX" : 285,
+    "maxX" : 367,
+    "minY" : 580,
+    "maxY" : 619,
+    "prop" : {
+      "x" : 303,
+      "y" : 599,
+      "width" : 58,
+      "height" : 20
+    },
+    "textPosition" : {
+      "x" : 306,
+      "y" : 598
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 361,
+          "y" : 599
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 361,
+          "y" : 599
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 29,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 315,
+          "y" : 596
+        },
+        "to" : {
+          "x" : 285,
+          "y" : 580
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 352,
+    "reactomeId" : 8932180,
+    "displayName" : "HIGD1A",
+    "schemaClass" : "EntityWithAccessionedSequence",
+    "renderableClass" : "Protein",
+    "position" : {
+      "x" : 2119,
+      "y" : 275
+    },
+    "minX" : 1886,
+    "maxX" : 2151,
+    "minY" : 256,
+    "maxY" : 322,
+    "prop" : {
+      "x" : 2094,
+      "y" : 264,
+      "width" : 51,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 2096,
+      "y" : 258
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 2145,
+          "y" : 264
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 2145,
+          "y" : 264
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 335,
+      "type" : "ACTIVATOR",
+      "segments" : [ {
+        "from" : {
+          "x" : 2108,
+          "y" : 290
+        },
+        "to" : {
+          "x" : 2078,
+          "y" : 321
+        }
+      }, {
+        "from" : {
+          "x" : 2078,
+          "y" : 321
+        },
+        "to" : {
+          "x" : 1972,
+          "y" : 322
+        }
+      }, {
+        "from" : {
+          "x" : 1972,
+          "y" : 322
+        },
+        "to" : {
+          "x" : 1886,
+          "y" : 256
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 1894,
+          "y" : 257
+        },
+        "b" : {
+          "x" : 1886,
+          "y" : 256
+        },
+        "c" : {
+          "x" : 1889,
+          "y" : 263
+        },
+        "type" : "ARROW",
+        "empty" : true,
+        "centre" : {
+          "x" : 1889,
+          "y" : 263
+        }
+      }
+    } ]
+  }, {
+    "id" : 353,
+    "reactomeId" : 9865687,
+    "displayName" : "HIGD2A",
+    "schemaClass" : "EntityWithAccessionedSequence",
+    "renderableClass" : "Protein",
+    "position" : {
+      "x" : 2191,
+      "y" : 275
+    },
+    "minX" : 1885,
+    "maxX" : 2223,
+    "minY" : 257,
+    "maxY" : 336,
+    "prop" : {
+      "x" : 2166,
+      "y" : 264,
+      "width" : 51,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 2168,
+      "y" : 258
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 2217,
+          "y" : 264
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 2217,
+          "y" : 264
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 335,
+      "type" : "ACTIVATOR",
+      "segments" : [ {
+        "from" : {
+          "x" : 2171,
+          "y" : 290
+        },
+        "to" : {
+          "x" : 2090,
+          "y" : 335
+        }
+      }, {
+        "from" : {
+          "x" : 2090,
+          "y" : 335
+        },
+        "to" : {
+          "x" : 1951,
+          "y" : 336
+        }
+      }, {
+        "from" : {
+          "x" : 1951,
+          "y" : 336
+        },
+        "to" : {
+          "x" : 1885,
+          "y" : 257
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 1893,
+          "y" : 260
+        },
+        "b" : {
+          "x" : 1885,
+          "y" : 257
+        },
+        "c" : {
+          "x" : 1886,
+          "y" : 265
+        },
+        "type" : "ARROW",
+        "empty" : true,
+        "centre" : {
+          "x" : 1886,
+          "y" : 265
+        }
+      }
+    } ]
+  }, {
+    "id" : 33,
+    "reactomeId" : 9864492,
+    "displayName" : "heme A",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 1432,
+      "y" : 296
+    },
+    "minX" : 1407,
+    "maxX" : 1456,
+    "minY" : 249,
+    "maxY" : 312,
+    "prop" : {
+      "x" : 1410,
+      "y" : 281,
+      "width" : 45,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 1409,
+      "y" : 279
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1450,
+          "y" : 286
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1450,
+          "y" : 286
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 267,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1423,
+          "y" : 278
+        },
+        "to" : {
+          "x" : 1407,
+          "y" : 249
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 3,
+        "shape" : {
+          "a" : {
+            "x" : 1409,
+            "y" : 257
+          },
+          "b" : {
+            "x" : 1421,
+            "y" : 269
+          },
+          "type" : "BOX",
+          "empty" : true,
+          "centre" : {
+            "x" : 1415,
+            "y" : 263
+          }
+        }
+      }
+    } ]
+  }, {
+    "id" : 290,
+    "reactomeId" : 9865624,
+    "displayName" : "COX17:Cu",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 268,
+      "y" : 147
+    },
+    "minX" : 243,
+    "maxX" : 310,
+    "minY" : 123,
+    "maxY" : 221,
+    "prop" : {
+      "x" : 243,
+      "y" : 129,
+      "width" : 51,
+      "height" : 36
+    },
+    "textPosition" : {
+      "x" : 244,
+      "y" : 130
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 294,
+          "y" : 129
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 294,
+          "y" : 129
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 116,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 278,
+          "y" : 168
+        },
+        "to" : {
+          "x" : 310,
+          "y" : 221
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 291,
+    "reactomeId" : 1307788,
+    "displayName" : "COX17",
+    "schemaClass" : "EntityWithAccessionedSequence",
+    "renderableClass" : "Protein",
+    "position" : {
+      "x" : 569,
+      "y" : 89
+    },
+    "minX" : 495,
+    "maxX" : 603,
+    "minY" : 71,
+    "maxY" : 253,
+    "prop" : {
+      "x" : 541,
+      "y" : 77,
+      "width" : 56,
+      "height" : 24
+    },
+    "textPosition" : {
+      "x" : 545,
+      "y" : 78
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 597,
+          "y" : 77
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 597,
+          "y" : 77
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 116,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 563,
+          "y" : 104
+        },
+        "to" : {
+          "x" : 495,
+          "y" : 253
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 564,
+          "y" : 112
+        },
+        "b" : {
+          "x" : 563,
+          "y" : 104
+        },
+        "c" : {
+          "x" : 556,
+          "y" : 109
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 556,
+          "y" : 109
+        }
+      }
+    } ]
+  }, {
+    "id" : 368,
+    "reactomeId" : 9865710,
+    "displayName" : "RAB5IF",
+    "schemaClass" : "EntityWithAccessionedSequence",
+    "renderableClass" : "Protein",
+    "position" : {
+      "x" : 2284,
+      "y" : 322
+    },
+    "minX" : 1883,
+    "maxX" : 2315,
+    "minY" : 258,
+    "maxY" : 350,
+    "prop" : {
+      "x" : 2260,
+      "y" : 310,
+      "width" : 49,
+      "height" : 24
+    },
+    "textPosition" : {
+      "x" : 2263,
+      "y" : 305
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 2309,
+          "y" : 310
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 2309,
+          "y" : 310
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 335,
+      "type" : "ACTIVATOR",
+      "segments" : [ {
+        "from" : {
+          "x" : 2257,
+          "y" : 325
+        },
+        "to" : {
+          "x" : 2101,
+          "y" : 350
+        }
+      }, {
+        "from" : {
+          "x" : 2101,
+          "y" : 350
+        },
+        "to" : {
+          "x" : 1932,
+          "y" : 350
+        }
+      }, {
+        "from" : {
+          "x" : 1932,
+          "y" : 350
+        },
+        "to" : {
+          "x" : 1883,
+          "y" : 258
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 1890,
+          "y" : 262
+        },
+        "b" : {
+          "x" : 1883,
+          "y" : 258
+        },
+        "c" : {
+          "x" : 1883,
+          "y" : 266
+        },
+        "type" : "ARROW",
+        "empty" : true,
+        "centre" : {
+          "x" : 1883,
+          "y" : 266
+        }
+      }
+    } ]
+  }, {
+    "id" : 369,
+    "reactomeId" : 9865797,
+    "displayName" : "TMEM223",
+    "schemaClass" : "EntityWithAccessionedSequence",
+    "renderableClass" : "Protein",
+    "position" : {
+      "x" : 313,
+      "y" : 720
+    },
+    "minX" : 273,
+    "maxX" : 424,
+    "minY" : 648,
+    "maxY" : 732,
+    "prop" : {
+      "x" : 273,
+      "y" : 709,
+      "width" : 80,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 279,
+      "y" : 710
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 353,
+          "y" : 709
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 353,
+          "y" : 709
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 3,
+      "type" : "ACTIVATOR",
+      "segments" : [ {
+        "from" : {
+          "x" : 330,
+          "y" : 706
+        },
+        "to" : {
+          "x" : 424,
+          "y" : 648
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 420,
+          "y" : 655
+        },
+        "b" : {
+          "x" : 424,
+          "y" : 648
+        },
+        "c" : {
+          "x" : 416,
+          "y" : 648
+        },
+        "type" : "ARROW",
+        "empty" : true,
+        "centre" : {
+          "x" : 416,
+          "y" : 648
+        }
+      }
+    } ]
+  }, {
+    "id" : 370,
+    "reactomeId" : 5628897,
+    "displayName" : "TP53 Regulates Metabolic Genes",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "EncapsulatedNode",
+    "position" : {
+      "x" : 571,
+      "y" : 430
+    },
+    "minX" : 509,
+    "maxX" : 634,
+    "minY" : 405,
+    "maxY" : 455,
+    "prop" : {
+      "x" : 509,
+      "y" : 405,
+      "width" : 125,
+      "height" : 50
+    },
+    "textPosition" : {
+      "x" : 511,
+      "y" : 408
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 117,
+    "reactomeId" : 9865441,
+    "displayName" : "metallochaperone complex",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 409,
+      "y" : 250
+    },
+    "minX" : 365,
+    "maxX" : 485,
+    "minY" : 178,
+    "maxY" : 317,
+    "prop" : {
+      "x" : 365,
+      "y" : 184,
+      "width" : 89,
+      "height" : 133
+    },
+    "textPosition" : {
+      "x" : 367,
+      "y" : 268
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 454,
+          "y" : 184
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 454,
+          "y" : 184
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 116,
+      "type" : "CATALYST",
+      "segments" : [ {
+        "from" : {
+          "x" : 457,
+          "y" : 252
+        },
+        "to" : {
+          "x" : 477,
+          "y" : 254
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "c" : {
+          "x" : 481,
+          "y" : 254
+        },
+        "r" : 4,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 481,
+          "y" : 254
+        }
+      }
+    } ]
+  }, {
+    "id" : 119,
+    "reactomeId" : 9865438,
+    "displayName" : "MT-CO1:Cu2+:Mg2+:PE:CL:MITRAC:TIMM21:COX4:COX5A:COX6C",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 619,
+      "y" : 253
+    },
+    "minX" : 495,
+    "maxX" : 1407,
+    "minY" : 56,
+    "maxY" : 312,
+    "prop" : {
+      "x" : 582,
+      "y" : 194,
+      "width" : 75,
+      "height" : 118
+    },
+    "textPosition" : {
+      "x" : 582,
+      "y" : 193
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 657,
+          "y" : 194
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 657,
+          "y" : 194
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 116,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 579,
+          "y" : 253
+        },
+        "to" : {
+          "x" : 495,
+          "y" : 253
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 572,
+          "y" : 257
+        },
+        "b" : {
+          "x" : 579,
+          "y" : 253
+        },
+        "c" : {
+          "x" : 572,
+          "y" : 249
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 572,
+          "y" : 249
+        }
+      }
+    }, {
+      "edgeId" : 267,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 652,
+          "y" : 191
+        },
+        "to" : {
+          "x" : 732,
+          "y" : 56
+        }
+      }, {
+        "from" : {
+          "x" : 732,
+          "y" : 56
+        },
+        "to" : {
+          "x" : 1309,
+          "y" : 56
+        }
+      }, {
+        "from" : {
+          "x" : 1309,
+          "y" : 56
+        },
+        "to" : {
+          "x" : 1407,
+          "y" : 249
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 312,
+    "reactomeId" : 1307788,
+    "displayName" : "COX17",
+    "schemaClass" : "EntityWithAccessionedSequence",
+    "renderableClass" : "Protein",
+    "position" : {
+      "x" : 1199,
+      "y" : 120
+    },
+    "minX" : 1141,
+    "maxX" : 1233,
+    "minY" : 102,
+    "maxY" : 250,
+    "prop" : {
+      "x" : 1171,
+      "y" : 108,
+      "width" : 56,
+      "height" : 24
+    },
+    "textPosition" : {
+      "x" : 1175,
+      "y" : 109
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1227,
+          "y" : 108
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1227,
+          "y" : 108
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 311,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1193,
+          "y" : 135
+        },
+        "to" : {
+          "x" : 1141,
+          "y" : 250
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 2,
+        "shape" : {
+          "a" : {
+            "x" : 1161,
+            "y" : 186
+          },
+          "b" : {
+            "x" : 1173,
+            "y" : 198
+          },
+          "type" : "BOX",
+          "empty" : true,
+          "centre" : {
+            "x" : 1167,
+            "y" : 192
+          }
+        }
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 1194,
+          "y" : 143
+        },
+        "b" : {
+          "x" : 1193,
+          "y" : 135
+        },
+        "c" : {
+          "x" : 1187,
+          "y" : 140
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 1187,
+          "y" : 140
+        }
+      }
+    } ]
+  }, {
+    "id" : 122,
+    "reactomeId" : 6792984,
+    "displayName" : "MT-CO2 mRNA",
+    "schemaClass" : "EntityWithAccessionedSequence",
+    "renderableClass" : "RNA",
+    "position" : {
+      "x" : 786,
+      "y" : 530
+    },
+    "minX" : 735,
+    "maxX" : 837,
+    "minY" : 510,
+    "maxY" : 551,
+    "prop" : {
+      "x" : 735,
+      "y" : 510,
+      "width" : 102,
+      "height" : 41
+    },
+    "textPosition" : {
+      "x" : 739,
+      "y" : 520
+    },
+    "connectors" : [ {
+      "edgeId" : 120,
+      "type" : "INPUT",
+      "segments" : [ ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 123,
+    "reactomeId" : 9865557,
+    "displayName" : "MT-CO2:COX20:TMEM177",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 936,
+      "y" : 256
+    },
+    "minX" : 903,
+    "maxX" : 1135,
+    "minY" : 171,
+    "maxY" : 311,
+    "prop" : {
+      "x" : 903,
+      "y" : 201,
+      "width" : 67,
+      "height" : 110
+    },
+    "textPosition" : {
+      "x" : 903,
+      "y" : 262
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 970,
+          "y" : 201
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 970,
+          "y" : 201
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 387,
+      "type" : "OUTPUT",
+      "segments" : [ ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    }, {
+      "edgeId" : 311,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 969,
+          "y" : 198
+        },
+        "to" : {
+          "x" : 988,
+          "y" : 171
+        }
+      }, {
+        "from" : {
+          "x" : 988,
+          "y" : 171
+        },
+        "to" : {
+          "x" : 1093,
+          "y" : 171
+        }
+      }, {
+        "from" : {
+          "x" : 1093,
+          "y" : 171
+        },
+        "to" : {
+          "x" : 1135,
+          "y" : 249
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 379,
+    "reactomeId" : 9902095,
+    "displayName" : "nascent MT-CO2",
+    "schemaClass" : "EntityWithAccessionedSequence",
+    "renderableClass" : "Protein",
+    "position" : {
+      "x" : 786,
+      "y" : 419
+    },
+    "minX" : 755,
+    "maxX" : 823,
+    "minY" : 354,
+    "maxY" : 437,
+    "prop" : {
+      "x" : 755,
+      "y" : 402,
+      "width" : 62,
+      "height" : 35
+    },
+    "textPosition" : {
+      "x" : 755,
+      "y" : 402
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 817,
+          "y" : 402
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 817,
+          "y" : 402
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 387,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 793,
+          "y" : 399
+        },
+        "to" : {
+          "x" : 815,
+          "y" : 354
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    }, {
+      "edgeId" : 120,
+      "type" : "OUTPUT",
+      "segments" : [ ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 124,
+    "reactomeId" : 5216190,
+    "displayName" : "COX18",
+    "schemaClass" : "EntityWithAccessionedSequence",
+    "renderableClass" : "Protein",
+    "position" : {
+      "x" : 836,
+      "y" : 251
+    },
+    "minX" : 812,
+    "maxX" : 866,
+    "minY" : 194,
+    "maxY" : 346,
+    "prop" : {
+      "x" : 812,
+      "y" : 200,
+      "width" : 48,
+      "height" : 103
+    },
+    "textPosition" : {
+      "x" : 812,
+      "y" : 241
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 860,
+          "y" : 200
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 860,
+          "y" : 200
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 387,
+      "type" : "CATALYST",
+      "segments" : [ {
+        "from" : {
+          "x" : 836,
+          "y" : 306
+        },
+        "to" : {
+          "x" : 837,
+          "y" : 338
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "c" : {
+          "x" : 837,
+          "y" : 342
+        },
+        "r" : 4,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 837,
+          "y" : 342
+        }
+      }
+    } ]
+  }, {
+    "id" : 318,
+    "reactomeId" : 9865624,
+    "displayName" : "COX17:Cu",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 1132,
+      "y" : 120
+    },
+    "minX" : 1105,
+    "maxX" : 1166,
+    "minY" : 96,
+    "maxY" : 249,
+    "prop" : {
+      "x" : 1105,
+      "y" : 102,
+      "width" : 55,
+      "height" : 36
+    },
+    "textPosition" : {
+      "x" : 1106,
+      "y" : 103
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1160,
+          "y" : 102
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1160,
+          "y" : 102
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 311,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1132,
+          "y" : 141
+        },
+        "to" : {
+          "x" : 1135,
+          "y" : 249
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 2,
+        "shape" : {
+          "a" : {
+            "x" : 1127,
+            "y" : 189
+          },
+          "b" : {
+            "x" : 1139,
+            "y" : 201
+          },
+          "type" : "BOX",
+          "empty" : true,
+          "centre" : {
+            "x" : 1133,
+            "y" : 195
+          }
+        }
+      }
+    } ]
+  }, {
+    "id" : 319,
+    "reactomeId" : 9865441,
+    "displayName" : "metallochaperone complex",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 1034,
+      "y" : 253
+    },
+    "minX" : 992,
+    "maxX" : 1408,
+    "minY" : 97,
+    "maxY" : 318,
+    "prop" : {
+      "x" : 992,
+      "y" : 188,
+      "width" : 84,
+      "height" : 130
+    },
+    "textPosition" : {
+      "x" : 995,
+      "y" : 269
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1076,
+          "y" : 188
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1076,
+          "y" : 188
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 311,
+      "type" : "CATALYST",
+      "segments" : [ {
+        "from" : {
+          "x" : 1079,
+          "y" : 252
+        },
+        "to" : {
+          "x" : 1124,
+          "y" : 251
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "c" : {
+          "x" : 1128,
+          "y" : 251
+        },
+        "r" : 4,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1128,
+          "y" : 251
+        }
+      }
+    }, {
+      "edgeId" : 267,
+      "type" : "CATALYST",
+      "segments" : [ {
+        "from" : {
+          "x" : 1050,
+          "y" : 185
+        },
+        "to" : {
+          "x" : 1073,
+          "y" : 97
+        }
+      }, {
+        "from" : {
+          "x" : 1073,
+          "y" : 97
+        },
+        "to" : {
+          "x" : 1365,
+          "y" : 97
+        }
+      }, {
+        "from" : {
+          "x" : 1365,
+          "y" : 97
+        },
+        "to" : {
+          "x" : 1403,
+          "y" : 235
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "c" : {
+          "x" : 1404,
+          "y" : 238
+        },
+        "r" : 4,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1404,
+          "y" : 238
+        }
+      }
+    } ]
+  } ],
+  "edges" : [ {
+    "id" : 80,
+    "reactomeId" : 9865412,
+    "displayName" : "TIMM21 carries COX4, COX5A, COX6C to MT-CO1:MITRAC",
+    "schemaClass" : "Reaction",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 308,
+      "y" : 460
+    },
+    "minX" : 303,
+    "maxX" : 313,
+    "minY" : 418,
+    "maxY" : 465,
+    "reactionType" : "binding",
+    "segments" : [ {
+      "from" : {
+        "x" : 308,
+        "y" : 459
+      },
+      "to" : {
+        "x" : 308,
+        "y" : 460
+      }
+    }, {
+      "from" : {
+        "x" : 308,
+        "y" : 460
+      },
+      "to" : {
+        "x" : 308,
+        "y" : 418
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 312,
+        "y" : 425
+      },
+      "b" : {
+        "x" : 308,
+        "y" : 418
+      },
+      "c" : {
+        "x" : 304,
+        "y" : 425
+      },
+      "type" : "ARROW",
+      "centre" : {
+        "x" : 304,
+        "y" : 425
+      }
+    },
+    "reactionShape" : {
+      "c" : {
+        "x" : 308,
+        "y" : 460
+      },
+      "r" : 5,
+      "type" : "CIRCLE",
+      "centre" : {
+        "x" : 308,
+        "y" : 460
+      }
+    },
+    "inputs" : [ {
+      "id" : 81,
+      "points" : [ {
+        "x" : 158,
+        "y" : 483
+      } ]
+    }, {
+      "id" : 85,
+      "points" : [ {
+        "x" : 308,
+        "y" : 503
+      } ]
+    } ],
+    "outputs" : [ {
+      "id" : 79
+    } ]
+  }, {
+    "id" : 387,
+    "reactomeId" : 9902096,
+    "displayName" : "COX18 inserts nascent MT-CO2 in COX20:TMEM77",
+    "schemaClass" : "Reaction",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 837,
+      "y" : 354
+    },
+    "minX" : 815,
+    "maxX" : 900,
+    "minY" : 289,
+    "maxY" : 360,
+    "reactionType" : "transition",
+    "segments" : [ {
+      "from" : {
+        "x" : 815,
+        "y" : 354
+      },
+      "to" : {
+        "x" : 837,
+        "y" : 354
+      }
+    }, {
+      "from" : {
+        "x" : 837,
+        "y" : 354
+      },
+      "to" : {
+        "x" : 900,
+        "y" : 289
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 898,
+        "y" : 297
+      },
+      "b" : {
+        "x" : 900,
+        "y" : 289
+      },
+      "c" : {
+        "x" : 892,
+        "y" : 291
+      },
+      "type" : "ARROW",
+      "centre" : {
+        "x" : 892,
+        "y" : 291
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 831,
+        "y" : 348
+      },
+      "b" : {
+        "x" : 843,
+        "y" : 360
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 837,
+        "y" : 354
+      }
+    },
+    "inputs" : [ {
+      "id" : 379,
+      "points" : [ {
+        "x" : 793,
+        "y" : 399
+      } ]
+    }, {
+      "id" : 273,
+      "points" : [ {
+        "x" : 786,
+        "y" : 305
+      } ]
+    }, {
+      "id" : 262,
+      "points" : [ {
+        "x" : 774,
+        "y" : 354
+      } ]
+    } ],
+    "outputs" : [ {
+      "id" : 123
+    } ],
+    "catalysts" : [ {
+      "id" : 124,
+      "points" : [ {
+        "x" : 836,
+        "y" : 306
+      } ]
+    } ]
+  }, {
+    "id" : 3,
+    "reactomeId" : 9865309,
+    "displayName" : "MT-CO1 mRNA is translated",
+    "schemaClass" : "BlackBoxEvent",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 432,
+      "y" : 643
+    },
+    "minX" : 319,
+    "maxX" : 484,
+    "minY" : 637,
+    "maxY" : 649,
+    "reactionType" : "uncertain",
+    "segments" : [ {
+      "from" : {
+        "x" : 484,
+        "y" : 643
+      },
+      "to" : {
+        "x" : 432,
+        "y" : 643
+      }
+    }, {
+      "from" : {
+        "x" : 432,
+        "y" : 643
+      },
+      "to" : {
+        "x" : 319,
+        "y" : 643
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 326,
+        "y" : 639
+      },
+      "b" : {
+        "x" : 319,
+        "y" : 643
+      },
+      "c" : {
+        "x" : 326,
+        "y" : 647
+      },
+      "type" : "ARROW",
+      "centre" : {
+        "x" : 326,
+        "y" : 647
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 426,
+        "y" : 637
+      },
+      "b" : {
+        "x" : 438,
+        "y" : 649
+      },
+      "s" : "?",
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 432,
+        "y" : 643
+      }
+    },
+    "inputs" : [ {
+      "id" : 7
+    } ],
+    "outputs" : [ {
+      "id" : 8
+    } ],
+    "activators" : [ {
+      "id" : 6,
+      "points" : [ {
+        "x" : 432,
+        "y" : 689
+      } ]
+    }, {
+      "id" : 79,
+      "points" : [ {
+        "x" : 345,
+        "y" : 418
+      }, {
+        "x" : 432,
+        "y" : 480
+      } ]
+    }, {
+      "id" : 369,
+      "points" : [ {
+        "x" : 330,
+        "y" : 706
+      } ]
+    } ]
+  }, {
+    "id" : 116,
+    "reactomeId" : 9865449,
+    "displayName" : "Metallochaperone inserts Cu2+ into MT-CO1",
+    "schemaClass" : "Reaction",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 493,
+      "y" : 255
+    },
+    "minX" : 310,
+    "maxX" : 499,
+    "minY" : 166,
+    "maxY" : 261,
+    "reactionType" : "transition",
+    "segments" : [ {
+      "from" : {
+        "x" : 310,
+        "y" : 221
+      },
+      "to" : {
+        "x" : 359,
+        "y" : 166
+      }
+    }, {
+      "from" : {
+        "x" : 359,
+        "y" : 166
+      },
+      "to" : {
+        "x" : 466,
+        "y" : 166
+      }
+    }, {
+      "from" : {
+        "x" : 466,
+        "y" : 166
+      },
+      "to" : {
+        "x" : 493,
+        "y" : 255
+      }
+    }, {
+      "from" : {
+        "x" : 493,
+        "y" : 255
+      },
+      "to" : {
+        "x" : 495,
+        "y" : 253
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 487,
+        "y" : 249
+      },
+      "b" : {
+        "x" : 499,
+        "y" : 261
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 493,
+        "y" : 255
+      }
+    },
+    "inputs" : [ {
+      "id" : 290,
+      "points" : [ {
+        "x" : 278,
+        "y" : 168
+      } ]
+    }, {
+      "id" : 79,
+      "points" : [ {
+        "x" : 308,
+        "y" : 355
+      } ]
+    } ],
+    "outputs" : [ {
+      "id" : 119,
+      "points" : [ {
+        "x" : 579,
+        "y" : 253
+      } ]
+    }, {
+      "id" : 291,
+      "points" : [ {
+        "x" : 563,
+        "y" : 104
+      } ]
+    } ],
+    "catalysts" : [ {
+      "id" : 117,
+      "points" : [ {
+        "x" : 457,
+        "y" : 252
+      } ]
+    } ]
+  }, {
+    "id" : 311,
+    "reactomeId" : 9865630,
+    "displayName" : "Metallochaperone inserts 2Cu2+ into MT-CO2",
+    "schemaClass" : "Reaction",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 1140,
+      "y" : 251
+    },
+    "minX" : 1134,
+    "maxX" : 1146,
+    "minY" : 245,
+    "maxY" : 257,
+    "reactionType" : "transition",
+    "segments" : [ {
+      "from" : {
+        "x" : 1135,
+        "y" : 249
+      },
+      "to" : {
+        "x" : 1140,
+        "y" : 251
+      }
+    }, {
+      "from" : {
+        "x" : 1140,
+        "y" : 251
+      },
+      "to" : {
+        "x" : 1141,
+        "y" : 250
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 1134,
+        "y" : 245
+      },
+      "b" : {
+        "x" : 1146,
+        "y" : 257
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 1140,
+        "y" : 251
+      }
+    },
+    "inputs" : [ {
+      "id" : 123,
+      "points" : [ {
+        "x" : 969,
+        "y" : 198
+      }, {
+        "x" : 988,
+        "y" : 171
+      }, {
+        "x" : 1093,
+        "y" : 171
+      } ]
+    }, {
+      "id" : 318,
+      "points" : [ {
+        "x" : 1132,
+        "y" : 141
+      } ],
+      "stoichiometry" : 2
+    } ],
+    "outputs" : [ {
+      "id" : 320,
+      "points" : [ {
+        "x" : 1187,
+        "y" : 249
+      } ]
+    }, {
+      "id" : 273,
+      "points" : [ {
+        "x" : 781,
+        "y" : 197
+      }, {
+        "x" : 859,
+        "y" : 70
+      }, {
+        "x" : 1262,
+        "y" : 70
+      } ]
+    }, {
+      "id" : 312,
+      "points" : [ {
+        "x" : 1193,
+        "y" : 135
+      } ],
+      "stoichiometry" : 2
+    } ],
+    "catalysts" : [ {
+      "id" : 319,
+      "points" : [ {
+        "x" : 1079,
+        "y" : 252
+      } ]
+    } ]
+  }, {
+    "id" : 120,
+    "reactomeId" : 9865569,
+    "displayName" : "MT-CO2 mRNA is translated",
+    "schemaClass" : "BlackBoxEvent",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 786,
+      "y" : 477
+    },
+    "minX" : 780,
+    "maxX" : 792,
+    "minY" : 440,
+    "maxY" : 515,
+    "reactionType" : "uncertain",
+    "segments" : [ {
+      "from" : {
+        "x" : 786,
+        "y" : 515
+      },
+      "to" : {
+        "x" : 786,
+        "y" : 477
+      }
+    }, {
+      "from" : {
+        "x" : 786,
+        "y" : 477
+      },
+      "to" : {
+        "x" : 786,
+        "y" : 440
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 790,
+        "y" : 447
+      },
+      "b" : {
+        "x" : 786,
+        "y" : 440
+      },
+      "c" : {
+        "x" : 782,
+        "y" : 447
+      },
+      "type" : "ARROW",
+      "centre" : {
+        "x" : 782,
+        "y" : 447
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 780,
+        "y" : 471
+      },
+      "b" : {
+        "x" : 792,
+        "y" : 483
+      },
+      "s" : "?",
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 786,
+        "y" : 477
+      }
+    },
+    "inputs" : [ {
+      "id" : 122
+    } ],
+    "outputs" : [ {
+      "id" : 379
+    } ]
+  }, {
+    "id" : 267,
+    "reactomeId" : 9865579,
+    "displayName" : "MT-CO1 and MT-CO2 complexes associate, installing heme moieties",
+    "schemaClass" : "BlackBoxEvent",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 1407,
+      "y" : 250
+    },
+    "minX" : 1401,
+    "maxX" : 1444,
+    "minY" : 244,
+    "maxY" : 256,
+    "reactionType" : "omitted",
+    "segments" : [ {
+      "from" : {
+        "x" : 1407,
+        "y" : 249
+      },
+      "to" : {
+        "x" : 1407,
+        "y" : 250
+      }
+    }, {
+      "from" : {
+        "x" : 1407,
+        "y" : 250
+      },
+      "to" : {
+        "x" : 1444,
+        "y" : 249
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 1401,
+        "y" : 244
+      },
+      "b" : {
+        "x" : 1413,
+        "y" : 256
+      },
+      "s" : "\\\\",
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 1407,
+        "y" : 250
+      }
+    },
+    "inputs" : [ {
+      "id" : 325,
+      "points" : [ {
+        "x" : 1356,
+        "y" : 234
+      } ]
+    }, {
+      "id" : 268,
+      "points" : [ {
+        "x" : 1336,
+        "y" : 269
+      } ]
+    }, {
+      "id" : 33,
+      "points" : [ {
+        "x" : 1423,
+        "y" : 278
+      } ],
+      "stoichiometry" : 3
+    }, {
+      "id" : 270,
+      "points" : [ {
+        "x" : 1384,
+        "y" : 267
+      } ]
+    }, {
+      "id" : 320,
+      "points" : [ {
+        "x" : 1268,
+        "y" : 249
+      } ]
+    }, {
+      "id" : 119,
+      "points" : [ {
+        "x" : 652,
+        "y" : 191
+      }, {
+        "x" : 732,
+        "y" : 56
+      }, {
+        "x" : 1309,
+        "y" : 56
+      } ]
+    } ],
+    "outputs" : [ {
+      "id" : 272,
+      "points" : [ {
+        "x" : 1517,
+        "y" : 249
+      } ]
+    }, {
+      "id" : 271,
+      "points" : [ {
+        "x" : 1469,
+        "y" : 213
+      } ]
+    } ],
+    "catalysts" : [ {
+      "id" : 319,
+      "points" : [ {
+        "x" : 1050,
+        "y" : 185
+      }, {
+        "x" : 1073,
+        "y" : 97
+      }, {
+        "x" : 1365,
+        "y" : 97
+      } ]
+    } ]
+  }, {
+    "id" : 29,
+    "reactomeId" : 9865350,
+    "displayName" : "Nascent MT-CO1 binds to MITRAC, Mg2+, PE, CL",
+    "schemaClass" : "BlackBoxEvent",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 283,
+      "y" : 579
+    },
+    "minX" : 278,
+    "maxX" : 300,
+    "minY" : 546,
+    "maxY" : 584,
+    "reactionType" : "omitted",
+    "segments" : [ {
+      "from" : {
+        "x" : 285,
+        "y" : 580
+      },
+      "to" : {
+        "x" : 283,
+        "y" : 579
+      }
+    }, {
+      "from" : {
+        "x" : 283,
+        "y" : 579
+      },
+      "to" : {
+        "x" : 300,
+        "y" : 546
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 300,
+        "y" : 554
+      },
+      "b" : {
+        "x" : 300,
+        "y" : 546
+      },
+      "c" : {
+        "x" : 293,
+        "y" : 550
+      },
+      "type" : "ARROW",
+      "centre" : {
+        "x" : 293,
+        "y" : 550
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 277,
+        "y" : 573
+      },
+      "b" : {
+        "x" : 289,
+        "y" : 585
+      },
+      "s" : "\\\\",
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 283,
+        "y" : 579
+      }
+    },
+    "inputs" : [ {
+      "id" : 30,
+      "points" : [ {
+        "x" : 315,
+        "y" : 596
+      } ]
+    }, {
+      "id" : 8,
+      "points" : [ {
+        "x" : 285,
+        "y" : 624
+      } ]
+    }, {
+      "id" : 82,
+      "points" : [ {
+        "x" : 181,
+        "y" : 649
+      } ]
+    }, {
+      "id" : 83,
+      "points" : [ {
+        "x" : 365,
+        "y" : 596
+      } ]
+    }, {
+      "id" : 84,
+      "points" : [ {
+        "x" : 200,
+        "y" : 701
+      } ]
+    } ],
+    "outputs" : [ {
+      "id" : 85
+    } ]
+  }, {
+    "id" : 335,
+    "reactomeId" : 9865663,
+    "displayName" : "MT-CO3, COX6A,B,7A and NDUFA4 bind to holo-MT-CO1,2 complex",
+    "schemaClass" : "BlackBoxEvent",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 1879,
+      "y" : 250
+    },
+    "minX" : 1873,
+    "maxX" : 1918,
+    "minY" : 244,
+    "maxY" : 256,
+    "reactionType" : "omitted",
+    "segments" : [ {
+      "from" : {
+        "x" : 1880,
+        "y" : 251
+      },
+      "to" : {
+        "x" : 1879,
+        "y" : 250
+      }
+    }, {
+      "from" : {
+        "x" : 1879,
+        "y" : 250
+      },
+      "to" : {
+        "x" : 1918,
+        "y" : 250
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 1873,
+        "y" : 244
+      },
+      "b" : {
+        "x" : 1885,
+        "y" : 256
+      },
+      "s" : "\\\\",
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 1879,
+        "y" : 250
+      }
+    },
+    "inputs" : [ {
+      "id" : 336,
+      "points" : [ {
+        "x" : 1794,
+        "y" : 234
+      } ]
+    }, {
+      "id" : 337,
+      "points" : [ {
+        "x" : 1799,
+        "y" : 279
+      } ]
+    }, {
+      "id" : 338,
+      "points" : [ {
+        "x" : 1694,
+        "y" : 280
+      }, {
+        "x" : 1734,
+        "y" : 262
+      } ]
+    }, {
+      "id" : 339,
+      "points" : [ {
+        "x" : 1861,
+        "y" : 272
+      } ]
+    }, {
+      "id" : 340,
+      "points" : [ {
+        "x" : 1699,
+        "y" : 237
+      }, {
+        "x" : 1713,
+        "y" : 244
+      } ]
+    }, {
+      "id" : 272,
+      "points" : [ {
+        "x" : 1626,
+        "y" : 249
+      } ]
+    } ],
+    "outputs" : [ {
+      "id" : 341,
+      "points" : [ {
+        "x" : 1957,
+        "y" : 250
+      } ]
+    }, {
+      "id" : 347,
+      "points" : [ {
+        "x" : 1917,
+        "y" : 229
+      } ]
+    } ],
+    "activators" : [ {
+      "id" : 352,
+      "points" : [ {
+        "x" : 2108,
+        "y" : 290
+      }, {
+        "x" : 2078,
+        "y" : 321
+      }, {
+        "x" : 1972,
+        "y" : 322
+      } ]
+    }, {
+      "id" : 353,
+      "points" : [ {
+        "x" : 2171,
+        "y" : 290
+      }, {
+        "x" : 2090,
+        "y" : 335
+      }, {
+        "x" : 1951,
+        "y" : 336
+      } ]
+    }, {
+      "id" : 368,
+      "points" : [ {
+        "x" : 2257,
+        "y" : 325
+      }, {
+        "x" : 2101,
+        "y" : 350
+      }, {
+        "x" : 1932,
+        "y" : 350
+      } ]
+    } ]
+  } ],
+  "compartments" : [ {
+    "id" : 1,
+    "reactomeId" : 17927,
+    "displayName" : "mitochondrial intermembrane space",
+    "schemaClass" : "Compartment",
+    "renderableClass" : "Compartment",
+    "position" : {
+      "x" : 1255,
+      "y" : 535
+    },
+    "minX" : 33,
+    "maxX" : 2478,
+    "minY" : 0,
+    "maxY" : 1070,
+    "prop" : {
+      "x" : 33,
+      "y" : 0,
+      "width" : 2445,
+      "height" : 1070
+    },
+    "textPosition" : {
+      "x" : 965,
+      "y" : 15
+    },
+    "insets" : {
+      "x" : 43,
+      "y" : 10,
+      "width" : 2425,
+      "height" : 1047
+    },
+    "bgColor" : {
+      "r" : 250,
+      "g" : 240,
+      "b" : 240
+    },
+    "componentIds" : [ 2, 291, 290, 312, 318, 400 ]
+  }, {
+    "id" : 2,
+    "reactomeId" : 5460,
+    "displayName" : "mitochondrial matrix",
+    "schemaClass" : "Compartment",
+    "renderableClass" : "Compartment",
+    "position" : {
+      "x" : 1215,
+      "y" : 601
+    },
+    "minX" : 95,
+    "maxX" : 2335,
+    "minY" : 206,
+    "maxY" : 996,
+    "prop" : {
+      "x" : 95,
+      "y" : 206,
+      "width" : 2240,
+      "height" : 790
+    },
+    "textPosition" : {
+      "x" : 1431,
+      "y" : 586
+    },
+    "insets" : {
+      "x" : 352,
+      "y" : 298,
+      "width" : 1883,
+      "height" : 646
+    },
+    "bgColor" : {
+      "r" : 250,
+      "g" : 240,
+      "b" : 240
+    },
+    "componentIds" : [ 6, 3, 7, 8, 29, 30, 33, 79, 80, 82, 83, 84, 85, 81, 116, 117, 119, 122, 123, 124, 120, 262, 267, 268, 270, 271, 272, 273, 319, 320, 311, 325, 339, 340, 341, 336, 338, 337, 335, 347, 352, 353, 368, 369, 370, 371, 379, 387, 388, 389, 396, 397, 398, 399 ]
+  } ],
+  "notes" : [ ],
+  "links" : [ {
+    "id" : 400,
+    "renderableClass" : "Interaction",
+    "position" : {
+      "x" : 84,
+      "y" : 439
+    },
+    "minX" : 73,
+    "maxX" : 96,
+    "minY" : 426,
+    "maxY" : 453,
+    "interactionType" : "Activate",
+    "segments" : [ {
+      "from" : {
+        "x" : 73,
+        "y" : 426
+      },
+      "to" : {
+        "x" : 96,
+        "y" : 453
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 88,
+        "y" : 450
+      },
+      "b" : {
+        "x" : 96,
+        "y" : 453
+      },
+      "c" : {
+        "x" : 95,
+        "y" : 445
+      },
+      "type" : "ARROW",
+      "empty" : true,
+      "centre" : {
+        "x" : 95,
+        "y" : 445
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 78,
+        "y" : 433
+      },
+      "b" : {
+        "x" : 90,
+        "y" : 445
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 84,
+        "y" : 439
+      }
+    },
+    "inputs" : [ {
+      "id" : 399
+    } ],
+    "outputs" : [ {
+      "id" : 81
+    } ]
+  }, {
+    "id" : 371,
+    "renderableClass" : "Interaction",
+    "position" : {
+      "x" : 503,
+      "y" : 350
+    },
+    "minX" : 457,
+    "maxX" : 549,
+    "minY" : 298,
+    "maxY" : 402,
+    "interactionType" : "Activate",
+    "segments" : [ {
+      "from" : {
+        "x" : 549,
+        "y" : 402
+      },
+      "to" : {
+        "x" : 457,
+        "y" : 298
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 465,
+        "y" : 301
+      },
+      "b" : {
+        "x" : 457,
+        "y" : 298
+      },
+      "c" : {
+        "x" : 459,
+        "y" : 306
+      },
+      "type" : "ARROW",
+      "empty" : true,
+      "centre" : {
+        "x" : 459,
+        "y" : 306
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 497,
+        "y" : 344
+      },
+      "b" : {
+        "x" : 509,
+        "y" : 356
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 503,
+        "y" : 350
+      }
+    },
+    "inputs" : [ {
+      "id" : 370
+    } ],
+    "outputs" : [ {
+      "id" : 117
+    } ]
+  }, {
+    "id" : 389,
+    "renderableClass" : "Interaction",
+    "position" : {
+      "x" : 2133,
+      "y" : 233
+    },
+    "minX" : 2050,
+    "maxX" : 2217,
+    "minY" : 222,
+    "maxY" : 244,
+    "interactionType" : "Activate",
+    "segments" : [ {
+      "from" : {
+        "x" : 2050,
+        "y" : 244
+      },
+      "to" : {
+        "x" : 2217,
+        "y" : 222
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 2211,
+        "y" : 227
+      },
+      "b" : {
+        "x" : 2217,
+        "y" : 222
+      },
+      "c" : {
+        "x" : 2210,
+        "y" : 219
+      },
+      "type" : "ARROW",
+      "empty" : true,
+      "centre" : {
+        "x" : 2210,
+        "y" : 219
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 2127,
+        "y" : 227
+      },
+      "b" : {
+        "x" : 2139,
+        "y" : 239
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 2133,
+        "y" : 233
+      }
+    },
+    "inputs" : [ {
+      "id" : 341
+    } ],
+    "outputs" : [ {
+      "id" : 388
+    } ]
+  }, {
+    "id" : 398,
+    "renderableClass" : "Interaction",
+    "position" : {
+      "x" : 1432,
+      "y" : 363
+    },
+    "minX" : 1426,
+    "maxX" : 1438,
+    "minY" : 315,
+    "maxY" : 412,
+    "interactionType" : "Activate",
+    "segments" : [ {
+      "from" : {
+        "x" : 1432,
+        "y" : 412
+      },
+      "to" : {
+        "x" : 1432,
+        "y" : 315
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 1436,
+        "y" : 322
+      },
+      "b" : {
+        "x" : 1432,
+        "y" : 315
+      },
+      "c" : {
+        "x" : 1428,
+        "y" : 322
+      },
+      "type" : "ARROW",
+      "empty" : true,
+      "centre" : {
+        "x" : 1428,
+        "y" : 322
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 1426,
+        "y" : 357
+      },
+      "b" : {
+        "x" : 1438,
+        "y" : 369
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 1432,
+        "y" : 363
+      }
+    },
+    "inputs" : [ {
+      "id" : 397
+    } ],
+    "outputs" : [ {
+      "id" : 33
+    } ]
+  } ],
+  "shadows" : [ ],
+  "minX" : 0,
+  "maxX" : 2478,
+  "minY" : 0,
+  "maxY" : 1070,
+  "disease" : false
+}

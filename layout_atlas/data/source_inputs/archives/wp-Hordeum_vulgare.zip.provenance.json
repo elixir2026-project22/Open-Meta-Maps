@@ -1,0 +1,8 @@
+{
+  "source": "wikipathways",
+  "version": "20261010",
+  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Hordeum_vulgare.zip",
+  "sha256": "d7acae0cef719e2655efc6dc063aa5490ef15c6cb4caa456d0434bd159ee6a5a",
+  "bytes": 9823,
+  "local_path": "data/archives/wp-Hordeum_vulgare.zip"
+}

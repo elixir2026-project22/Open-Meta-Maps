@@ -1,0 +1,153 @@
+{
+  "dbId" : 8849175,
+  "stId" : "R-HSA-8849175",
+  "speciesName" : "Homo sapiens",
+  "nodes" : [ {
+    "dbId" : 9929622,
+    "stId" : "R-ALL-9929622",
+    "displayName" : "2-iminobutanoate [cytosol]",
+    "schemaClass" : "SimpleEntity",
+    "speciesId" : 0,
+    "diagramIds" : [ 9139 ],
+    "identifier" : "76545",
+    "standardIdentifier" : "chebi:76545",
+    "referenceType" : "ReferenceMolecule",
+    "parents" : [ ],
+    "children" : [ ]
+  }, {
+    "dbId" : 31633,
+    "stId" : "R-ALL-31633",
+    "displayName" : "NH4+ [cytosol]",
+    "schemaClass" : "SimpleEntity",
+    "speciesId" : 0,
+    "diagramIds" : [ 9023 ],
+    "identifier" : "28938",
+    "standardIdentifier" : "chebi:28938",
+    "referenceType" : "ReferenceMolecule",
+    "parents" : [ ],
+    "children" : [ ]
+  }, {
+    "dbId" : 9014634,
+    "stId" : "R-HSA-9014634",
+    "displayName" : "HRSP12 [cytosol]",
+    "schemaClass" : "EntityWithAccessionedSequence",
+    "speciesId" : 48887,
+    "diagramIds" : [ 8996 ],
+    "identifier" : "P52758",
+    "standardIdentifier" : "uniprot:P52758",
+    "referenceType" : "ReferenceGeneProduct",
+    "geneNames" : [ "RIDA", "HRSP12" ],
+    "parents" : [ ],
+    "children" : [ ]
+  }, {
+    "dbId" : 351990,
+    "stId" : "R-ALL-351990",
+    "displayName" : "L-Thr [cytosol]",
+    "schemaClass" : "SimpleEntity",
+    "speciesId" : 0,
+    "diagramIds" : [ 8989 ],
+    "identifier" : "57926",
+    "standardIdentifier" : "chebi:57926",
+    "referenceType" : "ReferenceMolecule",
+    "parents" : [ ],
+    "children" : [ ]
+  }, {
+    "dbId" : 936714,
+    "stId" : "R-ALL-936714",
+    "displayName" : "2OBUTA [cytosol]",
+    "schemaClass" : "SimpleEntity",
+    "speciesId" : 0,
+    "diagramIds" : [ 8994 ],
+    "identifier" : "16763",
+    "standardIdentifier" : "chebi:16763",
+    "referenceType" : "ReferenceMolecule",
+    "parents" : [ ],
+    "children" : [ ]
+  }, {
+    "dbId" : 9017149,
+    "stId" : "R-HSA-9017149",
+    "displayName" : "PXLP-K41-SDS dimer [cytosol]",
+    "schemaClass" : "Complex",
+    "speciesId" : 48887,
+    "parents" : [ 9014724 ],
+    "children" : [ 9014623 ]
+  }, {
+    "dbId" : 9014623,
+    "stId" : "R-HSA-9014623",
+    "displayName" : "PXLP-K41-SDS [cytosol]",
+    "schemaClass" : "EntityWithAccessionedSequence",
+    "speciesId" : 48887,
+    "identifier" : "P20132",
+    "standardIdentifier" : "uniprot:P20132",
+    "referenceType" : "ReferenceGeneProduct",
+    "geneNames" : [ "SDS", "SDH" ],
+    "parents" : [ 9017149 ],
+    "children" : [ ]
+  }, {
+    "dbId" : 9014723,
+    "stId" : "R-HSA-9014723",
+    "displayName" : "PXLP-K48-SDSL [cytosol]",
+    "schemaClass" : "EntityWithAccessionedSequence",
+    "speciesId" : 48887,
+    "identifier" : "Q96GA7",
+    "standardIdentifier" : "uniprot:Q96GA7",
+    "referenceType" : "ReferenceGeneProduct",
+    "geneNames" : [ "SDSL" ],
+    "parents" : [ 9017156 ],
+    "children" : [ ]
+  }, {
+    "dbId" : 29356,
+    "stId" : "R-ALL-29356",
+    "displayName" : "H2O [cytosol]",
+    "schemaClass" : "SimpleEntity",
+    "speciesId" : 0,
+    "diagramIds" : [ 9140 ],
+    "identifier" : "15377",
+    "standardIdentifier" : "chebi:15377",
+    "referenceType" : "ReferenceMolecule",
+    "parents" : [ ],
+    "children" : [ ]
+  }, {
+    "dbId" : 9014724,
+    "stId" : "R-HSA-9014724",
+    "displayName" : "PXLP-SDS dimers [cytosol]",
+    "schemaClass" : "DefinedSet",
+    "speciesId" : 48887,
+    "diagramIds" : [ 8997 ],
+    "parents" : [ ],
+    "children" : [ 9017156, 9017149 ]
+  }, {
+    "dbId" : 9017156,
+    "stId" : "R-HSA-9017156",
+    "displayName" : "PXLP-K48-SDSL dimer [cytosol]",
+    "schemaClass" : "Complex",
+    "speciesId" : 48887,
+    "parents" : [ 9014724 ],
+    "children" : [ 9014723 ]
+  } ],
+  "edges" : [ {
+    "dbId" : 9014641,
+    "stId" : "R-HSA-9014641",
+    "displayName" : "HRSP12 deaminates 2-iminobutanoate to 2OBUTA",
+    "schemaClass" : "Reaction",
+    "speciesId" : 0,
+    "inputs" : [ 29356, 9929622 ],
+    "outputs" : [ 936714, 31633 ],
+    "catalysts" : [ 9014634 ],
+    "efs" : [ ],
+    "diagramIds" : [ 8993 ],
+    "entityFunctionalStatus" : [ ]
+  }, {
+    "dbId" : 9014627,
+    "stId" : "R-HSA-9014627",
+    "displayName" : "SDS dimers:PXLP convert L-Thr to 2OBUTA",
+    "schemaClass" : "Reaction",
+    "speciesId" : 0,
+    "inputs" : [ 351990 ],
+    "outputs" : [ 936714, 31633 ],
+    "catalysts" : [ 9014724 ],
+    "efs" : [ ],
+    "diagramIds" : [ 8988 ],
+    "entityFunctionalStatus" : [ ]
+  } ]
+}

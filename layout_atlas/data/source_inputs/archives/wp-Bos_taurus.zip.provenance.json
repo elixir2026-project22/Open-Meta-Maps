@@ -1,0 +1,8 @@
+{
+  "source": "wikipathways",
+  "version": "20261010",
+  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Bos_taurus.zip",
+  "sha256": "e8836dfa7d09e1cbc1ebb7f12af614e071fb06c28fb9be9c0f2dfa8a6b5bca00",
+  "bytes": 2551022,
+  "local_path": "data/archives/wp-Bos_taurus.zip"
+}

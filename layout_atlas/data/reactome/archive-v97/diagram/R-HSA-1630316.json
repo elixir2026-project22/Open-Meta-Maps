@@ -1,0 +1,191 @@
+{
+  "dbId" : 1630316,
+  "stableId" : "R-HSA-1630316",
+  "displayName" : "Glycosaminoglycan metabolism",
+  "nodes" : [ {
+    "id" : 3894,
+    "reactomeId" : 1971475,
+    "displayName" : "Glycosaminoglycan-protein linkage region biosynthesis",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 252,
+      "y" : 197
+    },
+    "minX" : 180,
+    "maxX" : 324,
+    "minY" : 164,
+    "maxY" : 231,
+    "prop" : {
+      "x" : 180,
+      "y" : 164,
+      "width" : 144,
+      "height" : 67
+    },
+    "textPosition" : {
+      "x" : 183,
+      "y" : 169
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 3848,
+    "reactomeId" : 2142845,
+    "displayName" : "Hyaluronan metabolism",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 57,
+      "y" : 38
+    },
+    "minX" : 4,
+    "maxX" : 110,
+    "minY" : 12,
+    "maxY" : 65,
+    "prop" : {
+      "x" : 4,
+      "y" : 12,
+      "width" : 106,
+      "height" : 53
+    },
+    "textPosition" : {
+      "x" : 11,
+      "y" : 17
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 3851,
+    "reactomeId" : 1638074,
+    "displayName" : "Keratan sulfate/keratin metabolism",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 201,
+      "y" : 39
+    },
+    "minX" : 146,
+    "maxX" : 256,
+    "minY" : 7,
+    "maxY" : 72,
+    "prop" : {
+      "x" : 146,
+      "y" : 7,
+      "width" : 110,
+      "height" : 65
+    },
+    "textPosition" : {
+      "x" : 146,
+      "y" : 11
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 3900,
+    "reactomeId" : 1638091,
+    "displayName" : "Heparan sulfate/heparin (HS-GAG) metabolism",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 578,
+      "y" : 882
+    },
+    "minX" : 515,
+    "maxX" : 641,
+    "minY" : 853,
+    "maxY" : 912,
+    "prop" : {
+      "x" : 515,
+      "y" : 853,
+      "width" : 126,
+      "height" : 59
+    },
+    "textPosition" : {
+      "x" : 520,
+      "y" : 847
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 3901,
+    "reactomeId" : 1638091,
+    "displayName" : "Heparan sulfate/heparin (HS-GAG) metabolism",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 473,
+      "y" : 198
+    },
+    "minX" : 392,
+    "maxX" : 554,
+    "minY" : 164,
+    "maxY" : 233,
+    "prop" : {
+      "x" : 392,
+      "y" : 164,
+      "width" : 162,
+      "height" : 69
+    },
+    "textPosition" : {
+      "x" : 402,
+      "y" : 170
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 3902,
+    "reactomeId" : 1793185,
+    "displayName" : "Chondroitin sulfate/dermatan sulfate metabolism",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 485,
+      "y" : 36
+    },
+    "minX" : 401,
+    "maxX" : 569,
+    "minY" : 0,
+    "maxY" : 72,
+    "prop" : {
+      "x" : 401,
+      "y" : 0,
+      "width" : 168,
+      "height" : 72
+    },
+    "textPosition" : {
+      "x" : 417,
+      "y" : 7
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 3855,
+    "reactomeId" : 174362,
+    "displayName" : "Transport and metabolism of PAPS",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 70,
+      "y" : 193
+    },
+    "minX" : 0,
+    "maxX" : 141,
+    "minY" : 167,
+    "maxY" : 220,
+    "prop" : {
+      "x" : 0,
+      "y" : 167,
+      "width" : 141,
+      "height" : 53
+    },
+    "textPosition" : {
+      "x" : 0,
+      "y" : 172
+    },
+    "connectors" : [ ]
+  } ],
+  "edges" : [ ],
+  "compartments" : [ ],
+  "notes" : [ ],
+  "links" : [ ],
+  "shadows" : [ ],
+  "minX" : 0,
+  "maxX" : 641,
+  "minY" : 0,
+  "maxY" : 912,
+  "disease" : false
+}

@@ -1,0 +1,2377 @@
+{
+  "dbId" : 71288,
+  "stableId" : "R-HSA-71288",
+  "displayName" : "Creatine metabolism",
+  "nodes" : [ {
+    "id" : 641,
+    "reactomeId" : 113592,
+    "displayName" : "ATP",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 383,
+      "y" : 381
+    },
+    "minX" : 324,
+    "maxX" : 453,
+    "minY" : 365,
+    "maxY" : 396,
+    "prop" : {
+      "x" : 363,
+      "y" : 366,
+      "width" : 40,
+      "height" : 30
+    },
+    "textPosition" : {
+      "x" : 367,
+      "y" : 370
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 398,
+          "y" : 371
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 398,
+          "y" : 371
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 2562,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 360,
+          "y" : 383
+        },
+        "to" : {
+          "x" : 324,
+          "y" : 387
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    }, {
+      "edgeId" : 2557,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 406,
+          "y" : 383
+        },
+        "to" : {
+          "x" : 453,
+          "y" : 391
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 642,
+    "reactomeId" : 29370,
+    "displayName" : "ADP",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 383,
+      "y" : 493
+    },
+    "minX" : 327,
+    "maxX" : 454,
+    "minY" : 477,
+    "maxY" : 508,
+    "prop" : {
+      "x" : 363,
+      "y" : 478,
+      "width" : 41,
+      "height" : 30
+    },
+    "textPosition" : {
+      "x" : 367,
+      "y" : 482
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 399,
+          "y" : 483
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 399,
+          "y" : 483
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 2562,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 360,
+          "y" : 493
+        },
+        "to" : {
+          "x" : 327,
+          "y" : 494
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 353,
+          "y" : 497
+        },
+        "b" : {
+          "x" : 360,
+          "y" : 493
+        },
+        "c" : {
+          "x" : 353,
+          "y" : 489
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 353,
+          "y" : 489
+        }
+      }
+    }, {
+      "edgeId" : 2557,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 407,
+          "y" : 493
+        },
+        "to" : {
+          "x" : 454,
+          "y" : 494
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 414,
+          "y" : 489
+        },
+        "b" : {
+          "x" : 407,
+          "y" : 493
+        },
+        "c" : {
+          "x" : 414,
+          "y" : 497
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 414,
+          "y" : 497
+        }
+      }
+    } ]
+  }, {
+    "id" : 2211,
+    "reactomeId" : 3902491,
+    "displayName" : "SLC6A8-like proteins",
+    "schemaClass" : "CandidateSet",
+    "renderableClass" : "EntitySet",
+    "position" : {
+      "x" : 351,
+      "y" : 85
+    },
+    "minX" : 286,
+    "maxX" : 463,
+    "minY" : 67,
+    "maxY" : 103,
+    "prop" : {
+      "x" : 286,
+      "y" : 67,
+      "width" : 131,
+      "height" : 36
+    },
+    "textPosition" : {
+      "x" : 310,
+      "y" : 67
+    },
+    "connectors" : [ {
+      "edgeId" : 2569,
+      "type" : "CATALYST",
+      "segments" : [ {
+        "from" : {
+          "x" : 423,
+          "y" : 83
+        },
+        "to" : {
+          "x" : 455,
+          "y" : 83
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "c" : {
+          "x" : 459,
+          "y" : 83
+        },
+        "r" : 4,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 459,
+          "y" : 83
+        }
+      }
+    } ]
+  }, {
+    "id" : 643,
+    "reactomeId" : 200351,
+    "displayName" : "Pcr",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 385,
+      "y" : 544
+    },
+    "minX" : 327,
+    "maxX" : 454,
+    "minY" : 494,
+    "maxY" : 559,
+    "prop" : {
+      "x" : 368,
+      "y" : 529,
+      "width" : 35,
+      "height" : 30
+    },
+    "textPosition" : {
+      "x" : 371,
+      "y" : 533
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 398,
+          "y" : 534
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 398,
+          "y" : 534
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 2562,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 365,
+          "y" : 528
+        },
+        "to" : {
+          "x" : 327,
+          "y" : 494
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 357,
+          "y" : 526
+        },
+        "b" : {
+          "x" : 365,
+          "y" : 528
+        },
+        "c" : {
+          "x" : 363,
+          "y" : 520
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 363,
+          "y" : 520
+        }
+      }
+    }, {
+      "edgeId" : 2567,
+      "type" : "INPUT",
+      "segments" : [ ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    }, {
+      "edgeId" : 2557,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 406,
+          "y" : 531
+        },
+        "to" : {
+          "x" : 454,
+          "y" : 494
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 409,
+          "y" : 524
+        },
+        "b" : {
+          "x" : 406,
+          "y" : 531
+        },
+        "c" : {
+          "x" : 414,
+          "y" : 530
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 414,
+          "y" : 530
+        }
+      }
+    } ]
+  }, {
+    "id" : 644,
+    "reactomeId" : 200343,
+    "displayName" : "CKB, CKM",
+    "schemaClass" : "DefinedSet",
+    "renderableClass" : "EntitySet",
+    "position" : {
+      "x" : 528,
+      "y" : 435
+    },
+    "minX" : 462,
+    "maxX" : 554,
+    "minY" : 418,
+    "maxY" : 453,
+    "prop" : {
+      "x" : 503,
+      "y" : 418,
+      "width" : 51,
+      "height" : 35
+    },
+    "textPosition" : {
+      "x" : 509,
+      "y" : 418
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "connectors" : [ {
+      "edgeId" : 2557,
+      "type" : "CATALYST",
+      "segments" : [ {
+        "from" : {
+          "x" : 497,
+          "y" : 436
+        },
+        "to" : {
+          "x" : 470,
+          "y" : 437
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "c" : {
+          "x" : 466,
+          "y" : 437
+        },
+        "r" : 4,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 466,
+          "y" : 437
+        }
+      }
+    } ]
+  }, {
+    "id" : 997,
+    "reactomeId" : 200381,
+    "displayName" : "CRET",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 444,
+      "y" : 16
+    },
+    "minX" : 420,
+    "maxX" : 471,
+    "minY" : 0,
+    "maxY" : 51,
+    "prop" : {
+      "x" : 420,
+      "y" : 1,
+      "width" : 48,
+      "height" : 30
+    },
+    "textPosition" : {
+      "x" : 424,
+      "y" : 5
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 463,
+          "y" : 6
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 463,
+          "y" : 6
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 2569,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 455,
+          "y" : 34
+        },
+        "to" : {
+          "x" : 471,
+          "y" : 51
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 1000,
+    "reactomeId" : 74113,
+    "displayName" : "Na+",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 510,
+      "y" : 17
+    },
+    "minX" : 471,
+    "maxX" : 533,
+    "minY" : 1,
+    "maxY" : 51,
+    "prop" : {
+      "x" : 489,
+      "y" : 2,
+      "width" : 43,
+      "height" : 30
+    },
+    "textPosition" : {
+      "x" : 493,
+      "y" : 6
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 527,
+          "y" : 7
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 527,
+          "y" : 7
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 2569,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 492,
+          "y" : 35
+        },
+        "to" : {
+          "x" : 471,
+          "y" : 51
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 649,
+    "reactomeId" : 200373,
+    "displayName" : "CK octamers",
+    "schemaClass" : "DefinedSet",
+    "renderableClass" : "EntitySet",
+    "position" : {
+      "x" : 231,
+      "y" : 436
+    },
+    "minX" : 196,
+    "maxX" : 316,
+    "minY" : 417,
+    "maxY" : 455,
+    "prop" : {
+      "x" : 196,
+      "y" : 417,
+      "width" : 71,
+      "height" : 38
+    },
+    "textPosition" : {
+      "x" : 198,
+      "y" : 418
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "connectors" : [ {
+      "edgeId" : 2562,
+      "type" : "CATALYST",
+      "segments" : [ {
+        "from" : {
+          "x" : 273,
+          "y" : 436
+        },
+        "to" : {
+          "x" : 308,
+          "y" : 437
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "c" : {
+          "x" : 312,
+          "y" : 438
+        },
+        "r" : 4,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 312,
+          "y" : 438
+        }
+      }
+    } ]
+  }, {
+    "id" : 1002,
+    "reactomeId" : 83910,
+    "displayName" : "Na+",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 527,
+      "y" : 144
+    },
+    "minX" : 471,
+    "maxX" : 550,
+    "minY" : 115,
+    "maxY" : 159,
+    "prop" : {
+      "x" : 506,
+      "y" : 129,
+      "width" : 43,
+      "height" : 30
+    },
+    "textPosition" : {
+      "x" : 510,
+      "y" : 133
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 544,
+          "y" : 134
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 544,
+          "y" : 134
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 2569,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 503,
+          "y" : 132
+        },
+        "to" : {
+          "x" : 471,
+          "y" : 115
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 495,
+          "y" : 132
+        },
+        "b" : {
+          "x" : 503,
+          "y" : 132
+        },
+        "c" : {
+          "x" : 499,
+          "y" : 125
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 499,
+          "y" : 125
+        }
+      }
+    } ]
+  }, {
+    "id" : 652,
+    "reactomeId" : 29372,
+    "displayName" : "Pi",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 335,
+      "y" : 634
+    },
+    "minX" : 322,
+    "maxX" : 385,
+    "minY" : 618,
+    "maxY" : 649,
+    "prop" : {
+      "x" : 322,
+      "y" : 619,
+      "width" : 27,
+      "height" : 30
+    },
+    "textPosition" : {
+      "x" : 326,
+      "y" : 623
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 344,
+          "y" : 624
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 344,
+          "y" : 624
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 2567,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 352,
+          "y" : 629
+        },
+        "to" : {
+          "x" : 385,
+          "y" : 618
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 357,
+          "y" : 623
+        },
+        "b" : {
+          "x" : 352,
+          "y" : 629
+        },
+        "c" : {
+          "x" : 360,
+          "y" : 631
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 360,
+          "y" : 631
+        }
+      }
+    } ]
+  }, {
+    "id" : 1004,
+    "reactomeId" : 29916,
+    "displayName" : "CRET",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 441,
+      "y" : 145
+    },
+    "minX" : 417,
+    "maxX" : 471,
+    "minY" : 115,
+    "maxY" : 160,
+    "prop" : {
+      "x" : 417,
+      "y" : 130,
+      "width" : 48,
+      "height" : 30
+    },
+    "textPosition" : {
+      "x" : 421,
+      "y" : 134
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 460,
+          "y" : 135
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 460,
+          "y" : 135
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 2569,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 456,
+          "y" : 127
+        },
+        "to" : {
+          "x" : 471,
+          "y" : 115
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 459,
+          "y" : 120
+        },
+        "b" : {
+          "x" : 456,
+          "y" : 127
+        },
+        "c" : {
+          "x" : 464,
+          "y" : 126
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 464,
+          "y" : 126
+        }
+      }
+    } ]
+  }, {
+    "id" : 653,
+    "reactomeId" : 30733,
+    "displayName" : "CREAT",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 386,
+      "y" : 661
+    },
+    "minX" : 358,
+    "maxX" : 415,
+    "minY" : 618,
+    "maxY" : 676,
+    "prop" : {
+      "x" : 358,
+      "y" : 646,
+      "width" : 56,
+      "height" : 30
+    },
+    "textPosition" : {
+      "x" : 362,
+      "y" : 650
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 409,
+          "y" : 651
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 409,
+          "y" : 651
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 2567,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 385,
+          "y" : 643
+        },
+        "to" : {
+          "x" : 385,
+          "y" : 618
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 381,
+          "y" : 636
+        },
+        "b" : {
+          "x" : 385,
+          "y" : 643
+        },
+        "c" : {
+          "x" : 389,
+          "y" : 636
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 389,
+          "y" : 636
+        }
+      }
+    } ]
+  }, {
+    "id" : 2574,
+    "reactomeId" : 70106,
+    "displayName" : "H+",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 383,
+      "y" : 440
+    },
+    "minX" : 327,
+    "maxX" : 454,
+    "minY" : 424,
+    "maxY" : 494,
+    "prop" : {
+      "x" : 365,
+      "y" : 425,
+      "width" : 36,
+      "height" : 30
+    },
+    "textPosition" : {
+      "x" : 369,
+      "y" : 429
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 396,
+          "y" : 430
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 396,
+          "y" : 430
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 2562,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 367,
+          "y" : 458
+        },
+        "to" : {
+          "x" : 327,
+          "y" : 494
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 365,
+          "y" : 466
+        },
+        "b" : {
+          "x" : 367,
+          "y" : 458
+        },
+        "c" : {
+          "x" : 359,
+          "y" : 460
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 359,
+          "y" : 460
+        }
+      }
+    }, {
+      "edgeId" : 2557,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 404,
+          "y" : 453
+        },
+        "to" : {
+          "x" : 454,
+          "y" : 494
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 412,
+          "y" : 454
+        },
+        "b" : {
+          "x" : 404,
+          "y" : 453
+        },
+        "c" : {
+          "x" : 407,
+          "y" : 460
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 407,
+          "y" : 460
+        }
+      }
+    } ],
+    "trivial" : true
+  }, {
+    "id" : 629,
+    "reactomeId" : 113545,
+    "displayName" : "Gly",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 157,
+      "y" : 255
+    },
+    "minX" : 123,
+    "maxX" : 176,
+    "minY" : 239,
+    "maxY" : 277,
+    "prop" : {
+      "x" : 140,
+      "y" : 240,
+      "width" : 35,
+      "height" : 30
+    },
+    "textPosition" : {
+      "x" : 144,
+      "y" : 244
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 170,
+          "y" : 245
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 170,
+          "y" : 245
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 2555,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 137,
+          "y" : 266
+        },
+        "to" : {
+          "x" : 123,
+          "y" : 277
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 630,
+    "reactomeId" : 113530,
+    "displayName" : "L-Arg",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 83,
+      "y" : 253
+    },
+    "minX" : 58,
+    "maxX" : 123,
+    "minY" : 237,
+    "maxY" : 277,
+    "prop" : {
+      "x" : 58,
+      "y" : 238,
+      "width" : 50,
+      "height" : 30
+    },
+    "textPosition" : {
+      "x" : 63,
+      "y" : 242
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 103,
+          "y" : 243
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 103,
+          "y" : 243
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 2555,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 111,
+          "y" : 268
+        },
+        "to" : {
+          "x" : 123,
+          "y" : 277
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 631,
+    "reactomeId" : 113543,
+    "displayName" : "GAA",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 166,
+      "y" : 376
+    },
+    "minX" : 123,
+    "maxX" : 188,
+    "minY" : 343,
+    "maxY" : 391,
+    "prop" : {
+      "x" : 145,
+      "y" : 361,
+      "width" : 42,
+      "height" : 30
+    },
+    "textPosition" : {
+      "x" : 149,
+      "y" : 365
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 182,
+          "y" : 366
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 182,
+          "y" : 366
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 2555,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 146,
+          "y" : 358
+        },
+        "to" : {
+          "x" : 123,
+          "y" : 343
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 138,
+          "y" : 358
+        },
+        "b" : {
+          "x" : 146,
+          "y" : 358
+        },
+        "c" : {
+          "x" : 142,
+          "y" : 351
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 142,
+          "y" : 351
+        }
+      }
+    } ]
+  }, {
+    "id" : 632,
+    "reactomeId" : 113586,
+    "displayName" : "L-Orn",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 88,
+      "y" : 375
+    },
+    "minX" : 63,
+    "maxX" : 123,
+    "minY" : 343,
+    "maxY" : 390,
+    "prop" : {
+      "x" : 63,
+      "y" : 360,
+      "width" : 51,
+      "height" : 30
+    },
+    "textPosition" : {
+      "x" : 68,
+      "y" : 364
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 109,
+          "y" : 365
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 109,
+          "y" : 365
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 2555,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 104,
+          "y" : 357
+        },
+        "to" : {
+          "x" : 123,
+          "y" : 343
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 107,
+          "y" : 350
+        },
+        "b" : {
+          "x" : 104,
+          "y" : 357
+        },
+        "c" : {
+          "x" : 112,
+          "y" : 356
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 112,
+          "y" : 356
+        }
+      }
+    } ]
+  }, {
+    "id" : 633,
+    "reactomeId" : 71268,
+    "displayName" : "GATM dimer",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 181,
+      "y" : 321
+    },
+    "minX" : 131,
+    "maxX" : 212,
+    "minY" : 297,
+    "maxY" : 339,
+    "prop" : {
+      "x" : 157,
+      "y" : 303,
+      "width" : 49,
+      "height" : 36
+    },
+    "textPosition" : {
+      "x" : 158,
+      "y" : 304
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 206,
+          "y" : 303
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 206,
+          "y" : 303
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 2555,
+      "type" : "CATALYST",
+      "segments" : [ {
+        "from" : {
+          "x" : 154,
+          "y" : 320
+        },
+        "to" : {
+          "x" : 139,
+          "y" : 320
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "c" : {
+          "x" : 135,
+          "y" : 320
+        },
+        "r" : 4,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 135,
+          "y" : 320
+        }
+      }
+    } ]
+  }, {
+    "id" : 953,
+    "reactomeId" : 70106,
+    "displayName" : "H+",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 329,
+      "y" : 226
+    },
+    "minX" : 311,
+    "maxX" : 380,
+    "minY" : 210,
+    "maxY" : 265,
+    "prop" : {
+      "x" : 311,
+      "y" : 211,
+      "width" : 36,
+      "height" : 30
+    },
+    "textPosition" : {
+      "x" : 315,
+      "y" : 215
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 342,
+          "y" : 216
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 342,
+          "y" : 216
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 2556,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 350,
+          "y" : 239
+        },
+        "to" : {
+          "x" : 380,
+          "y" : 265
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 358,
+          "y" : 241
+        },
+        "b" : {
+          "x" : 350,
+          "y" : 239
+        },
+        "c" : {
+          "x" : 353,
+          "y" : 247
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 353,
+          "y" : 247
+        }
+      }
+    } ],
+    "trivial" : true
+  }, {
+    "id" : 635,
+    "reactomeId" : 30401,
+    "displayName" : "GAA",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 517,
+      "y" : 218
+    },
+    "minX" : 481,
+    "maxX" : 539,
+    "minY" : 202,
+    "maxY" : 265,
+    "prop" : {
+      "x" : 496,
+      "y" : 203,
+      "width" : 42,
+      "height" : 30
+    },
+    "textPosition" : {
+      "x" : 500,
+      "y" : 207
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 533,
+          "y" : 208
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 533,
+          "y" : 208
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 2556,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 505,
+          "y" : 236
+        },
+        "to" : {
+          "x" : 481,
+          "y" : 265
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 636,
+    "reactomeId" : 71284,
+    "displayName" : "AdoMet",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 549,
+      "y" : 265
+    },
+    "minX" : 481,
+    "maxX" : 581,
+    "minY" : 249,
+    "maxY" : 280,
+    "prop" : {
+      "x" : 519,
+      "y" : 250,
+      "width" : 61,
+      "height" : 30
+    },
+    "textPosition" : {
+      "x" : 522,
+      "y" : 254
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 575,
+          "y" : 255
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 575,
+          "y" : 255
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 2556,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 516,
+          "y" : 265
+        },
+        "to" : {
+          "x" : 481,
+          "y" : 265
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 637,
+    "reactomeId" : 29916,
+    "displayName" : "CRET",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 376,
+      "y" : 331
+    },
+    "minX" : 324,
+    "maxX" : 453,
+    "minY" : 265,
+    "maxY" : 391,
+    "prop" : {
+      "x" : 352,
+      "y" : 316,
+      "width" : 48,
+      "height" : 30
+    },
+    "textPosition" : {
+      "x" : 356,
+      "y" : 320
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 395,
+          "y" : 321
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 395,
+          "y" : 321
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 2562,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 362,
+          "y" : 349
+        },
+        "to" : {
+          "x" : 324,
+          "y" : 387
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    }, {
+      "edgeId" : 2556,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 376,
+          "y" : 313
+        },
+        "to" : {
+          "x" : 380,
+          "y" : 265
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 373,
+          "y" : 306
+        },
+        "b" : {
+          "x" : 376,
+          "y" : 313
+        },
+        "c" : {
+          "x" : 381,
+          "y" : 306
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 381,
+          "y" : 306
+        }
+      }
+    }, {
+      "edgeId" : 2557,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 395,
+          "y" : 349
+        },
+        "to" : {
+          "x" : 453,
+          "y" : 391
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 638,
+    "reactomeId" : 71285,
+    "displayName" : "AdoHcy",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 299,
+      "y" : 264
+    },
+    "minX" : 269,
+    "maxX" : 380,
+    "minY" : 248,
+    "maxY" : 279,
+    "prop" : {
+      "x" : 269,
+      "y" : 249,
+      "width" : 61,
+      "height" : 30
+    },
+    "textPosition" : {
+      "x" : 272,
+      "y" : 253
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 325,
+          "y" : 254
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 325,
+          "y" : 254
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 2556,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 333,
+          "y" : 264
+        },
+        "to" : {
+          "x" : 380,
+          "y" : 265
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 340,
+          "y" : 260
+        },
+        "b" : {
+          "x" : 333,
+          "y" : 264
+        },
+        "c" : {
+          "x" : 340,
+          "y" : 268
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 340,
+          "y" : 268
+        }
+      }
+    } ]
+  }, {
+    "id" : 639,
+    "reactomeId" : 71276,
+    "displayName" : "GAMT",
+    "schemaClass" : "EntityWithAccessionedSequence",
+    "renderableClass" : "Protein",
+    "position" : {
+      "x" : 427,
+      "y" : 201
+    },
+    "minX" : 405,
+    "maxX" : 455,
+    "minY" : 184,
+    "maxY" : 257,
+    "prop" : {
+      "x" : 405,
+      "y" : 190,
+      "width" : 44,
+      "height" : 22
+    },
+    "textPosition" : {
+      "x" : 406,
+      "y" : 190
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 449,
+          "y" : 190
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 449,
+          "y" : 190
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 2556,
+      "type" : "CATALYST",
+      "segments" : [ {
+        "from" : {
+          "x" : 426,
+          "y" : 215
+        },
+        "to" : {
+          "x" : 425,
+          "y" : 249
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "c" : {
+          "x" : 425,
+          "y" : 253
+        },
+        "r" : 4,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 425,
+          "y" : 253
+        }
+      }
+    } ]
+  } ],
+  "edges" : [ {
+    "id" : 2562,
+    "reactomeId" : 200326,
+    "displayName" : "creatine + ATP => phosphocreatine + ADP [CK octamer]",
+    "schemaClass" : "Reaction",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 324,
+      "y" : 438
+    },
+    "minX" : 318,
+    "maxX" : 330,
+    "minY" : 387,
+    "maxY" : 494,
+    "reactionType" : "transition",
+    "segments" : [ {
+      "from" : {
+        "x" : 324,
+        "y" : 387
+      },
+      "to" : {
+        "x" : 324,
+        "y" : 438
+      }
+    }, {
+      "from" : {
+        "x" : 324,
+        "y" : 438
+      },
+      "to" : {
+        "x" : 327,
+        "y" : 494
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 318,
+        "y" : 432
+      },
+      "b" : {
+        "x" : 330,
+        "y" : 444
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 324,
+        "y" : 438
+      }
+    },
+    "inputs" : [ {
+      "id" : 637,
+      "points" : [ {
+        "x" : 362,
+        "y" : 349
+      } ]
+    }, {
+      "id" : 641,
+      "points" : [ {
+        "x" : 360,
+        "y" : 383
+      } ]
+    } ],
+    "outputs" : [ {
+      "id" : 643,
+      "points" : [ {
+        "x" : 365,
+        "y" : 528
+      } ]
+    }, {
+      "id" : 2574,
+      "points" : [ {
+        "x" : 367,
+        "y" : 458
+      } ]
+    }, {
+      "id" : 642,
+      "points" : [ {
+        "x" : 360,
+        "y" : 493
+      } ]
+    } ],
+    "catalysts" : [ {
+      "id" : 649,
+      "points" : [ {
+        "x" : 273,
+        "y" : 436
+      } ]
+    } ]
+  }, {
+    "id" : 2567,
+    "reactomeId" : 71287,
+    "displayName" : "phosphocreatine => creatinine + orthophosphate",
+    "schemaClass" : "Reaction",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 385,
+      "y" : 591
+    },
+    "minX" : 379,
+    "maxX" : 391,
+    "minY" : 562,
+    "maxY" : 618,
+    "reactionType" : "transition",
+    "segments" : [ {
+      "from" : {
+        "x" : 385,
+        "y" : 562
+      },
+      "to" : {
+        "x" : 385,
+        "y" : 591
+      }
+    }, {
+      "from" : {
+        "x" : 385,
+        "y" : 591
+      },
+      "to" : {
+        "x" : 385,
+        "y" : 618
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 379,
+        "y" : 585
+      },
+      "b" : {
+        "x" : 391,
+        "y" : 597
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 385,
+        "y" : 591
+      }
+    },
+    "inputs" : [ {
+      "id" : 643
+    } ],
+    "outputs" : [ {
+      "id" : 653,
+      "points" : [ {
+        "x" : 385,
+        "y" : 643
+      } ]
+    }, {
+      "id" : 652,
+      "points" : [ {
+        "x" : 352,
+        "y" : 629
+      } ]
+    } ]
+  }, {
+    "id" : 2569,
+    "reactomeId" : 200396,
+    "displayName" : "Creatine transport across the plasma membrane",
+    "schemaClass" : "Reaction",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 471,
+      "y" : 83
+    },
+    "minX" : 465,
+    "maxX" : 477,
+    "minY" : 51,
+    "maxY" : 115,
+    "reactionType" : "transition",
+    "segments" : [ {
+      "from" : {
+        "x" : 471,
+        "y" : 51
+      },
+      "to" : {
+        "x" : 471,
+        "y" : 83
+      }
+    }, {
+      "from" : {
+        "x" : 471,
+        "y" : 83
+      },
+      "to" : {
+        "x" : 471,
+        "y" : 115
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 465,
+        "y" : 77
+      },
+      "b" : {
+        "x" : 477,
+        "y" : 89
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 471,
+        "y" : 83
+      }
+    },
+    "inputs" : [ {
+      "id" : 997,
+      "points" : [ {
+        "x" : 455,
+        "y" : 34
+      } ]
+    }, {
+      "id" : 1000,
+      "points" : [ {
+        "x" : 492,
+        "y" : 35
+      } ]
+    } ],
+    "outputs" : [ {
+      "id" : 1002,
+      "points" : [ {
+        "x" : 503,
+        "y" : 132
+      } ]
+    }, {
+      "id" : 1004,
+      "points" : [ {
+        "x" : 456,
+        "y" : 127
+      } ]
+    } ],
+    "catalysts" : [ {
+      "id" : 2211,
+      "points" : [ {
+        "x" : 423,
+        "y" : 83
+      } ]
+    } ]
+  }, {
+    "id" : 2555,
+    "reactomeId" : 71275,
+    "displayName" : "arginine + glycine => ornithine + guanidoacetate",
+    "schemaClass" : "Reaction",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 123,
+      "y" : 320
+    },
+    "minX" : 117,
+    "maxX" : 129,
+    "minY" : 277,
+    "maxY" : 343,
+    "reactionType" : "transition",
+    "segments" : [ {
+      "from" : {
+        "x" : 123,
+        "y" : 277
+      },
+      "to" : {
+        "x" : 123,
+        "y" : 320
+      }
+    }, {
+      "from" : {
+        "x" : 123,
+        "y" : 320
+      },
+      "to" : {
+        "x" : 123,
+        "y" : 343
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 117,
+        "y" : 314
+      },
+      "b" : {
+        "x" : 129,
+        "y" : 326
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 123,
+        "y" : 320
+      }
+    },
+    "inputs" : [ {
+      "id" : 629,
+      "points" : [ {
+        "x" : 137,
+        "y" : 266
+      } ]
+    }, {
+      "id" : 630,
+      "points" : [ {
+        "x" : 111,
+        "y" : 268
+      } ]
+    } ],
+    "outputs" : [ {
+      "id" : 632,
+      "points" : [ {
+        "x" : 104,
+        "y" : 357
+      } ]
+    }, {
+      "id" : 631,
+      "points" : [ {
+        "x" : 146,
+        "y" : 358
+      } ]
+    } ],
+    "catalysts" : [ {
+      "id" : 633,
+      "points" : [ {
+        "x" : 154,
+        "y" : 320
+      } ]
+    } ]
+  }, {
+    "id" : 2556,
+    "reactomeId" : 71286,
+    "displayName" : "guanidinoacetate + S-adenosylmethionine => creatine + S-adenosylhomocysteine",
+    "schemaClass" : "Reaction",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 425,
+      "y" : 265
+    },
+    "minX" : 380,
+    "maxX" : 481,
+    "minY" : 259,
+    "maxY" : 271,
+    "reactionType" : "transition",
+    "segments" : [ {
+      "from" : {
+        "x" : 481,
+        "y" : 265
+      },
+      "to" : {
+        "x" : 425,
+        "y" : 265
+      }
+    }, {
+      "from" : {
+        "x" : 425,
+        "y" : 265
+      },
+      "to" : {
+        "x" : 380,
+        "y" : 265
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 419,
+        "y" : 259
+      },
+      "b" : {
+        "x" : 431,
+        "y" : 271
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 425,
+        "y" : 265
+      }
+    },
+    "inputs" : [ {
+      "id" : 636,
+      "points" : [ {
+        "x" : 516,
+        "y" : 265
+      } ]
+    }, {
+      "id" : 635,
+      "points" : [ {
+        "x" : 505,
+        "y" : 236
+      } ]
+    } ],
+    "outputs" : [ {
+      "id" : 637,
+      "points" : [ {
+        "x" : 376,
+        "y" : 313
+      } ]
+    }, {
+      "id" : 638,
+      "points" : [ {
+        "x" : 333,
+        "y" : 264
+      } ]
+    }, {
+      "id" : 953,
+      "points" : [ {
+        "x" : 350,
+        "y" : 239
+      } ]
+    } ],
+    "catalysts" : [ {
+      "id" : 639,
+      "points" : [ {
+        "x" : 426,
+        "y" : 215
+      } ]
+    } ]
+  }, {
+    "id" : 2557,
+    "reactomeId" : 200318,
+    "displayName" : "creatine + ATP => phosphocreatine + ADP [CKB,CKM]",
+    "schemaClass" : "Reaction",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 454,
+      "y" : 438
+    },
+    "minX" : 448,
+    "maxX" : 460,
+    "minY" : 391,
+    "maxY" : 494,
+    "reactionType" : "transition",
+    "segments" : [ {
+      "from" : {
+        "x" : 453,
+        "y" : 391
+      },
+      "to" : {
+        "x" : 454,
+        "y" : 438
+      }
+    }, {
+      "from" : {
+        "x" : 454,
+        "y" : 438
+      },
+      "to" : {
+        "x" : 454,
+        "y" : 494
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 448,
+        "y" : 432
+      },
+      "b" : {
+        "x" : 460,
+        "y" : 444
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 454,
+        "y" : 438
+      }
+    },
+    "inputs" : [ {
+      "id" : 637,
+      "points" : [ {
+        "x" : 395,
+        "y" : 349
+      } ]
+    }, {
+      "id" : 641,
+      "points" : [ {
+        "x" : 406,
+        "y" : 383
+      } ]
+    } ],
+    "outputs" : [ {
+      "id" : 643,
+      "points" : [ {
+        "x" : 406,
+        "y" : 531
+      } ]
+    }, {
+      "id" : 2574,
+      "points" : [ {
+        "x" : 404,
+        "y" : 453
+      } ]
+    }, {
+      "id" : 642,
+      "points" : [ {
+        "x" : 407,
+        "y" : 493
+      } ]
+    } ],
+    "catalysts" : [ {
+      "id" : 644,
+      "points" : [ {
+        "x" : 497,
+        "y" : 436
+      } ]
+    } ]
+  } ],
+  "compartments" : [ {
+    "id" : 16,
+    "reactomeId" : 70101,
+    "displayName" : "cytosol",
+    "schemaClass" : "Compartment",
+    "renderableClass" : "Compartment",
+    "position" : {
+      "x" : 333,
+      "y" : 396
+    },
+    "minX" : 0,
+    "maxX" : 667,
+    "minY" : 78,
+    "maxY" : 715,
+    "prop" : {
+      "x" : 0,
+      "y" : 78,
+      "width" : 667,
+      "height" : 637
+    },
+    "textPosition" : {
+      "x" : 63,
+      "y" : 629
+    },
+    "insets" : {
+      "x" : 10,
+      "y" : 88,
+      "width" : 646,
+      "height" : 615
+    },
+    "bgColor" : {
+      "r" : 250,
+      "g" : 240,
+      "b" : 240
+    },
+    "componentIds" : [ 635, 636, 637, 638, 639, 641, 642, 643, 644, 652, 653, 17, 953, 1002, 1004, 2211, 2556, 2557, 2562, 2567, 2569, 2574 ]
+  }, {
+    "id" : 17,
+    "reactomeId" : 5460,
+    "displayName" : "mitochondrial matrix",
+    "schemaClass" : "Compartment",
+    "renderableClass" : "Compartment",
+    "position" : {
+      "x" : 128,
+      "y" : 370
+    },
+    "minX" : 25,
+    "maxX" : 231,
+    "minY" : 223,
+    "maxY" : 517,
+    "prop" : {
+      "x" : 25,
+      "y" : 223,
+      "width" : 206,
+      "height" : 294
+    },
+    "textPosition" : {
+      "x" : 64,
+      "y" : 452
+    },
+    "insets" : {
+      "x" : 34,
+      "y" : 405,
+      "width" : 186,
+      "height" : 100
+    },
+    "bgColor" : {
+      "r" : 250,
+      "g" : 240,
+      "b" : 240
+    },
+    "componentIds" : [ 649, 631, 2555, 630, 629, 633, 632 ]
+  } ],
+  "notes" : [ ],
+  "links" : [ ],
+  "shadows" : [ ],
+  "minX" : 0,
+  "maxX" : 667,
+  "minY" : 0,
+  "maxY" : 715,
+  "disease" : false
+}

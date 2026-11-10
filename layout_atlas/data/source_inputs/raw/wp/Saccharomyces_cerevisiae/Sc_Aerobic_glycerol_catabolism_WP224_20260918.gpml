@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Pathway xmlns="http://pathvisio.org/GPML/2013a" Name="Aerobic glycerol catabolism" Version="WP224_r20260918200823" Author="[M.Braymer, MaintBot, Egonw, Mkutmon, Ariutta, Eweitz, Khanspers]" Last-Modified="20260918200823" Organism="Saccharomyces cerevisiae">
+  <Comment Source="WikiPathways-description">Under aerobic conditions, S. cerevisiae is able to utilize glycerol as a sole carbon and energy source. Glycerol degradation is a two-step process; the first step of glycerol phosphorylation occurs in the cytosol, then glycerol-3-phosphate enters the mitochondrion where the second step of conversion to dihydroxyacetone is catalyzed. Dihydroxyacetone is then returned to the cytosol where it enters into either glycolysis or gluconeogenesis. The genes encoding the enzymes catalyzing glycerol catabolism, GUT1 and GUT2, are carbon source regulated; gene expression is repressed when cells are grown on fermentable carbon sources such as glucose and up-regulated on non-fermentable carbon sources such as glycerol or ethanol. 
+
+Description source: [YeastPathways](https://pathway.yeastgenome.org/).</Comment>
+  <BiopaxRef>c91</BiopaxRef>
+  <BiopaxRef>dba</BiopaxRef>
+  <BiopaxRef>ecc</BiopaxRef>
+  <BiopaxRef>c6d</BiopaxRef>
+  <Graphics BoardWidth="904.0" BoardHeight="223.179104477612" />
+  <DataNode TextLabel="glycerol" GraphId="a5e" Type="Metabolite">
+    <Graphics CenterX="73.2116155715359" CenterY="118.33522026033015" Width="58.4232311430718" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle" Color="0000ff" />
+    <Xref Database="CAS" ID="56-81-5" />
+  </DataNode>
+  <DataNode TextLabel="ubiquinol-6" GraphId="ab4" Type="Metabolite">
+    <Graphics CenterX="456.20944972630355" CenterY="158.50734658599833" Width="77.58110054739291" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="52970" />
+  </DataNode>
+  <DataNode TextLabel="GUT1" GraphId="bdd" Type="GeneProduct">
+    <Attribute Key="org.pathvisio.model.BackpageHead" Value="GUT1" />
+    <Graphics CenterX="162.4676616915422" CenterY="81.70149253731343" Width="40.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle" />
+    <Xref Database="SGD" ID="S000001024" />
+  </DataNode>
+  <DataNode TextLabel="ATP" GraphId="c66" Type="Metabolite">
+    <Graphics CenterX="130.61194029850722" CenterY="159.17910447761196" Width="37.333333333333336" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle" Color="0000ff" />
+    <Xref Database="CAS" ID="1927-31-7" />
+  </DataNode>
+  <DataNode TextLabel="GUT2" GraphId="c82" Type="GeneProduct">
+    <Attribute Key="org.pathvisio.model.BackpageHead" Value="GUT2" />
+    <Graphics CenterX="410.1740132526651" CenterY="83.73753961394408" Width="40.0" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle" />
+    <Xref Database="SGD" ID="S000001417" />
+  </DataNode>
+  <DataNode TextLabel="ADP" GraphId="c87" Type="Metabolite" GroupRef="db9af">
+    <Graphics CenterX="187.62686567164204" CenterY="160.179104477612" Width="39.333333333333336" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle" Color="0000ff" />
+    <Xref Database="CAS" ID="58-64-0" />
+  </DataNode>
+  <DataNode TextLabel="glycerone phosphate" GraphId="caf7b" Type="Metabolite">
+    <Graphics CenterX="551.5723287805686" CenterY="118.33522026033015" Width="128.85534243886286" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="57642" />
+  </DataNode>
+  <DataNode TextLabel="Glycolysis" GraphId="cfb8a" Type="Pathway" GroupRef="be976">
+    <Graphics CenterX="768.0" CenterY="134.0" Width="90.0" Height="20.0" ZOrder="32768" FontWeight="Bold" FontSize="12" Valign="Middle" ShapeType="RoundedRectangle" Color="14961e" />
+    <Xref Database="WikiPathways" ID="WP253" />
+  </DataNode>
+  <DataNode TextLabel="Glycolysis and gluconeogenesis" GraphId="d87c2" Type="Pathway" GroupRef="be976">
+    <Graphics CenterX="770.875" CenterY="103.75" Width="206.25" Height="20.0" ZOrder="32768" FontWeight="Bold" FontSize="12" Valign="Middle" ShapeType="RoundedRectangle" Color="14961e" />
+    <Xref Database="WikiPathways" ID="WP515" />
+  </DataNode>
+  <DataNode TextLabel="glycerol-3-phosphate" GraphId="e5ab6" Type="Metabolite">
+    <Graphics CenterX="285.01641461929614" CenterY="118.33522026033015" Width="127.96717076140771" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="57597" />
+  </DataNode>
+  <DataNode TextLabel="ubiquinone-6" GraphId="f5a" Type="Metabolite">
+    <Graphics CenterX="369.45354364736386" CenterY="158.6430423509076" Width="82.90708729472772" Height="20.0" ZOrder="32768" FontSize="12" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="52971" />
+  </DataNode>
+  <DataNode TextLabel="H⁺" GraphId="e492b" Type="Metabolite" GroupRef="db9af">
+    <Graphics CenterX="187.62686567164204" CenterY="183.179104477612" Width="39.333333333333336" Height="20.0" ZOrder="32773" FontSize="12" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="15378" />
+  </DataNode>
+  <Interaction GraphId="id66225f2f">
+    <Graphics ZOrder="12288" LineStyle="Broken" LineThickness="1.0">
+      <Point X="616.0" Y="118.33522026033015" GraphRef="caf7b" RelX="1.0" RelY="0.0" />
+      <Point X="659.75" Y="118.875" GraphRef="db127" RelX="-1.0" RelY="0.0" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id7606d43c">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="102.4232311430718" Y="118.33522026033015" GraphRef="a5e" RelX="1.0" RelY="0.0" />
+      <Point X="221.03282923859229" Y="118.33522026033015" GraphRef="e5ab6" RelX="-1.0" RelY="0.0" ArrowHead="mim-conversion" />
+      <Anchor Position="0.503968911767224" Shape="None" GraphId="bfef2" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="idac6e4591">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="410.1740132526651" Y="93.73753961394408" GraphRef="c82" RelX="0.0" RelY="1.0" />
+      <Point X="410.0" Y="118.33522026033015" GraphRef="e551d" RelX="0.0" RelY="0.0" ArrowHead="mim-catalysis" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="idc45a110c">
+    <Graphics ConnectorType="Elbow" ZOrder="12288" LineThickness="1.0">
+      <Point X="349.0" Y="118.33522026033015" GraphRef="e5ab6" RelX="1.0" RelY="0.0" />
+      <Point X="487.14465756113714" Y="118.33522026033015" GraphRef="caf7b" RelX="-1.0" RelY="0.0" ArrowHead="mim-conversion" />
+      <Anchor Position="0.4415661168294106" Shape="None" GraphId="e551d" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="idc8228fde">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="130.61194029850722" Y="149.17910447761196" GraphRef="c66" RelX="0.0" RelY="-1.0" />
+      <Point X="162.19878122041905" Y="118.33522026033015" GraphRef="bfef2" RelX="0.0" RelY="0.0" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="idd23744a8">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="162.19878122041905" Y="118.33522026033015" GraphRef="bfef2" RelX="0.0" RelY="0.0" />
+      <Point X="187.62686567164207" Y="142.179104477612" GraphRef="f7d22" RelX="0.0" RelY="-1.0" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="idef883e1f">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="162.4676616915422" Y="91.70149253731343" GraphRef="bdd" RelX="0.0" RelY="1.0" />
+      <Point X="162.19878122041905" Y="118.33522026033015" GraphRef="bfef2" RelX="0.0" RelY="0.0" ArrowHead="mim-catalysis" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="e32bb">
+    <Graphics ZOrder="32771" LineThickness="1.0">
+      <Point X="369.45354364736386" Y="148.6430423509076" GraphRef="f5a" RelX="0.0" RelY="-1.0" />
+      <Point X="410.0" Y="118.33522026033015" GraphRef="e551d" RelX="0.0" RelY="0.0" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="ae3b4">
+    <Graphics ZOrder="32772" LineThickness="1.0">
+      <Point X="410.0" Y="118.33522026033015" GraphRef="e551d" RelX="0.0" RelY="0.0" />
+      <Point X="456.20944972630355" Y="148.50734658599833" GraphRef="ab4" RelX="0.0" RelY="-1.0" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Group GroupId="be976" GraphId="db127" Style="Group" />
+  <Group GroupId="db9af" GraphId="f7d22" Style="Group" />
+  <InfoBox CenterX="8.333333333333334" CenterY="28.333333333333332" />
+  <Biopax>
+    <bp:openControlledVocabulary xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#">
+      <bp:TERM xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">classic metabolic pathway</bp:TERM>
+      <bp:ID xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PW:0000002</bp:ID>
+      <bp:Ontology xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pathway Ontology</bp:Ontology>
+    </bp:openControlledVocabulary>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="c91">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">https://pathway.yeastgenome.org/YEAST/NEW-IMAGE?type=PATHWAY&amp;object=AERO-GLYCEROL-CAT-PWY</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">URL</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">glycerol degradation</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">YeastPathways</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string"></bp:YEAR>
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">https://pathway.yeastgenome.org/YEAST/NEW-IMAGE?type=PATHWAY&amp;object=AERO-GLYCEROL-CAT-PWY</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">glycerol degradation</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">YeastPathways</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string"></bp:YEAR>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="dba">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">11142398</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Carbon source-dependent transcriptional regulation of the mitochondrial glycerol-3-phosphate dehydrogenase gene, GUT2, from Saccharomyces cerevisiae.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Can J Microbiol</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2000</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Grauslund M</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Rønnow B</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="ecc">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">10536147</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Expression of GUT1, which encodes glycerol kinase in Saccharomyces cerevisiae, is controlled by the positive regulators Adr1p, Ino2p and Ino4p and the negative regulator Opi1p in a carbon source-dependent fashion.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Nucleic Acids Res</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1999</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Grauslund M</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Lopes JM</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Rønnow B</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="c6d">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">191434</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Isolation and characterization of Saccharomyces cerevisiae mutants defective in glycerol catabolism.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">J Bacteriol</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1977</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Sprague GF</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Cronan JE</bp:AUTHORS>
+    </bp:PublicationXref>
+  </Biopax>
+</Pathway>
+

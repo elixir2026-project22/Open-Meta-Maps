@@ -1,0 +1,28 @@
+{
+  "dbId" : 1793185,
+  "stId" : "R-HSA-1793185",
+  "speciesName" : "Homo sapiens",
+  "nodes" : [ {
+    "dbId" : 2022923,
+    "stId" : "R-HSA-2022923",
+    "displayName" : "DS-GAG biosynthesis",
+    "schemaClass" : "Pathway",
+    "speciesId" : 48887,
+    "diagramIds" : [ 2 ]
+  }, {
+    "dbId" : 2022870,
+    "stId" : "R-HSA-2022870",
+    "displayName" : "CS-GAG biosynthesis",
+    "schemaClass" : "Pathway",
+    "speciesId" : 48887,
+    "diagramIds" : [ 1 ]
+  }, {
+    "dbId" : 2024101,
+    "stId" : "R-HSA-2024101",
+    "displayName" : "CS/DS degradation",
+    "schemaClass" : "Pathway",
+    "speciesId" : 48887,
+    "diagramIds" : [ 15 ]
+  } ],
+  "edges" : [ ]
+}

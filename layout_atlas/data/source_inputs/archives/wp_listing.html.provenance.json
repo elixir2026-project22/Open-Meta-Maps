@@ -1,0 +1,8 @@
+{
+  "source": "wikipathways",
+  "version": "20261010",
+  "url": "https://data.wikipathways.org/current/gpml/",
+  "sha256": "24fef5dbf6b82bbe54ef0d20e7ebf52b7be3994d57cd7c9c0401a3d5d38c5066",
+  "bytes": 9556,
+  "local_path": "data/archives/wp_listing.html"
+}

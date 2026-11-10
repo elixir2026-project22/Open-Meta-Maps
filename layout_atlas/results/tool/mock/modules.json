@@ -1,0 +1,59 @@
+[
+ {
+  "code": "M03781",
+  "module_id": "108ec78eb57ebc2a6863390f",
+  "source": "community",
+  "map_name": "iJO1366.Nucleotide and histidine biosynthesis",
+  "species": "Escherichia coli",
+  "license": "CC0-1.0",
+  "size": 1,
+  "tier": "micro",
+  "reactions": [
+   "GMPR"
+  ],
+  "match_level": "equation",
+  "provenance": {
+   "expert_derived": 1
+  }
+ },
+ {
+  "code": "M07702",
+  "module_id": "843ef719e701a0628fcd4ad1",
+  "source": "community",
+  "map_name": "iAF1260.Amino_Acid_Metabolism",
+  "species": "Escherichia coli",
+  "license": "CC0-1.0",
+  "size": 40,
+  "tier": "structure",
+  "reactions": [
+   "METS",
+   "HCYSMT2",
+   "CYSTL"
+  ],
+  "match_level": "equation",
+  "provenance": {
+   "expert_derived": 30,
+   "topology_layout_suggestion": 4,
+   "bridge": 3
+  }
+ },
+ {
+  "code": "M11795",
+  "module_id": "",
+  "source": "reactome",
+  "map_name": "Selenoamino acid metabolism",
+  "species": "Homo sapiens",
+  "license": "CC0-1.0-data",
+  "size": 8,
+  "tier": "structure",
+  "reactions": [
+   "R-HSA-2408500",
+   "R-HSA-2408536"
+  ],
+  "match_level": "geometry",
+  "provenance": {
+   "expert_derived": 8,
+   "functional_layout_suggestion": 3
+  }
+ }
+]

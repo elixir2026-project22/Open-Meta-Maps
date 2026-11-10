@@ -1,0 +1,474 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Pathway xmlns="http://pathvisio.org/GPML/2013a" Name="NAD salvage pathway V" Data-Source="WikiPathways" Version="WP171_r20260911170213" Author="[M.Braymer, MaintBot, Ddigles, Egonw, DeSl, Eweitz, Khanspers]" Last-Modified="20260911170213" Organism="Saccharomyces cerevisiae">
+  <Comment Source="WikiPathways-description">Nicotinamide adenine dinucleotide (NAD) is an essential cofactor for cellular redox reactions and energy metabolism. NAD also has been shown to be an important substrate in a variety of biological processes, including transcriptional regulation, DNA repair, calcium-dependent signaling pathways, calorie-restriction-mediated life-span extension and age-associated diseases. NAD appears to affect these processes by regulating the Sir2p family of NAD-dependent deacetylases.
+In addition to NAD biosynthesis pathways, there are four additional pathways for synthesizing NAD in yeast: two salvage pathways from the vitamin precursor nicotinamide riboside (NR) and two salvage pathways from nicotinic acid riboside (NaR). Three of these salvage pathways converge first with the NAD salvage pathway and then with the de novo pathway, while the fourth, the NR salvage pathway I, is independent of both of these pathways. In the NR salvage pathway I, NR is phosphorylated to nicotinamide mononucleotide by the kinase Nrk1p, and then adenylated to NAD by Nma1p or Nma2p.cYeast have a second NR salvage pathway (NR salvage pathway II) that is independent of Nrk1p; in NR salvage pathway II NR is split into a ribosyl product and nicotinamide, which is subsequently converted to NAD via enzymes of the NAD salvage pathway and de novo pathway. The initial steps in the two NaR salvage pathways are similar to those of the NR salvage pathways and are catalyzed by the same enzymes; Nrk1p catalyzes the first step in the NR and NaR salvage pathways I and Urh1p and Pnp1p catalyze the first steps of the NR and NaR salvage pathways II.
+
+Description adapted from [yeastgenome.org](https://pathway.yeastgenome.org/).</Comment>
+  <BiopaxRef>efb</BiopaxRef>
+  <BiopaxRef>cd2</BiopaxRef>
+  <BiopaxRef>ea9</BiopaxRef>
+  <BiopaxRef>bcb</BiopaxRef>
+  <BiopaxRef>f26</BiopaxRef>
+  <BiopaxRef>c47</BiopaxRef>
+  <BiopaxRef>b54</BiopaxRef>
+  <BiopaxRef>b9a</BiopaxRef>
+  <BiopaxRef>e9f</BiopaxRef>
+  <Graphics BoardWidth="1027.0" BoardHeight="570.5" />
+  <DataNode TextLabel="AMP" GraphId="a8b" Type="Metabolite" GroupRef="c3819">
+    <Graphics CenterX="297.00000000000006" CenterY="64.33333333333334" Width="40.333333333333336" Height="19.0" ZOrder="28672" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="CHEBI:456215" />
+  </DataNode>
+  <DataNode TextLabel="H₂O" GraphId="bfb" Type="Metabolite">
+    <Graphics CenterX="621.3333333333334" CenterY="283.6666666666667" Width="38.333333333333336" Height="19.0" ZOrder="28672" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="CHEBI:15377" />
+  </DataNode>
+  <DataNode TextLabel="nicotinate adenine dinucleotide" GraphId="c5365" Type="Metabolite">
+    <Graphics CenterX="175.36111111111092" CenterY="239.33333333333334" Width="187.33333333333334" Height="19.0" ZOrder="28672" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="CHEBI:58437" />
+  </DataNode>
+  <DataNode TextLabel="β-nicotinate D-ribonucleotide&#x9;" GraphId="d3af6" Type="Metabolite">
+    <Graphics CenterX="176.36111111111092" CenterY="429.0" Width="164.33333333333334" Height="19.0" ZOrder="28672" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="57502" />
+  </DataNode>
+  <DataNode TextLabel="H₂O" GraphId="d44" Type="Metabolite" GroupRef="c28a1">
+    <Graphics CenterX="547.6666666666666" CenterY="510.0" Width="38.333333333333336" Height="19.0" ZOrder="28672" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="CHEBI:15377" />
+  </DataNode>
+  <DataNode TextLabel="H₂O" GraphId="d7d" Type="Metabolite" GroupRef="f9850">
+    <Graphics CenterX="517.6666666666666" CenterY="107.66666666666666" Width="38.333333333333336" Height="19.0" ZOrder="28672" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="CHEBI:15377" />
+  </DataNode>
+  <DataNode TextLabel="NH₃" GraphId="d8e" Type="Metabolite">
+    <Graphics CenterX="621.3333333333334" CenterY="327.0" Width="38.333333333333336" Height="19.0" ZOrder="28672" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="CHEBI:16134" />
+  </DataNode>
+  <DataNode TextLabel="NAD" GraphId="dc20f" Type="Metabolite">
+    <Graphics CenterX="427.3333333333333" CenterY="137.0" Width="40.333333333333336" Height="19.0" ZOrder="28672" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="CHEBI:15846" />
+  </DataNode>
+  <DataNode TextLabel="L-glutamate" GraphId="dcf" Type="Metabolite" GroupRef="c3819">
+    <Graphics CenterX="295.91666666666674" CenterY="125.33333333333337" Width="62.166666666666515" Height="19.0" ZOrder="28672" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="CHEBI:29985" />
+  </DataNode>
+  <DataNode TextLabel="H₂O" GraphId="e99" Type="Metabolite" GroupRef="e17fa">
+    <Graphics CenterX="186.6666666666668" CenterY="171.33333333333337" Width="38.333333333333336" Height="19.0" ZOrder="28672" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="CHEBI:15377" />
+  </DataNode>
+  <DataNode TextLabel="a [histone]-N6-acetyl-L-lysine" GraphId="a42ba" Type="Metabolite" GroupRef="f9850">
+    <Graphics CenterX="519.5" CenterY="86.0" Width="145.0" Height="19.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="KEGG" ID="C01997" />
+  </DataNode>
+  <DataNode TextLabel="ADP" GraphId="a4d" Type="Metabolite" GroupRef="c5a4d">
+    <Graphics CenterX="366.0" CenterY="456.6666666666667" Width="39.333333333333336" Height="19.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="CAS" ID="58-64-0" />
+  </DataNode>
+  <DataNode TextLabel="NAD salvage pathway IV (from nicotinamide riboside)" GraphId="a9ded" Type="Pathway">
+    <Graphics CenterX="426.5" CenterY="24.0" Width="313.0" Height="25.0" ZOrder="32768" FontWeight="Bold" FontSize="12" Valign="Middle" ShapeType="None" Color="14961e" />
+    <Xref Database="" ID="" />
+  </DataNode>
+  <DataNode TextLabel="NPT1" GraphId="b46" Type="GeneProduct">
+    <Attribute Key="org.pathvisio.model.BackpageHead" Value="NPT1" />
+    <Graphics CenterX="475.0" CenterY="387.3333333333333" Width="40.0" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" />
+    <Xref Database="SGD" ID="S000005735" />
+  </DataNode>
+  <DataNode TextLabel="pyrophosphate" GraphId="b8c" Type="Metabolite" GroupRef="c5a4d">
+    <Graphics CenterX="366.0" CenterY="493.33333333333326" Width="91.16666666666663" Height="19.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="CAS" ID="2466-09-3" />
+  </DataNode>
+  <DataNode TextLabel="PNC1" GraphId="be0" Type="GeneProduct">
+    <Attribute Key="org.pathvisio.model.BackpageHead" Value="PNC1" />
+    <Graphics CenterX="714.3333333333334" CenterY="303.3333333333333" Width="40.0" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" />
+    <Xref Database="SGD" ID="S000003005" />
+  </DataNode>
+  <DataNode TextLabel="nicotinamide" GraphId="d1d" Type="Metabolite">
+    <Graphics CenterX="658.9999999999999" CenterY="217.33333333333331" Width="97.33333333333333" Height="19.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="CAS" ID="98-92-0" />
+  </DataNode>
+  <DataNode TextLabel="QNS1" GraphId="d67" Type="GeneProduct">
+    <Attribute Key="org.pathvisio.model.BackpageHead" Value="QNS1" />
+    <Graphics CenterX="319.00000000000006" CenterY="206.33333333333337" Width="43.333333333333336" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" />
+    <Xref Database="SGD" ID="S000001116" />
+  </DataNode>
+  <DataNode TextLabel="nicotinate" GraphId="dd772" Type="Metabolite">
+    <Graphics CenterX="659.0" CenterY="429.0" Width="80.0" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="CHEBI:32544" />
+  </DataNode>
+  <DataNode TextLabel="5-phospho-α-D-ribose 1-diphosphate" GraphId="e33" Type="Metabolite" GroupRef="c28a1">
+    <Graphics CenterX="547.6666666666667" CenterY="490.0" Width="176.5" Height="19.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="58017" />
+  </DataNode>
+  <DataNode TextLabel="NMA1" GraphId="e3b" Type="GeneProduct" GroupRef="d5cf6">
+    <Attribute Key="org.pathvisio.model.BackpageHead" Value="NMA1" />
+    <Graphics CenterX="234.33333333333334" CenterY="326.0" Width="46.666666666666664" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" />
+    <Xref Database="SGD" ID="S000004320" />
+  </DataNode>
+  <DataNode TextLabel="NAD de novo biosynthesis II (from tryptophan)" GraphId="e585e" Type="Pathway" GroupRef="e0d54">
+    <Graphics CenterX="173.0" CenterY="511.0" Width="276.0" Height="25.0" ZOrder="32768" FontWeight="Bold" FontSize="12" Valign="Middle" ShapeType="RoundedRectangle" Color="14961e" />
+    <Xref Database="WikiPathways" ID="WP541" />
+  </DataNode>
+  <DataNode TextLabel="NMA2" GraphId="e71" Type="GeneProduct" GroupRef="d5cf6">
+    <Attribute Key="org.pathvisio.model.BackpageHead" Value="NMA2" />
+    <Graphics CenterX="234.33333333333334" CenterY="306.0" Width="46.666666666666664" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" />
+    <Xref Database="SGD" ID="S000003242" />
+  </DataNode>
+  <DataNode TextLabel="phosphate" GraphId="f29" Type="Metabolite" GroupRef="c5a4d">
+    <Graphics CenterX="366.0" CenterY="473.3333333333333" Width="66.66666666666663" Height="19.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="CAS" ID="14265-44-2" />
+  </DataNode>
+  <DataNode TextLabel="ATP" GraphId="f6f" Type="Metabolite" GroupRef="c28a1">
+    <Graphics CenterX="547.6666666666666" CenterY="470.0" Width="37.333333333333336" Height="19.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="CAS" ID="1927-31-7" />
+  </DataNode>
+  <DataNode TextLabel="nicotinate riboside salvage pathway II" GraphId="fc72a" Type="Pathway">
+    <Graphics CenterX="856.5" CenterY="429.0" Width="225.0" Height="25.0" ZOrder="32768" FontWeight="Bold" FontSize="12" Valign="Middle" ShapeType="None" Color="14961e" />
+    <Xref Database="" ID="" />
+  </DataNode>
+  <DataNode TextLabel="H⁺" GraphId="bda45" Type="Metabolite" GroupRef="d7f48">
+    <Graphics CenterX="125.33333333333329" CenterY="342.33333333333337" Width="38.333333333333336" Height="19.0" ZOrder="32770" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="CHEBI:15378" />
+  </DataNode>
+  <DataNode TextLabel="ATP" GraphId="dba6f" Type="Metabolite" GroupRef="d7f48">
+    <Graphics CenterX="125.33333333333329" CenterY="364.3333333333333" Width="37.333333333333336" Height="19.0" ZOrder="32771" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="CAS" ID="1927-31-7" />
+  </DataNode>
+  <DataNode TextLabel="pyrophosphate" GraphId="dc83f" Type="Metabolite">
+    <Graphics CenterX="108.29166666666666" CenterY="281.3333333333333" Width="74.58333333333331" Height="19.0" ZOrder="32772" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="CAS" ID="2466-09-3" />
+  </DataNode>
+  <DataNode TextLabel="ATP" GraphId="d8269" Type="Metabolite" GroupRef="e17fa">
+    <Graphics CenterX="186.3333333333333" CenterY="151.33333333333331" Width="37.333333333333336" Height="19.0" ZOrder="32773" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="CAS" ID="1927-31-7" />
+  </DataNode>
+  <DataNode TextLabel="L-glutamine" GraphId="ec262" Type="Metabolite" GroupRef="e17fa">
+    <Graphics CenterX="186.83333333333331" CenterY="130.33333333333331" Width="60.33333333333337" Height="19.0" ZOrder="32774" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="58359" />
+  </DataNode>
+  <DataNode TextLabel="pyrophosphate" GraphId="ae062" Type="Metabolite" GroupRef="c3819">
+    <Graphics CenterX="296.29166666666663" CenterY="84.33333333333331" Width="74.58333333333331" Height="19.0" ZOrder="32775" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="CAS" ID="2466-09-3" />
+  </DataNode>
+  <DataNode TextLabel="H⁺" GraphId="a7470" Type="Metabolite" GroupRef="c3819">
+    <Graphics CenterX="296.3333333333333" CenterY="105.33333333333337" Width="38.333333333333336" Height="19.0" ZOrder="32776" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="CHEBI:15378" />
+  </DataNode>
+  <DataNode TextLabel="SIR2" GraphId="ccc28" Type="GeneProduct">
+    <Attribute Key="org.pathvisio.model.BackpageHead" Value="PNC1" />
+    <Graphics CenterX="483.33333333333337" CenterY="205.33333333333331" Width="40.0" Height="20.0" ZOrder="32778" FontSize="10" Valign="Middle" />
+    <Xref Database="SGD" ID="S000002200" />
+  </DataNode>
+  <DataNode TextLabel="2''-O-acetyl-ADP-ribose" GraphId="e89b1" Type="Metabolite" GroupRef="afd92">
+    <Graphics CenterX="631.75" CenterY="139.33333333333337" Width="118.5" Height="19.0" ZOrder="32779" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="CHEBI:83767" />
+  </DataNode>
+  <DataNode TextLabel="a [histone]-L-lysine" GraphId="fbed5" Type="Metabolite" GroupRef="afd92">
+    <Graphics CenterX="631.75" CenterY="161.33333333333337" Width="118.5" Height="19.0" ZOrder="32780" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="KEGG Compound" ID="C02415" />
+  </DataNode>
+  <DataNode TextLabel="nicotinamide riboside salvage pathway II" GraphId="a97ce" Type="Pathway">
+    <Graphics CenterX="870.0" CenterY="218.0" Width="254.0" Height="25.0" ZOrder="32781" FontWeight="Bold" FontSize="12" Valign="Middle" ShapeType="None" Color="14961e" />
+    <Xref Database="" ID="" />
+  </DataNode>
+  <DataNode TextLabel="nicotinate riboside salvage pathway I" GraphId="b634b" Type="Pathway" GroupRef="e0d54">
+    <Graphics CenterX="179.0" CenterY="528.0" Width="276.0" Height="25.0" ZOrder="32782" FontWeight="Bold" FontSize="12" Valign="Middle" ShapeType="None" Color="14961e" />
+    <Xref Database="" ID="" />
+  </DataNode>
+  <Interaction GraphId="id163e27f0">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="483.33333333333337" Y="195.33333333333331" GraphRef="ccc28" RelX="0.0" RelY="-1.0" />
+      <Point X="512.6333333333332" Y="169.13333333333333" GraphRef="ee2c0" RelX="0.0" RelY="0.0" ArrowHead="mim-catalysis" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id281439dd">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="499.54166666666674" Y="452.5" GraphRef="b01eb" RelX="-0.5" RelY="-1.0" />
+      <Point X="474.811111111111" Y="429.0" GraphRef="a5045" RelX="0.0" RelY="0.0" ArrowHead="mim-conversion" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id2d1dd000">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="474.811111111111" Y="429.0" GraphRef="a5045" RelX="0.0" RelY="0.0" />
+      <Point X="419.5833333333333" Y="475.0" GraphRef="a0761" RelX="1.0" RelY="0.0" ArrowHead="mim-conversion" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id32f0a3f9">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="694.3333333333334" Y="303.3333333333333" GraphRef="be0" RelX="-1.0" RelY="0.0" />
+      <Point X="659.0" Y="303.7" GraphRef="d6cae" RelX="0.0" RelY="0.0" ArrowHead="mim-catalysis" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id3b06e24">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="659.0" Y="303.7" GraphRef="d6cae" RelX="0.0" RelY="0.0" />
+      <Point X="640.5000000000002" Y="327.0" GraphRef="d8e" RelX="1.0" RelY="0.0" ArrowHead="mim-conversion" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id3b401140">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="512.6333333333332" Y="169.13333333333333" GraphRef="ee2c0" RelX="0.0" RelY="0.0" />
+      <Point X="564.5" Y="150.33333333333337" GraphRef="d60aa" RelX="-1.0" RelY="0.0" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id492d684f">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="271.34472622894816" Y="191.39387956175614" GraphRef="ab91e" RelX="0.0" RelY="0.0" />
+      <Point X="296.29166666666663" Y="142.83333333333337" GraphRef="b575f" RelX="0.0" RelY="1.0" ArrowHead="mim-conversion" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id4b00dac6">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="659.0" Y="226.83333333333331" GraphRef="d1d" RelX="0.0" RelY="1.0" />
+      <Point X="659.0" Y="419.0" GraphRef="dd772" RelX="0.0" RelY="-1.0" ArrowHead="mim-conversion" />
+      <Anchor Position="0.4" Shape="None" GraphId="d6cae" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id503ead">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="475.0" Y="397.3333333333333" GraphRef="b46" RelX="0.0" RelY="1.0" />
+      <Point X="474.811111111111" Y="429.0" GraphRef="a5045" RelX="0.0" RelY="0.0" ArrowHead="mim-catalysis" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id515f4de5">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="152.49999999999994" Y="353.33333333333337" GraphRef="dbcdc" RelX="1.0" RelY="0.0" />
+      <Point X="175.7545368968162" Y="315.9780007603702" GraphRef="b8759" RelX="0.0" RelY="0.0" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id58e1978f">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="175.36111111111092" Y="229.83333333333334" GraphRef="c5365" RelX="0.0" RelY="-1.0" />
+      <Point X="407.16666666666663" Y="137.0" GraphRef="dc20f" RelX="-1.0" RelY="0.0" ArrowHead="mim-conversion" />
+      <Anchor Position="0.4140695199810831" Shape="None" GraphId="ab91e" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id5b2236e7">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="175.36111111111092" Y="248.83333333333334" GraphRef="c5365" RelX="0.0" RelY="1.0" ArrowHead="mim-conversion" />
+      <Point X="176.36111111111092" Y="419.5" GraphRef="d3af6" RelX="0.0" RelY="-1.0" />
+      <Anchor Position="0.39342578570529413" Shape="None" GraphId="b8759" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id5c00a7af">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="225.0" Y="150.83333333333334" GraphRef="a7893" RelX="1.0" RelY="0.0" />
+      <Point X="271.34472622894816" Y="191.39387956175614" GraphRef="ab91e" RelX="0.0" RelY="0.0" ArrowHead="mim-conversion" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id5df52837">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="640.5000000000002" Y="283.6666666666667" GraphRef="bfb" RelX="1.0" RelY="0.0" />
+      <Point X="659.0" Y="303.7" GraphRef="d6cae" RelX="0.0" RelY="0.0" ArrowHead="mim-conversion" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id5e896944">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="519.5" Y="125.16666666666666" GraphRef="f448c" RelX="0.0" RelY="1.0" />
+      <Point X="512.6333333333332" Y="169.13333333333333" GraphRef="ee2c0" RelX="0.0" RelY="0.0" ArrowHead="mim-conversion" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id6e10bcf">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="743.0" Y="218.0" GraphRef="a97ce" RelX="-1.0" RelY="0.0" />
+      <Point X="707.6666666666667" Y="217.33333333333331" GraphRef="d1d" RelX="1.0" RelY="0.0" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id88c19e21">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="297.33333333333337" Y="206.33333333333337" GraphRef="d67" RelX="-1.0" RelY="0.0" />
+      <Point X="271.34472622894816" Y="191.39387956175614" GraphRef="ab91e" RelX="0.0" RelY="0.0" ArrowHead="mim-catalysis" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id90fd8be">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="203.0" Y="316.0" GraphRef="aafb3" RelX="-1.0" RelY="0.0" />
+      <Point X="175.7545368968162" Y="315.9780007603702" GraphRef="b8759" RelX="0.0" RelY="0.0" ArrowHead="mim-catalysis" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="ida2bb8b9e">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="744.0" Y="429.0" GraphRef="fc72a" RelX="-1.0" RelY="0.0" />
+      <Point X="699.0" Y="429.0" GraphRef="dd772" RelX="1.0" RelY="0.0" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="idb811c195">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="175.7545368968162" Y="315.9780007603702" GraphRef="b8759" RelX="0.0" RelY="0.0" />
+      <Point X="145.58333333333331" Y="281.3333333333333" GraphRef="dc83f" RelX="1.0" RelY="0.0" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="idc88dfa60">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="176.0" Y="490.5" GraphRef="f1197" RelX="0.0" RelY="-1.0" />
+      <Point X="176.36111111111092" Y="438.5" GraphRef="d3af6" RelX="0.0" RelY="1.0" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="ide26ea2c3">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="619.0" Y="429.0" GraphRef="dd772" RelX="-1.0" RelY="0.0" />
+      <Point X="258.5277777777776" Y="429.0" GraphRef="d3af6" RelX="1.0" RelY="0.0" ArrowHead="mim-conversion" />
+      <Anchor Position="0.4" Shape="None" GraphId="a5045" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="idf59d06ac">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="426.5" Y="36.5" GraphRef="a9ded" RelX="0.0" RelY="1.0" />
+      <Point X="427.33333333333326" Y="127.5" GraphRef="dc20f" RelX="0.0" RelY="-1.0" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="idfac03b17">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="447.4999999999999" Y="137.0" GraphRef="dc20f" RelX="1.0" RelY="0.0" />
+      <Point X="610.3333333333333" Y="217.33333333333331" GraphRef="d1d" RelX="-1.0" RelY="0.0" ArrowHead="mim-conversion" />
+      <Anchor Position="0.4" Shape="None" GraphId="ee2c0" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Group GroupId="c5a4d" GraphId="a0761" Style="Group" />
+  <Group GroupId="e17fa" GraphId="a7893" Style="Group" />
+  <Group GroupId="d5cf6" GraphId="aafb3" Style="Group" />
+  <Group GroupId="c28a1" GraphId="b01eb" Style="Group" />
+  <Group GroupId="c3819" GraphId="b575f" Style="Group" />
+  <Group GroupId="afd92" GraphId="d60aa" Style="Group" />
+  <Group GroupId="d7f48" GraphId="dbcdc" Style="Group" />
+  <Group GroupId="e0d54" GraphId="f1197" Style="Group" />
+  <Group GroupId="f9850" GraphId="f448c" Style="Group" />
+  <InfoBox CenterX="695.0" CenterY="15.0" />
+  <Biopax>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="efb">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">https://pathway.yeastgenome.org/YEAST/NEW-IMAGE?type=PATHWAY&amp;object=PWY3O-4107</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">URL</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">NAD salvage pathway V (PNC V cycle)</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">YeastPathways</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string"></bp:YEAR>
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">https://pathway.yeastgenome.org/YEAST/NEW-IMAGE?type=PATHWAY&amp;object=PWY3O-4107</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">NAD salvage pathway V (PNC V cycle)</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">YeastPathways</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string"></bp:YEAR>
+    </bp:PublicationXref>
+    <bp:openControlledVocabulary xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#">
+      <bp:TERM xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">classic metabolic pathway</bp:TERM>
+      <bp:ID xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PW:0000002</bp:ID>
+      <bp:Ontology xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pathway Ontology</bp:Ontology>
+    </bp:openControlledVocabulary>
+    <bp:openControlledVocabulary xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#">
+      <bp:TERM xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">nicotinamide adenine dinucleotide biosynthesis, the salvage pathway</bp:TERM>
+      <bp:ID xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PW:0001375</bp:ID>
+      <bp:Ontology xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pathway Ontology</bp:Ontology>
+    </bp:openControlledVocabulary>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="cd2">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">12736687</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Nicotinamide and PNC1 govern lifespan extension by calorie restriction in Saccharomyces cerevisiae.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Nature</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2003</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Anderson RM</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Bitterman KJ</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Wood JG</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Medvedik O</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Sinclair DA</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="ea9">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">12648681</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Nicotinamide adenine dinucleotide, a metabolic regulator of transcription, longevity and disease.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Curr Opin Cell Biol</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2003</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Lin SJ</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Guarente L</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="bcb">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">12972620</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">NAD+-dependent deacetylase Hst1p controls biosynthesis and cellular NAD+ levels in Saccharomyces cerevisiae.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Mol Cell Biol</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2003</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Bedalov A</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Hirao M</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Posakony J</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Nelson M</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Simon JA</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="f26">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">13416279</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Enzymatic synthesis of nicotinamide mononucleotide.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">J Biol Chem</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1957</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PREISS J</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">HANDLER P</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="c47">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">13563526</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Biosynthesis of diphosphopyridine nucleotide. I. Identification of intermediates.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">J Biol Chem</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1958</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PREISS J</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">HANDLER P</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="b54">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">15137942</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Discoveries of nicotinamide riboside as a nutrient and conserved NRK genes establish a Preiss-Handler independent route to NAD+ in fungi and humans.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Cell</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2004</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Bieganowski P</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Brenner C</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="b9a">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">17482543</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Nicotinamide riboside promotes Sir2 silencing and extends lifespan via Nrk and Urh1/Pnp1/Meu1 pathways to NAD+.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Cell</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2007</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Belenky P</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Racette FG</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Bogan KL</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">McClure JM</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Smith JS</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Brenner C</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="e9f">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">17914902</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Nicotinamide riboside kinase structures reveal new pathways to NAD+.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PLoS Biol</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2007</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Tempel W</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Rabeh WM</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Bogan KL</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Belenky P</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Wojcik M</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Seidle HF</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Nedyalkova L</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Yang T</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Sauve AA</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Park HW</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Brenner C</bp:AUTHORS>
+    </bp:PublicationXref>
+  </Biopax>
+</Pathway>
+

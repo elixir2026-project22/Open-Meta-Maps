@@ -1,0 +1,1584 @@
+{
+  "id": "scrambled_network",
+  "name": "",
+  "metabolites": [
+    {
+      "id": "X2f051967",
+      "name": "",
+      "compartment": "e"
+    },
+    {
+      "id": "X0c2ff330",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X7d64313d",
+      "name": "",
+      "compartment": "e"
+    },
+    {
+      "id": "X4a4724bf",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X9e7d4c89",
+      "name": "",
+      "compartment": "e"
+    },
+    {
+      "id": "X23563bf7",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X6c957441",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X5f114d46",
+      "name": "",
+      "compartment": "e"
+    },
+    {
+      "id": "X2eaed5bf",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X0216f3b4",
+      "name": "",
+      "compartment": "e"
+    },
+    {
+      "id": "Xdecf6301",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X773b202e",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "Xe07b2f67",
+      "name": "",
+      "compartment": "e"
+    },
+    {
+      "id": "X186a22a9",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "Xfe66f172",
+      "name": "",
+      "compartment": "e"
+    },
+    {
+      "id": "Xf123b3b9",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X3481567b",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X7e3cf6de",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X36bc30c1",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X5f6d31d4",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "Xf9bd1895",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "Xd6861eb9",
+      "name": "",
+      "compartment": "e"
+    },
+    {
+      "id": "X294d2956",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X51877e4a",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "Xa6cc4dc0",
+      "name": "",
+      "compartment": "e"
+    },
+    {
+      "id": "Xf27c0181",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "Xd78a925f",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "Xee39ee03",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X4d70b56c",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "Xcd848463",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "Xeb6099c5",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X29546a95",
+      "name": "",
+      "compartment": "e"
+    },
+    {
+      "id": "X5edd8d84",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X6c7ab365",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X6665a016",
+      "name": "",
+      "compartment": "e"
+    },
+    {
+      "id": "X37b0bf02",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X9435f19c",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X9e1afd4b",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X6b509570",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "Xdc538e03",
+      "name": "",
+      "compartment": "e"
+    },
+    {
+      "id": "Xb358491f",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "Xc67ad722",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "Xf89fa6f2",
+      "name": "",
+      "compartment": "e"
+    },
+    {
+      "id": "X1639dfff",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X3009e56b",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X2f4efbba",
+      "name": "",
+      "compartment": "e"
+    },
+    {
+      "id": "Xb27fc656",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X40d5843c",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X28b05ded",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X91723172",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "Xd875c424",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X744313d2",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X220e6477",
+      "name": "",
+      "compartment": "e"
+    },
+    {
+      "id": "X4c01f1a3",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X5104214f",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X5b4a7700",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "Xa21f95f9",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X7a605b4c",
+      "name": "",
+      "compartment": "e"
+    },
+    {
+      "id": "Xc42aa793",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X2da472d6",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X76074a0c",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X23d849d7",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X8d633277",
+      "name": "",
+      "compartment": "e"
+    },
+    {
+      "id": "Xdd74b830",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X30220c99",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X5519bd4a",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "Xf4dfe8bc",
+      "name": "",
+      "compartment": "e"
+    },
+    {
+      "id": "Xb21ee1ac",
+      "name": "",
+      "compartment": "e"
+    },
+    {
+      "id": "X14734cf0",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "X0eb0fe92",
+      "name": "",
+      "compartment": "e"
+    },
+    {
+      "id": "X25104026",
+      "name": "",
+      "compartment": "c"
+    },
+    {
+      "id": "Xfe4ce6d4",
+      "name": "",
+      "compartment": "c"
+    }
+  ],
+  "reactions": [
+    {
+      "id": "R9cca23fd",
+      "name": "",
+      "metabolites": {
+        "X5104214f": -1.0,
+        "Xdd74b830": -1.0,
+        "Xd875c424": 1.0,
+        "X30220c99": 1.0,
+        "X2eaed5bf": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Red02d380",
+      "name": "",
+      "metabolites": {
+        "Xc42aa793": -1.0,
+        "X6c7ab365": -1.0,
+        "X1639dfff": 1.0,
+        "X5519bd4a": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rafd06a2f",
+      "name": "",
+      "metabolites": {
+        "Xfe4ce6d4": -1.0,
+        "Xdd74b830": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R3cf5a743",
+      "name": "",
+      "metabolites": {
+        "Xf27c0181": -1.0,
+        "X5104214f": -1.0,
+        "Xf9bd1895": 1.0,
+        "Xd875c424": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R0f290b88",
+      "name": "",
+      "metabolites": {
+        "Xeb6099c5": -1.0,
+        "X6c957441": -1.0,
+        "X4d70b56c": 1.0,
+        "X2eaed5bf": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R63d593ce",
+      "name": "",
+      "metabolites": {
+        "Xb358491f": -1.0,
+        "Xc42aa793": -1.0,
+        "Xf123b3b9": -1.0,
+        "X1639dfff": 1.0,
+        "X2eaed5bf": 1.0,
+        "X3481567b": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R41f0abdd",
+      "name": "",
+      "metabolites": {
+        "X220e6477": -1.0,
+        "X0216f3b4": -1.0,
+        "X744313d2": 1.0,
+        "X2eaed5bf": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R3ebead95",
+      "name": "",
+      "metabolites": {
+        "X51877e4a": -1.0,
+        "Xf27c0181": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rd22c6d9b",
+      "name": "",
+      "metabolites": {
+        "X0216f3b4": -1.0,
+        "X29546a95": -1.0,
+        "X2eaed5bf": 1.0,
+        "Xcd848463": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R4da76948",
+      "name": "",
+      "metabolites": {
+        "X23d849d7": -1.0,
+        "Xf123b3b9": -1.0,
+        "Xb358491f": 1.0,
+        "X2eaed5bf": 1.0,
+        "X3481567b": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rdf64615d",
+      "name": "",
+      "metabolites": {
+        "Xf89fa6f2": -1.0,
+        "Xb358491f": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R8c5fe4db",
+      "name": "",
+      "metabolites": {
+        "X5edd8d84": -1.0,
+        "X5104214f": -1.0,
+        "X91723172": 1.0,
+        "Xd875c424": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rf4449831",
+      "name": "",
+      "metabolites": {
+        "Xa21f95f9": -1.0,
+        "X6c957441": -1.0,
+        "Xee39ee03": -1.0,
+        "X2eaed5bf": 1.0,
+        "Xd78a925f": 1.0,
+        "Xcd848463": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Re462b511",
+      "name": "",
+      "metabolites": {
+        "X5b4a7700": -1.0,
+        "X40d5843c": 1.0,
+        "X6c957441": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R9d9c1f28",
+      "name": "",
+      "metabolites": {
+        "X40d5843c": -1.0,
+        "X6c957441": -1.0,
+        "Xdecf6301": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R26c1f61b",
+      "name": "",
+      "metabolites": {
+        "X5104214f": -1.0,
+        "X6c957441": -1.0,
+        "Xd875c424": 1.0,
+        "X2eaed5bf": 1.0,
+        "Xcd848463": 1.0
+      },
+      "lower_bound": 8.39,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Ra7dfa4e7",
+      "name": "",
+      "metabolites": {
+        "X5104214f": -1.0,
+        "Xd78a925f": -1.0,
+        "Xd875c424": 1.0,
+        "Xa21f95f9": 1.0,
+        "Xee39ee03": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R83489aca",
+      "name": "",
+      "metabolites": {
+        "Xdc538e03": -1.0,
+        "X0216f3b4": -1.0,
+        "X5edd8d84": 1.0,
+        "X2eaed5bf": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Raf088dfe",
+      "name": "",
+      "metabolites": {
+        "X5104214f": -1.0,
+        "X6c957441": -1.0,
+        "X6c7ab365": -1.0,
+        "X4c01f1a3": 1.0,
+        "X2eaed5bf": 2.0,
+        "Xee39ee03": 1.0,
+        "Xcd848463": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R9fe7c00d",
+      "name": "",
+      "metabolites": {
+        "X4c01f1a3": -1.0,
+        "X5104214f": -1.0,
+        "Xd875c424": 2.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rb11bcca1",
+      "name": "",
+      "metabolites": {
+        "X744313d2": -1.0,
+        "Xc42aa793": -1.0,
+        "Xf123b3b9": -1.0,
+        "Xa21f95f9": 1.0,
+        "X3481567b": 1.0,
+        "Xb27fc656": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R7313d1c4",
+      "name": "",
+      "metabolites": {
+        "Xd875c424": -1.0,
+        "X0216f3b4": -4.0,
+        "Xcd848463": -1.0,
+        "X5104214f": 1.0,
+        "X6c957441": 1.0,
+        "X2eaed5bf": 3.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rbb88d095",
+      "name": "",
+      "metabolites": {
+        "X1639dfff": -1.0,
+        "Xcd848463": -1.0,
+        "X91723172": 1.0,
+        "Xc42aa793": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R6490fafb",
+      "name": "",
+      "metabolites": {
+        "Xd875c424": -1.0,
+        "X2eaed5bf": -1.0,
+        "Xee39ee03": -1.0,
+        "X5104214f": 1.0,
+        "X6c7ab365": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rc201148e",
+      "name": "",
+      "metabolites": {
+        "Xf27c0181": -1.496,
+        "X1639dfff": -3.7478,
+        "X5104214f": -59.81,
+        "X76074a0c": -0.361,
+        "Xdd74b830": -0.0709,
+        "X25104026": -0.129,
+        "Xfe4ce6d4": -0.205,
+        "X0c2ff330": -0.2557,
+        "X4a4724bf": -4.9414,
+        "X6c957441": -59.81,
+        "Xf123b3b9": -3.547,
+        "X36bc30c1": -13.0279,
+        "Xd78a925f": -1.7867,
+        "Xee39ee03": -0.5191,
+        "X6c7ab365": -2.8328,
+        "X9e1afd4b": -0.8977,
+        "Xd875c424": 59.81,
+        "X744313d2": 4.1182,
+        "Xc42aa793": 3.7478,
+        "X2eaed5bf": 59.81,
+        "X3481567b": 3.547,
+        "X7e3cf6de": 13.0279,
+        "Xcd848463": 59.81
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rad149c63",
+      "name": "",
+      "metabolites": {
+        "X0216f3b4": -1.0,
+        "X6665a016": -1.0,
+        "X2eaed5bf": 1.0,
+        "X6c7ab365": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R7ddc15de",
+      "name": "",
+      "metabolites": {
+        "X7a605b4c": -1.0,
+        "Xa21f95f9": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rcaaa0d95",
+      "name": "",
+      "metabolites": {
+        "X6b509570": -1.0,
+        "X28b05ded": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Re89aaa0e",
+      "name": "",
+      "metabolites": {
+        "X1639dfff": -1.0,
+        "X6c957441": -1.0,
+        "Xd78a925f": -1.0,
+        "X5b4a7700": 1.0,
+        "Xc42aa793": 1.0,
+        "X2eaed5bf": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R06aaf07d",
+      "name": "",
+      "metabolites": {
+        "X9e1afd4b": -1.0,
+        "X6b509570": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R7314ad4f",
+      "name": "",
+      "metabolites": {
+        "X0216f3b4": -2.0,
+        "X2f4efbba": -1.0,
+        "X2eaed5bf": 2.0,
+        "X3009e56b": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R80eb56b3",
+      "name": "",
+      "metabolites": {
+        "X2eaed5bf": -2.0,
+        "X294d2956": -0.5,
+        "X9435f19c": -1.0,
+        "X6c957441": 1.0,
+        "X0216f3b4": 2.0,
+        "X37b0bf02": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R2f2a08ad",
+      "name": "",
+      "metabolites": {
+        "X0216f3b4": -1.0,
+        "Xe07b2f67": -1.0,
+        "X2eaed5bf": 1.0,
+        "X773b202e": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R1a93ec88",
+      "name": "",
+      "metabolites": {
+        "X51877e4a": -1.0,
+        "X6c957441": 1.0,
+        "Xee39ee03": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R3f812409",
+      "name": "",
+      "metabolites": {
+        "X0216f3b4": -1.0,
+        "X3009e56b": -1.0,
+        "X2eaed5bf": 1.0,
+        "X2f4efbba": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R002f698c",
+      "name": "",
+      "metabolites": {
+        "X8d633277": -1.0,
+        "X0216f3b4": -1.0,
+        "X23d849d7": 1.0,
+        "X2eaed5bf": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rd6b45d16",
+      "name": "",
+      "metabolites": {
+        "X37b0bf02": -1.0,
+        "X3009e56b": -1.0,
+        "X14734cf0": 1.0,
+        "X9435f19c": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rdd562793",
+      "name": "",
+      "metabolites": {
+        "X5104214f": -1.0,
+        "Xc42aa793": -1.0,
+        "X3009e56b": -1.0,
+        "Xd875c424": 1.0,
+        "Xcd848463": 1.0,
+        "Xb27fc656": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R0b97842d",
+      "name": "",
+      "metabolites": {
+        "X25104026": -1.0,
+        "Xc67ad722": -1.0,
+        "X76074a0c": 1.0,
+        "Xdd74b830": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R3298025a",
+      "name": "",
+      "metabolites": {
+        "X0216f3b4": -2.0,
+        "X3481567b": -1.0,
+        "X7e3cf6de": -1.0,
+        "X2eaed5bf": 2.0,
+        "Xf123b3b9": 1.0,
+        "X36bc30c1": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rf5cfc715",
+      "name": "",
+      "metabolites": {
+        "X9e1afd4b": -1.0,
+        "X28b05ded": -1.0,
+        "X25104026": 1.0,
+        "Xc67ad722": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R120037bc",
+      "name": "",
+      "metabolites": {
+        "X76074a0c": -1.0,
+        "X28b05ded": -1.0,
+        "Xdd74b830": 1.0,
+        "X25104026": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R1df02f19",
+      "name": "",
+      "metabolites": {
+        "X2da472d6": -1.0,
+        "X25104026": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R0cbb1484",
+      "name": "",
+      "metabolites": {
+        "Xdc538e03": -1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R67274df6",
+      "name": "",
+      "metabolites": {
+        "Xf89fa6f2": -1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R2138f375",
+      "name": "",
+      "metabolites": {
+        "X220e6477": -1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R1162f5b4",
+      "name": "",
+      "metabolites": {
+        "X7a605b4c": -1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R6eac675c",
+      "name": "",
+      "metabolites": {
+        "X8d633277": -1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R1c3f32c0",
+      "name": "",
+      "metabolites": {
+        "Xf4dfe8bc": -1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rb39af666",
+      "name": "",
+      "metabolites": {
+        "Xb21ee1ac": -1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R31c5642b",
+      "name": "",
+      "metabolites": {
+        "X0eb0fe92": -1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R01a6d476",
+      "name": "",
+      "metabolites": {
+        "X2f051967": -1.0
+      },
+      "lower_bound": -10.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R4c362f0b",
+      "name": "",
+      "metabolites": {
+        "X7d64313d": -1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rccc4737b",
+      "name": "",
+      "metabolites": {
+        "X9e7d4c89": -1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rc91e4172",
+      "name": "",
+      "metabolites": {
+        "X0216f3b4": -1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rade55f07",
+      "name": "",
+      "metabolites": {
+        "X5f114d46": -1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R7b5b0b34",
+      "name": "",
+      "metabolites": {
+        "Xe07b2f67": -1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R6a3aa978",
+      "name": "",
+      "metabolites": {
+        "Xfe66f172": -1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R5c0e5cff",
+      "name": "",
+      "metabolites": {
+        "Xd6861eb9": -1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rab9bf04f",
+      "name": "",
+      "metabolites": {
+        "Xa6cc4dc0": -1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R9a0a6dbd",
+      "name": "",
+      "metabolites": {
+        "X29546a95": -1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R6d19499a",
+      "name": "",
+      "metabolites": {
+        "X6665a016": -1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Ra7f898f3",
+      "name": "",
+      "metabolites": {
+        "X2f4efbba": -1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R36ebae10",
+      "name": "",
+      "metabolites": {
+        "X30220c99": -1.0,
+        "X2da472d6": 1.0,
+        "X25104026": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rc351d6bf",
+      "name": "",
+      "metabolites": {
+        "X30220c99": -1.0,
+        "X6c957441": -1.0,
+        "Xdd74b830": 1.0,
+        "Xcd848463": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rd2348138",
+      "name": "",
+      "metabolites": {
+        "Xf4dfe8bc": -1.0,
+        "X0216f3b4": -1.0,
+        "X5519bd4a": 1.0,
+        "X2eaed5bf": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rde458624",
+      "name": "",
+      "metabolites": {
+        "Xf4dfe8bc": -1.0,
+        "X5519bd4a": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 0.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R9deff20d",
+      "name": "",
+      "metabolites": {
+        "X14734cf0": -1.0,
+        "X9435f19c": -1.0,
+        "X37b0bf02": 1.0,
+        "X3009e56b": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R4077b4e3",
+      "name": "",
+      "metabolites": {
+        "Xb21ee1ac": -1.0,
+        "Xee39ee03": -1.0,
+        "Xdd74b830": 1.0,
+        "X6c7ab365": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Re0e38604",
+      "name": "",
+      "metabolites": {
+        "X14734cf0": -1.0,
+        "X6c957441": -1.0,
+        "X186a22a9": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R4464e385",
+      "name": "",
+      "metabolites": {
+        "X0eb0fe92": -1.0,
+        "X0216f3b4": -2.0,
+        "X14734cf0": 1.0,
+        "X2eaed5bf": 2.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rfd8d0e5f",
+      "name": "",
+      "metabolites": {
+        "Xfe4ce6d4": -1.0,
+        "X7e3cf6de": -1.0,
+        "Xeb6099c5": 1.0,
+        "X2eaed5bf": 1.0,
+        "X36bc30c1": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R806557a9",
+      "name": "",
+      "metabolites": {
+        "X25104026": -1.0,
+        "Xf123b3b9": -1.0,
+        "Xcd848463": -1.0,
+        "Xf9bd1895": 1.0,
+        "X2eaed5bf": 1.0,
+        "X3481567b": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R34e98c25",
+      "name": "",
+      "metabolites": {
+        "X2f051967": -1.0,
+        "Xee39ee03": -1.0,
+        "Xfe4ce6d4": 1.0,
+        "X6c7ab365": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R9b287254",
+      "name": "",
+      "metabolites": {
+        "X5104214f": -1.0,
+        "X4a4724bf": -1.0,
+        "X5f6d31d4": -1.0,
+        "Xd875c424": 1.0,
+        "X0c2ff330": 1.0,
+        "X2eaed5bf": 1.0,
+        "Xcd848463": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R4c08af2f",
+      "name": "",
+      "metabolites": {
+        "X5104214f": -1.0,
+        "X7d64313d": -1.0,
+        "X6c957441": -1.0,
+        "Xd875c424": 1.0,
+        "X0c2ff330": 1.0,
+        "X2eaed5bf": 1.0,
+        "Xcd848463": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rf49f5a65",
+      "name": "",
+      "metabolites": {
+        "X4a4724bf": -1.0,
+        "X6c957441": -1.0,
+        "X7e3cf6de": -1.0,
+        "X744313d2": 1.0,
+        "X2eaed5bf": 1.0,
+        "X36bc30c1": 1.0,
+        "X5f6d31d4": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R7007eca4",
+      "name": "",
+      "metabolites": {
+        "X0c2ff330": -1.0,
+        "X6c957441": -1.0,
+        "X4a4724bf": 1.0,
+        "X5f6d31d4": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R29870b86",
+      "name": "",
+      "metabolites": {
+        "X744313d2": -1.0,
+        "X0c2ff330": -1.0,
+        "X2eaed5bf": -1.0,
+        "X36bc30c1": -1.0,
+        "X4a4724bf": 2.0,
+        "X7e3cf6de": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rc99f0507",
+      "name": "",
+      "metabolites": {
+        "X9e7d4c89": -1.0,
+        "X0216f3b4": -1.0,
+        "X4a4724bf": 1.0,
+        "X2eaed5bf": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rd98d26c1",
+      "name": "",
+      "metabolites": {
+        "X4d70b56c": -1.0,
+        "X7e3cf6de": -1.0,
+        "Xa21f95f9": 1.0,
+        "X36bc30c1": 1.0,
+        "X6b509570": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rdea9f681",
+      "name": "",
+      "metabolites": {
+        "X5f114d46": -1.0,
+        "X6c957441": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R5546d61c",
+      "name": "",
+      "metabolites": {
+        "Xdecf6301": -1.0,
+        "X7e3cf6de": -1.0,
+        "X744313d2": 1.0,
+        "Xa21f95f9": 1.0,
+        "X36bc30c1": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R09afeeda",
+      "name": "",
+      "metabolites": {
+        "Xdecf6301": -1.0,
+        "X23563bf7": 1.0,
+        "X3009e56b": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R08a9f1b8",
+      "name": "",
+      "metabolites": {
+        "X773b202e": -1.0,
+        "Xf123b3b9": -1.0,
+        "X2eaed5bf": 1.0,
+        "X3481567b": 1.0,
+        "X6c7ab365": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R895139e0",
+      "name": "",
+      "metabolites": {
+        "X1639dfff": -1.0,
+        "X23563bf7": -1.0,
+        "X6c957441": -1.0,
+        "Xc42aa793": 1.0,
+        "X2eaed5bf": 1.0,
+        "X186a22a9": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Raf425123",
+      "name": "",
+      "metabolites": {
+        "X0216f3b4": -2.0,
+        "Xfe66f172": -1.0,
+        "X2eaed5bf": 2.0,
+        "X186a22a9": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Raac1e15b",
+      "name": "",
+      "metabolites": {
+        "X186a22a9": -1.0,
+        "Xf123b3b9": -1.0,
+        "X2eaed5bf": 1.0,
+        "X3481567b": 1.0,
+        "Xd78a925f": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rbeb2f9d4",
+      "name": "",
+      "metabolites": {
+        "X186a22a9": -1.0,
+        "Xf123b3b9": -1.0,
+        "Xa21f95f9": 1.0,
+        "X3481567b": 1.0,
+        "X6c7ab365": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rbac0cf15",
+      "name": "",
+      "metabolites": {
+        "X186a22a9": -1.0,
+        "X7e3cf6de": -1.0,
+        "Xa21f95f9": 1.0,
+        "X36bc30c1": 1.0,
+        "X6c7ab365": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "Rce0ca62e",
+      "name": "",
+      "metabolites": {
+        "X2eaed5bf": -4.0,
+        "X3481567b": -1.0,
+        "X37b0bf02": -1.0,
+        "X0216f3b4": 3.0,
+        "Xf123b3b9": 1.0,
+        "X9435f19c": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R5d91f82d",
+      "name": "",
+      "metabolites": {
+        "Xf123b3b9": -1.0,
+        "X36bc30c1": -1.0,
+        "X3481567b": 1.0,
+        "X7e3cf6de": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R49e3ab24",
+      "name": "",
+      "metabolites": {
+        "Xd6861eb9": -1.0,
+        "X5f6d31d4": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R48b66d66",
+      "name": "",
+      "metabolites": {
+        "Xa6cc4dc0": -1.0,
+        "X294d2956": 1.0
+      },
+      "lower_bound": -1000.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    },
+    {
+      "id": "R5e8202a1",
+      "name": "",
+      "metabolites": {
+        "Xc42aa793": -1.0,
+        "Xf123b3b9": -1.0,
+        "X6c7ab365": -1.0,
+        "X1639dfff": 1.0,
+        "Xa21f95f9": 1.0,
+        "X3481567b": 1.0
+      },
+      "lower_bound": 0.0,
+      "upper_bound": 1000.0,
+      "gene_reaction_rule": ""
+    }
+  ],
+  "genes": []
+}

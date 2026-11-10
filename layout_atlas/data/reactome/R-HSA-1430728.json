@@ -1,0 +1,1207 @@
+{
+  "dbId" : 1430728,
+  "stableId" : "R-HSA-1430728",
+  "displayName" : "Metabolism",
+  "nodes" : [ {
+    "id" : 1,
+    "reactomeId" : 202131,
+    "displayName" : "Metabolism of nitric oxide: NOS3 activation and regulation",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 131,
+      "y" : 354
+    },
+    "minX" : 49,
+    "maxX" : 214,
+    "minY" : 318,
+    "maxY" : 391,
+    "prop" : {
+      "x" : 49,
+      "y" : 318,
+      "width" : 165,
+      "height" : 73
+    },
+    "textPosition" : {
+      "x" : 51,
+      "y" : 326
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 2,
+    "reactomeId" : 163685,
+    "displayName" : "Integration of energy metabolism",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 257,
+      "y" : 265
+    },
+    "minX" : 180,
+    "maxX" : 335,
+    "minY" : 229,
+    "maxY" : 302,
+    "prop" : {
+      "x" : 180,
+      "y" : 229,
+      "width" : 155,
+      "height" : 73
+    },
+    "textPosition" : {
+      "x" : 181,
+      "y" : 244
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 196,
+    "reactomeId" : 2564830,
+    "displayName" : "Cytosolic iron-sulfur cluster assembly",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 97,
+      "y" : 510
+    },
+    "minX" : 6,
+    "maxX" : 188,
+    "minY" : 482,
+    "maxY" : 538,
+    "prop" : {
+      "x" : 6,
+      "y" : 482,
+      "width" : 182,
+      "height" : 56
+    },
+    "textPosition" : {
+      "x" : 26,
+      "y" : 488
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 4,
+    "reactomeId" : 71291,
+    "displayName" : "Metabolism of amino acids and derivatives",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 265,
+      "y" : 38
+    },
+    "minX" : 200,
+    "maxX" : 331,
+    "minY" : 0,
+    "maxY" : 76,
+    "prop" : {
+      "x" : 200,
+      "y" : 0,
+      "width" : 131,
+      "height" : 76
+    },
+    "textPosition" : {
+      "x" : 204,
+      "y" : 9
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 101,
+    "reactomeId" : 1475029,
+    "displayName" : "Reversible hydration of carbon dioxide",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 272,
+      "y" : 434
+    },
+    "minX" : 193,
+    "maxX" : 351,
+    "minY" : 405,
+    "maxY" : 464,
+    "prop" : {
+      "x" : 193,
+      "y" : 405,
+      "width" : 158,
+      "height" : 59
+    },
+    "textPosition" : {
+      "x" : 198,
+      "y" : 413
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 5,
+    "reactomeId" : 15869,
+    "displayName" : "Metabolism of nucleotides",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 86,
+      "y" : 148
+    },
+    "minX" : 30,
+    "maxX" : 142,
+    "minY" : 118,
+    "maxY" : 178,
+    "prop" : {
+      "x" : 30,
+      "y" : 118,
+      "width" : 112,
+      "height" : 60
+    },
+    "textPosition" : {
+      "x" : 32,
+      "y" : 126
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 102,
+    "reactomeId" : 1483249,
+    "displayName" : "Inositol phosphate metabolism",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 315,
+      "y" : 362
+    },
+    "minX" : 241,
+    "maxX" : 390,
+    "minY" : 333,
+    "maxY" : 392,
+    "prop" : {
+      "x" : 241,
+      "y" : 333,
+      "width" : 149,
+      "height" : 59
+    },
+    "textPosition" : {
+      "x" : 247,
+      "y" : 341
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 6,
+    "reactomeId" : 196854,
+    "displayName" : "Metabolism of vitamins and cofactors",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 441,
+      "y" : 50
+    },
+    "minX" : 381,
+    "maxX" : 501,
+    "minY" : 13,
+    "maxY" : 88,
+    "prop" : {
+      "x" : 381,
+      "y" : 13,
+      "width" : 120,
+      "height" : 75
+    },
+    "textPosition" : {
+      "x" : 387,
+      "y" : 22
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 198,
+    "reactomeId" : 71737,
+    "displayName" : "Pyrophosphate hydrolysis",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 433,
+      "y" : 435
+    },
+    "minX" : 368,
+    "maxX" : 499,
+    "minY" : 408,
+    "maxY" : 462,
+    "prop" : {
+      "x" : 368,
+      "y" : 408,
+      "width" : 131,
+      "height" : 54
+    },
+    "textPosition" : {
+      "x" : 376,
+      "y" : 413
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 7,
+    "reactomeId" : 1428517,
+    "displayName" : "Aerobic respiration and respiratory electron transport",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 266,
+      "y" : 148
+    },
+    "minX" : 190,
+    "maxX" : 342,
+    "minY" : 107,
+    "maxY" : 189,
+    "prop" : {
+      "x" : 190,
+      "y" : 107,
+      "width" : 152,
+      "height" : 82
+    },
+    "textPosition" : {
+      "x" : 196,
+      "y" : 119
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 11,
+    "reactomeId" : 189445,
+    "displayName" : "Metabolism of porphyrins",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 86,
+      "y" : 47
+    },
+    "minX" : 28,
+    "maxX" : 145,
+    "minY" : 14,
+    "maxY" : 80,
+    "prop" : {
+      "x" : 28,
+      "y" : 14,
+      "width" : 117,
+      "height" : 66
+    },
+    "textPosition" : {
+      "x" : 33,
+      "y" : 25
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 13,
+    "reactomeId" : 211859,
+    "displayName" : "Biological oxidations",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 452,
+      "y" : 148
+    },
+    "minX" : 382,
+    "maxX" : 522,
+    "minY" : 118,
+    "maxY" : 179,
+    "prop" : {
+      "x" : 382,
+      "y" : 118,
+      "width" : 140,
+      "height" : 61
+    },
+    "textPosition" : {
+      "x" : 412,
+      "y" : 127
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 16,
+    "reactomeId" : 71387,
+    "displayName" : "Metabolism of carbohydrates and carbohydrate derivatives",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 83,
+      "y" : 263
+    },
+    "minX" : 24,
+    "maxX" : 142,
+    "minY" : 226,
+    "maxY" : 300,
+    "prop" : {
+      "x" : 24,
+      "y" : 226,
+      "width" : 118,
+      "height" : 74
+    },
+    "textPosition" : {
+      "x" : 27,
+      "y" : 221
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 17,
+    "reactomeId" : 556833,
+    "displayName" : "Metabolism of lipids",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 452,
+      "y" : 262
+    },
+    "minX" : 377,
+    "maxX" : 528,
+    "minY" : 228,
+    "maxY" : 296,
+    "prop" : {
+      "x" : 377,
+      "y" : 228,
+      "width" : 151,
+      "height" : 68
+    },
+    "textPosition" : {
+      "x" : 383,
+      "y" : 247
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 18,
+    "reactomeId" : 1362409,
+    "displayName" : "Mitochondrial iron-sulfur cluster biogenesis",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "ProcessNode",
+    "position" : {
+      "x" : 92,
+      "y" : 435
+    },
+    "minX" : 0,
+    "maxX" : 184,
+    "minY" : 406,
+    "maxY" : 464,
+    "prop" : {
+      "x" : 0,
+      "y" : 406,
+      "width" : 184,
+      "height" : 58
+    },
+    "textPosition" : {
+      "x" : 6,
+      "y" : 413
+    },
+    "connectors" : [ ]
+  } ],
+  "edges" : [ ],
+  "compartments" : [ ],
+  "notes" : [ ],
+  "links" : [ {
+    "id" : 96,
+    "renderableClass" : "FlowLine",
+    "position" : {
+      "x" : 369,
+      "y" : 193
+    },
+    "minX" : 345,
+    "maxX" : 411,
+    "minY" : 181,
+    "maxY" : 225,
+    "segments" : [ {
+      "from" : {
+        "x" : 345,
+        "y" : 181
+      },
+      "to" : {
+        "x" : 369,
+        "y" : 193
+      }
+    }, {
+      "from" : {
+        "x" : 369,
+        "y" : 193
+      },
+      "to" : {
+        "x" : 411,
+        "y" : 225
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 403,
+        "y" : 224
+      },
+      "b" : {
+        "x" : 411,
+        "y" : 225
+      },
+      "c" : {
+        "x" : 408,
+        "y" : 218
+      },
+      "type" : "ARROW",
+      "centre" : {
+        "x" : 408,
+        "y" : 218
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 363,
+        "y" : 187
+      },
+      "b" : {
+        "x" : 375,
+        "y" : 199
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 369,
+        "y" : 193
+      }
+    },
+    "inputs" : [ {
+      "id" : 7
+    } ],
+    "outputs" : [ {
+      "id" : 17
+    } ]
+  }, {
+    "id" : 97,
+    "renderableClass" : "FlowLine",
+    "position" : {
+      "x" : 164,
+      "y" : 95
+    },
+    "minX" : 131,
+    "maxX" : 197,
+    "minY" : 75,
+    "maxY" : 115,
+    "segments" : [ {
+      "from" : {
+        "x" : 197,
+        "y" : 75
+      },
+      "to" : {
+        "x" : 131,
+        "y" : 115
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 135,
+        "y" : 108
+      },
+      "b" : {
+        "x" : 131,
+        "y" : 115
+      },
+      "c" : {
+        "x" : 139,
+        "y" : 115
+      },
+      "type" : "ARROW",
+      "centre" : {
+        "x" : 139,
+        "y" : 115
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 158,
+        "y" : 89
+      },
+      "b" : {
+        "x" : 170,
+        "y" : 101
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 164,
+        "y" : 95
+      }
+    },
+    "inputs" : [ {
+      "id" : 4
+    } ],
+    "outputs" : [ {
+      "id" : 5
+    } ]
+  }, {
+    "id" : 98,
+    "renderableClass" : "FlowLine",
+    "position" : {
+      "x" : 172,
+      "y" : 41
+    },
+    "minX" : 148,
+    "maxX" : 197,
+    "minY" : 35,
+    "maxY" : 47,
+    "segments" : [ {
+      "from" : {
+        "x" : 197,
+        "y" : 40
+      },
+      "to" : {
+        "x" : 148,
+        "y" : 43
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 155,
+        "y" : 39
+      },
+      "b" : {
+        "x" : 148,
+        "y" : 43
+      },
+      "c" : {
+        "x" : 155,
+        "y" : 47
+      },
+      "type" : "ARROW",
+      "centre" : {
+        "x" : 155,
+        "y" : 47
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 166,
+        "y" : 35
+      },
+      "b" : {
+        "x" : 178,
+        "y" : 47
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 172,
+        "y" : 41
+      }
+    },
+    "inputs" : [ {
+      "id" : 4
+    } ],
+    "outputs" : [ {
+      "id" : 11
+    } ]
+  }, {
+    "id" : 195,
+    "renderableClass" : "FlowLine",
+    "position" : {
+      "x" : 370,
+      "y" : 306
+    },
+    "minX" : 343,
+    "maxX" : 388,
+    "minY" : 299,
+    "maxY" : 330,
+    "segments" : [ {
+      "from" : {
+        "x" : 388,
+        "y" : 299
+      },
+      "to" : {
+        "x" : 370,
+        "y" : 306
+      }
+    }, {
+      "from" : {
+        "x" : 370,
+        "y" : 306
+      },
+      "to" : {
+        "x" : 343,
+        "y" : 330
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 346,
+        "y" : 322
+      },
+      "b" : {
+        "x" : 343,
+        "y" : 330
+      },
+      "c" : {
+        "x" : 351,
+        "y" : 328
+      },
+      "type" : "ARROW",
+      "centre" : {
+        "x" : 351,
+        "y" : 328
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 364,
+        "y" : 300
+      },
+      "b" : {
+        "x" : 376,
+        "y" : 312
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 370,
+        "y" : 306
+      }
+    },
+    "inputs" : [ {
+      "id" : 17
+    } ],
+    "outputs" : [ {
+      "id" : 102
+    } ]
+  }, {
+    "id" : 199,
+    "renderableClass" : "FlowLine",
+    "position" : {
+      "x" : 243,
+      "y" : 89
+    },
+    "minX" : 237,
+    "maxX" : 250,
+    "minY" : 79,
+    "maxY" : 104,
+    "segments" : [ {
+      "from" : {
+        "x" : 248,
+        "y" : 79
+      },
+      "to" : {
+        "x" : 243,
+        "y" : 89
+      }
+    }, {
+      "from" : {
+        "x" : 243,
+        "y" : 89
+      },
+      "to" : {
+        "x" : 250,
+        "y" : 104
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 243,
+        "y" : 99
+      },
+      "b" : {
+        "x" : 250,
+        "y" : 104
+      },
+      "c" : {
+        "x" : 251,
+        "y" : 96
+      },
+      "type" : "ARROW",
+      "centre" : {
+        "x" : 251,
+        "y" : 96
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 237,
+        "y" : 83
+      },
+      "b" : {
+        "x" : 249,
+        "y" : 95
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 243,
+        "y" : 89
+      }
+    },
+    "inputs" : [ {
+      "id" : 4
+    } ],
+    "outputs" : [ {
+      "id" : 7
+    } ]
+  }, {
+    "id" : 104,
+    "renderableClass" : "FlowLine",
+    "position" : {
+      "x" : 384,
+      "y" : 321
+    },
+    "minX" : 364,
+    "maxX" : 412,
+    "minY" : 299,
+    "maxY" : 330,
+    "segments" : [ {
+      "from" : {
+        "x" : 364,
+        "y" : 330
+      },
+      "to" : {
+        "x" : 384,
+        "y" : 321
+      }
+    }, {
+      "from" : {
+        "x" : 384,
+        "y" : 321
+      },
+      "to" : {
+        "x" : 412,
+        "y" : 299
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 409,
+        "y" : 306
+      },
+      "b" : {
+        "x" : 412,
+        "y" : 299
+      },
+      "c" : {
+        "x" : 404,
+        "y" : 300
+      },
+      "type" : "ARROW",
+      "centre" : {
+        "x" : 404,
+        "y" : 300
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 378,
+        "y" : 315
+      },
+      "b" : {
+        "x" : 390,
+        "y" : 327
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 384,
+        "y" : 321
+      }
+    },
+    "inputs" : [ {
+      "id" : 102
+    } ],
+    "outputs" : [ {
+      "id" : 17
+    } ]
+  }, {
+    "id" : 200,
+    "renderableClass" : "FlowLine",
+    "position" : {
+      "x" : 281,
+      "y" : 90
+    },
+    "minX" : 275,
+    "maxX" : 287,
+    "minY" : 79,
+    "maxY" : 104,
+    "segments" : [ {
+      "from" : {
+        "x" : 276,
+        "y" : 104
+      },
+      "to" : {
+        "x" : 281,
+        "y" : 90
+      }
+    }, {
+      "from" : {
+        "x" : 281,
+        "y" : 90
+      },
+      "to" : {
+        "x" : 276,
+        "y" : 79
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 283,
+        "y" : 84
+      },
+      "b" : {
+        "x" : 276,
+        "y" : 79
+      },
+      "c" : {
+        "x" : 275,
+        "y" : 87
+      },
+      "type" : "ARROW",
+      "centre" : {
+        "x" : 275,
+        "y" : 87
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 275,
+        "y" : 84
+      },
+      "b" : {
+        "x" : 287,
+        "y" : 96
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 281,
+        "y" : 90
+      }
+    },
+    "inputs" : [ {
+      "id" : 7
+    } ],
+    "outputs" : [ {
+      "id" : 4
+    } ]
+  }, {
+    "id" : 91,
+    "renderableClass" : "FlowLine",
+    "position" : {
+      "x" : 165,
+      "y" : 192
+    },
+    "minX" : 125,
+    "maxX" : 187,
+    "minY" : 181,
+    "maxY" : 223,
+    "segments" : [ {
+      "from" : {
+        "x" : 187,
+        "y" : 181
+      },
+      "to" : {
+        "x" : 165,
+        "y" : 192
+      }
+    }, {
+      "from" : {
+        "x" : 165,
+        "y" : 192
+      },
+      "to" : {
+        "x" : 125,
+        "y" : 223
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 128,
+        "y" : 216
+      },
+      "b" : {
+        "x" : 125,
+        "y" : 223
+      },
+      "c" : {
+        "x" : 133,
+        "y" : 222
+      },
+      "type" : "ARROW",
+      "centre" : {
+        "x" : 133,
+        "y" : 222
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 159,
+        "y" : 186
+      },
+      "b" : {
+        "x" : 171,
+        "y" : 198
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 165,
+        "y" : 192
+      }
+    },
+    "inputs" : [ {
+      "id" : 7
+    } ],
+    "outputs" : [ {
+      "id" : 16
+    } ]
+  }, {
+    "id" : 92,
+    "renderableClass" : "FlowLine",
+    "position" : {
+      "x" : 174,
+      "y" : 214
+    },
+    "minX" : 145,
+    "maxX" : 208,
+    "minY" : 192,
+    "maxY" : 231,
+    "segments" : [ {
+      "from" : {
+        "x" : 145,
+        "y" : 231
+      },
+      "to" : {
+        "x" : 174,
+        "y" : 214
+      }
+    }, {
+      "from" : {
+        "x" : 174,
+        "y" : 214
+      },
+      "to" : {
+        "x" : 208,
+        "y" : 192
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 204,
+        "y" : 199
+      },
+      "b" : {
+        "x" : 208,
+        "y" : 192
+      },
+      "c" : {
+        "x" : 200,
+        "y" : 192
+      },
+      "type" : "ARROW",
+      "centre" : {
+        "x" : 200,
+        "y" : 192
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 168,
+        "y" : 208
+      },
+      "b" : {
+        "x" : 180,
+        "y" : 220
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 174,
+        "y" : 214
+      }
+    },
+    "inputs" : [ {
+      "id" : 16
+    } ],
+    "outputs" : [ {
+      "id" : 7
+    } ]
+  }, {
+    "id" : 93,
+    "renderableClass" : "FlowLine",
+    "position" : {
+      "x" : 161,
+      "y" : 263
+    },
+    "minX" : 145,
+    "maxX" : 177,
+    "minY" : 257,
+    "maxY" : 269,
+    "segments" : [ {
+      "from" : {
+        "x" : 177,
+        "y" : 263
+      },
+      "to" : {
+        "x" : 145,
+        "y" : 263
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 152,
+        "y" : 259
+      },
+      "b" : {
+        "x" : 145,
+        "y" : 263
+      },
+      "c" : {
+        "x" : 152,
+        "y" : 267
+      },
+      "type" : "ARROW",
+      "centre" : {
+        "x" : 152,
+        "y" : 267
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 155,
+        "y" : 257
+      },
+      "b" : {
+        "x" : 167,
+        "y" : 269
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 161,
+        "y" : 263
+      }
+    },
+    "inputs" : [ {
+      "id" : 2
+    } ],
+    "outputs" : [ {
+      "id" : 16
+    } ]
+  }, {
+    "id" : 94,
+    "renderableClass" : "FlowLine",
+    "position" : {
+      "x" : 356,
+      "y" : 262
+    },
+    "minX" : 338,
+    "maxX" : 374,
+    "minY" : 256,
+    "maxY" : 268,
+    "segments" : [ {
+      "from" : {
+        "x" : 338,
+        "y" : 263
+      },
+      "to" : {
+        "x" : 374,
+        "y" : 262
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 367,
+        "y" : 266
+      },
+      "b" : {
+        "x" : 374,
+        "y" : 262
+      },
+      "c" : {
+        "x" : 367,
+        "y" : 258
+      },
+      "type" : "ARROW",
+      "centre" : {
+        "x" : 367,
+        "y" : 258
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 350,
+        "y" : 256
+      },
+      "b" : {
+        "x" : 362,
+        "y" : 268
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 356,
+        "y" : 262
+      }
+    },
+    "inputs" : [ {
+      "id" : 2
+    } ],
+    "outputs" : [ {
+      "id" : 17
+    } ]
+  }, {
+    "id" : 95,
+    "renderableClass" : "FlowLine",
+    "position" : {
+      "x" : 361,
+      "y" : 217
+    },
+    "minX" : 322,
+    "maxX" : 383,
+    "minY" : 192,
+    "maxY" : 225,
+    "segments" : [ {
+      "from" : {
+        "x" : 383,
+        "y" : 225
+      },
+      "to" : {
+        "x" : 361,
+        "y" : 217
+      }
+    }, {
+      "from" : {
+        "x" : 361,
+        "y" : 217
+      },
+      "to" : {
+        "x" : 322,
+        "y" : 192
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 330,
+        "y" : 192
+      },
+      "b" : {
+        "x" : 322,
+        "y" : 192
+      },
+      "c" : {
+        "x" : 326,
+        "y" : 199
+      },
+      "type" : "ARROW",
+      "centre" : {
+        "x" : 326,
+        "y" : 199
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 355,
+        "y" : 211
+      },
+      "b" : {
+        "x" : 367,
+        "y" : 223
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 361,
+        "y" : 217
+      }
+    },
+    "inputs" : [ {
+      "id" : 17
+    } ],
+    "outputs" : [ {
+      "id" : 7
+    } ]
+  } ],
+  "shadows" : [ ],
+  "minX" : 0,
+  "maxX" : 528,
+  "minY" : 0,
+  "maxY" : 538,
+  "disease" : false
+}

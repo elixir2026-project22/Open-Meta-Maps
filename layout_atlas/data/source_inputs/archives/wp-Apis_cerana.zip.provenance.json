@@ -1,0 +1,8 @@
+{
+  "source": "wikipathways",
+  "version": "20261010",
+  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Apis_cerana.zip",
+  "sha256": "e5d8df3372715959556c710391df4cabc6db9def807f19eed1dcd08ce462bd9a",
+  "bytes": 45344,
+  "local_path": "data/archives/wp-Apis_cerana.zip"
+}

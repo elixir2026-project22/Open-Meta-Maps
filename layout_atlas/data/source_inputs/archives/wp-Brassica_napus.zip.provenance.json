@@ -1,0 +1,8 @@
+{
+  "source": "wikipathways",
+  "version": "20261010",
+  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Brassica_napus.zip",
+  "sha256": "2d9b2bc0ed94d4f48f228eb1bba1e92669572063c90793b20990f7d46d071e71",
+  "bytes": 19428,
+  "local_path": "data/archives/wp-Brassica_napus.zip"
+}

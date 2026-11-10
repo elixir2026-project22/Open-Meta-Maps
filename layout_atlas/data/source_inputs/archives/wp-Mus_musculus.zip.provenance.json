@@ -1,0 +1,8 @@
+{
+  "source": "wikipathways",
+  "version": "20261010",
+  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Mus_musculus.zip",
+  "sha256": "9b911de6486a8f45ae9d9bab31bc59a0d850b0355a04a72dc535eb532ca3ea4e",
+  "bytes": 1948936,
+  "local_path": "data/archives/wp-Mus_musculus.zip"
+}

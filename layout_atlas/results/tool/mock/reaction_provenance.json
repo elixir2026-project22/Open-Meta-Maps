@@ -1,0 +1,339 @@
+[
+ {
+  "reaction": "PGI",
+  "provenance": "expert_derived",
+  "identity_evidence": {
+   "kind": "complete_equation",
+   "shared_ec": null,
+   "reason": "all participants matched"
+  },
+  "context_compatibility": "compatible",
+  "ambiguity": null,
+  "structure": {
+   "structure_id": "s1",
+   "code": "M03781",
+   "source": "community",
+   "match_level": "equation",
+   "license": "CC0-1.0",
+   "partition": "core"
+  }
+ },
+ {
+  "reaction": "PFK",
+  "provenance": "topology_layout_suggestion",
+  "identity_evidence": null,
+  "context_compatibility": "compatible",
+  "ambiguity": null,
+  "structure": {
+   "structure_id": "s2",
+   "code": "M07702",
+   "source": "community",
+   "match_level": "topology",
+   "license": "CC0-1.0",
+   "partition": "core"
+  }
+ },
+ {
+  "reaction": "FBA",
+  "provenance": "functional_layout_suggestion",
+  "identity_evidence": {
+   "kind": "ec_only",
+   "shared_ec": "2.7.1.1",
+   "reason": "shares EC 2.7.1.1; equation not verified"
+  },
+  "context_compatibility": "compatible",
+  "ambiguity": null,
+  "structure": {
+   "structure_id": "s3",
+   "code": "M11795",
+   "source": "reactome",
+   "match_level": "ec",
+   "license": "CC0-1.0-data",
+   "partition": "ec"
+  }
+ },
+ {
+  "reaction": "TPI",
+  "provenance": "bridge",
+  "identity_evidence": null,
+  "context_compatibility": null,
+  "ambiguity": null,
+  "structure": null
+ },
+ {
+  "reaction": "GAPD",
+  "provenance": "generated",
+  "identity_evidence": null,
+  "context_compatibility": null,
+  "ambiguity": null,
+  "structure": null
+ },
+ {
+  "reaction": "PGK",
+  "provenance": "expert_derived",
+  "identity_evidence": {
+   "kind": "complete_equation",
+   "shared_ec": null,
+   "reason": "all participants matched"
+  },
+  "context_compatibility": "compatible",
+  "ambiguity": null,
+  "structure": {
+   "structure_id": "s1",
+   "code": "M03781",
+   "source": "community",
+   "match_level": "equation",
+   "license": "CC0-1.0",
+   "partition": "core"
+  }
+ },
+ {
+  "reaction": "PGM",
+  "provenance": "topology_layout_suggestion",
+  "identity_evidence": null,
+  "context_compatibility": "compatible",
+  "ambiguity": null,
+  "structure": {
+   "structure_id": "s2",
+   "code": "M07702",
+   "source": "community",
+   "match_level": "topology",
+   "license": "CC0-1.0",
+   "partition": "core"
+  }
+ },
+ {
+  "reaction": "ENO",
+  "provenance": "functional_layout_suggestion",
+  "identity_evidence": {
+   "kind": "ec_only",
+   "shared_ec": "2.7.1.1",
+   "reason": "shares EC 2.7.1.1; equation not verified"
+  },
+  "context_compatibility": "compatible",
+  "ambiguity": null,
+  "structure": {
+   "structure_id": "s3",
+   "code": "M11795",
+   "source": "reactome",
+   "match_level": "ec",
+   "license": "CC0-1.0-data",
+   "partition": "ec"
+  }
+ },
+ {
+  "reaction": "PYK",
+  "provenance": "bridge",
+  "identity_evidence": null,
+  "context_compatibility": null,
+  "ambiguity": null,
+  "structure": null
+ },
+ {
+  "reaction": "LDH_D",
+  "provenance": "generated",
+  "identity_evidence": null,
+  "context_compatibility": null,
+  "ambiguity": null,
+  "structure": null
+ },
+ {
+  "reaction": "ACALD",
+  "provenance": "expert_derived",
+  "identity_evidence": {
+   "kind": "complete_equation",
+   "shared_ec": null,
+   "reason": "all participants matched"
+  },
+  "context_compatibility": "compatible",
+  "ambiguity": null,
+  "structure": {
+   "structure_id": "s1",
+   "code": "M03781",
+   "source": "community",
+   "match_level": "equation",
+   "license": "CC0-1.0",
+   "partition": "core"
+  }
+ },
+ {
+  "reaction": "ALCD2x",
+  "provenance": "topology_layout_suggestion",
+  "identity_evidence": null,
+  "context_compatibility": "compatible",
+  "ambiguity": null,
+  "structure": {
+   "structure_id": "s2",
+   "code": "M07702",
+   "source": "community",
+   "match_level": "topology",
+   "license": "CC0-1.0",
+   "partition": "core"
+  }
+ },
+ {
+  "reaction": "PGI_b",
+  "provenance": "functional_layout_suggestion",
+  "identity_evidence": {
+   "kind": "ec_only",
+   "shared_ec": "2.7.1.1",
+   "reason": "shares EC 2.7.1.1; equation not verified"
+  },
+  "context_compatibility": "compatible",
+  "ambiguity": null,
+  "structure": {
+   "structure_id": "s3",
+   "code": "M11795",
+   "source": "reactome",
+   "match_level": "ec",
+   "license": "CC0-1.0-data",
+   "partition": "ec"
+  }
+ },
+ {
+  "reaction": "PFK_b",
+  "provenance": "bridge",
+  "identity_evidence": null,
+  "context_compatibility": null,
+  "ambiguity": null,
+  "structure": null
+ },
+ {
+  "reaction": "FBA_b",
+  "provenance": "generated",
+  "identity_evidence": null,
+  "context_compatibility": null,
+  "ambiguity": null,
+  "structure": null
+ },
+ {
+  "reaction": "TPI_b",
+  "provenance": "expert_derived",
+  "identity_evidence": {
+   "kind": "complete_equation",
+   "shared_ec": null,
+   "reason": "all participants matched"
+  },
+  "context_compatibility": "compatible",
+  "ambiguity": null,
+  "structure": {
+   "structure_id": "s1",
+   "code": "M03781",
+   "source": "community",
+   "match_level": "equation",
+   "license": "CC0-1.0",
+   "partition": "core"
+  }
+ },
+ {
+  "reaction": "GAPD_b",
+  "provenance": "topology_layout_suggestion",
+  "identity_evidence": null,
+  "context_compatibility": "compatible",
+  "ambiguity": null,
+  "structure": {
+   "structure_id": "s2",
+   "code": "M07702",
+   "source": "community",
+   "match_level": "topology",
+   "license": "CC0-1.0",
+   "partition": "core"
+  }
+ },
+ {
+  "reaction": "PGK_b",
+  "provenance": "functional_layout_suggestion",
+  "identity_evidence": {
+   "kind": "ec_only",
+   "shared_ec": "2.7.1.1",
+   "reason": "shares EC 2.7.1.1; equation not verified"
+  },
+  "context_compatibility": "compatible",
+  "ambiguity": null,
+  "structure": {
+   "structure_id": "s3",
+   "code": "M11795",
+   "source": "reactome",
+   "match_level": "ec",
+   "license": "CC0-1.0-data",
+   "partition": "ec"
+  }
+ },
+ {
+  "reaction": "PGM_b",
+  "provenance": "bridge",
+  "identity_evidence": null,
+  "context_compatibility": null,
+  "ambiguity": null,
+  "structure": null
+ },
+ {
+  "reaction": "ENO_b",
+  "provenance": "generated",
+  "identity_evidence": null,
+  "context_compatibility": null,
+  "ambiguity": null,
+  "structure": null
+ },
+ {
+  "reaction": "PYK_b",
+  "provenance": "expert_derived",
+  "identity_evidence": {
+   "kind": "complete_equation",
+   "shared_ec": null,
+   "reason": "all participants matched"
+  },
+  "context_compatibility": "compatible",
+  "ambiguity": null,
+  "structure": {
+   "structure_id": "s1",
+   "code": "M03781",
+   "source": "community",
+   "match_level": "equation",
+   "license": "CC0-1.0",
+   "partition": "core"
+  }
+ },
+ {
+  "reaction": "LDH_D_b",
+  "provenance": "topology_layout_suggestion",
+  "identity_evidence": null,
+  "context_compatibility": "compatible",
+  "ambiguity": null,
+  "structure": {
+   "structure_id": "s2",
+   "code": "M07702",
+   "source": "community",
+   "match_level": "topology",
+   "license": "CC0-1.0",
+   "partition": "core"
+  }
+ },
+ {
+  "reaction": "ACALD_b",
+  "provenance": "functional_layout_suggestion",
+  "identity_evidence": {
+   "kind": "ec_only",
+   "shared_ec": "2.7.1.1",
+   "reason": "shares EC 2.7.1.1; equation not verified"
+  },
+  "context_compatibility": "compatible",
+  "ambiguity": null,
+  "structure": {
+   "structure_id": "s3",
+   "code": "M11795",
+   "source": "reactome",
+   "match_level": "ec",
+   "license": "CC0-1.0-data",
+   "partition": "ec"
+  }
+ },
+ {
+  "reaction": "ALCD2x_b",
+  "provenance": "bridge",
+  "identity_evidence": null,
+  "context_compatibility": null,
+  "ambiguity": null,
+  "structure": null
+ }
+]

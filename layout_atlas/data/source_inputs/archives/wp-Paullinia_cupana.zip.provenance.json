@@ -1,0 +1,8 @@
+{
+  "source": "wikipathways",
+  "version": "20261010",
+  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Paullinia_cupana.zip",
+  "sha256": "7793311c7344d8bf86e564b9fa394b92d50453a578efea3ec7abbf0b55ede2eb",
+  "bytes": 1801,
+  "local_path": "data/archives/wp-Paullinia_cupana.zip"
+}

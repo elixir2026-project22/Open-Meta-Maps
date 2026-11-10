@@ -1,0 +1,49 @@
+{
+  "dbId" : 1428517,
+  "stId" : "R-HSA-1428517",
+  "speciesName" : "Homo sapiens",
+  "nodes" : [ {
+    "dbId" : 880009,
+    "stId" : "R-HSA-880009",
+    "displayName" : "Interconversion of 2-oxoglutarate and 2-hydroxyglutarate",
+    "schemaClass" : "Pathway",
+    "speciesId" : 48887,
+    "diagramIds" : [ 5 ]
+  }, {
+    "dbId" : 163210,
+    "stId" : "R-HSA-163210",
+    "displayName" : "Formation of ATP by chemiosmotic coupling",
+    "schemaClass" : "Pathway",
+    "speciesId" : 48887,
+    "diagramIds" : [ 8 ]
+  }, {
+    "dbId" : 611105,
+    "stId" : "R-HSA-611105",
+    "displayName" : "Respiratory electron transport",
+    "schemaClass" : "Pathway",
+    "speciesId" : 48887,
+    "diagramIds" : [ 7 ]
+  }, {
+    "dbId" : 166187,
+    "stId" : "R-HSA-166187",
+    "displayName" : "Mitochondrial Uncoupling",
+    "schemaClass" : "Pathway",
+    "speciesId" : 48887,
+    "diagramIds" : [ 9 ]
+  }, {
+    "dbId" : 71403,
+    "stId" : "R-HSA-71403",
+    "displayName" : "Citric acid cycle (TCA cycle)",
+    "schemaClass" : "Pathway",
+    "speciesId" : 48887,
+    "diagramIds" : [ 3 ]
+  }, {
+    "dbId" : 70268,
+    "stId" : "R-HSA-70268",
+    "displayName" : "Pyruvate metabolism",
+    "schemaClass" : "Pathway",
+    "speciesId" : 48887,
+    "diagramIds" : [ 4 ]
+  } ],
+  "edges" : [ ]
+}

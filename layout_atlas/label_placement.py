@@ -1,0 +1,160 @@
+"""Label placement on the FINAL curves.
+
+`drawing.export` (hashed) places every label once, before any curve exists, so after the V7 Bezier connections a label can sit on a line.  This module moves
+the labels of the finished `map.json` (`label_x` / `label_y` of metabolites and reactions) among 9 candidate positions around their glyph (right, left, above,
+below, the four diagonals, and where it is now) and keeps, for each label, the position with the lowest cost.  A glyph never moves; only text moves.
+
+  cost = 10 x (sampled curve pieces of OTHER connections that cross the label box) + 3 x (pieces of its own connections)
+       + 10 x (overlap with another label) + 8 x (overlap with another glyph)
+Greedy, three passes, the worst labels first, ties keep the current position then prefer 'right'.  Deterministic.
+"""
+import numpy as np
+from collections import defaultdict
+
+PADX, PADY_UP, PADY_DOWN = 2.0, 14.0, 4.0
+CELL = 150.0
+
+
+def _rect(lx, ly, w):
+    return (lx - PADX, ly - PADY_UP, lx + w + PADX, ly + PADY_DOWN)
+
+
+def _cells(lo, hi):
+    for gx in range(int(lo[0] // CELL), int(hi[0] // CELL) + 1):
+        for gy in range(int(lo[1] // CELL), int(hi[1] // CELL) + 1):
+            yield gx, gy
+
+
+def _seg_rect(S, r):
+    """Boolean per segment [k,4]: does it touch the rectangle r?"""
+    x0, y0, x1, y1 = r
+    ax, ay, bx, by = S[:, 0], S[:, 1], S[:, 2], S[:, 3]
+    dx, dy = bx - ax, by - ay
+    tmin, tmax = np.zeros(len(S)), np.ones(len(S))
+    ok = np.ones(len(S), bool)
+    for p, d, lo, hi in ((ax, dx, x0, x1), (ay, dy, y0, y1)):
+        zero = np.abs(d) < 1e-9
+        with np.errstate(divide='ignore', invalid='ignore'):
+            t1, t2 = (lo - p) / d, (hi - p) / d
+        ok &= np.where(zero, (p >= lo) & (p <= hi), True)
+        tmin = np.where(zero, tmin, np.maximum(tmin, np.minimum(t1, t2)))
+        tmax = np.where(zero, tmax, np.minimum(tmax, np.maximum(t1, t2)))
+    return ok & (tmin <= tmax)
+
+
+def optimize(data, passes=8):
+    import edge_routing as er
+    import line_render
+    import drawing
+    font = drawing.FONT
+    body = data[1]
+    nodes, reactions = body['nodes'], body['reactions']
+    # all connection pieces, with the node ids of their two ends
+    pieces, piece_ends = [], []
+    for rx in reactions.values():
+        for path in line_render._terminals(rx, nodes):
+            if nodes[path[-1]].get('node_type') != 'metabolite':
+                continue
+            pts = np.array(er._path_points(rx, path, nodes), float)
+            for a, b in zip(pts[:-1], pts[1:]):
+                pieces.append((a[0], a[1], b[0], b[1]))
+                piece_ends.append((path[0], path[-1]))
+    S = np.array(pieces, float).reshape(-1, 4)
+    grid = defaultdict(list)
+    for k, s in enumerate(S):
+        for c in _cells(np.minimum(s[:2], s[2:]), np.maximum(s[:2], s[2:])):
+            grid[c].append(k)
+    # glyph boxes
+    glyphs = []
+    for nid, n in nodes.items():
+        if n.get('node_type') in ('metabolite', 'midmarker'):
+            glyphs.append((nid, (n['x'] - 7, n['y'] - 7, n['x'] + 7, n['y'] + 7)))
+    glyph_grid = defaultdict(list)
+    for i, (nid, r) in enumerate(glyphs):
+        for c in _cells(r[:2], r[2:]):
+            glyph_grid[c].append(i)
+    # labels: (owner node id, container, widths, anchor)
+    labels = []
+    for nid, n in nodes.items():
+        if n.get('node_type') == 'metabolite' and 'label_x' in n:
+            labels.append(dict(owner=nid, box=n, w=font.getlength(n.get('bigg_id', '')), cx=n['x'], cy=n['y']))
+    for rx in reactions.values():
+        mid = next((s['from_node_id'] for s in rx['segments'].values() if nodes[s['from_node_id']].get('node_type') == 'midmarker'), None)
+        if mid is not None:
+            labels.append(dict(owner=mid, box=rx, w=font.getlength(rx['bigg_id']), cx=nodes[mid]['x'], cy=nodes[mid]['y']))
+    label_grid = defaultdict(set)
+
+    def put(i, rect):
+        for c in _cells(rect[:2], rect[2:]):
+            label_grid[c].add(i)
+
+    def drop(i, rect):
+        for c in _cells(rect[:2], rect[2:]):
+            label_grid[c].discard(i)
+    current = []
+    for i, L in enumerate(labels):
+        r = _rect(L['box']['label_x'], L['box']['label_y'], L['w'])
+        current.append(r)
+        put(i, r)
+
+    def candidates(L):
+        x, y, w = L['cx'], L['cy'], L['w']
+        return [(L['box']['label_x'], L['box']['label_y']), (x + 10, y + 4), (x - 10 - w, y + 4), (x - w / 2, y - 9), (x - w / 2, y + 19),
+                (x + 8, y - 8), (x + 8, y + 17), (x - 8 - w, y - 8), (x - 8 - w, y + 17),
+                # a second, wider ring for crowded places
+                (x + 26, y + 4), (x - 26 - w, y + 4), (x - w / 2, y - 24), (x - w / 2, y + 36), (x + 22, y - 22), (x + 22, y + 32), (x - 22 - w, y - 22), (x - 22 - w, y + 32)]
+
+    def cost(i, rect):
+        L = labels[i]
+        c = 0.0
+        seen = set()
+        for cell in _cells(rect[:2], rect[2:]):
+            seen.update(grid.get(cell, ()))
+        if seen:
+            idx = np.array(sorted(seen), int)
+            hit = _seg_rect(S[idx], rect)
+            for k in idx[hit]:
+                c += 3.0 if L['owner'] in piece_ends[k] else 10.0
+        near = set()
+        for cell in _cells(rect[:2], rect[2:]):
+            near.update(label_grid.get(cell, ()))
+        for j in near:
+            if j != i:
+                r = current[j]
+                if r[0] < rect[2] and rect[0] < r[2] and r[1] < rect[3] and rect[1] < r[3]:
+                    c += 10.0
+        gl = set()
+        for cell in _cells(rect[:2], rect[2:]):
+            gl.update(glyph_grid.get(cell, ()))
+        for g in gl:
+            nid, r = glyphs[g]
+            if nid != L['owner'] and r[0] < rect[2] and rect[0] < r[2] and r[1] < rect[3] and rect[1] < r[3]:
+                c += 8.0
+        return c
+    before = sum(cost(i, current[i]) > 0 for i in range(len(labels)))
+    moved = 0
+    for _ in range(passes):
+        order = sorted(range(len(labels)), key=lambda i: -cost(i, current[i]))
+        changed = 0
+        for i in order:
+            c0 = cost(i, current[i])
+            if c0 == 0:
+                continue
+            best = (c0, 0, None)
+            for k, (lx, ly) in enumerate(candidates(labels[i])[1:], start=1):
+                rect = _rect(lx, ly, labels[i]['w'])
+                c = cost(i, rect)
+                if c < best[0] - 1e-9:
+                    best = (c, k, (lx, ly, rect))
+            if best[2] is not None:
+                lx, ly, rect = best[2]
+                drop(i, current[i])
+                current[i] = rect
+                put(i, rect)
+                labels[i]['box']['label_x'], labels[i]['box']['label_y'] = round(float(lx), 2), round(float(ly), 2)
+                changed += 1
+                moved += 1
+        if not changed:
+            break
+    after = sum(cost(i, current[i]) > 0 for i in range(len(labels)))
+    return dict(labels=len(labels), with_conflict_before=before, with_conflict_after=after, moves=moved)

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Pathway xmlns="http://pathvisio.org/GPML/2013a" Name="Asparagine degradation" Data-Source="WikiPathways" Version="WP432_r140696" Author="[J.Heckman, MaintBot, Mkutmon, Christine Chichester, Khanspers, Egonw]" Last-Modified="20251008065313" Organism="Saccharomyces cerevisiae">
+  <Comment Source="WikiPathways-description">Like many other amino acids, asparagine may be utilized by S. cerevisiae as a sole source of nitrogen. Catabolism of asparagine for nitrogen involves the action of asparaginases, which hydrolyze the amide group in the side chain of asparagine. This converts asparagine to aspartate and releases an assimilable molecule of ammonia (NH₃). Further nitrogen can be derived from the newly generated aspartate molecule via its reversible conversion to glutamate by aspartate aminotransferases. Glutamate, whose amino group can be hydrolyzed to release ammonia, represents one of the major sources of nitrogen for biosynthetic reactions in S. cerevisiae.
+
+SOURCE: [SGD pathways](http://pathway.yeastgenome.org/server.html)</Comment>
+  <BiopaxRef>djh</BiopaxRef>
+  <BiopaxRef>f5d</BiopaxRef>
+  <Graphics BoardWidth="853.0000000000001" BoardHeight="283.0" />
+  <DataNode TextLabel="NH₃" GraphId="a27e8" Type="Metabolite">
+    <Graphics CenterX="310.0" CenterY="243.0" Width="62.0" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="28938" />
+  </DataNode>
+  <DataNode TextLabel="ASP1" GraphId="b18" Type="GeneProduct" GroupRef="a6e9e">
+    <Attribute Key="org.pathvisio.model.BackpageHead" Value="L-asparaginase I" />
+    <Graphics CenterX="268.6666666666667" CenterY="136.33333333333334" Width="53.333333333333336" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" />
+    <Xref Database="SGD" ID="S000002729" />
+  </DataNode>
+  <DataNode TextLabel="ASP3-1" GraphId="b2e" Type="GeneProduct" GroupRef="a6e9e">
+    <Attribute Key="org.pathvisio.model.BackpageHead" Value="L-asparaginase II precursor" />
+    <Graphics CenterX="268.6666666666667" CenterY="116.33333333333333" Width="53.333333333333336" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" />
+    <Xref Database="SGD" ID="S000004145" />
+  </DataNode>
+  <DataNode TextLabel="AAT2" GraphId="b87" Type="GeneProduct" GroupRef="ead5e">
+    <Attribute Key="org.pathvisio.model.BackpageHead" Value="AAT2" />
+    <Graphics CenterX="591.0" CenterY="126.66666666666666" Width="40.0" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" />
+    <Xref Database="SGD" ID="S000004017" />
+  </DataNode>
+  <DataNode TextLabel="H₂O" GraphId="bd976" Type="Metabolite">
+    <Graphics CenterX="222.0" CenterY="241.0" Width="54.0" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="15377" />
+  </DataNode>
+  <DataNode TextLabel="oxaloacetic acid" GraphId="bd97d" Type="Metabolite">
+    <Graphics CenterX="660.0" CenterY="239.0" Width="90.0" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="16452" />
+  </DataNode>
+  <DataNode TextLabel="ASP3-3" GraphId="be1" Type="GeneProduct" GroupRef="a6e9e">
+    <Attribute Key="org.pathvisio.model.BackpageHead" Value="asparaginase" />
+    <Graphics CenterX="268.6666666666667" CenterY="76.33333333333333" Width="53.333333333333336" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" />
+    <Xref Database="SGD" ID="S000004148" />
+  </DataNode>
+  <DataNode TextLabel="L-aspartate" GraphId="c4e23" Type="Metabolite">
+    <Graphics CenterX="454.75" CenterY="184.75" Width="90.0" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="29991" />
+  </DataNode>
+  <DataNode TextLabel="ASP3-4" GraphId="c62" Type="GeneProduct" GroupRef="a6e9e">
+    <Attribute Key="org.pathvisio.model.BackpageHead" Value="asparaginase" />
+    <Graphics CenterX="268.6666666666667" CenterY="56.333333333333336" Width="53.333333333333336" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" />
+    <Xref Database="SGD" ID="S000004150" />
+  </DataNode>
+  <DataNode TextLabel="2-oxoglutarate" GraphId="c9992" Type="Metabolite">
+    <Graphics CenterX="544.0" CenterY="237.0" Width="90.0" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="ChEBI" ID="16810" />
+  </DataNode>
+  <DataNode TextLabel="ASP3-2" GraphId="d49" Type="GeneProduct" GroupRef="a6e9e">
+    <Attribute Key="org.pathvisio.model.BackpageHead" Value="aspariginase II" />
+    <Graphics CenterX="268.6666666666667" CenterY="96.33333333333333" Width="53.333333333333336" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" />
+    <Xref Database="SGD" ID="S000004147" />
+  </DataNode>
+  <DataNode TextLabel="L-glutamate" GraphId="dd8" Type="Metabolite">
+    <Graphics CenterX="775.3333333333334" CenterY="184.75" Width="95.33333333333333" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="CAS" ID="56-86-0" />
+  </DataNode>
+  <DataNode TextLabel="L-asparagine" GraphId="f5f" Type="Metabolite">
+    <Graphics CenterX="121.33333333333331" CenterY="184.75" Width="105.33333333333333" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
+    <Xref Database="CAS" ID="70-47-3" />
+  </DataNode>
+  <DataNode TextLabel="AAT1" GraphId="f88" Type="GeneProduct" GroupRef="ead5e">
+    <Attribute Key="org.pathvisio.model.BackpageHead" Value="AAT1" />
+    <Graphics CenterX="591.0" CenterY="106.66666666666667" Width="40.0" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" />
+    <Xref Database="SGD" ID="S000001589" />
+  </DataNode>
+  <Interaction GraphId="id453682cf">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="268.3" Y="184.75" GraphRef="fe7bb" RelX="0.0" RelY="0.0" />
+      <Point X="310.0" Y="233.0" GraphRef="a27e8" RelX="0.0" RelY="-1.0" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id50e2ef62">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="590.9166666666667" Y="184.75" GraphRef="f4a6d" RelX="0.0" RelY="0.0" />
+      <Point X="660.0" Y="229.0" GraphRef="bd97d" RelX="0.0" RelY="-1.0" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id67eb511">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="174.0" Y="184.75" GraphRef="f5f" RelX="1.0" RelY="0.0" />
+      <Point X="409.75" Y="184.75" GraphRef="c4e23" RelX="-1.0" RelY="0.0" ArrowHead="mim-conversion" />
+      <Anchor Position="0.4" Shape="None" GraphId="fe7bb" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="id98bf9517">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="591.0" Y="144.66666666666666" GraphRef="d9347" RelX="0.0" RelY="1.0" />
+      <Point X="590.9166666666667" Y="184.75" GraphRef="f4a6d" RelX="0.0" RelY="0.0" ArrowHead="mim-catalysis" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="idb6e0f93b">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="499.75" Y="184.75" GraphRef="c4e23" RelX="1.0" RelY="0.0" />
+      <Point X="727.6666666666667" Y="184.75" GraphRef="dd8" RelX="-1.0" RelY="0.0" ArrowHead="mim-conversion" />
+      <Anchor Position="0.4" Shape="None" GraphId="f4a6d" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="idee14d46d">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="222.0" Y="231.0" GraphRef="bd976" RelX="0.0" RelY="-1.0" />
+      <Point X="268.3" Y="184.75" GraphRef="fe7bb" RelX="0.0" RelY="0.0" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="idf4333b6d">
+    <Graphics ZOrder="12288" LineThickness="1.0">
+      <Point X="544.0" Y="227.0" GraphRef="c9992" RelX="0.0" RelY="-1.0" />
+      <Point X="590.9166666666667" Y="184.75" GraphRef="f4a6d" RelX="0.0" RelY="0.0" ArrowHead="Arrow" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Interaction GraphId="de2da">
+    <Graphics ZOrder="32770" LineThickness="1.0">
+      <Point X="268.6666666666667" Y="154.33333333333334" GraphRef="fcacb" RelX="0.0" RelY="1.0" />
+      <Point X="268.3" Y="184.75" GraphRef="fe7bb" RelX="0.0" RelY="0.0" ArrowHead="mim-catalysis" />
+    </Graphics>
+    <Xref Database="" ID="" />
+  </Interaction>
+  <Group GroupId="ead5e" GraphId="d9347" Style="Group" />
+  <Group GroupId="a6e9e" GraphId="fcacb" Style="Group" />
+  <InfoBox CenterX="601.6666666666666" CenterY="221.66666666666666" />
+  <Biopax>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="djh">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">10640599</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The role of ammonia metabolism in nitrogen catabolite repression in Saccharomyces cerevisiae.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">FEMS Microbiol Rev</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2000</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ter Schure EG</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">van Riel NA</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Verrips CT</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="f5d">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">https://pathway.yeastgenome.org/YEAST/NEW-IMAGE?type=PATHWAY&amp;object=ASPARAGINE-DEG2-PWY</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">URL</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">asparagine degradation</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Yeast Pathways</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string"></bp:YEAR>
+    </bp:PublicationXref>
+    <bp:openControlledVocabulary xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#">
+      <bp:TERM xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">asparagine metabolic pathway</bp:TERM>
+      <bp:ID xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PW:0001083</bp:ID>
+      <bp:Ontology xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pathway Ontology</bp:Ontology>
+    </bp:openControlledVocabulary>
+  </Biopax>
+</Pathway>
+

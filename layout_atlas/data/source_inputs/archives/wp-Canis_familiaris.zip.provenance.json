@@ -1,0 +1,8 @@
+{
+  "source": "wikipathways",
+  "version": "20261010",
+  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Canis_familiaris.zip",
+  "sha256": "b535957d6c965eb274113ce346f9e843353a73575a3a95b6228410f54bb9ad80",
+  "bytes": 364400,
+  "local_path": "data/archives/wp-Canis_familiaris.zip"
+}

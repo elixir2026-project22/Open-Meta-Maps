@@ -1,0 +1,66 @@
+{
+  "version": "0.3",
+  "seeds": [
+    20261105,
+    20261106,
+    20261107
+  ],
+  "sources": {
+    "rhea_release": 143,
+    "wikipathways_release": "20261010",
+    "reactome_release": "v97",
+    "reactome_record": 21383214,
+    "yeast_original_commit": "93b787c6986a834cac323de667aac4b93547a457"
+  },
+  "database": {
+    "isomorphism_steps": 5000,
+    "geometry_mappings": 8,
+    "variant_representatives": 24
+  },
+  "retrieval": {
+    "root_budget": 120,
+    "query_sizes": [
+      2,
+      4,
+      8,
+      12
+    ],
+    "reference_windows": 600,
+    "candidates_per_query": 24,
+    "library_signature_budget": 48,
+    "core_subgraph_size": 2,
+    "core_subgraph_template_budget": 18
+  },
+  "ranking": {
+    "queries_per_source": 40,
+    "training_preference_threshold": 50,
+    "test_multivariant_threshold": 20
+  },
+  "completion": {
+    "queries_per_source": 12,
+    "masks": [
+      [
+        "random",
+        0.2
+      ],
+      [
+        "connected_branch",
+        0.5
+      ],
+      [
+        "whole_module",
+        0.8
+      ]
+    ],
+    "layers": 4,
+    "hidden": 64,
+    "max_epochs": 60,
+    "early_stop_patience": 8,
+    "device": "cpu"
+  },
+  "views": {
+    "max_reactions": 50,
+    "full_small_threshold": 150
+  },
+  "note": "Executable defaults are fixed in the corresponding versioned modules; this manifest records them, not a free-form hyperparameter override."
+}

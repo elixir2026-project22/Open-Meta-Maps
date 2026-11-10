@@ -1,0 +1,717 @@
+{
+  "dbId" : 8849175,
+  "stableId" : "R-HSA-8849175",
+  "displayName" : "Threonine catabolism",
+  "nodes" : [ {
+    "id" : 8994,
+    "reactomeId" : 936714,
+    "displayName" : "2OBUTA",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 306,
+      "y" : 160
+    },
+    "minX" : 211,
+    "maxX" : 397,
+    "minY" : 144,
+    "maxY" : 182,
+    "prop" : {
+      "x" : 274,
+      "y" : 145,
+      "width" : 64,
+      "height" : 30
+    },
+    "textPosition" : {
+      "x" : 277,
+      "y" : 149
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 333,
+          "y" : 150
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 333,
+          "y" : 150
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 8993,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 341,
+          "y" : 167
+        },
+        "to" : {
+          "x" : 397,
+          "y" : 181
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 349,
+          "y" : 165
+        },
+        "b" : {
+          "x" : 341,
+          "y" : 167
+        },
+        "c" : {
+          "x" : 347,
+          "y" : 173
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 347,
+          "y" : 173
+        }
+      }
+    }, {
+      "edgeId" : 8988,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 271,
+          "y" : 167
+        },
+        "to" : {
+          "x" : 211,
+          "y" : 182
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 265,
+          "y" : 173
+        },
+        "b" : {
+          "x" : 271,
+          "y" : 167
+        },
+        "c" : {
+          "x" : 263,
+          "y" : 165
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 263,
+          "y" : 165
+        }
+      }
+    } ]
+  }, {
+    "id" : 9139,
+    "reactomeId" : 9929622,
+    "displayName" : "2-iminobutanoate",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 596,
+      "y" : 183
+    },
+    "minX" : 484,
+    "maxX" : 659,
+    "minY" : 167,
+    "maxY" : 199,
+    "prop" : {
+      "x" : 534,
+      "y" : 168,
+      "width" : 124,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 536,
+      "y" : 173
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 653,
+          "y" : 173
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 653,
+          "y" : 173
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 8993,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 531,
+          "y" : 182
+        },
+        "to" : {
+          "x" : 484,
+          "y" : 182
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 8996,
+    "reactomeId" : 9014634,
+    "displayName" : "HRSP12",
+    "schemaClass" : "EntityWithAccessionedSequence",
+    "renderableClass" : "Protein",
+    "position" : {
+      "x" : 448,
+      "y" : 127
+    },
+    "minX" : 421,
+    "maxX" : 482,
+    "minY" : 110,
+    "maxY" : 174,
+    "prop" : {
+      "x" : 421,
+      "y" : 116,
+      "width" : 55,
+      "height" : 22
+    },
+    "textPosition" : {
+      "x" : 424,
+      "y" : 110
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 476,
+          "y" : 116
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 476,
+          "y" : 116
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 8993,
+      "type" : "CATALYST",
+      "segments" : [ {
+        "from" : {
+          "x" : 447,
+          "y" : 141
+        },
+        "to" : {
+          "x" : 446,
+          "y" : 166
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "c" : {
+          "x" : 446,
+          "y" : 170
+        },
+        "r" : 4,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 446,
+          "y" : 170
+        }
+      }
+    } ]
+  }, {
+    "id" : 9140,
+    "reactomeId" : 29356,
+    "displayName" : "H2O",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 537,
+      "y" : 228
+    },
+    "minX" : 484,
+    "maxX" : 560,
+    "minY" : 182,
+    "maxY" : 244,
+    "prop" : {
+      "x" : 516,
+      "y" : 213,
+      "width" : 43,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 520,
+      "y" : 218
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 554,
+          "y" : 218
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 554,
+          "y" : 218
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 8993,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 519,
+          "y" : 210
+        },
+        "to" : {
+          "x" : 484,
+          "y" : 182
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ],
+    "trivial" : true
+  }, {
+    "id" : 8997,
+    "reactomeId" : 9014724,
+    "displayName" : "PXLP-SDS dimers",
+    "schemaClass" : "DefinedSet",
+    "renderableClass" : "EntitySet",
+    "position" : {
+      "x" : 164,
+      "y" : 127
+    },
+    "minX" : 109,
+    "maxX" : 219,
+    "minY" : 116,
+    "maxY" : 174,
+    "prop" : {
+      "x" : 109,
+      "y" : 116,
+      "width" : 110,
+      "height" : 22
+    },
+    "textPosition" : {
+      "x" : 129,
+      "y" : 110
+    },
+    "connectors" : [ {
+      "edgeId" : 8988,
+      "type" : "CATALYST",
+      "segments" : [ {
+        "from" : {
+          "x" : 164,
+          "y" : 144
+        },
+        "to" : {
+          "x" : 164,
+          "y" : 166
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "c" : {
+          "x" : 164,
+          "y" : 170
+        },
+        "r" : 4,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 164,
+          "y" : 170
+        }
+      }
+    } ]
+  }, {
+    "id" : 8989,
+    "reactomeId" : 351990,
+    "displayName" : "L-Thr",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 77,
+      "y" : 182
+    },
+    "minX" : 52,
+    "maxX" : 103,
+    "minY" : 166,
+    "maxY" : 197,
+    "prop" : {
+      "x" : 52,
+      "y" : 167,
+      "width" : 50,
+      "height" : 30
+    },
+    "textPosition" : {
+      "x" : 58,
+      "y" : 171
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 97,
+          "y" : 172
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 97,
+          "y" : 172
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 8988,
+      "type" : "INPUT",
+      "segments" : [ ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 9023,
+    "reactomeId" : 31633,
+    "displayName" : "NH4+",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 306,
+      "y" : 229
+    },
+    "minX" : 211,
+    "maxX" : 397,
+    "minY" : 181,
+    "maxY" : 245,
+    "prop" : {
+      "x" : 280,
+      "y" : 214,
+      "width" : 53,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 284,
+      "y" : 219
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 328,
+          "y" : 219
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 328,
+          "y" : 219
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 8993,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 336,
+          "y" : 215
+        },
+        "to" : {
+          "x" : 397,
+          "y" : 181
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 340,
+          "y" : 208
+        },
+        "b" : {
+          "x" : 336,
+          "y" : 215
+        },
+        "c" : {
+          "x" : 344,
+          "y" : 215
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 344,
+          "y" : 215
+        }
+      }
+    }, {
+      "edgeId" : 8988,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 277,
+          "y" : 215
+        },
+        "to" : {
+          "x" : 211,
+          "y" : 182
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 269,
+          "y" : 215
+        },
+        "b" : {
+          "x" : 277,
+          "y" : 215
+        },
+        "c" : {
+          "x" : 273,
+          "y" : 208
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 273,
+          "y" : 208
+        }
+      }
+    } ]
+  } ],
+  "edges" : [ {
+    "id" : 8993,
+    "reactomeId" : 9014641,
+    "displayName" : "HRSP12 deaminates 2-iminobutanoate to 2OBUTA",
+    "schemaClass" : "Reaction",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 446,
+      "y" : 182
+    },
+    "minX" : 397,
+    "maxX" : 484,
+    "minY" : 176,
+    "maxY" : 188,
+    "reactionType" : "transition",
+    "segments" : [ {
+      "from" : {
+        "x" : 484,
+        "y" : 182
+      },
+      "to" : {
+        "x" : 446,
+        "y" : 182
+      }
+    }, {
+      "from" : {
+        "x" : 446,
+        "y" : 182
+      },
+      "to" : {
+        "x" : 397,
+        "y" : 181
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 440,
+        "y" : 176
+      },
+      "b" : {
+        "x" : 452,
+        "y" : 188
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 446,
+        "y" : 182
+      }
+    },
+    "inputs" : [ {
+      "id" : 9139,
+      "points" : [ {
+        "x" : 531,
+        "y" : 182
+      } ]
+    }, {
+      "id" : 9140,
+      "points" : [ {
+        "x" : 519,
+        "y" : 210
+      } ]
+    } ],
+    "outputs" : [ {
+      "id" : 9023,
+      "points" : [ {
+        "x" : 336,
+        "y" : 215
+      } ]
+    }, {
+      "id" : 8994,
+      "points" : [ {
+        "x" : 341,
+        "y" : 167
+      } ]
+    } ],
+    "catalysts" : [ {
+      "id" : 8996,
+      "points" : [ {
+        "x" : 447,
+        "y" : 141
+      } ]
+    } ]
+  }, {
+    "id" : 8988,
+    "reactomeId" : 9014627,
+    "displayName" : "SDS dimers:PXLP convert L-Thr to 2OBUTA",
+    "schemaClass" : "Reaction",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 164,
+      "y" : 182
+    },
+    "minX" : 105,
+    "maxX" : 211,
+    "minY" : 176,
+    "maxY" : 188,
+    "reactionType" : "transition",
+    "segments" : [ {
+      "from" : {
+        "x" : 105,
+        "y" : 182
+      },
+      "to" : {
+        "x" : 164,
+        "y" : 182
+      }
+    }, {
+      "from" : {
+        "x" : 164,
+        "y" : 182
+      },
+      "to" : {
+        "x" : 211,
+        "y" : 182
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 158,
+        "y" : 176
+      },
+      "b" : {
+        "x" : 170,
+        "y" : 188
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 164,
+        "y" : 182
+      }
+    },
+    "inputs" : [ {
+      "id" : 8989
+    } ],
+    "outputs" : [ {
+      "id" : 9023,
+      "points" : [ {
+        "x" : 277,
+        "y" : 215
+      } ]
+    }, {
+      "id" : 8994,
+      "points" : [ {
+        "x" : 271,
+        "y" : 167
+      } ]
+    } ],
+    "catalysts" : [ {
+      "id" : 8997,
+      "points" : [ {
+        "x" : 164,
+        "y" : 144
+      } ]
+    } ]
+  } ],
+  "compartments" : [ {
+    "id" : 8987,
+    "reactomeId" : 70101,
+    "displayName" : "cytosol",
+    "schemaClass" : "Compartment",
+    "renderableClass" : "Compartment",
+    "position" : {
+      "x" : 355,
+      "y" : 176
+    },
+    "minX" : 0,
+    "maxX" : 710,
+    "minY" : 0,
+    "maxY" : 352,
+    "prop" : {
+      "x" : 0,
+      "y" : 0,
+      "width" : 710,
+      "height" : 352
+    },
+    "textPosition" : {
+      "x" : 19,
+      "y" : 306
+    },
+    "insets" : {
+      "x" : 8,
+      "y" : 11,
+      "width" : 691,
+      "height" : 332
+    },
+    "bgColor" : {
+      "r" : 250,
+      "g" : 240,
+      "b" : 240
+    },
+    "componentIds" : [ 8988, 8989, 8993, 8994, 8996, 8997, 9023, 9139, 9140 ]
+  } ],
+  "notes" : [ ],
+  "links" : [ ],
+  "shadows" : [ ],
+  "minX" : 0,
+  "maxX" : 710,
+  "minY" : 0,
+  "maxY" : 352,
+  "disease" : false
+}

@@ -1,0 +1,45 @@
+{
+  "extension": "source paths (original expert connection geometry)",
+  "formats": [
+    "escher",
+    "gpml"
+  ],
+  "maps": 2237,
+  "totals": {
+    "segments": 26973,
+    "bezier_segments": 19691,
+    "chains": 19720,
+    "reactions": 4503
+  },
+  "totals_by_format": {
+    "gpml": {
+      "edges": 127082,
+      "connector_Elbow": 16628,
+      "two_point_edges": 117728,
+      "connector_Straight": 104326,
+      "explicit_edges": 6179,
+      "explicit_exact": 884,
+      "reactions": 6179,
+      "edge_end_glyph_missing": 3175,
+      "connector_Segmented": 2548,
+      "connector_Curved": 3580
+    },
+    "escher": {
+      "segments": 26973,
+      "bezier_segments": 19691,
+      "chains": 19720,
+      "reactions": 4503
+    }
+  },
+  "bezier_share": 0.73,
+  "input": {
+    "file": "data/source_inputs/map_observations.json.gz",
+    "sha256": "a1e89d52cca0e6ae2993814bf028f6d24a6ac0680688d1886632cd395d78bf83"
+  },
+  "notes": [
+    "Absolute source coordinates; chains run from the midmarker to the metabolite glyph.",
+    "Modules resolve paths through their own node keys (r:<reaction key>, g:<glyph id>) and map_id; no per-module copy is stored.",
+    "WikiPathways: only edges with >=3 stored points are kept (two-point edges are straight lines or typed connectors whose shape PathVisio computes and the file does not store). Reactome (segments) is not extracted yet."
+  ],
+  "code_sha256": "8b5f4ced37630fcf4ae3d7b6aa89f1156e56213d5550e1b9167260e5570b59d9"
+}

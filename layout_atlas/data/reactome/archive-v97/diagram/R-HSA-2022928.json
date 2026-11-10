@@ -1,0 +1,5868 @@
+{
+  "dbId" : 2022928,
+  "stableId" : "R-HSA-2022928",
+  "displayName" : "HS-GAG biosynthesis",
+  "forNormalDraw" : true,
+  "nodes" : [ {
+    "id" : 128,
+    "reactomeId" : 742343,
+    "displayName" : "PAP",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 1422,
+      "y" : 179
+    },
+    "minX" : 1370,
+    "maxX" : 1443,
+    "minY" : 163,
+    "maxY" : 210,
+    "prop" : {
+      "x" : 1403,
+      "y" : 164,
+      "width" : 39,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 1406,
+      "y" : 169
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1437,
+          "y" : 169
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1437,
+          "y" : 169
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 124,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1400,
+          "y" : 190
+        },
+        "to" : {
+          "x" : 1370,
+          "y" : 210
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 1396,
+          "y" : 197
+        },
+        "b" : {
+          "x" : 1400,
+          "y" : 190
+        },
+        "c" : {
+          "x" : 1392,
+          "y" : 191
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 1392,
+          "y" : 191
+        }
+      }
+    } ]
+  }, {
+    "id" : 257,
+    "reactomeId" : 9941509,
+    "displayName" : "GLCE dimer",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 1120,
+      "y" : 665
+    },
+    "minX" : 1085,
+    "maxX" : 1162,
+    "minY" : 596,
+    "maxY" : 677,
+    "prop" : {
+      "x" : 1085,
+      "y" : 654,
+      "width" : 71,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 1099,
+      "y" : 642
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1156,
+          "y" : 654
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1156,
+          "y" : 654
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 82,
+      "type" : "CATALYST",
+      "segments" : [ {
+        "from" : {
+          "x" : 1119,
+          "y" : 651
+        },
+        "to" : {
+          "x" : 1119,
+          "y" : 604
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "c" : {
+          "x" : 1119,
+          "y" : 600
+        },
+        "r" : 4,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1119,
+          "y" : 600
+        }
+      }
+    } ]
+  }, {
+    "id" : 258,
+    "reactomeId" : 9941509,
+    "displayName" : "GLCE dimer",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 1471,
+      "y" : 355
+    },
+    "minX" : 1379,
+    "maxX" : 1513,
+    "minY" : 338,
+    "maxY" : 367,
+    "prop" : {
+      "x" : 1436,
+      "y" : 344,
+      "width" : 71,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 1450,
+      "y" : 332
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1507,
+          "y" : 344
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1507,
+          "y" : 344
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 121,
+      "type" : "CATALYST",
+      "segments" : [ {
+        "from" : {
+          "x" : 1433,
+          "y" : 355
+        },
+        "to" : {
+          "x" : 1387,
+          "y" : 355
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "c" : {
+          "x" : 1383,
+          "y" : 355
+        },
+        "r" : 4,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1383,
+          "y" : 355
+        }
+      }
+    } ]
+  }, {
+    "id" : 131,
+    "reactomeId" : 2076619,
+    "displayName" : "HSPGs",
+    "schemaClass" : "DefinedSet",
+    "renderableClass" : "EntitySet",
+    "position" : {
+      "x" : 1154,
+      "y" : 131
+    },
+    "minX" : 1132,
+    "maxX" : 1177,
+    "minY" : 120,
+    "maxY" : 143,
+    "prop" : {
+      "x" : 1132,
+      "y" : 120,
+      "width" : 45,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 1133,
+      "y" : 114
+    },
+    "connectors" : [ {
+      "edgeId" : 130,
+      "type" : "INPUT",
+      "segments" : [ ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 4,
+    "reactomeId" : 162756,
+    "displayName" : "UDP-GlcNAc",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 126,
+      "y" : 57
+    },
+    "minX" : 101,
+    "maxX" : 153,
+    "minY" : 36,
+    "maxY" : 103,
+    "prop" : {
+      "x" : 101,
+      "y" : 37,
+      "width" : 51,
+      "height" : 41
+    },
+    "textPosition" : {
+      "x" : 101,
+      "y" : 40
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 147,
+          "y" : 42
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 147,
+          "y" : 42
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 3,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 119,
+          "y" : 81
+        },
+        "to" : {
+          "x" : 111,
+          "y" : 103
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 5,
+    "reactomeId" : 735698,
+    "displayName" : "UMP",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 105,
+      "y" : 171
+    },
+    "minX" : 87,
+    "maxX" : 125,
+    "minY" : 103,
+    "maxY" : 189,
+    "prop" : {
+      "x" : 87,
+      "y" : 154,
+      "width" : 37,
+      "height" : 35
+    },
+    "textPosition" : {
+      "x" : 88,
+      "y" : 161
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 119,
+          "y" : 159
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 119,
+          "y" : 159
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 3,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 106,
+          "y" : 151
+        },
+        "to" : {
+          "x" : 111,
+          "y" : 103
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 6,
+    "reactomeId" : 914003,
+    "displayName" : "UDP-GlcNAc",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 164,
+      "y" : 211
+    },
+    "minX" : 109,
+    "maxX" : 222,
+    "minY" : 103,
+    "maxY" : 236,
+    "prop" : {
+      "x" : 139,
+      "y" : 187,
+      "width" : 51,
+      "height" : 49
+    },
+    "textPosition" : {
+      "x" : 139,
+      "y" : 194
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 185,
+          "y" : 192
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 185,
+          "y" : 192
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 3,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 151,
+          "y" : 184
+        },
+        "to" : {
+          "x" : 109,
+          "y" : 103
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 144,
+          "y" : 180
+        },
+        "b" : {
+          "x" : 151,
+          "y" : 184
+        },
+        "c" : {
+          "x" : 151,
+          "y" : 176
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 151,
+          "y" : 176
+        }
+      }
+    }, {
+      "edgeId" : 393,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 193,
+          "y" : 221
+        },
+        "to" : {
+          "x" : 222,
+          "y" : 234
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 7,
+    "reactomeId" : 109402,
+    "displayName" : "UMP",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 53,
+      "y" : 60
+    },
+    "minX" : 35,
+    "maxX" : 109,
+    "minY" : 43,
+    "maxY" : 103,
+    "prop" : {
+      "x" : 35,
+      "y" : 44,
+      "width" : 36,
+      "height" : 33
+    },
+    "textPosition" : {
+      "x" : 35,
+      "y" : 50
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 66,
+          "y" : 49
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 66,
+          "y" : 49
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 3,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 74,
+          "y" : 73
+        },
+        "to" : {
+          "x" : 109,
+          "y" : 103
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 82,
+          "y" : 74
+        },
+        "b" : {
+          "x" : 74,
+          "y" : 73
+        },
+        "c" : {
+          "x" : 77,
+          "y" : 81
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 77,
+          "y" : 81
+        }
+      }
+    } ]
+  }, {
+    "id" : 8,
+    "reactomeId" : 744235,
+    "displayName" : "SLC35D2",
+    "schemaClass" : "EntityWithAccessionedSequence",
+    "renderableClass" : "Protein",
+    "position" : {
+      "x" : 194,
+      "y" : 103
+    },
+    "minX" : 118,
+    "maxX" : 235,
+    "minY" : 85,
+    "maxY" : 116,
+    "prop" : {
+      "x" : 159,
+      "y" : 91,
+      "width" : 70,
+      "height" : 25
+    },
+    "textPosition" : {
+      "x" : 162,
+      "y" : 93
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 229,
+          "y" : 91
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 229,
+          "y" : 91
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 3,
+      "type" : "CATALYST",
+      "segments" : [ {
+        "from" : {
+          "x" : 156,
+          "y" : 103
+        },
+        "to" : {
+          "x" : 126,
+          "y" : 104
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "c" : {
+          "x" : 122,
+          "y" : 104
+        },
+        "r" : 4,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 122,
+          "y" : 104
+        }
+      }
+    } ]
+  }, {
+    "id" : 138,
+    "reactomeId" : 2076618,
+    "displayName" : "HSPGs",
+    "schemaClass" : "DefinedSet",
+    "renderableClass" : "EntitySet",
+    "position" : {
+      "x" : 1154,
+      "y" : 11
+    },
+    "minX" : 1132,
+    "maxX" : 1177,
+    "minY" : 0,
+    "maxY" : 23,
+    "prop" : {
+      "x" : 1132,
+      "y" : 0,
+      "width" : 45,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 1133,
+      "y" : -6
+    },
+    "connectors" : [ {
+      "edgeId" : 130,
+      "type" : "OUTPUT",
+      "segments" : [ ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 16,
+    "reactomeId" : 2076551,
+    "displayName" : "GlcA-Gal-Gal-Xyl-HS proteins",
+    "schemaClass" : "DefinedSet",
+    "renderableClass" : "EntitySet",
+    "position" : {
+      "x" : 328,
+      "y" : 198
+    },
+    "minX" : 222,
+    "maxX" : 388,
+    "minY" : 180,
+    "maxY" : 234,
+    "prop" : {
+      "x" : 268,
+      "y" : 180,
+      "width" : 120,
+      "height" : 37
+    },
+    "textPosition" : {
+      "x" : 274,
+      "y" : 181
+    },
+    "connectors" : [ {
+      "edgeId" : 393,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 273,
+          "y" : 223
+        },
+        "to" : {
+          "x" : 222,
+          "y" : 234
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 273,
+    "reactomeId" : 9941505,
+    "displayName" : "HS2ST1 trimer",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 1275,
+      "y" : 665
+    },
+    "minX" : 1230,
+    "maxX" : 1326,
+    "minY" : 598,
+    "maxY" : 677,
+    "prop" : {
+      "x" : 1230,
+      "y" : 654,
+      "width" : 90,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 1245,
+      "y" : 642
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1320,
+          "y" : 654
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1320,
+          "y" : 654
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 92,
+      "type" : "CATALYST",
+      "segments" : [ {
+        "from" : {
+          "x" : 1274,
+          "y" : 651
+        },
+        "to" : {
+          "x" : 1273,
+          "y" : 606
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "c" : {
+          "x" : 1273,
+          "y" : 602
+        },
+        "r" : 4,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1273,
+          "y" : 602
+        }
+      }
+    } ]
+  }, {
+    "id" : 17,
+    "reactomeId" : 2076465,
+    "displayName" : "Heparan-PGs",
+    "schemaClass" : "DefinedSet",
+    "renderableClass" : "EntitySet",
+    "position" : {
+      "x" : 165,
+      "y" : 371
+    },
+    "minX" : 125,
+    "maxX" : 222,
+    "minY" : 314,
+    "maxY" : 419,
+    "prop" : {
+      "x" : 125,
+      "y" : 360,
+      "width" : 81,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 132,
+      "y" : 354
+    },
+    "connectors" : [ {
+      "edgeId" : 393,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 176,
+          "y" : 354
+        },
+        "to" : {
+          "x" : 222,
+          "y" : 314
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 179,
+          "y" : 346
+        },
+        "b" : {
+          "x" : 176,
+          "y" : 354
+        },
+        "c" : {
+          "x" : 184,
+          "y" : 352
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 184,
+          "y" : 352
+        }
+      }
+    }, {
+      "edgeId" : 49,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 165,
+          "y" : 389
+        },
+        "to" : {
+          "x" : 165,
+          "y" : 419
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 18,
+    "reactomeId" : 205687,
+    "displayName" : "UDP",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 233,
+      "y" : 347
+    },
+    "minX" : 214,
+    "maxX" : 254,
+    "minY" : 314,
+    "maxY" : 363,
+    "prop" : {
+      "x" : 214,
+      "y" : 332,
+      "width" : 39,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 216,
+      "y" : 337
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 248,
+          "y" : 337
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 248,
+          "y" : 337
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 393,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 227,
+          "y" : 329
+        },
+        "to" : {
+          "x" : 222,
+          "y" : 314
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 221,
+          "y" : 324
+        },
+        "b" : {
+          "x" : 227,
+          "y" : 329
+        },
+        "c" : {
+          "x" : 229,
+          "y" : 321
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 229,
+          "y" : 321
+        }
+      }
+    } ]
+  }, {
+    "id" : 19,
+    "reactomeId" : 2022878,
+    "displayName" : "EXT1:EXT2",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 37,
+      "y" : 448
+    },
+    "minX" : 11,
+    "maxX" : 156,
+    "minY" : 422,
+    "maxY" : 468,
+    "prop" : {
+      "x" : 11,
+      "y" : 428,
+      "width" : 52,
+      "height" : 40
+    },
+    "textPosition" : {
+      "x" : 16,
+      "y" : 433
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 63,
+          "y" : 428
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 63,
+          "y" : 428
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 49,
+      "type" : "CATALYST",
+      "segments" : [ {
+        "from" : {
+          "x" : 66,
+          "y" : 448
+        },
+        "to" : {
+          "x" : 148,
+          "y" : 448
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "c" : {
+          "x" : 152,
+          "y" : 448
+        },
+        "r" : 4,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 152,
+          "y" : 448
+        }
+      }
+    } ]
+  }, {
+    "id" : 275,
+    "reactomeId" : 425969,
+    "displayName" : "H+",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 1395,
+      "y" : 631
+    },
+    "minX" : 1300,
+    "maxX" : 1412,
+    "minY" : 590,
+    "maxY" : 647,
+    "prop" : {
+      "x" : 1380,
+      "y" : 616,
+      "width" : 31,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 1382,
+      "y" : 621
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1406,
+          "y" : 621
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1406,
+          "y" : 621
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 92,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1377,
+          "y" : 624
+        },
+        "to" : {
+          "x" : 1300,
+          "y" : 590
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 1369,
+          "y" : 625
+        },
+        "b" : {
+          "x" : 1377,
+          "y" : 624
+        },
+        "c" : {
+          "x" : 1372,
+          "y" : 618
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 1372,
+          "y" : 618
+        }
+      }
+    } ],
+    "trivial" : true
+  }, {
+    "id" : 153,
+    "reactomeId" : 425969,
+    "displayName" : "H+",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 283,
+      "y" : 334
+    },
+    "minX" : 222,
+    "maxX" : 300,
+    "minY" : 314,
+    "maxY" : 350,
+    "prop" : {
+      "x" : 268,
+      "y" : 319,
+      "width" : 31,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 270,
+      "y" : 324
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 294,
+          "y" : 324
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 294,
+          "y" : 324
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 393,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 265,
+          "y" : 328
+        },
+        "to" : {
+          "x" : 222,
+          "y" : 314
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 257,
+          "y" : 330
+        },
+        "b" : {
+          "x" : 265,
+          "y" : 328
+        },
+        "c" : {
+          "x" : 260,
+          "y" : 322
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 260,
+          "y" : 322
+        }
+      }
+    } ],
+    "trivial" : true
+  }, {
+    "id" : 26,
+    "reactomeId" : 1971475,
+    "displayName" : "Glycosaminoglycan-protein linkage region biosynthesis",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "EncapsulatedNode",
+    "position" : {
+      "x" : 507,
+      "y" : 170
+    },
+    "minX" : 434,
+    "maxX" : 580,
+    "minY" : 138,
+    "maxY" : 203,
+    "prop" : {
+      "x" : 434,
+      "y" : 138,
+      "width" : 146,
+      "height" : 65
+    },
+    "textPosition" : {
+      "x" : 438,
+      "y" : 142
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 284,
+    "reactomeId" : 425969,
+    "displayName" : "H+",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 1286,
+      "y" : 434
+    },
+    "minX" : 1271,
+    "maxX" : 1403,
+    "minY" : 418,
+    "maxY" : 481,
+    "prop" : {
+      "x" : 1271,
+      "y" : 419,
+      "width" : 31,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 1273,
+      "y" : 424
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1297,
+          "y" : 424
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1297,
+          "y" : 424
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 100,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1305,
+          "y" : 440
+        },
+        "to" : {
+          "x" : 1403,
+          "y" : 481
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 1313,
+          "y" : 439
+        },
+        "b" : {
+          "x" : 1305,
+          "y" : 440
+        },
+        "c" : {
+          "x" : 1310,
+          "y" : 446
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 1310,
+          "y" : 446
+        }
+      }
+    }, {
+      "edgeId" : 108,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1305,
+          "y" : 440
+        },
+        "to" : {
+          "x" : 1363,
+          "y" : 466
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 1313,
+          "y" : 439
+        },
+        "b" : {
+          "x" : 1305,
+          "y" : 440
+        },
+        "c" : {
+          "x" : 1310,
+          "y" : 446
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 1310,
+          "y" : 446
+        }
+      }
+    } ],
+    "trivial" : true
+  }, {
+    "id" : 161,
+    "reactomeId" : 425969,
+    "displayName" : "H+",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 70,
+      "y" : 494
+    },
+    "minX" : 55,
+    "maxX" : 163,
+    "minY" : 471,
+    "maxY" : 510,
+    "prop" : {
+      "x" : 55,
+      "y" : 479,
+      "width" : 31,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 57,
+      "y" : 484
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 81,
+          "y" : 484
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 81,
+          "y" : 484
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 49,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 89,
+          "y" : 490
+        },
+        "to" : {
+          "x" : 163,
+          "y" : 471
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 95,
+          "y" : 484
+        },
+        "b" : {
+          "x" : 89,
+          "y" : 490
+        },
+        "c" : {
+          "x" : 97,
+          "y" : 492
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 97,
+          "y" : 492
+        }
+      }
+    } ],
+    "trivial" : true
+  }, {
+    "id" : 50,
+    "reactomeId" : 1889970,
+    "displayName" : "UDP-GlcA",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 236,
+      "y" : 395
+    },
+    "minX" : 165,
+    "maxX" : 456,
+    "minY" : 374,
+    "maxY" : 589,
+    "prop" : {
+      "x" : 215,
+      "y" : 375,
+      "width" : 42,
+      "height" : 41
+    },
+    "textPosition" : {
+      "x" : 217,
+      "y" : 378
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 252,
+          "y" : 380
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 252,
+          "y" : 380
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 69,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 260,
+          "y" : 413
+        },
+        "to" : {
+          "x" : 456,
+          "y" : 589
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    }, {
+      "edgeId" : 49,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 212,
+          "y" : 402
+        },
+        "to" : {
+          "x" : 165,
+          "y" : 419
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 51,
+    "reactomeId" : 2076416,
+    "displayName" : "Heparan(1)-PGs",
+    "schemaClass" : "DefinedSet",
+    "renderableClass" : "EntitySet",
+    "position" : {
+      "x" : 167,
+      "y" : 558
+    },
+    "minX" : 120,
+    "maxX" : 248,
+    "minY" : 471,
+    "maxY" : 594,
+    "prop" : {
+      "x" : 120,
+      "y" : 547,
+      "width" : 94,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 125,
+      "y" : 541
+    },
+    "connectors" : [ {
+      "edgeId" : 49,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 166,
+          "y" : 541
+        },
+        "to" : {
+          "x" : 163,
+          "y" : 471
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 162,
+          "y" : 534
+        },
+        "b" : {
+          "x" : 166,
+          "y" : 541
+        },
+        "c" : {
+          "x" : 170,
+          "y" : 534
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 170,
+          "y" : 534
+        }
+      }
+    }, {
+      "edgeId" : 54,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 192,
+          "y" : 576
+        },
+        "to" : {
+          "x" : 248,
+          "y" : 594
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 53,
+    "reactomeId" : 205687,
+    "displayName" : "UDP",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 103,
+      "y" : 513
+    },
+    "minX" : 84,
+    "maxX" : 163,
+    "minY" : 471,
+    "maxY" : 529,
+    "prop" : {
+      "x" : 84,
+      "y" : 498,
+      "width" : 39,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 86,
+      "y" : 503
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 118,
+          "y" : 503
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 118,
+          "y" : 503
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 49,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 126,
+          "y" : 499
+        },
+        "to" : {
+          "x" : 163,
+          "y" : 471
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 129,
+          "y" : 492
+        },
+        "b" : {
+          "x" : 126,
+          "y" : 499
+        },
+        "c" : {
+          "x" : 134,
+          "y" : 498
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 134,
+          "y" : 498
+        }
+      }
+    } ]
+  }, {
+    "id" : 55,
+    "reactomeId" : 2076412,
+    "displayName" : "Heparan(2)-PGs",
+    "schemaClass" : "DefinedSet",
+    "renderableClass" : "EntitySet",
+    "position" : {
+      "x" : 375,
+      "y" : 589
+    },
+    "minX" : 299,
+    "maxX" : 456,
+    "minY" : 578,
+    "maxY" : 601,
+    "prop" : {
+      "x" : 329,
+      "y" : 578,
+      "width" : 93,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 333,
+      "y" : 572
+    },
+    "connectors" : [ {
+      "edgeId" : 69,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 428,
+          "y" : 589
+        },
+        "to" : {
+          "x" : 456,
+          "y" : 589
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    }, {
+      "edgeId" : 54,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 323,
+          "y" : 590
+        },
+        "to" : {
+          "x" : 299,
+          "y" : 592
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 316,
+          "y" : 595
+        },
+        "b" : {
+          "x" : 323,
+          "y" : 590
+        },
+        "c" : {
+          "x" : 316,
+          "y" : 587
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 316,
+          "y" : 587
+        }
+      }
+    } ]
+  }, {
+    "id" : 57,
+    "reactomeId" : 914003,
+    "displayName" : "UDP-GlcNAc",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 185,
+      "y" : 626
+    },
+    "minX" : 160,
+    "maxX" : 248,
+    "minY" : 594,
+    "maxY" : 651,
+    "prop" : {
+      "x" : 160,
+      "y" : 602,
+      "width" : 51,
+      "height" : 49
+    },
+    "textPosition" : {
+      "x" : 160,
+      "y" : 609
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 206,
+          "y" : 607
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 206,
+          "y" : 607
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 54,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 214,
+          "y" : 613
+        },
+        "to" : {
+          "x" : 248,
+          "y" : 594
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 59,
+    "reactomeId" : 2022878,
+    "displayName" : "EXT1:EXT2",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 275,
+      "y" : 664
+    },
+    "minX" : 249,
+    "maxX" : 307,
+    "minY" : 601,
+    "maxY" : 684,
+    "prop" : {
+      "x" : 249,
+      "y" : 644,
+      "width" : 52,
+      "height" : 40
+    },
+    "textPosition" : {
+      "x" : 254,
+      "y" : 649
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 301,
+          "y" : 644
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 301,
+          "y" : 644
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 54,
+      "type" : "CATALYST",
+      "segments" : [ {
+        "from" : {
+          "x" : 274,
+          "y" : 641
+        },
+        "to" : {
+          "x" : 274,
+          "y" : 609
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "c" : {
+          "x" : 274,
+          "y" : 605
+        },
+        "r" : 4,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 274,
+          "y" : 605
+        }
+      }
+    } ]
+  }, {
+    "id" : 316,
+    "reactomeId" : 425969,
+    "displayName" : "H+",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 1310,
+      "y" : 175
+    },
+    "minX" : 1295,
+    "maxX" : 1370,
+    "minY" : 159,
+    "maxY" : 210,
+    "prop" : {
+      "x" : 1295,
+      "y" : 160,
+      "width" : 31,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 1297,
+      "y" : 165
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1321,
+          "y" : 165
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1321,
+          "y" : 165
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 124,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1329,
+          "y" : 184
+        },
+        "to" : {
+          "x" : 1370,
+          "y" : 210
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 1337,
+          "y" : 184
+        },
+        "b" : {
+          "x" : 1329,
+          "y" : 184
+        },
+        "c" : {
+          "x" : 1333,
+          "y" : 191
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 1333,
+          "y" : 191
+        }
+      }
+    } ],
+    "trivial" : true
+  }, {
+    "id" : 61,
+    "reactomeId" : 205687,
+    "displayName" : "UDP",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 339,
+      "y" : 548
+    },
+    "minX" : 299,
+    "maxX" : 360,
+    "minY" : 532,
+    "maxY" : 592,
+    "prop" : {
+      "x" : 320,
+      "y" : 533,
+      "width" : 39,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 322,
+      "y" : 538
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 354,
+          "y" : 538
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 354,
+          "y" : 538
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 54,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 324,
+          "y" : 567
+        },
+        "to" : {
+          "x" : 299,
+          "y" : 592
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 322,
+          "y" : 575
+        },
+        "b" : {
+          "x" : 324,
+          "y" : 567
+        },
+        "c" : {
+          "x" : 316,
+          "y" : 569
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 316,
+          "y" : 569
+        }
+      }
+    } ]
+  }, {
+    "id" : 317,
+    "reactomeId" : 2024096,
+    "displayName" : "HS-GAG degradation",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "EncapsulatedNode",
+    "position" : {
+      "x" : 1419,
+      "y" : 48
+    },
+    "minX" : 1349,
+    "maxX" : 1489,
+    "minY" : 27,
+    "maxY" : 70,
+    "prop" : {
+      "x" : 1349,
+      "y" : 27,
+      "width" : 140,
+      "height" : 43
+    },
+    "textPosition" : {
+      "x" : 1372,
+      "y" : 27
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 70,
+    "reactomeId" : 2076535,
+    "displayName" : "Heparan(3)-PGs",
+    "schemaClass" : "DefinedSet",
+    "renderableClass" : "EntitySet",
+    "position" : {
+      "x" : 596,
+      "y" : 589
+    },
+    "minX" : 514,
+    "maxX" : 687,
+    "minY" : 578,
+    "maxY" : 601,
+    "prop" : {
+      "x" : 550,
+      "y" : 578,
+      "width" : 93,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 554,
+      "y" : 572
+    },
+    "connectors" : [ {
+      "edgeId" : 69,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 544,
+          "y" : 587
+        },
+        "to" : {
+          "x" : 514,
+          "y" : 587
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 537,
+          "y" : 591
+        },
+        "b" : {
+          "x" : 544,
+          "y" : 587
+        },
+        "c" : {
+          "x" : 537,
+          "y" : 583
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 537,
+          "y" : 583
+        }
+      }
+    }, {
+      "edgeId" : 73,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 649,
+          "y" : 589
+        },
+        "to" : {
+          "x" : 687,
+          "y" : 589
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 72,
+    "reactomeId" : 205687,
+    "displayName" : "UDP",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 564,
+      "y" : 547
+    },
+    "minX" : 514,
+    "maxX" : 585,
+    "minY" : 531,
+    "maxY" : 587,
+    "prop" : {
+      "x" : 545,
+      "y" : 532,
+      "width" : 39,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 547,
+      "y" : 537
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 579,
+          "y" : 537
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 579,
+          "y" : 537
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 69,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 542,
+          "y" : 562
+        },
+        "to" : {
+          "x" : 514,
+          "y" : 587
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 539,
+          "y" : 570
+        },
+        "b" : {
+          "x" : 542,
+          "y" : 562
+        },
+        "c" : {
+          "x" : 534,
+          "y" : 564
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 534,
+          "y" : 564
+        }
+      }
+    } ]
+  }, {
+    "id" : 74,
+    "reactomeId" : 2022884,
+    "displayName" : "H2O",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 649,
+      "y" : 542
+    },
+    "minX" : 630,
+    "maxX" : 687,
+    "minY" : 526,
+    "maxY" : 589,
+    "prop" : {
+      "x" : 630,
+      "y" : 527,
+      "width" : 39,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 632,
+      "y" : 532
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 664,
+          "y" : 532
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 664,
+          "y" : 532
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 73,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 661,
+          "y" : 561
+        },
+        "to" : {
+          "x" : 687,
+          "y" : 589
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ],
+    "trivial" : true
+  }, {
+    "id" : 75,
+    "reactomeId" : 2022890,
+    "displayName" : "CH3COO-",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 781,
+      "y" : 544
+    },
+    "minX" : 740,
+    "maxX" : 816,
+    "minY" : 528,
+    "maxY" : 589,
+    "prop" : {
+      "x" : 747,
+      "y" : 529,
+      "width" : 68,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 749,
+      "y" : 534
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 810,
+          "y" : 534
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 810,
+          "y" : 534
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 73,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 766,
+          "y" : 563
+        },
+        "to" : {
+          "x" : 740,
+          "y" : 589
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 764,
+          "y" : 571
+        },
+        "b" : {
+          "x" : 766,
+          "y" : 563
+        },
+        "c" : {
+          "x" : 758,
+          "y" : 565
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 758,
+          "y" : 565
+        }
+      }
+    } ]
+  }, {
+    "id" : 76,
+    "reactomeId" : 2076346,
+    "displayName" : "Heparan(4)-PGs",
+    "schemaClass" : "DefinedSet",
+    "renderableClass" : "EntitySet",
+    "position" : {
+      "x" : 830,
+      "y" : 589
+    },
+    "minX" : 740,
+    "maxX" : 921,
+    "minY" : 578,
+    "maxY" : 601,
+    "prop" : {
+      "x" : 784,
+      "y" : 578,
+      "width" : 93,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 788,
+      "y" : 572
+    },
+    "connectors" : [ {
+      "edgeId" : 73,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 778,
+          "y" : 589
+        },
+        "to" : {
+          "x" : 740,
+          "y" : 589
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 771,
+          "y" : 593
+        },
+        "b" : {
+          "x" : 778,
+          "y" : 589
+        },
+        "c" : {
+          "x" : 771,
+          "y" : 585
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 771,
+          "y" : 585
+        }
+      }
+    }, {
+      "edgeId" : 78,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 883,
+          "y" : 589
+        },
+        "to" : {
+          "x" : 921,
+          "y" : 589
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 77,
+    "reactomeId" : 2022936,
+    "displayName" : "NDSTs",
+    "schemaClass" : "CandidateSet",
+    "renderableClass" : "EntitySet",
+    "position" : {
+      "x" : 847,
+      "y" : 667
+    },
+    "minX" : 721,
+    "maxX" : 946,
+    "minY" : 591,
+    "maxY" : 679,
+    "prop" : {
+      "x" : 822,
+      "y" : 656,
+      "width" : 50,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 823,
+      "y" : 657
+    },
+    "connectors" : [ {
+      "edgeId" : 73,
+      "type" : "CATALYST",
+      "segments" : [ {
+        "from" : {
+          "x" : 827,
+          "y" : 650
+        },
+        "to" : {
+          "x" : 728,
+          "y" : 597
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "c" : {
+          "x" : 725,
+          "y" : 595
+        },
+        "r" : 4,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 725,
+          "y" : 595
+        }
+      }
+    }, {
+      "edgeId" : 78,
+      "type" : "CATALYST",
+      "segments" : [ {
+        "from" : {
+          "x" : 862,
+          "y" : 650
+        },
+        "to" : {
+          "x" : 939,
+          "y" : 598
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "c" : {
+          "x" : 942,
+          "y" : 596
+        },
+        "r" : 4,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 942,
+          "y" : 596
+        }
+      }
+    } ]
+  }, {
+    "id" : 205,
+    "reactomeId" : 9941052,
+    "displayName" : "EXTL2,3",
+    "schemaClass" : "DefinedSet",
+    "renderableClass" : "EntitySet",
+    "position" : {
+      "x" : 53,
+      "y" : 287
+    },
+    "minX" : 24,
+    "maxX" : 214,
+    "minY" : 271,
+    "maxY" : 299,
+    "prop" : {
+      "x" : 24,
+      "y" : 276,
+      "width" : 59,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 25,
+      "y" : 277
+    },
+    "connectors" : [ {
+      "edgeId" : 393,
+      "type" : "CATALYST",
+      "segments" : [ {
+        "from" : {
+          "x" : 89,
+          "y" : 284
+        },
+        "to" : {
+          "x" : 206,
+          "y" : 275
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "c" : {
+          "x" : 210,
+          "y" : 275
+        },
+        "r" : 4,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 210,
+          "y" : 275
+        }
+      }
+    } ]
+  }, {
+    "id" : 79,
+    "reactomeId" : 741440,
+    "displayName" : "PAPS",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 879,
+      "y" : 544
+    },
+    "minX" : 856,
+    "maxX" : 921,
+    "minY" : 528,
+    "maxY" : 589,
+    "prop" : {
+      "x" : 856,
+      "y" : 529,
+      "width" : 46,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 859,
+      "y" : 534
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 897,
+          "y" : 534
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 897,
+          "y" : 534
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 78,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 893,
+          "y" : 563
+        },
+        "to" : {
+          "x" : 921,
+          "y" : 589
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 2,
+        "shape" : {
+          "a" : {
+            "x" : 901,
+            "y" : 570
+          },
+          "b" : {
+            "x" : 913,
+            "y" : 582
+          },
+          "type" : "BOX",
+          "empty" : true,
+          "centre" : {
+            "x" : 907,
+            "y" : 576
+          }
+        }
+      }
+    } ]
+  }, {
+    "id" : 80,
+    "reactomeId" : 742343,
+    "displayName" : "PAP",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 1023,
+      "y" : 541
+    },
+    "minX" : 982,
+    "maxX" : 1044,
+    "minY" : 525,
+    "maxY" : 589,
+    "prop" : {
+      "x" : 1004,
+      "y" : 526,
+      "width" : 39,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 1007,
+      "y" : 531
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1038,
+          "y" : 531
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1038,
+          "y" : 531
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 78,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1009,
+          "y" : 560
+        },
+        "to" : {
+          "x" : 982,
+          "y" : 589
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 2,
+        "shape" : {
+          "a" : {
+            "x" : 989,
+            "y" : 568
+          },
+          "b" : {
+            "x" : 1001,
+            "y" : 580
+          },
+          "type" : "BOX",
+          "empty" : true,
+          "centre" : {
+            "x" : 995,
+            "y" : 574
+          }
+        }
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 1007,
+          "y" : 568
+        },
+        "b" : {
+          "x" : 1009,
+          "y" : 560
+        },
+        "c" : {
+          "x" : 1001,
+          "y" : 562
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 1001,
+          "y" : 562
+        }
+      }
+    } ]
+  }, {
+    "id" : 81,
+    "reactomeId" : 2076452,
+    "displayName" : "HS(1)-PGs",
+    "schemaClass" : "DefinedSet",
+    "renderableClass" : "EntitySet",
+    "position" : {
+      "x" : 1050,
+      "y" : 589
+    },
+    "minX" : 982,
+    "maxX" : 1082,
+    "minY" : 578,
+    "maxY" : 601,
+    "prop" : {
+      "x" : 1018,
+      "y" : 578,
+      "width" : 64,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 1026,
+      "y" : 572
+    },
+    "connectors" : [ {
+      "edgeId" : 78,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1012,
+          "y" : 589
+        },
+        "to" : {
+          "x" : 982,
+          "y" : 589
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 1005,
+          "y" : 593
+        },
+        "b" : {
+          "x" : 1012,
+          "y" : 589
+        },
+        "c" : {
+          "x" : 1005,
+          "y" : 585
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 1005,
+          "y" : 585
+        }
+      }
+    }, {
+      "edgeId" : 82,
+      "type" : "INPUT",
+      "segments" : [ ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 83,
+    "reactomeId" : 2076425,
+    "displayName" : "HS(2)-PGs",
+    "schemaClass" : "DefinedSet",
+    "renderableClass" : "EntitySet",
+    "position" : {
+      "x" : 1187,
+      "y" : 589
+    },
+    "minX" : 1155,
+    "maxX" : 1251,
+    "minY" : 578,
+    "maxY" : 601,
+    "prop" : {
+      "x" : 1155,
+      "y" : 578,
+      "width" : 64,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 1163,
+      "y" : 572
+    },
+    "connectors" : [ {
+      "edgeId" : 82,
+      "type" : "OUTPUT",
+      "segments" : [ ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    }, {
+      "edgeId" : 92,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1225,
+          "y" : 589
+        },
+        "to" : {
+          "x" : 1251,
+          "y" : 589
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 93,
+    "reactomeId" : 2076297,
+    "displayName" : "HS(3)-PGs",
+    "schemaClass" : "DefinedSet",
+    "renderableClass" : "EntitySet",
+    "position" : {
+      "x" : 1419,
+      "y" : 590
+    },
+    "minX" : 1300,
+    "maxX" : 1451,
+    "minY" : 523,
+    "maxY" : 602,
+    "prop" : {
+      "x" : 1387,
+      "y" : 579,
+      "width" : 64,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 1395,
+      "y" : 573
+    },
+    "connectors" : [ {
+      "edgeId" : 100,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1416,
+          "y" : 573
+        },
+        "to" : {
+          "x" : 1404,
+          "y" : 525
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    }, {
+      "edgeId" : 108,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1407,
+          "y" : 573
+        },
+        "to" : {
+          "x" : 1353,
+          "y" : 523
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    }, {
+      "edgeId" : 92,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1381,
+          "y" : 590
+        },
+        "to" : {
+          "x" : 1300,
+          "y" : 590
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 1374,
+          "y" : 594
+        },
+        "b" : {
+          "x" : 1381,
+          "y" : 590
+        },
+        "c" : {
+          "x" : 1374,
+          "y" : 586
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 1374,
+          "y" : 586
+        }
+      }
+    } ]
+  }, {
+    "id" : 222,
+    "reactomeId" : 425969,
+    "displayName" : "H+",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 309,
+      "y" : 533
+    },
+    "minX" : 294,
+    "maxX" : 326,
+    "minY" : 517,
+    "maxY" : 592,
+    "prop" : {
+      "x" : 294,
+      "y" : 518,
+      "width" : 31,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 296,
+      "y" : 523
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 320,
+          "y" : 523
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 320,
+          "y" : 523
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 54,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 306,
+          "y" : 552
+        },
+        "to" : {
+          "x" : 299,
+          "y" : 592
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 309,
+          "y" : 560
+        },
+        "b" : {
+          "x" : 306,
+          "y" : 552
+        },
+        "c" : {
+          "x" : 301,
+          "y" : 558
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 301,
+          "y" : 558
+        }
+      }
+    } ],
+    "trivial" : true
+  }, {
+    "id" : 95,
+    "reactomeId" : 741440,
+    "displayName" : "PAPS",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 1201,
+      "y" : 552
+    },
+    "minX" : 1178,
+    "maxX" : 1251,
+    "minY" : 536,
+    "maxY" : 589,
+    "prop" : {
+      "x" : 1178,
+      "y" : 537,
+      "width" : 46,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 1181,
+      "y" : 542
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1219,
+          "y" : 542
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1219,
+          "y" : 542
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 92,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1221,
+          "y" : 571
+        },
+        "to" : {
+          "x" : 1251,
+          "y" : 589
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 224,
+    "reactomeId" : 2022878,
+    "displayName" : "EXT1:EXT2",
+    "schemaClass" : "Complex",
+    "renderableClass" : "Complex",
+    "position" : {
+      "x" : 489,
+      "y" : 665
+    },
+    "minX" : 463,
+    "maxX" : 521,
+    "minY" : 596,
+    "maxY" : 685,
+    "prop" : {
+      "x" : 463,
+      "y" : 645,
+      "width" : 52,
+      "height" : 40
+    },
+    "textPosition" : {
+      "x" : 468,
+      "y" : 650
+    },
+    "bgColor" : {
+      "r" : 204,
+      "g" : 255,
+      "b" : 255
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 515,
+          "y" : 645
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 515,
+          "y" : 645
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 69,
+      "type" : "CATALYST",
+      "segments" : [ {
+        "from" : {
+          "x" : 488,
+          "y" : 642
+        },
+        "to" : {
+          "x" : 487,
+          "y" : 604
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "c" : {
+          "x" : 487,
+          "y" : 600
+        },
+        "r" : 4,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 487,
+          "y" : 600
+        }
+      }
+    } ]
+  }, {
+    "id" : 96,
+    "reactomeId" : 742343,
+    "displayName" : "PAP",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 1347,
+      "y" : 633
+    },
+    "minX" : 1300,
+    "maxX" : 1368,
+    "minY" : 590,
+    "maxY" : 649,
+    "prop" : {
+      "x" : 1328,
+      "y" : 618,
+      "width" : 39,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 1331,
+      "y" : 623
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1362,
+          "y" : 623
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1362,
+          "y" : 623
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 92,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1330,
+          "y" : 615
+        },
+        "to" : {
+          "x" : 1300,
+          "y" : 590
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 1322,
+          "y" : 614
+        },
+        "b" : {
+          "x" : 1330,
+          "y" : 615
+        },
+        "c" : {
+          "x" : 1327,
+          "y" : 607
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 1327,
+          "y" : 607
+        }
+      }
+    } ]
+  }, {
+    "id" : 97,
+    "reactomeId" : 174362,
+    "displayName" : "Transport and metabolism of PAPS",
+    "schemaClass" : "Pathway",
+    "renderableClass" : "EncapsulatedNode",
+    "position" : {
+      "x" : 930,
+      "y" : 386
+    },
+    "minX" : 860,
+    "maxX" : 1001,
+    "minY" : 361,
+    "maxY" : 412,
+    "prop" : {
+      "x" : 860,
+      "y" : 361,
+      "width" : 141,
+      "height" : 51
+    },
+    "textPosition" : {
+      "x" : 860,
+      "y" : 365
+    },
+    "connectors" : [ ]
+  }, {
+    "id" : 101,
+    "reactomeId" : 2076491,
+    "displayName" : "HS(4)-PGs",
+    "schemaClass" : "DefinedSet",
+    "renderableClass" : "EntitySet",
+    "position" : {
+      "x" : 1372,
+      "y" : 414
+    },
+    "minX" : 1340,
+    "maxX" : 1404,
+    "minY" : 403,
+    "maxY" : 481,
+    "prop" : {
+      "x" : 1340,
+      "y" : 403,
+      "width" : 64,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 1348,
+      "y" : 397
+    },
+    "connectors" : [ {
+      "edgeId" : 100,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1377,
+          "y" : 432
+        },
+        "to" : {
+          "x" : 1403,
+          "y" : 481
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 1384,
+          "y" : 436
+        },
+        "b" : {
+          "x" : 1377,
+          "y" : 432
+        },
+        "c" : {
+          "x" : 1377,
+          "y" : 440
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 1377,
+          "y" : 440
+        }
+      }
+    }, {
+      "edgeId" : 108,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1370,
+          "y" : 432
+        },
+        "to" : {
+          "x" : 1363,
+          "y" : 466
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 1373,
+          "y" : 440
+        },
+        "b" : {
+          "x" : 1370,
+          "y" : 432
+        },
+        "c" : {
+          "x" : 1365,
+          "y" : 438
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 1365,
+          "y" : 438
+        }
+      }
+    }, {
+      "edgeId" : 121,
+      "type" : "INPUT",
+      "segments" : [ ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 102,
+    "reactomeId" : 2076438,
+    "displayName" : "HS3ST2-6",
+    "schemaClass" : "CandidateSet",
+    "renderableClass" : "EntitySet",
+    "position" : {
+      "x" : 1469,
+      "y" : 500
+    },
+    "minX" : 1412,
+    "maxX" : 1502,
+    "minY" : 489,
+    "maxY" : 512,
+    "prop" : {
+      "x" : 1437,
+      "y" : 489,
+      "width" : 65,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 1439,
+      "y" : 483
+    },
+    "connectors" : [ {
+      "edgeId" : 100,
+      "type" : "CATALYST",
+      "segments" : [ {
+        "from" : {
+          "x" : 1431,
+          "y" : 500
+        },
+        "to" : {
+          "x" : 1420,
+          "y" : 500
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "c" : {
+          "x" : 1416,
+          "y" : 501
+        },
+        "r" : 4,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1416,
+          "y" : 501
+        }
+      }
+    } ]
+  }, {
+    "id" : 104,
+    "reactomeId" : 741440,
+    "displayName" : "PAPS",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 1322,
+      "y" : 553
+    },
+    "minX" : 1299,
+    "maxX" : 1404,
+    "minY" : 523,
+    "maxY" : 569,
+    "prop" : {
+      "x" : 1299,
+      "y" : 538,
+      "width" : 46,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 1302,
+      "y" : 543
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1340,
+          "y" : 543
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1340,
+          "y" : 543
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 100,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1348,
+          "y" : 545
+        },
+        "to" : {
+          "x" : 1404,
+          "y" : 525
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    }, {
+      "edgeId" : 108,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1338,
+          "y" : 535
+        },
+        "to" : {
+          "x" : 1353,
+          "y" : 523
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 233,
+    "reactomeId" : 425969,
+    "displayName" : "H+",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 536,
+      "y" : 520
+    },
+    "minX" : 514,
+    "maxX" : 553,
+    "minY" : 504,
+    "maxY" : 587,
+    "prop" : {
+      "x" : 521,
+      "y" : 505,
+      "width" : 31,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 523,
+      "y" : 510
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 547,
+          "y" : 510
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 547,
+          "y" : 510
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 69,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 530,
+          "y" : 539
+        },
+        "to" : {
+          "x" : 514,
+          "y" : 587
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 532,
+          "y" : 547
+        },
+        "b" : {
+          "x" : 530,
+          "y" : 539
+        },
+        "c" : {
+          "x" : 524,
+          "y" : 544
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 524,
+          "y" : 544
+        }
+      }
+    } ],
+    "trivial" : true
+  }, {
+    "id" : 109,
+    "reactomeId" : 2076429,
+    "displayName" : "HS3ST1",
+    "schemaClass" : "EntityWithAccessionedSequence",
+    "renderableClass" : "Protein",
+    "position" : {
+      "x" : 1279,
+      "y" : 489
+    },
+    "minX" : 1252,
+    "maxX" : 1344,
+    "minY" : 472,
+    "maxY" : 501,
+    "prop" : {
+      "x" : 1252,
+      "y" : 478,
+      "width" : 55,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 1255,
+      "y" : 472
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1307,
+          "y" : 478
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1307,
+          "y" : 478
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 108,
+      "type" : "CATALYST",
+      "segments" : [ {
+        "from" : {
+          "x" : 1310,
+          "y" : 490
+        },
+        "to" : {
+          "x" : 1336,
+          "y" : 491
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "c" : {
+          "x" : 1340,
+          "y" : 491
+        },
+        "r" : 4,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1340,
+          "y" : 491
+        }
+      }
+    } ]
+  }, {
+    "id" : 111,
+    "reactomeId" : 741440,
+    "displayName" : "PAPS",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 1289,
+      "y" : 301
+    },
+    "minX" : 1266,
+    "maxX" : 1370,
+    "minY" : 255,
+    "maxY" : 317,
+    "prop" : {
+      "x" : 1266,
+      "y" : 286,
+      "width" : 46,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 1269,
+      "y" : 291
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1307,
+          "y" : 291
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1307,
+          "y" : 291
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 124,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1315,
+          "y" : 287
+        },
+        "to" : {
+          "x" : 1370,
+          "y" : 255
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 242,
+    "reactomeId" : 425969,
+    "displayName" : "H+",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 1011,
+      "y" : 503
+    },
+    "minX" : 982,
+    "maxX" : 1028,
+    "minY" : 487,
+    "maxY" : 589,
+    "prop" : {
+      "x" : 996,
+      "y" : 488,
+      "width" : 31,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 998,
+      "y" : 493
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1022,
+          "y" : 493
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1022,
+          "y" : 493
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 78,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1005,
+          "y" : 522
+        },
+        "to" : {
+          "x" : 982,
+          "y" : 589
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 1007,
+          "y" : 530
+        },
+        "b" : {
+          "x" : 1005,
+          "y" : 522
+        },
+        "c" : {
+          "x" : 999,
+          "y" : 527
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 999,
+          "y" : 527
+        }
+      }
+    } ],
+    "trivial" : true
+  }, {
+    "id" : 120,
+    "reactomeId" : 742343,
+    "displayName" : "PAP",
+    "schemaClass" : "SimpleEntity",
+    "renderableClass" : "Chemical",
+    "position" : {
+      "x" : 1450,
+      "y" : 412
+    },
+    "minX" : 1363,
+    "maxX" : 1471,
+    "minY" : 396,
+    "maxY" : 481,
+    "prop" : {
+      "x" : 1431,
+      "y" : 397,
+      "width" : 39,
+      "height" : 31
+    },
+    "textPosition" : {
+      "x" : 1434,
+      "y" : 402
+    },
+    "interactorsSummary" : {
+      "type" : "TR",
+      "shape" : {
+        "c" : {
+          "x" : 1465,
+          "y" : 402
+        },
+        "r" : 6,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1465,
+          "y" : 402
+        }
+      }
+    },
+    "connectors" : [ {
+      "edgeId" : 100,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1439,
+          "y" : 431
+        },
+        "to" : {
+          "x" : 1403,
+          "y" : 481
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 1438,
+          "y" : 439
+        },
+        "b" : {
+          "x" : 1439,
+          "y" : 431
+        },
+        "c" : {
+          "x" : 1432,
+          "y" : 434
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 1432,
+          "y" : 434
+        }
+      }
+    }, {
+      "edgeId" : 108,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1428,
+          "y" : 424
+        },
+        "to" : {
+          "x" : 1363,
+          "y" : 466
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 1424,
+          "y" : 431
+        },
+        "b" : {
+          "x" : 1428,
+          "y" : 424
+        },
+        "c" : {
+          "x" : 1420,
+          "y" : 424
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 1420,
+          "y" : 424
+        }
+      }
+    } ]
+  }, {
+    "id" : 122,
+    "reactomeId" : 2076461,
+    "displayName" : "HS(5)-PGs",
+    "schemaClass" : "DefinedSet",
+    "renderableClass" : "EntitySet",
+    "position" : {
+      "x" : 1370,
+      "y" : 301
+    },
+    "minX" : 1338,
+    "maxX" : 1402,
+    "minY" : 255,
+    "maxY" : 313,
+    "prop" : {
+      "x" : 1338,
+      "y" : 290,
+      "width" : 64,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 1346,
+      "y" : 284
+    },
+    "connectors" : [ {
+      "edgeId" : 121,
+      "type" : "OUTPUT",
+      "segments" : [ ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    }, {
+      "edgeId" : 124,
+      "type" : "INPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1370,
+          "y" : 284
+        },
+        "to" : {
+          "x" : 1370,
+          "y" : 255
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      }
+    } ]
+  }, {
+    "id" : 125,
+    "reactomeId" : 2076357,
+    "displayName" : "HS/HPIN-PGs",
+    "schemaClass" : "DefinedSet",
+    "renderableClass" : "EntitySet",
+    "position" : {
+      "x" : 1367,
+      "y" : 149
+    },
+    "minX" : 1327,
+    "maxX" : 1407,
+    "minY" : 138,
+    "maxY" : 210,
+    "prop" : {
+      "x" : 1327,
+      "y" : 138,
+      "width" : 80,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 1336,
+      "y" : 132
+    },
+    "connectors" : [ {
+      "edgeId" : 124,
+      "type" : "OUTPUT",
+      "segments" : [ {
+        "from" : {
+          "x" : 1367,
+          "y" : 167
+        },
+        "to" : {
+          "x" : 1370,
+          "y" : 210
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "a" : {
+          "x" : 1371,
+          "y" : 174
+        },
+        "b" : {
+          "x" : 1367,
+          "y" : 167
+        },
+        "c" : {
+          "x" : 1363,
+          "y" : 174
+        },
+        "type" : "ARROW",
+        "centre" : {
+          "x" : 1363,
+          "y" : 174
+        }
+      }
+    } ]
+  }, {
+    "id" : 126,
+    "reactomeId" : 2076470,
+    "displayName" : "HS6STs",
+    "schemaClass" : "CandidateSet",
+    "renderableClass" : "EntitySet",
+    "position" : {
+      "x" : 1475,
+      "y" : 231
+    },
+    "minX" : 1377,
+    "maxX" : 1503,
+    "minY" : 220,
+    "maxY" : 243,
+    "prop" : {
+      "x" : 1448,
+      "y" : 220,
+      "width" : 55,
+      "height" : 23
+    },
+    "textPosition" : {
+      "x" : 1448,
+      "y" : 221
+    },
+    "connectors" : [ {
+      "edgeId" : 124,
+      "type" : "CATALYST",
+      "segments" : [ {
+        "from" : {
+          "x" : 1442,
+          "y" : 231
+        },
+        "to" : {
+          "x" : 1385,
+          "y" : 231
+        }
+      } ],
+      "stoichiometry" : {
+        "value" : 1
+      },
+      "endShape" : {
+        "c" : {
+          "x" : 1381,
+          "y" : 231
+        },
+        "r" : 4,
+        "type" : "CIRCLE",
+        "empty" : true,
+        "centre" : {
+          "x" : 1381,
+          "y" : 231
+        }
+      }
+    } ]
+  } ],
+  "edges" : [ {
+    "id" : 130,
+    "reactomeId" : 2024108,
+    "displayName" : "Some HSPGs are secreted to the plasma membrane",
+    "schemaClass" : "BlackBoxEvent",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 1154,
+      "y" : 67
+    },
+    "minX" : 1148,
+    "maxX" : 1160,
+    "minY" : 29,
+    "maxY" : 114,
+    "reactionType" : "omitted",
+    "segments" : [ {
+      "from" : {
+        "x" : 1154,
+        "y" : 114
+      },
+      "to" : {
+        "x" : 1154,
+        "y" : 67
+      }
+    }, {
+      "from" : {
+        "x" : 1154,
+        "y" : 67
+      },
+      "to" : {
+        "x" : 1154,
+        "y" : 29
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 1158,
+        "y" : 36
+      },
+      "b" : {
+        "x" : 1154,
+        "y" : 29
+      },
+      "c" : {
+        "x" : 1150,
+        "y" : 36
+      },
+      "type" : "ARROW",
+      "centre" : {
+        "x" : 1150,
+        "y" : 36
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 1148,
+        "y" : 61
+      },
+      "b" : {
+        "x" : 1160,
+        "y" : 73
+      },
+      "s" : "\\\\",
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 1154,
+        "y" : 67
+      }
+    },
+    "inputs" : [ {
+      "id" : 131
+    } ],
+    "outputs" : [ {
+      "id" : 138
+    } ]
+  }, {
+    "id" : 3,
+    "reactomeId" : 744231,
+    "displayName" : "SLC35D2 exchanges UDP-GlcNAc for UMP",
+    "schemaClass" : "Reaction",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 110,
+      "y" : 104
+    },
+    "minX" : 104,
+    "maxX" : 116,
+    "minY" : 98,
+    "maxY" : 110,
+    "reactionType" : "transition",
+    "segments" : [ {
+      "from" : {
+        "x" : 111,
+        "y" : 103
+      },
+      "to" : {
+        "x" : 110,
+        "y" : 104
+      }
+    }, {
+      "from" : {
+        "x" : 110,
+        "y" : 104
+      },
+      "to" : {
+        "x" : 109,
+        "y" : 103
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 104,
+        "y" : 98
+      },
+      "b" : {
+        "x" : 116,
+        "y" : 110
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 110,
+        "y" : 104
+      }
+    },
+    "inputs" : [ {
+      "id" : 4,
+      "points" : [ {
+        "x" : 119,
+        "y" : 81
+      } ]
+    }, {
+      "id" : 5,
+      "points" : [ {
+        "x" : 106,
+        "y" : 151
+      } ]
+    } ],
+    "outputs" : [ {
+      "id" : 6,
+      "points" : [ {
+        "x" : 151,
+        "y" : 184
+      } ]
+    }, {
+      "id" : 7,
+      "points" : [ {
+        "x" : 74,
+        "y" : 73
+      } ]
+    } ],
+    "catalysts" : [ {
+      "id" : 8,
+      "points" : [ {
+        "x" : 156,
+        "y" : 103
+      } ]
+    } ]
+  }, {
+    "id" : 100,
+    "reactomeId" : 2076611,
+    "displayName" : "HS3ST2-6 sulfate GlcN at C3 in heparan sulfate",
+    "schemaClass" : "Reaction",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 1404,
+      "y" : 501
+    },
+    "minX" : 1398,
+    "maxX" : 1410,
+    "minY" : 481,
+    "maxY" : 525,
+    "reactionType" : "transition",
+    "segments" : [ {
+      "from" : {
+        "x" : 1404,
+        "y" : 525
+      },
+      "to" : {
+        "x" : 1404,
+        "y" : 501
+      }
+    }, {
+      "from" : {
+        "x" : 1404,
+        "y" : 501
+      },
+      "to" : {
+        "x" : 1403,
+        "y" : 481
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 1398,
+        "y" : 495
+      },
+      "b" : {
+        "x" : 1410,
+        "y" : 507
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 1404,
+        "y" : 501
+      }
+    },
+    "inputs" : [ {
+      "id" : 93,
+      "points" : [ {
+        "x" : 1416,
+        "y" : 573
+      } ]
+    }, {
+      "id" : 104,
+      "points" : [ {
+        "x" : 1348,
+        "y" : 545
+      } ]
+    } ],
+    "outputs" : [ {
+      "id" : 101,
+      "points" : [ {
+        "x" : 1377,
+        "y" : 432
+      } ]
+    }, {
+      "id" : 284,
+      "points" : [ {
+        "x" : 1305,
+        "y" : 440
+      } ]
+    }, {
+      "id" : 120,
+      "points" : [ {
+        "x" : 1439,
+        "y" : 431
+      } ]
+    } ],
+    "catalysts" : [ {
+      "id" : 102,
+      "points" : [ {
+        "x" : 1431,
+        "y" : 500
+      } ]
+    } ]
+  }, {
+    "id" : 69,
+    "reactomeId" : 2076392,
+    "displayName" : "EXT1:EXT2 transfers GlcA to heparan",
+    "schemaClass" : "Reaction",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 487,
+      "y" : 588
+    },
+    "minX" : 456,
+    "maxX" : 514,
+    "minY" : 582,
+    "maxY" : 594,
+    "reactionType" : "transition",
+    "segments" : [ {
+      "from" : {
+        "x" : 456,
+        "y" : 589
+      },
+      "to" : {
+        "x" : 487,
+        "y" : 588
+      }
+    }, {
+      "from" : {
+        "x" : 487,
+        "y" : 588
+      },
+      "to" : {
+        "x" : 514,
+        "y" : 587
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 481,
+        "y" : 582
+      },
+      "b" : {
+        "x" : 493,
+        "y" : 594
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 487,
+        "y" : 588
+      }
+    },
+    "inputs" : [ {
+      "id" : 50,
+      "points" : [ {
+        "x" : 260,
+        "y" : 413
+      } ]
+    }, {
+      "id" : 55,
+      "points" : [ {
+        "x" : 428,
+        "y" : 589
+      } ]
+    } ],
+    "outputs" : [ {
+      "id" : 70,
+      "points" : [ {
+        "x" : 544,
+        "y" : 587
+      } ]
+    }, {
+      "id" : 72,
+      "points" : [ {
+        "x" : 542,
+        "y" : 562
+      } ]
+    }, {
+      "id" : 233,
+      "points" : [ {
+        "x" : 530,
+        "y" : 539
+      } ]
+    } ],
+    "catalysts" : [ {
+      "id" : 224,
+      "points" : [ {
+        "x" : 488,
+        "y" : 642
+      } ]
+    } ]
+  }, {
+    "id" : 73,
+    "reactomeId" : 2022887,
+    "displayName" : "NDST1-4 N-deacetylates GlcNAc residues in heparan",
+    "schemaClass" : "Reaction",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 714,
+      "y" : 589
+    },
+    "minX" : 687,
+    "maxX" : 740,
+    "minY" : 583,
+    "maxY" : 595,
+    "reactionType" : "transition",
+    "segments" : [ {
+      "from" : {
+        "x" : 687,
+        "y" : 589
+      },
+      "to" : {
+        "x" : 714,
+        "y" : 589
+      }
+    }, {
+      "from" : {
+        "x" : 714,
+        "y" : 589
+      },
+      "to" : {
+        "x" : 740,
+        "y" : 589
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 708,
+        "y" : 583
+      },
+      "b" : {
+        "x" : 720,
+        "y" : 595
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 714,
+        "y" : 589
+      }
+    },
+    "inputs" : [ {
+      "id" : 74,
+      "points" : [ {
+        "x" : 661,
+        "y" : 561
+      } ]
+    }, {
+      "id" : 70,
+      "points" : [ {
+        "x" : 649,
+        "y" : 589
+      } ]
+    } ],
+    "outputs" : [ {
+      "id" : 75,
+      "points" : [ {
+        "x" : 766,
+        "y" : 563
+      } ]
+    }, {
+      "id" : 76,
+      "points" : [ {
+        "x" : 778,
+        "y" : 589
+      } ]
+    } ],
+    "catalysts" : [ {
+      "id" : 77,
+      "points" : [ {
+        "x" : 827,
+        "y" : 650
+      } ]
+    } ]
+  }, {
+    "id" : 393,
+    "reactomeId" : 9953259,
+    "displayName" : "EXTL3 dimer transfers GlcNAc to the GAG linker",
+    "schemaClass" : "Reaction",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 222,
+      "y" : 274
+    },
+    "minX" : 216,
+    "maxX" : 228,
+    "minY" : 234,
+    "maxY" : 314,
+    "reactionType" : "transition",
+    "segments" : [ {
+      "from" : {
+        "x" : 222,
+        "y" : 234
+      },
+      "to" : {
+        "x" : 222,
+        "y" : 274
+      }
+    }, {
+      "from" : {
+        "x" : 222,
+        "y" : 274
+      },
+      "to" : {
+        "x" : 222,
+        "y" : 314
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 216,
+        "y" : 268
+      },
+      "b" : {
+        "x" : 228,
+        "y" : 280
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 222,
+        "y" : 274
+      }
+    },
+    "inputs" : [ {
+      "id" : 16,
+      "points" : [ {
+        "x" : 273,
+        "y" : 223
+      } ]
+    }, {
+      "id" : 6,
+      "points" : [ {
+        "x" : 193,
+        "y" : 221
+      } ]
+    } ],
+    "outputs" : [ {
+      "id" : 18,
+      "points" : [ {
+        "x" : 227,
+        "y" : 329
+      } ]
+    }, {
+      "id" : 17,
+      "points" : [ {
+        "x" : 176,
+        "y" : 354
+      } ]
+    }, {
+      "id" : 153,
+      "points" : [ {
+        "x" : 265,
+        "y" : 328
+      } ]
+    } ],
+    "catalysts" : [ {
+      "id" : 205,
+      "points" : [ {
+        "x" : 89,
+        "y" : 284
+      } ]
+    } ]
+  }, {
+    "id" : 108,
+    "reactomeId" : 2076383,
+    "displayName" : "HS3ST1 sulfates GlcN at C3 in heparan sulfate",
+    "schemaClass" : "Reaction",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 1352,
+      "y" : 492
+    },
+    "minX" : 1346,
+    "maxX" : 1363,
+    "minY" : 466,
+    "maxY" : 523,
+    "reactionType" : "transition",
+    "segments" : [ {
+      "from" : {
+        "x" : 1353,
+        "y" : 523
+      },
+      "to" : {
+        "x" : 1352,
+        "y" : 492
+      }
+    }, {
+      "from" : {
+        "x" : 1352,
+        "y" : 492
+      },
+      "to" : {
+        "x" : 1363,
+        "y" : 466
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 1346,
+        "y" : 486
+      },
+      "b" : {
+        "x" : 1358,
+        "y" : 498
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 1352,
+        "y" : 492
+      }
+    },
+    "inputs" : [ {
+      "id" : 93,
+      "points" : [ {
+        "x" : 1407,
+        "y" : 573
+      } ]
+    }, {
+      "id" : 104,
+      "points" : [ {
+        "x" : 1338,
+        "y" : 535
+      } ]
+    } ],
+    "outputs" : [ {
+      "id" : 101,
+      "points" : [ {
+        "x" : 1370,
+        "y" : 432
+      } ]
+    }, {
+      "id" : 120,
+      "points" : [ {
+        "x" : 1428,
+        "y" : 424
+      } ]
+    }, {
+      "id" : 284,
+      "points" : [ {
+        "x" : 1305,
+        "y" : 440
+      } ]
+    } ],
+    "catalysts" : [ {
+      "id" : 109,
+      "points" : [ {
+        "x" : 1310,
+        "y" : 490
+      } ]
+    } ]
+  }, {
+    "id" : 78,
+    "reactomeId" : 2022860,
+    "displayName" : "NDST1-4 can sulfate a glucosamine residue in heparan to form heparan sulfate (HS)",
+    "schemaClass" : "Reaction",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 952,
+      "y" : 589
+    },
+    "minX" : 921,
+    "maxX" : 982,
+    "minY" : 583,
+    "maxY" : 595,
+    "reactionType" : "transition",
+    "segments" : [ {
+      "from" : {
+        "x" : 921,
+        "y" : 589
+      },
+      "to" : {
+        "x" : 952,
+        "y" : 589
+      }
+    }, {
+      "from" : {
+        "x" : 952,
+        "y" : 589
+      },
+      "to" : {
+        "x" : 982,
+        "y" : 589
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 946,
+        "y" : 583
+      },
+      "b" : {
+        "x" : 958,
+        "y" : 595
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 952,
+        "y" : 589
+      }
+    },
+    "inputs" : [ {
+      "id" : 79,
+      "points" : [ {
+        "x" : 893,
+        "y" : 563
+      } ],
+      "stoichiometry" : 2
+    }, {
+      "id" : 76,
+      "points" : [ {
+        "x" : 883,
+        "y" : 589
+      } ]
+    } ],
+    "outputs" : [ {
+      "id" : 81,
+      "points" : [ {
+        "x" : 1012,
+        "y" : 589
+      } ]
+    }, {
+      "id" : 80,
+      "points" : [ {
+        "x" : 1009,
+        "y" : 560
+      } ],
+      "stoichiometry" : 2
+    }, {
+      "id" : 242,
+      "points" : [ {
+        "x" : 1005,
+        "y" : 522
+      } ]
+    } ],
+    "catalysts" : [ {
+      "id" : 77,
+      "points" : [ {
+        "x" : 862,
+        "y" : 650
+      } ]
+    } ]
+  }, {
+    "id" : 49,
+    "reactomeId" : 2022856,
+    "displayName" : "EXT1:EXT2 transfers GlcA to heparan",
+    "schemaClass" : "Reaction",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 164,
+      "y" : 448
+    },
+    "minX" : 158,
+    "maxX" : 170,
+    "minY" : 419,
+    "maxY" : 471,
+    "reactionType" : "transition",
+    "segments" : [ {
+      "from" : {
+        "x" : 165,
+        "y" : 419
+      },
+      "to" : {
+        "x" : 164,
+        "y" : 448
+      }
+    }, {
+      "from" : {
+        "x" : 164,
+        "y" : 448
+      },
+      "to" : {
+        "x" : 163,
+        "y" : 471
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 158,
+        "y" : 442
+      },
+      "b" : {
+        "x" : 170,
+        "y" : 454
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 164,
+        "y" : 448
+      }
+    },
+    "inputs" : [ {
+      "id" : 50,
+      "points" : [ {
+        "x" : 212,
+        "y" : 402
+      } ]
+    }, {
+      "id" : 17,
+      "points" : [ {
+        "x" : 165,
+        "y" : 389
+      } ]
+    } ],
+    "outputs" : [ {
+      "id" : 51,
+      "points" : [ {
+        "x" : 166,
+        "y" : 541
+      } ]
+    }, {
+      "id" : 53,
+      "points" : [ {
+        "x" : 126,
+        "y" : 499
+      } ]
+    }, {
+      "id" : 161,
+      "points" : [ {
+        "x" : 89,
+        "y" : 490
+      } ]
+    } ],
+    "catalysts" : [ {
+      "id" : 19,
+      "points" : [ {
+        "x" : 66,
+        "y" : 448
+      } ]
+    } ]
+  }, {
+    "id" : 82,
+    "reactomeId" : 2024100,
+    "displayName" : "GLCE epimerises GlcA to IdoA",
+    "schemaClass" : "Reaction",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 1119,
+      "y" : 588
+    },
+    "minX" : 1088,
+    "maxX" : 1149,
+    "minY" : 582,
+    "maxY" : 594,
+    "reactionType" : "transition",
+    "segments" : [ {
+      "from" : {
+        "x" : 1088,
+        "y" : 588
+      },
+      "to" : {
+        "x" : 1119,
+        "y" : 588
+      }
+    }, {
+      "from" : {
+        "x" : 1119,
+        "y" : 588
+      },
+      "to" : {
+        "x" : 1149,
+        "y" : 588
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 1142,
+        "y" : 592
+      },
+      "b" : {
+        "x" : 1149,
+        "y" : 588
+      },
+      "c" : {
+        "x" : 1142,
+        "y" : 584
+      },
+      "type" : "ARROW",
+      "centre" : {
+        "x" : 1142,
+        "y" : 584
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 1113,
+        "y" : 582
+      },
+      "b" : {
+        "x" : 1125,
+        "y" : 594
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 1119,
+        "y" : 588
+      }
+    },
+    "inputs" : [ {
+      "id" : 81
+    } ],
+    "outputs" : [ {
+      "id" : 83
+    } ],
+    "catalysts" : [ {
+      "id" : 257,
+      "points" : [ {
+        "x" : 1119,
+        "y" : 651
+      } ]
+    } ]
+  }, {
+    "id" : 54,
+    "reactomeId" : 2022851,
+    "displayName" : "EXT1:EXT2 transfers GlcNAc to the heparan chain",
+    "schemaClass" : "Reaction",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 274,
+      "y" : 593
+    },
+    "minX" : 248,
+    "maxX" : 299,
+    "minY" : 587,
+    "maxY" : 599,
+    "reactionType" : "transition",
+    "segments" : [ {
+      "from" : {
+        "x" : 248,
+        "y" : 594
+      },
+      "to" : {
+        "x" : 274,
+        "y" : 593
+      }
+    }, {
+      "from" : {
+        "x" : 274,
+        "y" : 593
+      },
+      "to" : {
+        "x" : 299,
+        "y" : 592
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 268,
+        "y" : 587
+      },
+      "b" : {
+        "x" : 280,
+        "y" : 599
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 274,
+        "y" : 593
+      }
+    },
+    "inputs" : [ {
+      "id" : 51,
+      "points" : [ {
+        "x" : 192,
+        "y" : 576
+      } ]
+    }, {
+      "id" : 57,
+      "points" : [ {
+        "x" : 214,
+        "y" : 613
+      } ]
+    } ],
+    "outputs" : [ {
+      "id" : 55,
+      "points" : [ {
+        "x" : 323,
+        "y" : 590
+      } ]
+    }, {
+      "id" : 61,
+      "points" : [ {
+        "x" : 324,
+        "y" : 567
+      } ]
+    }, {
+      "id" : 222,
+      "points" : [ {
+        "x" : 306,
+        "y" : 552
+      } ]
+    } ],
+    "catalysts" : [ {
+      "id" : 59,
+      "points" : [ {
+        "x" : 274,
+        "y" : 641
+      } ]
+    } ]
+  }, {
+    "id" : 121,
+    "reactomeId" : 2076371,
+    "displayName" : "GLCE epimerises more GlcA to IdoA as sulfate content rises",
+    "schemaClass" : "Reaction",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 1371,
+      "y" : 355
+    },
+    "minX" : 1365,
+    "maxX" : 1377,
+    "minY" : 319,
+    "maxY" : 397,
+    "reactionType" : "transition",
+    "segments" : [ {
+      "from" : {
+        "x" : 1371,
+        "y" : 397
+      },
+      "to" : {
+        "x" : 1371,
+        "y" : 355
+      }
+    }, {
+      "from" : {
+        "x" : 1371,
+        "y" : 355
+      },
+      "to" : {
+        "x" : 1370,
+        "y" : 319
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 1374,
+        "y" : 326
+      },
+      "b" : {
+        "x" : 1370,
+        "y" : 319
+      },
+      "c" : {
+        "x" : 1366,
+        "y" : 326
+      },
+      "type" : "ARROW",
+      "centre" : {
+        "x" : 1366,
+        "y" : 326
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 1365,
+        "y" : 349
+      },
+      "b" : {
+        "x" : 1377,
+        "y" : 361
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 1371,
+        "y" : 355
+      }
+    },
+    "inputs" : [ {
+      "id" : 101
+    } ],
+    "outputs" : [ {
+      "id" : 122
+    } ],
+    "catalysts" : [ {
+      "id" : 258,
+      "points" : [ {
+        "x" : 1433,
+        "y" : 355
+      } ]
+    } ]
+  }, {
+    "id" : 92,
+    "reactomeId" : 2076508,
+    "displayName" : "HS2ST1 trimer sulfates IdoA at C2 in heparan sulfate",
+    "schemaClass" : "Reaction",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 1273,
+      "y" : 590
+    },
+    "minX" : 1251,
+    "maxX" : 1300,
+    "minY" : 584,
+    "maxY" : 596,
+    "reactionType" : "transition",
+    "segments" : [ {
+      "from" : {
+        "x" : 1251,
+        "y" : 589
+      },
+      "to" : {
+        "x" : 1273,
+        "y" : 590
+      }
+    }, {
+      "from" : {
+        "x" : 1273,
+        "y" : 590
+      },
+      "to" : {
+        "x" : 1300,
+        "y" : 590
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 1267,
+        "y" : 584
+      },
+      "b" : {
+        "x" : 1279,
+        "y" : 596
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 1273,
+        "y" : 590
+      }
+    },
+    "inputs" : [ {
+      "id" : 83,
+      "points" : [ {
+        "x" : 1225,
+        "y" : 589
+      } ]
+    }, {
+      "id" : 95,
+      "points" : [ {
+        "x" : 1221,
+        "y" : 571
+      } ]
+    } ],
+    "outputs" : [ {
+      "id" : 93,
+      "points" : [ {
+        "x" : 1381,
+        "y" : 590
+      } ]
+    }, {
+      "id" : 275,
+      "points" : [ {
+        "x" : 1377,
+        "y" : 624
+      } ]
+    }, {
+      "id" : 96,
+      "points" : [ {
+        "x" : 1330,
+        "y" : 615
+      } ]
+    } ],
+    "catalysts" : [ {
+      "id" : 273,
+      "points" : [ {
+        "x" : 1274,
+        "y" : 651
+      } ]
+    } ]
+  }, {
+    "id" : 124,
+    "reactomeId" : 2076419,
+    "displayName" : "HS6STs sulfate GlcN at C6 in heparan sulfate/heparin",
+    "schemaClass" : "Reaction",
+    "renderableClass" : "Reaction",
+    "position" : {
+      "x" : 1369,
+      "y" : 231
+    },
+    "minX" : 1363,
+    "maxX" : 1375,
+    "minY" : 210,
+    "maxY" : 255,
+    "reactionType" : "transition",
+    "segments" : [ {
+      "from" : {
+        "x" : 1370,
+        "y" : 255
+      },
+      "to" : {
+        "x" : 1369,
+        "y" : 231
+      }
+    }, {
+      "from" : {
+        "x" : 1369,
+        "y" : 231
+      },
+      "to" : {
+        "x" : 1370,
+        "y" : 210
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 1363,
+        "y" : 225
+      },
+      "b" : {
+        "x" : 1375,
+        "y" : 237
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 1369,
+        "y" : 231
+      }
+    },
+    "inputs" : [ {
+      "id" : 122,
+      "points" : [ {
+        "x" : 1370,
+        "y" : 284
+      } ]
+    }, {
+      "id" : 111,
+      "points" : [ {
+        "x" : 1315,
+        "y" : 287
+      } ]
+    } ],
+    "outputs" : [ {
+      "id" : 125,
+      "points" : [ {
+        "x" : 1367,
+        "y" : 167
+      } ]
+    }, {
+      "id" : 316,
+      "points" : [ {
+        "x" : 1329,
+        "y" : 184
+      } ]
+    }, {
+      "id" : 128,
+      "points" : [ {
+        "x" : 1400,
+        "y" : 190
+      } ]
+    } ],
+    "catalysts" : [ {
+      "id" : 126,
+      "points" : [ {
+        "x" : 1442,
+        "y" : 231
+      } ]
+    } ]
+  } ],
+  "compartments" : [ {
+    "id" : 1,
+    "reactomeId" : 70101,
+    "displayName" : "cytosol",
+    "schemaClass" : "Compartment",
+    "renderableClass" : "Compartment",
+    "position" : {
+      "x" : 761,
+      "y" : 352
+    },
+    "minX" : 0,
+    "maxX" : 1523,
+    "minY" : 5,
+    "maxY" : 700,
+    "prop" : {
+      "x" : 0,
+      "y" : 5,
+      "width" : 1523,
+      "height" : 695
+    },
+    "textPosition" : {
+      "x" : 548,
+      "y" : 31
+    },
+    "insets" : {
+      "x" : 10,
+      "y" : 15,
+      "width" : 1501,
+      "height" : 672
+    },
+    "bgColor" : {
+      "r" : 250,
+      "g" : 240,
+      "b" : 240
+    },
+    "componentIds" : [ 2, 4, 7, 138, 130, 317, 318, 393 ]
+  }, {
+    "id" : 2,
+    "reactomeId" : 17963,
+    "displayName" : "Golgi lumen",
+    "schemaClass" : "Compartment",
+    "renderableClass" : "Compartment",
+    "position" : {
+      "x" : 759,
+      "y" : 382
+    },
+    "minX" : 35,
+    "maxX" : 1483,
+    "minY" : 96,
+    "maxY" : 668,
+    "prop" : {
+      "x" : 35,
+      "y" : 96,
+      "width" : 1448,
+      "height" : 572
+    },
+    "textPosition" : {
+      "x" : 648,
+      "y" : 116
+    },
+    "insets" : {
+      "x" : 44,
+      "y" : 108,
+      "width" : 1431,
+      "height" : 552
+    },
+    "bgColor" : {
+      "r" : 250,
+      "g" : 240,
+      "b" : 240
+    },
+    "componentIds" : [ 8, 5, 6, 3, 16, 17, 18, 19, 26, 27, 50, 51, 49, 53, 54, 55, 57, 59, 61, 69, 70, 72, 73, 74, 75, 76, 77, 78, 79, 81, 80, 82, 83, 92, 93, 95, 96, 97, 98, 99, 100, 101, 102, 104, 107, 108, 109, 111, 120, 121, 122, 124, 125, 126, 128, 129, 131, 132, 133, 134, 135, 136, 137, 153, 161, 205, 222, 224, 233, 242, 257, 258, 273, 275, 284, 316 ]
+  } ],
+  "notes" : [ ],
+  "links" : [ {
+    "id" : 129,
+    "renderableClass" : "Interaction",
+    "position" : {
+      "x" : 1133,
+      "y" : 337
+    },
+    "minX" : 1004,
+    "maxX" : 1263,
+    "minY" : 306,
+    "maxY" : 369,
+    "interactionType" : "Activate",
+    "segments" : [ {
+      "from" : {
+        "x" : 1004,
+        "y" : 369
+      },
+      "to" : {
+        "x" : 1263,
+        "y" : 306
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 1257,
+        "y" : 312
+      },
+      "b" : {
+        "x" : 1263,
+        "y" : 306
+      },
+      "c" : {
+        "x" : 1255,
+        "y" : 304
+      },
+      "type" : "ARROW",
+      "empty" : true,
+      "centre" : {
+        "x" : 1255,
+        "y" : 304
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 1127,
+        "y" : 331
+      },
+      "b" : {
+        "x" : 1139,
+        "y" : 343
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 1133,
+        "y" : 337
+      }
+    },
+    "inputs" : [ {
+      "id" : 97
+    } ],
+    "outputs" : [ {
+      "id" : 111
+    } ]
+  }, {
+    "id" : 98,
+    "renderableClass" : "Interaction",
+    "position" : {
+      "x" : 902,
+      "y" : 470
+    },
+    "minX" : 884,
+    "maxX" : 921,
+    "minY" : 415,
+    "maxY" : 526,
+    "interactionType" : "Activate",
+    "segments" : [ {
+      "from" : {
+        "x" : 921,
+        "y" : 415
+      },
+      "to" : {
+        "x" : 884,
+        "y" : 526
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 882,
+        "y" : 518
+      },
+      "b" : {
+        "x" : 884,
+        "y" : 526
+      },
+      "c" : {
+        "x" : 890,
+        "y" : 521
+      },
+      "type" : "ARROW",
+      "empty" : true,
+      "centre" : {
+        "x" : 890,
+        "y" : 521
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 896,
+        "y" : 464
+      },
+      "b" : {
+        "x" : 908,
+        "y" : 476
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 902,
+        "y" : 470
+      }
+    },
+    "inputs" : [ {
+      "id" : 97
+    } ],
+    "outputs" : [ {
+      "id" : 79
+    } ]
+  }, {
+    "id" : 99,
+    "renderableClass" : "Interaction",
+    "position" : {
+      "x" : 1073,
+      "y" : 476
+    },
+    "minX" : 971,
+    "maxX" : 1175,
+    "minY" : 415,
+    "maxY" : 538,
+    "interactionType" : "Activate",
+    "segments" : [ {
+      "from" : {
+        "x" : 971,
+        "y" : 415
+      },
+      "to" : {
+        "x" : 1175,
+        "y" : 538
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 1167,
+        "y" : 538
+      },
+      "b" : {
+        "x" : 1175,
+        "y" : 538
+      },
+      "c" : {
+        "x" : 1171,
+        "y" : 531
+      },
+      "type" : "ARROW",
+      "empty" : true,
+      "centre" : {
+        "x" : 1171,
+        "y" : 531
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 1067,
+        "y" : 470
+      },
+      "b" : {
+        "x" : 1079,
+        "y" : 482
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 1073,
+        "y" : 476
+      }
+    },
+    "inputs" : [ {
+      "id" : 97
+    } ],
+    "outputs" : [ {
+      "id" : 95
+    } ]
+  }, {
+    "id" : 132,
+    "renderableClass" : "EntitySetAndMemberLink",
+    "position" : {
+      "x" : 1101,
+      "y" : 360
+    },
+    "minX" : 1052,
+    "maxX" : 1151,
+    "minY" : 149,
+    "maxY" : 572,
+    "segments" : [ {
+      "from" : {
+        "x" : 1052,
+        "y" : 572
+      },
+      "to" : {
+        "x" : 1151,
+        "y" : 149
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 1095,
+        "y" : 354
+      },
+      "b" : {
+        "x" : 1107,
+        "y" : 366
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 1101,
+        "y" : 360
+      }
+    },
+    "inputs" : [ {
+      "id" : 81
+    } ],
+    "outputs" : [ {
+      "id" : 131
+    } ]
+  }, {
+    "id" : 133,
+    "renderableClass" : "EntitySetAndMemberLink",
+    "position" : {
+      "x" : 1286,
+      "y" : 361
+    },
+    "minX" : 1160,
+    "maxX" : 1412,
+    "minY" : 149,
+    "maxY" : 573,
+    "segments" : [ {
+      "from" : {
+        "x" : 1412,
+        "y" : 573
+      },
+      "to" : {
+        "x" : 1160,
+        "y" : 149
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 1280,
+        "y" : 355
+      },
+      "b" : {
+        "x" : 1292,
+        "y" : 367
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 1286,
+        "y" : 361
+      }
+    },
+    "inputs" : [ {
+      "id" : 93
+    } ],
+    "outputs" : [ {
+      "id" : 131
+    } ]
+  }, {
+    "id" : 134,
+    "renderableClass" : "EntitySetAndMemberLink",
+    "position" : {
+      "x" : 1252,
+      "y" : 138
+    },
+    "minX" : 1183,
+    "maxX" : 1321,
+    "minY" : 132,
+    "maxY" : 145,
+    "segments" : [ {
+      "from" : {
+        "x" : 1321,
+        "y" : 145
+      },
+      "to" : {
+        "x" : 1183,
+        "y" : 132
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 1246,
+        "y" : 132
+      },
+      "b" : {
+        "x" : 1258,
+        "y" : 144
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 1252,
+        "y" : 138
+      }
+    },
+    "inputs" : [ {
+      "id" : 125
+    } ],
+    "outputs" : [ {
+      "id" : 131
+    } ]
+  }, {
+    "id" : 135,
+    "renderableClass" : "EntitySetAndMemberLink",
+    "position" : {
+      "x" : 1262,
+      "y" : 273
+    },
+    "minX" : 1162,
+    "maxX" : 1362,
+    "minY" : 149,
+    "maxY" : 397,
+    "segments" : [ {
+      "from" : {
+        "x" : 1362,
+        "y" : 397
+      },
+      "to" : {
+        "x" : 1162,
+        "y" : 149
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 1256,
+        "y" : 267
+      },
+      "b" : {
+        "x" : 1268,
+        "y" : 279
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 1262,
+        "y" : 273
+      }
+    },
+    "inputs" : [ {
+      "id" : 101
+    } ],
+    "outputs" : [ {
+      "id" : 131
+    } ]
+  }, {
+    "id" : 136,
+    "renderableClass" : "EntitySetAndMemberLink",
+    "position" : {
+      "x" : 1170,
+      "y" : 360
+    },
+    "minX" : 1154,
+    "maxX" : 1186,
+    "minY" : 149,
+    "maxY" : 572,
+    "segments" : [ {
+      "from" : {
+        "x" : 1186,
+        "y" : 572
+      },
+      "to" : {
+        "x" : 1154,
+        "y" : 149
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 1164,
+        "y" : 354
+      },
+      "b" : {
+        "x" : 1176,
+        "y" : 366
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 1170,
+        "y" : 360
+      }
+    },
+    "inputs" : [ {
+      "id" : 83
+    } ],
+    "outputs" : [ {
+      "id" : 131
+    } ]
+  }, {
+    "id" : 137,
+    "renderableClass" : "EntitySetAndMemberLink",
+    "position" : {
+      "x" : 1261,
+      "y" : 216
+    },
+    "minX" : 1169,
+    "maxX" : 1354,
+    "minY" : 149,
+    "maxY" : 284,
+    "segments" : [ {
+      "from" : {
+        "x" : 1354,
+        "y" : 284
+      },
+      "to" : {
+        "x" : 1169,
+        "y" : 149
+      }
+    } ],
+    "reactionShape" : {
+      "a" : {
+        "x" : 1255,
+        "y" : 210
+      },
+      "b" : {
+        "x" : 1267,
+        "y" : 222
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 1261,
+        "y" : 216
+      }
+    },
+    "inputs" : [ {
+      "id" : 122
+    } ],
+    "outputs" : [ {
+      "id" : 131
+    } ]
+  }, {
+    "id" : 27,
+    "renderableClass" : "Interaction",
+    "position" : {
+      "x" : 412,
+      "y" : 183
+    },
+    "minX" : 394,
+    "maxX" : 431,
+    "minY" : 177,
+    "maxY" : 189,
+    "interactionType" : "Activate",
+    "segments" : [ {
+      "from" : {
+        "x" : 431,
+        "y" : 180
+      },
+      "to" : {
+        "x" : 394,
+        "y" : 187
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 400,
+        "y" : 182
+      },
+      "b" : {
+        "x" : 394,
+        "y" : 187
+      },
+      "c" : {
+        "x" : 402,
+        "y" : 190
+      },
+      "type" : "ARROW",
+      "empty" : true,
+      "centre" : {
+        "x" : 402,
+        "y" : 190
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 406,
+        "y" : 177
+      },
+      "b" : {
+        "x" : 418,
+        "y" : 189
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 412,
+        "y" : 183
+      }
+    },
+    "inputs" : [ {
+      "id" : 26
+    } ],
+    "outputs" : [ {
+      "id" : 16
+    } ]
+  }, {
+    "id" : 107,
+    "renderableClass" : "Interaction",
+    "position" : {
+      "x" : 1142,
+      "y" : 479
+    },
+    "minX" : 989,
+    "maxX" : 1296,
+    "minY" : 415,
+    "maxY" : 543,
+    "interactionType" : "Activate",
+    "segments" : [ {
+      "from" : {
+        "x" : 989,
+        "y" : 415
+      },
+      "to" : {
+        "x" : 1296,
+        "y" : 543
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 1288,
+        "y" : 544
+      },
+      "b" : {
+        "x" : 1296,
+        "y" : 543
+      },
+      "c" : {
+        "x" : 1291,
+        "y" : 537
+      },
+      "type" : "ARROW",
+      "empty" : true,
+      "centre" : {
+        "x" : 1291,
+        "y" : 537
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 1136,
+        "y" : 473
+      },
+      "b" : {
+        "x" : 1148,
+        "y" : 485
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 1142,
+        "y" : 479
+      }
+    },
+    "inputs" : [ {
+      "id" : 97
+    } ],
+    "outputs" : [ {
+      "id" : 104
+    } ]
+  }, {
+    "id" : 318,
+    "renderableClass" : "Interaction",
+    "position" : {
+      "x" : 1264,
+      "y" : 25
+    },
+    "minX" : 1183,
+    "maxX" : 1346,
+    "minY" : 14,
+    "maxY" : 37,
+    "interactionType" : "Activate",
+    "segments" : [ {
+      "from" : {
+        "x" : 1183,
+        "y" : 14
+      },
+      "to" : {
+        "x" : 1346,
+        "y" : 37
+      }
+    } ],
+    "endShape" : {
+      "a" : {
+        "x" : 1339,
+        "y" : 40
+      },
+      "b" : {
+        "x" : 1346,
+        "y" : 37
+      },
+      "c" : {
+        "x" : 1340,
+        "y" : 32
+      },
+      "type" : "ARROW",
+      "empty" : true,
+      "centre" : {
+        "x" : 1340,
+        "y" : 32
+      }
+    },
+    "reactionShape" : {
+      "a" : {
+        "x" : 1258,
+        "y" : 19
+      },
+      "b" : {
+        "x" : 1270,
+        "y" : 31
+      },
+      "type" : "BOX",
+      "empty" : true,
+      "centre" : {
+        "x" : 1264,
+        "y" : 25
+      }
+    },
+    "inputs" : [ {
+      "id" : 138
+    } ],
+    "outputs" : [ {
+      "id" : 317
+    } ]
+  } ],
+  "shadows" : [ ],
+  "minX" : 0,
+  "maxX" : 1523,
+  "minY" : 0,
+  "maxY" : 700,
+  "disease" : true
+}

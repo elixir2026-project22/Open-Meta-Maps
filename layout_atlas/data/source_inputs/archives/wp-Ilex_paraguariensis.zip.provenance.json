@@ -1,0 +1,8 @@
+{
+  "source": "wikipathways",
+  "version": "20261010",
+  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Ilex_paraguariensis.zip",
+  "sha256": "80a9075973ea95ccc8a9b629dcbe9401b02721e45bbcc1a1c88d91a8292ffdbc",
+  "bytes": 1788,
+  "local_path": "data/archives/wp-Ilex_paraguariensis.zip"
+}

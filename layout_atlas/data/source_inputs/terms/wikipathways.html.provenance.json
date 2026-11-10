@@ -1,0 +1,9 @@
+{
+  "source": "wikipathways",
+  "kind": "license_evidence",
+  "access_date": "2026-11-05",
+  "url": "https://sandbox.wikipathways.org/terms.html",
+  "sha256": "92b9b4359adf755ae4520167b3b108dcaf99b1961f819dad868c1633b11ed95a",
+  "bytes": 19060,
+  "local_path": "data/terms/wikipathways.html"
+}
