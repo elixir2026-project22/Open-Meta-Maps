@@ -10,6 +10,7 @@ This directory is the Python package behind Open Meta Maps. It builds a metaboli
 | `python3 project.py compose --gem MODEL.xml --out DIR --source-paths --layout-style expert` | the same pipeline from the command line (`compose_cli.py` → `tool_pipeline.py`) |
 | `python3 project.py data list` / `fetch` | optional data packages, see [docs/data_packages.md](../docs/data_packages.md) |
 | `python3 project.py setup` | one-time build of the edge routers (needs `clang++`) |
+| `python3 project.py catalog` | rebuild the module catalog pages from the Atlas |
 
 A run writes `map.json` (Escher), `map.svg`, `report.json`, `reaction_provenance.json`, `layout_issues.json`, `licenses.json`, `skeleton.json` and `modules.json` into the output folder. `reaction_provenance.json` labels every reaction as expert-derived, topology-only suggestion, functional (EC) suggestion, bridge or generated; these are reported separately and never merged into one reuse rate.
 
@@ -50,11 +51,6 @@ python3 test_orientation.py
 python3 test_ec_provenance.py
 ```
 
-`test_v03.py` belongs to an earlier research stage and currently fails (12 of 46 tests); it is kept for reference and is not part of the maintained checks.
-
-## Research scripts
-
-`micromap_*.py`, `brenda_*.py`, `composition_*.py`, `geometry_*.py`, `units_*.py`, `master_map_audit.py` and the report generators reproduce earlier experiments. They need generated result folders and data that are not part of this repository (MicroMap and BRENDA are optional [data packages](../docs/data_packages.md)) and are not needed to use the tool.
 
 ## Data
 
