@@ -1,0 +1,50 @@
+{
+ "version": "data-v1",
+ "base_url": "https://github.com/yangziwei96/OpenMetaMaps/releases/download/data-v1/",
+ "packages": [
+  {
+   "name": "atlas-full",
+   "title": "Full local Atlas database (atlas.sqlite)",
+   "file": "openmetamaps-atlas-full-data-v1.tar.gz",
+   "sha256": "33850a35084f1f97275e6d89a77d03404119220ffe5577b93308a4058ddf5481",
+   "bytes": 48347021,
+   "files": 2,
+   "licence": "Modules and reactions: the three open-core sources (WikiPathways CC0, Reactome CC0, Escher community maps recorded as CC0-1.0, to be confirmed). The maps table additionally lists metadata of the Human-maps and Yeast-maps sources, whose embedded licences conflict.",
+   "marker": "atlas.sqlite",
+   "notice": "package_notices/atlas-full.md"
+  },
+  {
+   "name": "micromap",
+   "title": "MicroMap extension (modules, observations, reference files)",
+   "file": "openmetamaps-micromap-data-v1.tar.gz",
+   "sha256": "895305e882ee012b9143e9791071cee6f6d37b4fee2867bc73dbb16148020554",
+   "bytes": 111374575,
+   "files": 27,
+   "licence": "CC BY-NC-SA 4.0 (non-commercial, share-alike). MicroMap v4.0, Ines Thiele, doi:10.7910/DVN/FZKMJ8.",
+   "marker": "extensions/micromap/SOURCE.json",
+   "notice": "package_notices/micromap.md"
+  },
+  {
+   "name": "brenda",
+   "title": "BRENDA pathway-map extension (trial)",
+   "file": "openmetamaps-brenda-data-v1.tar.gz",
+   "sha256": "70cb1e22230c7701b7986a5670ddc70bfe7c64b3f60ce898dd041461dbfb06bd",
+   "bytes": 35904067,
+   "files": 8,
+   "licence": "BRENDA online version and downloads: CC BY 4.0 per the BRENDA download page; the pathway-map-specific terms and the layout origin are NOT confirmed.",
+   "marker": "extensions/brenda/SOURCE.json",
+   "notice": "package_notices/brenda.md"
+  },
+  {
+   "name": "reference-maps",
+   "title": "Reference map sources (Human-maps, Yeast-maps, original yeast map, rule history)",
+   "file": "openmetamaps-reference-maps-data-v1.tar.gz",
+   "sha256": "6894d230fa86169c3c5a34c7218caa414886377c9303002a46ad981e8e52c501",
+   "bytes": 88540063,
+   "files": 262,
+   "licence": "Per-source terms differ; Human-maps and Yeast-maps are recorded as \"repository CC-BY-4.0 / GPL-3.0; embedded SVG BY-SA-4.0 conflict\" and are NOT confirmed redistributable.",
+   "marker": "references/rules_history.json",
+   "notice": "package_notices/reference-maps.md"
+  }
+ ]
+}

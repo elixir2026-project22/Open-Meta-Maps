@@ -85,6 +85,8 @@ Open Meta Maps is under active development. It supports expert-informed map comp
 
 The software and the Atlas data have separate licensing requirements. The repository software licence is **to be specified before the public release**. Source-specific terms and provenance are documented in [docs/data_sources.md](docs/data_sources.md).
 
+The full structure database used in development has a few extra parts (MicroMap and BRENDA extensions, reference maps, the full `atlas.sqlite`). They are separate downloads with their own terms: see [docs/data_packages.md](docs/data_packages.md) and `python3 project.py data list`.
+
 See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the original sources of every structure and dataset used, with the licence recorded for each.
 
 ## Acknowledgements
