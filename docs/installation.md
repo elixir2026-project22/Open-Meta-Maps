@@ -24,7 +24,7 @@ On first run, if `layout_atlas/data/atlas.sqlite` is missing it is created as a 
 
 ```sh
 python3 project.py tool                 # web tool, 127.0.0.1:8765
-python3 project.py compose --gem examples/e_coli_core.xml --out results/e_coli_core/
+python3 project.py compose --gem examples/e_coli_core.xml --out results/e_coli_core/ --source-paths --layout-style expert
 ```
 
 The `e_coli_core` example takes roughly two minutes on a laptop (the structure-selection step dominates).

@@ -43,7 +43,7 @@ Upload an SBML or COBRA JSON model, generate a map and download the results. On 
 Command line:
 
 ```sh
-python3 project.py compose --gem examples/e_coli_core.xml --out results/e_coli_core/
+python3 project.py compose --gem examples/e_coli_core.xml --out results/e_coli_core/ --source-paths --layout-style expert
 ```
 
 Example models: `e_coli_core`, `iIT341`, `iML1515`, `iMM904` in `examples/`. Run `python3 project.py --help` for all commands. More detail: [docs/installation.md](docs/installation.md).
