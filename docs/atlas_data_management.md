@@ -8,7 +8,7 @@ Status: 2026-11-11. How extracted layouts are stored and registered. Not legal a
 |---|---|
 | `data/open_core.sqlite` | Redistributable Atlas (tracked). Tables: `maps`, `modules`, `reactions`, `reviews`, `retained_observations`. Open-core modules: Escher (in-repo `escher_cutter`) + Reactome + WikiPathways semantic. |
 | `data/atlas.sqlite` | Runtime working copy (gitignored). Copied from `open_core.sqlite` on first run (`core.py`). |
-| `data/extensions/*/modules.json.gz` | Default extensions (BRENDA, Human-maps, WikiPathways geometry, Metabolism Regulation, PANTHER) loaded by `database.modules()`. Units exist under `extensions/units/` but are **not** in the default load. |
+| `data/extensions/*/modules.json.gz` | Default extensions (BRENDA, Human-maps, WikiPathways geometry, Metabolism Regulation, PANTHER, iCH360) loaded by `database.modules()`. Units exist under `extensions/units/` but are **not** in the default load. Counts: see `atlas_registry.json`. |
 | `data/atlas_registry.json` | Machine-readable build/registry summary (counts, licences, per-source extraction methods, input manifest and source-registry hashes). |
 | `data/source_inputs/` | Observations, raw inputs, `source_registry.json`, crosswalks, terms snapshots. |
 | `data/input_manifest.json` | SHA-256 of files under `source_inputs/` (version label `0.3-source-inputs`). |
@@ -35,13 +35,13 @@ Every module payload duplicates the indexed columns and includes `license`, `sou
 | Method | Used for | Notes |
 |---|---|---|
 | `escher_community_windows` | Open-core Escher (`escher_cutter`) | All roots; sizes 1–40; reproducible |
-| `diagram_modules` | Reactome, WikiPathways semantic, Human-maps, Metabolism Regulation, PANTHER | BFS windows; parameters recorded |
+| `diagram_modules` | Reactome, WikiPathways semantic, Human-maps, Metabolism Regulation, PANTHER, iCH360 | BFS windows; parameters recorded |
 | `geometry_modules` | WikiPathways geometry extension | Same cutter over metabolite–metabolite GPML edges |
 | `brenda_library.extract` | BRENDA extension | Singletons, pairs, windows, components |
 | `units_library.decompose` | Units extension (companion layer) | Non-overlapping 3–12 reaction units |
 | `legacy_observations` | Remaining `from_legacy` path (geometry-only observations) | `version: unreproducible`, `inferred: true` |
 
-Registry `extraction.by_source` summarises method, parameters, map/module counts per source.
+Registry `extraction.by_source` summarises method, parameters, map/module counts per source. Extensions (including iCH360) carry `layout_origin` / `provenance_status` on modules.
 
 ### Reaction identifiers
 

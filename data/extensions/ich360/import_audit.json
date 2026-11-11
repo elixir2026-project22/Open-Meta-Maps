@@ -1,0 +1,96 @@
+{
+  "per_map": [
+    {
+      "source_id": "full_map",
+      "name": "iCH360 full metabolic map",
+      "sha256": "071232f8c77e0842b4ef27f40e3f607502558debbe7e38add79a14bd74b7945d",
+      "events": 349,
+      "glyphs": 2071,
+      "modules": 140,
+      "skipped": {}
+    },
+    {
+      "source_id": "aminoacids_biosynthesis",
+      "name": "Amino-acid biosynthesis",
+      "sha256": "d33812270f230d3519da63595ccdd423ec5a8ef04dfbdfec68f4ae1ecd715e56",
+      "events": 90,
+      "glyphs": 589,
+      "modules": 131,
+      "skipped": {}
+    },
+    {
+      "source_id": "c1_pool",
+      "name": "C1 metabolism",
+      "sha256": "24112984da7a78944da8daf3f54fb0062ccafce05ae1f0ed0a1ab5be39688f59",
+      "events": 6,
+      "glyphs": 41,
+      "modules": 14,
+      "skipped": {}
+    },
+    {
+      "source_id": "fatty_acids_biosynthesis",
+      "name": "Fatty-acid biosynthesis",
+      "sha256": "28babdb8351367f7d637e1da9d54bf4fe56c86f752abc43e85c4fe4670034052",
+      "events": 60,
+      "glyphs": 391,
+      "modules": 147,
+      "skipped": {}
+    },
+    {
+      "source_id": "nucleotides_biosynthesis",
+      "name": "Nucleotide biosynthesis",
+      "sha256": "6673791af9a5154282bd59b5b8239cae360285e0f7a218fff43e4078b68f1a64",
+      "events": 44,
+      "glyphs": 311,
+      "modules": 116,
+      "skipped": {}
+    },
+    {
+      "source_id": "cofactors_de_novo_biosynthesis",
+      "name": "Cofactor de novo biosynthesis",
+      "sha256": "c8788438fd930f423872bdff5f6bd63ae843c47afe1b409ddab8c411a766540b",
+      "events": 25,
+      "glyphs": 180,
+      "modules": 56,
+      "skipped": {}
+    },
+    {
+      "source_id": "ions_metals_uptake",
+      "name": "Ion and metal uptake",
+      "sha256": "90462aadb6f89385df5dd923546f476ac4d052bc55260ca400be59d4e7f2802b",
+      "events": 30,
+      "glyphs": 154,
+      "modules": 53,
+      "skipped": {}
+    },
+    {
+      "source_id": "kdo_biosynthesis",
+      "name": "KDO-lipid biosynthesis",
+      "sha256": "9419669cc7e51774d22d391fc3ff540d8472309a9139f91c1477196e1441dca0",
+      "events": 19,
+      "glyphs": 126,
+      "modules": 58,
+      "skipped": {}
+    },
+    {
+      "source_id": "murein_biosynthesis",
+      "name": "Murein biosynthesis",
+      "sha256": "d11444b3cd53a7667621e83c6f6caf4736d4c7c45136410f2915d86b1c0e2145",
+      "events": 31,
+      "glyphs": 210,
+      "modules": 104,
+      "skipped": {}
+    },
+    {
+      "source_id": "phospholipids_biosynthesis",
+      "name": "Phospholipid biosynthesis",
+      "sha256": "cdb6fe8851aa5d006c065e4116db3df24e65b758617e32164ba48eb97696e252",
+      "events": 13,
+      "glyphs": 89,
+      "modules": 39,
+      "skipped": {}
+    }
+  ],
+  "failures": [],
+  "excluded": []
+}

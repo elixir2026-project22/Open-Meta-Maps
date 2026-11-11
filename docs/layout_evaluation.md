@@ -65,6 +65,8 @@ Maps composed with `--source-paths` (Bézier / curated layout default). Geometry
 | overlap_area_share | 0.322 | 0.296 |
 | long_edge_share (>3× median) | 0.211 | 0.232 |
 
+Refresh notes (2026-11-11): rebased iCH360 onto Stage A (extraction provenance + compactness-aware select). Re-compose e_coli_core / iIT341 with `--source-paths` and update this table from the new runs.
+
 Machine-readable copy: [`docs/evaluation/summary.csv`](evaluation/summary.csv).
 
 **Test scope for this refresh:** only `e_coli_core` and `iIT341` (not iMM904 / iML1515).
@@ -116,7 +118,7 @@ space-utilisation row.
 | model | contiguous_pair_share | structures | split_structures | pairs |
 |---|---:|---:|---:|---:|
 | e_coli_core | 0.856 | 11 | 0 | 146 |
-| iIT341 | 0.947 | (see report) | 3 | (see report) |
+| iIT341 | 0.950 | 90 | 3 | 238 |
 
 ## Reproducibility / stability
 

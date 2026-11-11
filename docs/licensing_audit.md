@@ -2,7 +2,7 @@
 
 Status: audit of what the repository currently redistributes, dated 2026-11-11. Evidence is either local (term snapshots and provenance files in `data/source_inputs/`) or a public web page checked on that date. **This is an engineering review, not legal advice.** Items marked *open* need a decision or confirmation before a public release.
 
-Policy: the project redistributes **only** openly redistributable maps (CC0 / CC BY), all included by default. No NC or GPL map packages remain. Module counts below match [`data/atlas_registry.json`](../data/atlas_registry.json) (default load = open-core SQLite + default extensions).
+Policy: the project redistributes **only** openly redistributable maps (CC0 / CC BY by default; MIT/permissive when it clearly covers the data), all included by default. No NC or GPL map packages remain. Module counts below match [`data/atlas_registry.json`](../data/atlas_registry.json) (default load = open-core SQLite + default extensions).
 
 ## 1. Atlas content (`open_core.sqlite` + default extensions)
 
@@ -16,7 +16,8 @@ Policy: the project redistributes **only** openly redistributable maps (CC0 / CC
 | Human-maps | 8,540 | CC BY 4.0 (JSON) | official `escher/` JSON only | OK — companion SVGs are CC BY-SA and are **not** imported |
 | Metabolism Regulation gallery | 423 | CC BY 4.0 | https://metabolismregulation.github.io/about/; SBGN-ML under `source_inputs/raw/metabolismregulation/` | OK (hand-drawn; attribution required) |
 | PANTHER Pathway | 238 | CC BY 4.0 | `data.pantherdb.org` CD4.1 CellDesigner; `source_inputs/raw/panther/` | OK (labels bridged via BiGG/ChEBI identity layer) |
-| **Total (default load)** | **64,325** | | | |
+| iCH360 Visualisation | 858 | MIT | Repo-root `LICENSE` (MIT) covers `Visualisation/` (no carve-out; `Visualisation/readme.md` has no restrictive notes). Paper Data Availability points at GitHub. Zenodo deposit doi:10.5281/zenodo.15048160 of the same Visualisation tree is CC BY 4.0 (corroboration). Local: `data/terms/ich360_LICENSE.txt`, `data/terms/ich360_zenodo_15048160.html`. | OK (permissive; attribution / copyright notice retained) |
+| **Total (default load)** | **65,183** | | | |
 
 ### Escher maps
 
@@ -38,6 +39,7 @@ The 22 maps come from the Escher community-maps repository (BiGG-based maps for 
 | Human-maps (official `escher/` JSON) | CC BY 4.0 | **Included** (8,540 modules via `database.escher_diagram`). Companion SVG exports are **CC BY-SA** and are **not** imported |
 | Metabolism Regulation gallery SBGN-ML | CC BY 4.0 | **Included** via `layout_atlas/sbgn.py` (`data/extensions/metabolismregulation/`). See [metabolismregulation_import.md](metabolismregulation_import.md). |
 | PANTHER Pathway CellDesigner | CC BY 4.0 | **Included** (8 metabolic CD4.1 maps → 238 modules) via `celldesigner.py` + `identity_labels.py`. See [panther_pilot.md](panther_pilot.md). |
+| iCH360 Visualisation Escher JSON | MIT | **Included** (10 maps → 858 modules; `compressed_map.json` excluded). See [ich360_import.md](ich360_import.md). |
 | `data/extensions/{units,source_paths,reaction_geometry_templates}` | derived from the open-core maps | inherits the Escher-map status above |
 | `data/identifier_bridge.json` (+ derived Mapper crosswalk) | BiGG↔ChEBI / EC from public model annotations; Mapper view built at load time | inherits the model licences above |
 
@@ -47,6 +49,7 @@ Excluded (not redistributed): Yeast-maps / original yeast map (GPL-3.0); MicroMa
 
 - BRENDA pathway modules: CC BY 4.0; included by default under `data/extensions/brenda/` with per-module attribution to BRENDA + NAR 2026 doi:10.1093/nar/gkaf1113; layout provenance marked possibly automatic.
 - PANTHER Pathway (CC BY 4.0): included from `data.pantherdb.org` FTP CD4.1. See [panther_pilot.md](panther_pilot.md).
+- iCH360 Visualisation (MIT): included from pinned GitHub commit under `data/source_inputs/raw/ich360/`. See [ich360_import.md](ich360_import.md).
 - `data/references/`, `Ref/`, `Presentation/`, `results/`: not tracked.
 
 ## 4. Open actions

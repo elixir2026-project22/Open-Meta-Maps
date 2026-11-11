@@ -60,7 +60,7 @@ REACTION_STYLE = 'line'  # 'line' (reactions are lines between metabolites, like
 STEPS = [('parse', 'Parse the model'), ('map', 'Match library structures'),
          ('select', 'Select structures'), ('skeleton', 'Build the skeleton'),
          ('complete', 'Complete the map'), ('report', 'Write the report')]
-SOURCE_COLORS = {'escher': '#128781', 'reactome': '#3d6fa3', 'wikipathways': '#8a5fb0', 'brenda': '#b04a4a', 'human_maps': '#2d6a8f', 'metabolismregulation': '#6b4f2a', 'panther': '#8a6b3d'}
+SOURCE_COLORS = {'escher': '#128781', 'reactome': '#3d6fa3', 'wikipathways': '#8a5fb0', 'brenda': '#b04a4a', 'human_maps': '#2d6a8f', 'metabolismregulation': '#6b4f2a', 'panther': '#8a6b3d', 'ich360': '#3d7a5a'}
 LEVEL_RANK = {'complete_equation': 0, 'reaction_reference': 1, 'partial_reference': 2, 'ec_topology': 3, 'geometry': 4}
 LEVEL_NAMES = {'complete_equation': 'complete_equation', 'reaction_reference': 'reference_supported', 'partial_reference': 'reference_supported',
                'ec_topology': 'ec_topology', 'geometry': 'geometry_only'}

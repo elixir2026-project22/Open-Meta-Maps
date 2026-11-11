@@ -117,16 +117,17 @@ Default Atlas (`data/open_core.sqlite` plus default extensions). Counts from [`d
 | BRENDA (194 pathway maps; layout possibly automatic) | 11,703 | CC BY 4.0 |
 | Metabolism Regulation (22 SBGN-ML maps) | 423 | CC BY 4.0 |
 | PANTHER (3.4/CD4.1, 8 maps) | 238 | CC BY 4.0 |
-| **Total (default load)** | **64,325** | |
+| iCH360 (10 custom Escher maps; MIT) | 858 | MIT |
+| **Total (default load)** | **65,183** | |
 
-Not included: MicroMap, Yeast-maps, KEGG. Attribution: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Audit notes: [docs/licensing_audit.md](docs/licensing_audit.md).
+Not included: MicroMap, Yeast-maps, KEGG; iCH360 `compressed_map.json` (CP pseudo-reactions). Attribution: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Audit notes: [docs/licensing_audit.md](docs/licensing_audit.md).
 
-**Code** is [MIT](LICENSE). **Atlas data and generated maps** are **CC BY 4.0** (mixed CC0 + CC BY 4.0 sources); keep the attributions in THIRD_PARTY_NOTICES.md.
+**Code** is [MIT](LICENSE). **Atlas data and generated maps** mix CC0, CC BY 4.0 and MIT sources; keep the attributions in THIRD_PARTY_NOTICES.md.
 
 ## Documentation
 
 - [Installation](docs/installation.md)
-- [Data sources](docs/data_sources.md) · [Optional packages](docs/data_packages.md) · [Atlas layout](data/README.md)
+- [Data sources](docs/data_sources.md) · [iCH360 import](docs/ich360_import.md) · [Optional packages](docs/data_packages.md) · [Atlas layout](data/README.md)
 - [Reaction–map matching](docs/reaction_map_matching.md) · [EC extension](docs/ec_extension_recommendation.md)
 - [Methodology](docs/methodology.md) · [Limitations](docs/limitations.md)
 - [Layout evaluation](docs/layout_evaluation.md)
