@@ -4,17 +4,12 @@ import gzip
 import zlib,itertools,xml.etree.ElementTree as ET
 from core import *
 from semantics import rhea_index,parse_gpml
+from atlas_registry import SCHEMA_VERSION, ensure_schema, pack, unpack, connect_path
 
-def pack(v):return zlib.compress(json.dumps(v,ensure_ascii=False).encode(),6)
-def unpack(v):return json.loads(zlib.decompress(v))
 def connect():
- DATA.mkdir(exist_ok=True);db=sqlite3.connect(DATA/'atlas.sqlite')
- db.executescript('''CREATE TABLE IF NOT EXISTS modules(id TEXT PRIMARY KEY,source TEXT,species TEXT,lineage TEXT,quality TEXT,size INTEGER,core_family TEXT,variant TEXT,payload BLOB);
- CREATE INDEX IF NOT EXISTS core_family_idx ON modules(core_family);
- CREATE TABLE IF NOT EXISTS reactions(module_id TEXT,reaction_key TEXT,namespace TEXT,identifier TEXT,PRIMARY KEY(module_id,reaction_key,namespace,identifier));
- CREATE INDEX IF NOT EXISTS biological_idx ON reactions(namespace,identifier);
- CREATE TABLE IF NOT EXISTS maps(id TEXT PRIMARY KEY,source TEXT,species TEXT,lineage TEXT,payload BLOB);
- CREATE TABLE IF NOT EXISTS reviews(module_id TEXT,reviewer TEXT,status TEXT,payload BLOB,PRIMARY KEY(module_id,reviewer));''');return db
+ """Open the runtime Atlas DB (atlas.sqlite), ensuring schema v1 objects exist."""
+ DATA.mkdir(exist_ok=True)
+ return connect_path(DATA/'atlas.sqlite')
 
 @functools.lru_cache(maxsize=1)
 def _core_modules_cached():

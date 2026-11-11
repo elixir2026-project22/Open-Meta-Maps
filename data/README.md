@@ -8,7 +8,8 @@ Everything in this directory is read by the tool at run time. The Atlas (the str
 |---|---|
 | `extensions/human_maps/` | Human-maps modules (CC BY 4.0; 8,540 modules from 130 official Escher JSON maps). |
 | `extensions/brenda/` | BRENDA pathway modules (CC BY 4.0; 11,703 modules). Loaded with the default Atlas; layout provenance possibly automatic. Source SVG under `references/brenda/` (not tracked). |
-| `open_core.sqlite` | the open-core Atlas: 17,199 modules and 63,274 reactions (WikiPathways, Reactome, Escher maps; source label `escher`). Default extensions add BRENDA (11,703, CC BY 4.0) and Human-maps (8,540, CC BY 4.0) under `data/extensions/`. Modules store core nodes, appendages, coordinates, paths, reactions and ports as compressed JSON (read with `database.unpack`). On first run it is copied to `atlas.sqlite`, which is the file the tool reads |
+| `open_core.sqlite` | the open-core Atlas (schema v1 via `meta.schema_version`): 17,199 modules and 63,274 reactions (WikiPathways, Reactome, Escher maps; source label `escher`). Default extensions add BRENDA (11,703, CC BY 4.0) and Human-maps (8,540, CC BY 4.0) under `data/extensions/`. Modules store core nodes, appendages, coordinates, paths, reactions and ports as compressed JSON (read with `database.unpack`). On first run it is copied to `atlas.sqlite`, which is the file the tool reads |
+| `atlas_registry.json` | machine-readable build/registry summary (counts, licences, input manifest and source-registry hashes); rebuilt by `layout_atlas/atlas_registry.py` |
 | `source_inputs/` | source data used to build the Atlas: `raw/escher/` (original Escher map JSON), `raw/wp/` (pinned WikiPathways GPML (release 20261110)), `module_observations.json.gz` and `map_observations.json.gz` (observations with original identifiers, families, geometry and provenance chains), `archives/` and `terms/` (source packages and licence snapshots), `origin.json` and `source_registry.json` (versions and hashes) |
 | `input_manifest.json`, `acquisition.json` | SHA-256 of the required inputs and how they were obtained |
 | `rhea/` | Rhea release 143 reactions, directions and identity mappings (CC BY 4.0, copyright statement kept) |
@@ -28,7 +29,7 @@ The number of module instances or source files is not the number of independent 
 
 ```sh
 python3 project.py data list
-python3 project.py data fetch brenda       # or: atlas-full, all
+python3 project.py data fetch atlas-full
 ```
 
-Details and terms: [`docs/data_packages.md`](../docs/data_packages.md). A normal run needs none of them.
+Details and terms: [`docs/data_packages.md`](../docs/data_packages.md). BRENDA and Human-maps ship as default extensions in-tree; a normal run needs no optional package. Atlas provenance/schema checks: `python3 layout_atlas/test_atlas_provenance.py`.
