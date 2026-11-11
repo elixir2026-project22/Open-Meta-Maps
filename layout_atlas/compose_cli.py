@@ -20,8 +20,8 @@ def run(gem, out, ec=False, no_library=False, library='windows', reaction_style=
     gem, out = Path(gem).resolve(), Path(out).resolve()  # the pipeline runs in layout_atlas/, so paths must be absolute
     if not gem.is_file():
         raise SystemExit(f'GEM file not found: {gem}')
-    if gem.suffix.lower() not in ('.xml', '.json'):
-        raise SystemExit('The GEM must be an SBML .xml or a COBRA/BiGG .json file.')
+    if gem.suffix.lower() not in ('.xml', '.sbml', '.json'):
+        raise SystemExit('The GEM must be an SBML .xml/.sbml or a COBRA/BiGG .json file.')
     problems = tool_server.check_environment()
     if problems:
         raise SystemExit('The tool cannot run:\n  - ' + '\n  - '.join(problems))

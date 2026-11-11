@@ -1,0 +1,10 @@
+# Optional dependencies for `python3 project.py evaluate` (development aid).
+# Core compose/tool still uses layout_atlas/requirements.txt only.
+#
+# shapely: pathway box-overlap and compartment metrics (MIT-compatible use).
+# gdmetrix: general graph-drawing metrics (GPL-3.0) — optional import only; never vendored.
+# Installing layout-benchmark from GitHub also pulls these; prefer the thin ports in
+# layout_atlas/evaluation/ plus these extras.
+
+shapely>=2.0
+gdmetrix>=0.0.5

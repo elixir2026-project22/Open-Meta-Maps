@@ -32,6 +32,8 @@ Open Meta Maps publishes **processed structures**: the module graphs, reaction i
 | **Escher** map schema (`data/escher_schema/`, used unchanged) | MIT (licence kept next to the file) |
 | **libSBML** (`python-libsbml`, SBML reader; installed as a dependency, not redistributed) | LGPL 2.1 |
 | **adaptagrams / libavoid** (edge routing, `data/routing/`) | LGPL; exact terms **to be confirmed**, notice to be added |
+| **layout-benchmark** pathway metrics (adapted into `layout_atlas/evaluation/`, not a runtime dependency) | MIT; see `layout_atlas/evaluation/ATTRIBUTION.md` and <https://github.com/elixir2026-project22/layout-benchmark> |
+| **gdMetriX** (optional import for general graph-drawing metrics in `evaluate`) | GPL-3.0; **not vendored**; install via `layout_atlas/requirements-eval.txt` if needed |
 
 ## Not included in this repository
 

@@ -24,7 +24,7 @@ A run writes `map.json` (Escher), `map.svg`, `report.json`, `reaction_provenance
 | Context and anchors for unmatched reactions | `context.py`, `completion_context.py`, `instances.py` (metabolite instances and protected shared connections), `orientation.py` |
 | Whole-map composition | `composition.py` (recovers stray components, arranges independent modules in rows), `peripheral.py` (exchange and transport modules), `block_relocation.py` (moves expert blocks that sit far from the reactions they connect to) |
 | Connections and labels | `edge_style.py` (Bézier connections from expert templates, joint routing per reaction), `reaction_templates.py`, `label_placement.py`, `line_render.py`, `routing.py` (libavoid) |
-| Quality | `layout_quality.py` (crossings, collisions, long connections, composition metrics, `layout_issues.json`), `quality_gate.py` (accepts a change only if the final geometry is not worse) |
+| Quality | `layout_quality.py` (final-geometry for the quality gate: curve crossings, collisions, …), `quality_gate.py` (accepts a change only if the final geometry is not worse), `evaluation/` (unified development scoring: Project 22 layout-benchmark metrics + the same final-geometry block; CLI `python3 project.py evaluate`) |
 | Pages | `ui.py`, `navigation.py`, `toolpage.py`, `gallery*.py` |
 
 Files whose hashes are recorded by saved results (`routing.py`, `drawing.py`, `geometry.py`, `retrieval.py`, `semantic_transfer.py`, `celldesigner.py`) should not be edited casually.
@@ -64,6 +64,8 @@ python3 test_orientation.py
 python3 test_ec_provenance.py
 python3 test_reaction_map_matching.py
 python3 map_matching_eval.py          # BRENDA / Atlas match rates for e_coli_core, iIT341
+python3 test_evaluation.py
+python3 test_layout_quality.py
 ```
 
 

@@ -1,4 +1,9 @@
-"""Layout quality measures that feed layout decisions (grown version by version; see Proposal/14).
+"""Final-geometry measures used by the quality gate (curve crossings, collisions, length, orientation).
+
+Development scoring that also covers Project 22 layout-benchmark rules (crossings via gdMetriX when
+available, box overlaps, participant consistency, compartments, long edges, reference similarity) lives in
+``evaluation/`` and is the single CLI path: ``python3 project.py evaluate ...``.  That path calls
+``evaluate()`` here for the Escher-native geometry block so the gate and the report stay one evaluator.
 
 Also contains metric_details and assert_chemistry (used by compose) to avoid
 loading experiment/UI modules during compose.
