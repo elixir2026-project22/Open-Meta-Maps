@@ -4,7 +4,7 @@ Tiers (a plain lexicographic comparison with small tolerances, no combined score
   hard    GEM completeness, every algorithm connection still a Bezier, no connection of a moved reaction without segments        -> never allowed to degrade
   tier 1  disconnected peripheral modules (a real connection that the map does not show), curves through nodes, curves through labels,
           label overlaps, node overlaps                                                                                         -> must not get worse; improvement is decisive
-  tier 2  crossings of algorithm connections (algorithm x algorithm + algorithm x expert)                                        -> may not rise by more than TOL_CROSS
+  tier 2  crossings of algorithm connections (algorithm x algorithm + algorithm x curated)                                       -> may not rise by more than TOL_CROSS
   tier 3  connections longer than 250 px, small-angle share etc.                                                                 -> may not rise by more than 5 %
 
 `evaluate_map(data, skip)` runs the final-geometry evaluator; `accept(old, new)` returns (decision, reason); `translate_module(...)` moves a rigid module inside
@@ -66,7 +66,7 @@ def evaluate_map(data, skip_edges, disconnected=0):
         hard=int(b['share'] < 0.999),
         disconnected=disconnected,
         collisions=co['curves_through_nodes'] + co['curves_through_labels'] + co['label_overlap_pairs'] + co['node_overlap_pairs'],
-        crossings=x['algorithm_algorithm'] + x['algorithm_expert'],
+        crossings=x['algorithm_algorithm'] + x.get('algorithm_curated', x.get('algorithm_expert', 0)),
         long_edges=s['details']['length']['over_250'],
         detail=dict(through_nodes=co['curves_through_nodes'], through_labels=co['curves_through_labels'], label_overlaps=co['label_overlap_pairs'], node_overlaps=co['node_overlap_pairs'])), s, issues
 

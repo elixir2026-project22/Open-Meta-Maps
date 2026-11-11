@@ -1,28 +1,31 @@
-"""Final-geometry measures used by the quality gate (curve crossings, collisions, length, orientation).
+"""Final-geometry measures used by the quality gate and the Layout quality panel.
 
-Development scoring that also covers Project 22 layout-benchmark rules (crossings via gdMetriX when
-available, box overlaps, participant consistency, compartments, long edges, reference similarity,
-structure continuity) lives in ``evaluation/`` and is the single CLI path:
-``python3 project.py evaluate ...``.  That path calls ``evaluate()`` here for the Escher-native
-geometry block so the gate and the report stay one evaluator.
+One computation path: ``evaluate()`` feeds the quality gate, the tool panel, and
+``python3 project.py evaluate`` (via ``evaluation.score``). Project 22
+layout-benchmark / layout-transfer-check field names are used where they exist;
+gdMetriX extras stay CLI-only (optional GPL import, never vendored).
 
-Also contains metric_details and assert_chemistry (used by compose) to avoid
-loading experiment/UI modules during compose.
+User-facing wording uses **curated** (人工绘制), not "expert". Internal aliases
+``algorithm_expert`` / ``expert_expert`` remain for the quality gate.
 
-V1 (reaction orientation) needs:
-  orientation   share of reactions with substrates and products on opposite sides of the reaction point (orientation.summary)
-  label overlap pairs / node overlaps (drawing.export / layout_quality.metric_details, already in the map metric)
-  expert geometry   how far the layout moved the expert structures from where they were placed (similarity-aligned residual of the reaction
-                    points of each structure: translation, rotation and uniform scale are not counted as distortion)
-  integrity       the three integrity checks of the pipeline (unchanged)
+Also contains metric_details and assert_chemistry (used by compose).
 """
 import numpy as np
 
 import source_paths as sp
 
+try:
+    from core import CURRENCY, chem
+except ImportError:  # pragma: no cover
+    CURRENCY, chem = set(), lambda mid: mid
+
+
+def _is_currency_met(mid: str | None) -> bool:
+    return bool(mid) and chem(mid) in CURRENCY
+
 
 def expert_geometry(blocks, scene):
-    """Distortion of expert structures between their planned positions (`block['positions']`) and the final scene."""
+    """Distortion of curated structures between their planned positions (`block['positions']`) and the final scene."""
     rows = []
     for b in blocks:
         src, dst = [], []
@@ -49,8 +52,8 @@ def expert_geometry(blocks, scene):
 
 # ---------------------------------------------------------------------------------------------- final-geometry evaluator (V7, minimal version)
 # Everything below is computed from the FINAL map.json (the same segments, Bezier controls and label offsets that the SVG draws), never from the layout
-# stage's straight lines or rectangles.  Crossings are counted on the sampled final curves, by source: algorithm x algorithm, algorithm x expert,
-# expert x expert; two connections that share a node (same reaction, same glyph) do not cross each other legitimately.
+# stage's straight lines or rectangles.  Crossings are counted on the sampled final curves, by source: algorithm × algorithm, algorithm × curated,
+# curated × curated; and by metabolite role: main-metabolite vs currency-involved (ecmapper / Project 22).
 from collections import defaultdict as _dd
 
 CELL = 200.0
@@ -141,13 +144,14 @@ def _seg_hits(a, b, S):
 def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, structures=None):
     """-> (summary, issues).  `summary` holds the six core indicators, the details and the worst local regions; `issues` lists where the problems are.
 
-    ``structures``: optional reused expert structures ``[{id, reactions|reaction_ids}]`` (or id→ids).
-    When omitted, ``metadata.expert_structures`` is used, else a fallback from expert-derived connectivity.
+    ``structures``: optional reused curated structures ``[{id, reactions|reaction_ids}]`` (or id→ids).
+    When omitted, ``metadata.expert_structures`` is used, else a fallback from curated-derived connectivity.
     """
     import edge_routing as er
     import line_render
     import orientation as orientation_module
     from evaluation.continuity import structure_continuity as _structure_continuity
+    from evaluation.map_rules import collect_map_rule_details
     meta = data[0].get('metadata', {})
     skip = {tuple(e) for e in (skip_edges if skip_edges is not None else meta.get('preserved_edges') or [])}
     skip |= {(p['reaction'], p['metabolite']) for p in (meta.get('source_paths') or [])}
@@ -167,9 +171,12 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, str
             pts = np.array(er._path_points(rx, path, nodes), float)
             segs = [s for s in rx['segments'].values() if s['from_node_id'] in path and s['to_node_id'] in path]
             curved = [bool(s.get('b1') and s.get('b2')) for s in segs]
-            edges.append(dict(rid=rx['bigg_id'], met=nodes[path[-1]].get('bigg_id'), path=path, pts=pts, expert=(rx['bigg_id'], nodes[path[-1]].get('bigg_id')) in skip,
-                              curved=curved, ends=(path[0], path[-1])))
-    algo = [e for e in edges if not e['expert']]
+            met = nodes[path[-1]].get('bigg_id')
+            curated = (rx['bigg_id'], met) in skip
+            currency = _is_currency_met(met) or (nodes[path[-1]].get('node_is_primary') is False)
+            edges.append(dict(rid=rx['bigg_id'], met=met, path=path, pts=pts, curated=curated, expert=curated,
+                              currency=currency, curved=curved, ends=(path[0], path[-1])))
+    algo = [e for e in edges if not e['curated']]
     # ---- crossings on the sampled final curves
     seg_a, seg_b, seg_edge = [], [], []
     for i, e in enumerate(edges):
@@ -180,7 +187,8 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, str
     grid_s = _dd(list)
     for k, (a, b) in enumerate(zip(seg_a, seg_b)):
         _grid_add(grid_s, k, np.minimum(a, b), np.maximum(a, b))
-    cross = dict(algorithm_algorithm=0, algorithm_expert=0, expert_expert=0, same_reaction=0, same_reaction_expert=0)
+    cross = dict(algorithm_algorithm=0, algorithm_curated=0, curated_curated=0, same_reaction=0, same_reaction_curated=0,
+                 main_metabolite=0, currency_involved=0)
     # ``cross_points`` is capped for the issues payload; ``all_cross_events`` keeps every location for region windows.
     cross_points, all_cross_events, per_edge_cross = [], [], _dd(int)
     for k, (a, b) in enumerate(zip(seg_a, seg_b)):
@@ -194,21 +202,30 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, str
             if edges[i]['rid'] == edges[j]['rid']:      # curves of one reaction meet at the reaction point; a crossing elsewhere is a defect
                 centre = nodes[edges[i]['ends'][0]]
                 if float(np.hypot(pt[0] - centre['x'], pt[1] - centre['y'])) > 14.0:
-                    both_expert = edges[i]['expert'] and edges[j]['expert']
-                    cross['same_reaction_expert' if both_expert else 'same_reaction'] += 1
+                    both_curated = edges[i]['curated'] and edges[j]['curated']
+                    cross['same_reaction_curated' if both_curated else 'same_reaction'] += 1
                     per_edge_cross[i] += 1; per_edge_cross[j] += 1
-                    ev = dict(kind='same_reaction_expert' if both_expert else 'same_reaction', reactions=[edges[i]['rid']], metabolites=[edges[i]['met'], edges[j]['met']], x=round(float(pt[0]), 1), y=round(float(pt[1]), 1))
+                    ev = dict(kind='same_reaction_curated' if both_curated else 'same_reaction', reactions=[edges[i]['rid']], metabolites=[edges[i]['met'], edges[j]['met']], x=round(float(pt[0]), 1), y=round(float(pt[1]), 1))
                     all_cross_events.append(ev)
                     if len(cross_points) < max_issues:
                         cross_points.append(ev)
                 continue
             if set(edges[i]['ends']) & set(edges[j]['ends']):
                 continue
-            ei, ej = edges[i]['expert'], edges[j]['expert']
-            kindc = 'expert_expert' if ei and ej else ('algorithm_algorithm' if not ei and not ej else 'algorithm_expert')
+            ei, ej = edges[i]['curated'], edges[j]['curated']
+            kindc = 'curated_curated' if ei and ej else ('algorithm_algorithm' if not ei and not ej else 'algorithm_curated')
             cross[kindc] += 1
+            # Role split only for the headline set (algorithm×algorithm + algorithm×curated).
+            if kindc != 'curated_curated':
+                if edges[i]['currency'] or edges[j]['currency']:
+                    cross['currency_involved'] += 1
+                else:
+                    cross['main_metabolite'] += 1
             per_edge_cross[i] += 1; per_edge_cross[j] += 1
-            ev = dict(kind=kindc, reactions=[edges[i]['rid'], edges[j]['rid']], x=round(float(pt[0]), 1), y=round(float(pt[1]), 1))
+            # Keep legacy kind aliases so older consumers / region filters still match.
+            legacy = {'algorithm_curated': 'algorithm_expert', 'curated_curated': 'expert_expert'}.get(kindc, kindc)
+            ev = dict(kind=kindc, kind_legacy=legacy, reactions=[edges[i]['rid'], edges[j]['rid']], x=round(float(pt[0]), 1), y=round(float(pt[1]), 1),
+                      currency_involved=bool(edges[i]['currency'] or edges[j]['currency']))
             all_cross_events.append(ev)
             if len(cross_points) < max_issues:
                 cross_points.append(ev)
@@ -273,13 +290,13 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, str
     mids = np.array([[n['x'], n['y']] for n in nodes.values() if n.get('node_type') == 'midmarker'], float)
     spacing = float(np.median(cKDTree(mids).query(mids, k=2)[0][:, 1])) if len(mids) > 2 else 60.0
     # ---- worst local regions (400 px windows, stride 200; counted area == drawn box)
-    # Crossings here match the Connection-crossings headline: algorithm×algorithm and algorithm×expert only
-    # (same-reaction and expert×expert are tracked elsewhere, not in these windows).
+    # Crossings here match the Connection-crossings headline: algorithm×algorithm and algorithm×curated only
+    # (same-reaction and curated×curated are tracked elsewhere, not in these windows).
     allx = centres[:, 0]; ally = centres[:, 1]
     windows = []
     if len(centres):
         x0, y0 = float(allx.min()), float(ally.min())
-        region_cross_kinds = ('algorithm_algorithm', 'algorithm_expert')
+        region_cross_kinds = ('algorithm_algorithm', 'algorithm_curated', 'algorithm_expert')
         events = [(c['x'], c['y'], 'crossing', c['reactions']) for c in all_cross_events if c['kind'] in region_cross_kinds] + \
                  [(h['x'], h['y'], 'obstacle', [h['reaction']]) for h in hit_points] + \
                  [(float(centres[i][0]), float(centres[i][1]), 'node_overlap', []) for i, _ in node_overlap]
@@ -323,47 +340,147 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, str
         for a_, b_ in zip(gx.tolist(), gy.tolist()):
             counts[a_, b_] += 1
         W_, H_ = (mids_xy.max(0) - mids_xy.min(0))
-        comp = dict(canvas=[round(float(W_)), round(float(H_))], aspect=round(float(W_ / max(H_, 1.0)), 2), space_utilisation=round(occupied / max(total_cells, 1), 4),
+        # aspect = W/H (one definition everywhere; not max/min)
+        comp = dict(canvas=[round(float(W_)), round(float(H_))], aspect=round(float(W_ / max(H_, 1.0)), 4), aspect_ratio=round(float(W_ / max(H_, 1.0)), 4),
+                    space_utilisation=round(occupied / max(total_cells, 1), 4),
                     cell_px=round(cell), neighbour5_median_px=round(med), neighbour5_p90_px=round(float(np.percentile(d5, 90))), neighbour5_max_px=round(float(d5.max())),
                     isolated_reactions=int(len(outliers)), isolation_threshold_px=round(8.0 * med), max_reactions_in_one_cell=int(max(counts.values())))
         outlier_rows = [dict(x=round(float(mids_xy[i][0]), 1), y=round(float(mids_xy[i][1]), 1), neighbour5_px=round(float(d5[i]))) for i in outliers[:200]]
     else:
         outlier_rows = []
     n_alg = max(len(algo), 1)
-    n_all = max(len(edges), 1)
-    total_cross = sum(cross.values())
+    counted_cross = cross['algorithm_algorithm'] + cross['algorithm_curated']
     continuity = _structure_continuity(data, structures=structures)
     # Keep the card payload small; full per-structure rows go under details.
     continuity_core = {k: continuity.get(k) for k in (
         'contiguous_pair_share', 'pairs', 'contiguous_pairs', 'structures', 'split_structures',
         'split_structure_share', 'reaction_spacing_px', 'adjacency_factor', 'note')}
+    # Participant placement: ≥120° (transfer-check first guess); core = non-currency only.
+    place_all = ori.get('all_participants') or {}
+    place_core = ori.get('core_participants') or {}
+    p90_px = float(np.percentile(all_len, 90)) if len(all_len) else 0.0
+    med_len = float(np.median(all_len)) if len(all_len) else 0.0
+    max_rel = round(float(np.max(all_len) / max(med_len, 1e-9)), 3) if len(all_len) else None
+    # Optional subsystem map from metadata.source_reactions
+    subsystems = {}
+    for rid, info in (meta.get('source_reactions') or {}).items():
+        if isinstance(info, dict) and info.get('subsystem'):
+            subsystems[rid] = info['subsystem']
+    rules = collect_map_rule_details(data, edges, all_len, spacing, subsystems=subsystems or None)
+    cofactor = dict(
+        currency_hub_violations=rules.get('currency_hub_violations'),
+        currency_long_arc_share=rules.get('currency_long_arc_share'),
+        currency_glyphs=rules.get('currency_glyphs'),
+        hub_threshold_spacings=rules.get('hub_threshold_spacings'),
+        long_threshold_spacings=rules.get('long_threshold_spacings'),
+    )
+    overlaps = dict(
+        overlapping_pairs=len(node_overlap) + label_overlap,
+        node_overlap_pairs=len(node_overlap),
+        label_overlap_pairs=label_overlap,
+        curves_through_nodes=node_hits,
+        curves_through_labels=label_hits,
+    )
+    bezier = dict(share=round(bez_edges / n_alg, 3), algorithm_edges=len(algo), bezier=bez_edges, straight_lines=straight_edges,
+                  polylines_with_bends=poly_edges, orthogonal_polylines=ortho_edges)
+    warnings = []
+    if bezier['share'] < 0.999:
+        warnings.append(dict(code='bezier_coverage', message='algorithm connections as Bézier must be 100%', share=bezier['share']))
+    cross_out = dict(
+        counted=counted_cross,
+        total=counted_cross + cross['curated_curated'] + cross['same_reaction'] + cross['same_reaction_curated'],
+        same_reaction=cross['same_reaction'],
+        same_reaction_curated=cross['same_reaction_curated'],
+        same_reaction_expert=cross['same_reaction_curated'],  # alias
+        algorithm_algorithm=cross['algorithm_algorithm'],
+        algorithm_curated=cross['algorithm_curated'],
+        curated_curated=cross['curated_curated'],
+        algorithm_expert=cross['algorithm_curated'],  # alias for quality_gate
+        expert_expert=cross['curated_curated'],  # alias
+        main_metabolite=cross['main_metabolite'],
+        currency_involved=cross['currency_involved'],
+        per_100_edges=round(100.0 * counted_cross / n_alg, 2),
+    )
     summary = dict(
-        edges=dict(total=len(edges), algorithm=len(algo), expert=len(edges) - len(algo)),
+        edges=dict(total=len(edges), algorithm=len(algo), curated=len(edges) - len(algo), expert=len(edges) - len(algo)),
         core=dict(
-            crossings=dict(total=total_cross, same_reaction=cross['same_reaction'], same_reaction_expert=cross['same_reaction_expert'], algorithm_algorithm=cross['algorithm_algorithm'], algorithm_expert=cross['algorithm_expert'], expert_expert=cross['expert_expert'],
-                           per_100_edges=round(100.0 * (cross['algorithm_algorithm'] + cross['algorithm_expert']) / n_alg, 2)),
-            collisions=dict(node_overlap_pairs=len(node_overlap), label_overlap_pairs=label_overlap, curves_through_nodes=node_hits, curves_through_labels=label_hits),
-            length_p90=dict(px=round(float(np.percentile(all_len, 90)), 1), in_reaction_spacings=round(float(np.percentile(all_len, 90)) / max(spacing, 1.0), 2), reaction_spacing_px=round(spacing, 1)),
-            core_orientation=dict(opposite_sides_share=(ori.get('core_participants') or {}).get('opposite_sides_share'), reactions=(ori.get('core_participants') or {}).get('reactions')),
+            crossings=cross_out,
+            overlaps=overlaps,
+            collisions=overlaps,  # alias for quality_gate
+            long_lines=dict(
+                p90_reaction_spacings=round(p90_px / max(spacing, 1.0), 2),
+                edge_len_max_rel=max_rel,
+                p90_px=round(p90_px, 1),
+                reaction_spacing_px=round(spacing, 1),
+            ),
+            length_p90=dict(px=round(p90_px, 1), in_reaction_spacings=round(p90_px / max(spacing, 1.0), 2), reaction_spacing_px=round(spacing, 1)),
+            participant_placement=dict(
+                inout_opposite_share=place_all.get('opposite_sides_share'),
+                inout_opposite_share_core=place_core.get('opposite_sides_share'),
+                reactions_all=place_all.get('reactions'),
+                reactions_core=place_core.get('reactions'),
+                threshold_deg=ori.get('threshold_deg', 120.0),
+            ),
+            core_orientation=dict(opposite_sides_share=place_core.get('opposite_sides_share'), reactions=place_core.get('reactions')),
+            cofactor_clones=cofactor,
             structure_continuity=continuity_core,
-            bezier_coverage=dict(share=round(bez_edges / n_alg, 3), algorithm_edges=len(algo), bezier=bez_edges, straight_lines=straight_edges, polylines_with_bends=poly_edges,
-                                 orthogonal_polylines=ortho_edges)),
+            bezier_coverage=bezier),  # not a card; quality-gate hard check + warning
         details=dict(
-            length=dict(p50=round(float(np.percentile(all_len, 50)), 1), p90=round(float(np.percentile(all_len, 90)), 1), p99=round(float(np.percentile(all_len, 99)), 1),
-                        over_250=int((all_len > 250).sum()), over_1000=int((all_len > 1000).sum())),
-            detour_ratio=dict(median=round(float(np.median(detours)), 3) if detours else None, p90=round(float(np.percentile(detours, 90)), 3) if detours else None,
-                              over_1_6=int(sum(d > 1.6 for d in detours))),
-            curve_quality=dict(hooks=hooks, sharp_turns=sharp, self_intersections=selfx),
+            length=dict(p50=round(float(np.percentile(all_len, 50)), 1) if len(all_len) else None,
+                        p90=round(p90_px, 1), p99=round(float(np.percentile(all_len, 99)), 1) if len(all_len) else None,
+                        over_250=int((all_len > 250).sum()) if len(all_len) else 0,
+                        over_1000=int((all_len > 1000).sum()) if len(all_len) else 0,
+                        edge_len_max_rel=max_rel, median_px=round(med_len, 1) if len(all_len) else None),
+            line_shape=dict(
+                detour_median=round(float(np.median(detours)), 3) if detours else None,
+                detour_p90=round(float(np.percentile(detours, 90)), 3) if detours else None,
+                detour_over_1_6=int(sum(d > 1.6 for d in detours)),
+                hooks=hooks, sharp_turns=sharp, self_intersections=selfx,
+                bends_per_arc=rules.get('bends_per_arc'), bent_arc_share=rules.get('bent_arc_share')),
+            cycles=dict(cycle_circularity=rules.get('cycle_circularity'), cycle_direction=rules.get('cycle_direction'),
+                        cycle_direction_consistency=rules.get('cycle_direction_consistency'),
+                        cycle_order_consistency=rules.get('cycle_order_consistency'),
+                        cycles=rules.get('cycles'), cycle_len=rules.get('cycle_len')),
+            flow_main_dir=rules.get('flow_main_dir'),
+            flow_main_dir_share=rules.get('flow_main_dir_share'),
+            exchange_periphery_share=rules.get('exchange_periphery_share'),
+            blank_space=dict(
+                blank_space_share=rules.get('blank_space_share'),
+                largest_empty_rect_share=rules.get('largest_empty_rect_share'),
+                cell_px=rules.get('cell_px'),
+                spacing_px=rules.get('spacing_px'),
+            ),
+            blank_space_share=rules.get('blank_space_share'),
+            largest_empty_rect_share=rules.get('largest_empty_rect_share'),
+            unrelated_overlaps=dict(
+                node_overlaps=rules.get('unrelated_node_overlaps'),
+                edge_through_node=rules.get('unrelated_edge_through_node'),
+                collinear_edge_overlaps=rules.get('unrelated_collinear_edge_overlaps'),
+                total=rules.get('unrelated_overlaps_total'),
+            ),
+            aspect_ratio=rules.get('aspect_ratio'),
+            aspect_ratio_target=rules.get('aspect_ratio_target'),
+            aspect_ratio_vs_target=rules.get('aspect_ratio_vs_target'),
+            area_per_node=rules.get('area_per_node'),
+            species_in_other_compartment=rules.get('species_in_other_compartment'),
+            participant_consistency=rules.get('participant_consistency'),
+            subsystem_conventions=rules.get('subsystem_conventions'),
+            thresholds_note=rules.get('thresholds_note'),
             crossing_density=dict(worst_window_crossings=windows[0]['crossings'] if windows else 0),
-            orientation=ori, composition=comp, structure_continuity=continuity),
+            orientation=ori, composition=comp, structure_continuity=continuity,
+            edges_footnote=dict(algorithm=len(algo), curated=len(edges) - len(algo), total=len(edges)),
+            warnings=warnings,
+            bezier_coverage=bezier),
         worst_regions=windows,
-        note='computed from the final map.json; crossings are counted on sampled final curves, source-split; '
-             'worst_regions use uncapped algorithm×algorithm and algorithm×expert crossings in true 400 px / stride-200 boxes '
-             '(same as Connection crossings; same-reaction and expert×expert not counted there); '
-             'structure continuity scores reused expert structures on the final geometry')
+        note='computed from the final map.json; crossings are counted on sampled final curves, source-split '
+             '(algorithm×algorithm + algorithm×curated; curated×curated not in the headline) and role-split '
+             '(main-metabolite vs currency-involved); worst_regions use uncapped counted crossings in true '
+             '400 px / stride-200 boxes; structure continuity scores reused curated structures; '
+             '120° opposite-side threshold is a Project 22 first guess')
     issues = dict(isolated_reactions=outlier_rows, crossings=cross_points, obstacle_hits=hit_points, curve_anomalies=anomalies, worst_regions=windows,
                   node_overlaps=[dict(x=round(float(centres[i][0]), 1), y=round(float(centres[i][1]), 1)) for i, _ in node_overlap][:max_issues],
-                  split_structures=[d for d in continuity.get('details') or [] if d.get('components', 1) > 1][:max_issues])
+                  split_structures=[d for d in continuity.get('details') or [] if d.get('components', 1) > 1][:max_issues],
+                  warnings=warnings)
     return summary, issues
 
 
