@@ -25,7 +25,7 @@ A run writes `map.json` (Escher), `map.svg`, `report.json`, `reaction_provenance
 | Whole-map composition | `composition.py` (recovers stray components, arranges independent modules in rows), `peripheral.py` (exchange and transport modules), `block_relocation.py` (moves expert blocks that sit far from the reactions they connect to) |
 | Connections and labels | `edge_style.py` (Bézier connections from expert templates, joint routing per reaction), `reaction_templates.py`, `label_placement.py`, `line_render.py`, `routing.py` (libavoid) |
 | Quality | `layout_quality.py` (final-geometry for the quality gate: curve crossings, collisions, …), `quality_gate.py` (accepts a change only if the final geometry is not worse), `evaluation/` (unified development scoring: Project 22 layout-benchmark metrics + the same final-geometry block; CLI `python3 project.py evaluate`) |
-| Pages | `ui.py`, `navigation.py`, `toolpage.py`, `gallery*.py` |
+| Pages | `ui.py`, `navigation.py`, `gallery*.py` (tool UI is the committed `results/tool/index.html`) |
 
 Files whose hashes are recorded by saved results (`routing.py`, `drawing.py`, `geometry.py`, `retrieval.py`, `semantic_transfer.py`, `celldesigner.py`) should not be edited casually.
 
