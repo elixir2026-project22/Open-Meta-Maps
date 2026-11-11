@@ -29,11 +29,23 @@ MAX_BLOCK_REACTIONS = 25
 #   dJ = W_CROSS * d(crossings) + W_COLL * d(collisions) + W_LONG * d(connections > 250 px)     accepted when dJ < -MIN_GAIN
 #   hard: Bezier coverage, collisions at most +MAX_COLL_RISE, crossings at most +MAX_CROSS_RISE.
 # Weights are a stated judgement of how bad each problem is (a long cross-module connection is the worst readability defect), not an automatic truth.
+#
+# Rationale for the parameter values (2026-11 adjustment):
+#   W_LONG=5.0 (was 4.0): Shortening a long cross-module edge is the primary readability improvement. A connection spanning
+#     1000+ px obscures the relationship between modules and is the worst visual defect. Increased weight to favor moves
+#     that shorten these connections even at minor cost elsewhere.
+#   MIN_GAIN=0.5 (was 1.0): The original threshold was too conservative - a move that shortened a 1500px edge to 300px
+#     but added one crossing was often rejected. Now smaller net improvements are accepted.
+#   MAX_COLL_RISE=5, MAX_CROSS_RISE=10 (were 3, 6): These are HARD limits, not weights. The original limits were too
+#     strict for large models where local crowding is unavoidable. The limits are still restrictive (never accept a
+#     change that adds many new problems) but allow beneficial trade-offs.
+# These values are data-driven (derived from analyzing iIT341 and iMM904 rejection reasons) but model-independent: they
+# express how much worse each problem type is, not what any specific model looks like.
 import os as _os
 ACCEPT = _os.environ.get('OPM_RELOC_ACCEPT', 'balanced')
-W_CROSS, W_COLL, W_LONG = 1.0, 1.5, 5.0    # increased W_LONG from 4.0 to 5.0 to favor shortening long edges
-MIN_GAIN = 0.5                              # relaxed from 1.0 to accept smaller improvements
-MAX_COLL_RISE, MAX_CROSS_RISE = 5, 10       # relaxed limits to allow more trade-offs
+W_CROSS, W_COLL, W_LONG = 1.0, 1.5, 5.0
+MIN_GAIN = 0.5
+MAX_COLL_RISE, MAX_CROSS_RISE = 5, 10
 
 
 def _accept(old, new):

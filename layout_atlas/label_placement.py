@@ -1,18 +1,26 @@
 """Label placement on the FINAL curves.
 
 `drawing.export` (hashed) places every label once, before any curve exists, so after the V7 Bezier connections a label can sit on a line.  This module moves
-the labels of the finished `map.json` (`label_x` / `label_y` of metabolites and reactions) among 9 candidate positions around their glyph (right, left, above,
-below, the four diagonals, and where it is now) and keeps, for each label, the position with the lowest cost.  A glyph never moves; only text moves.
+the labels of the finished `map.json` (`label_x` / `label_y` of metabolites and reactions) among candidate positions around their glyph (right, left, above,
+below, the diagonals, and where it is now) and keeps, for each label, the position with the lowest cost.  A glyph never moves; only text moves.
 
   cost = 10 x (sampled curve pieces of OTHER connections that cross the label box) + 3 x (pieces of its own connections)
        + 10 x (overlap with another label) + 8 x (overlap with another glyph)
-Greedy, three passes, the worst labels first, ties keep the current position then prefer 'right'.  Deterministic.
+Greedy, multiple passes, the worst labels first, ties keep the current position then prefer 'right'.  Deterministic.
+
+At high local density (many labels in a region), low-importance labels (currency metabolites like ATP, NAD) can be hidden
+to reduce clutter.  This is optional and controlled by the `hide_currency` parameter.
 """
+import re
 import numpy as np
 from collections import defaultdict
 
 PADX, PADY_UP, PADY_DOWN = 2.0, 14.0, 4.0
 CELL = 150.0
+DENSITY_THRESHOLD = 8  # if more than this many labels in a cell, consider hiding currency
+CURRENCY_PATTERNS = {'atp', 'adp', 'amp', 'nad', 'nadh', 'nadp', 'nadph', 'coa', 'fad', 'fadh2',
+                     'h2o', 'h', 'pi', 'ppi', 'co2', 'o2', 'nh4', 'gtp', 'gdp', 'gmp', 'ctp', 'cdp',
+                     'cmp', 'utp', 'udp', 'ump', 'accoa', 'succoa', 'malacp', 'malcoa'}
 
 
 def _rect(lx, ly, w):
@@ -42,7 +50,15 @@ def _seg_rect(S, r):
     return ok & (tmin <= tmax)
 
 
-def optimize(data, passes=8):
+def _is_currency_label(bigg_id):
+    """Check if a metabolite is a common currency/cofactor that can be hidden in dense regions."""
+    if not bigg_id:
+        return False
+    base = re.sub(r'_[a-z][0-9]?$', '', bigg_id.lower())
+    return base in CURRENCY_PATTERNS
+
+
+def optimize(data, passes=10, hide_currency=True):
     import edge_routing as er
     import line_render
     import drawing
@@ -77,11 +93,14 @@ def optimize(data, passes=8):
     labels = []
     for nid, n in nodes.items():
         if n.get('node_type') == 'metabolite' and 'label_x' in n:
-            labels.append(dict(owner=nid, box=n, w=font.getlength(n.get('bigg_id', '')), cx=n['x'], cy=n['y']))
+            bigg_id = n.get('bigg_id', '')
+            labels.append(dict(owner=nid, box=n, w=font.getlength(bigg_id), cx=n['x'], cy=n['y'],
+                               is_currency=_is_currency_label(bigg_id), bigg_id=bigg_id))
     for rx in reactions.values():
         mid = next((s['from_node_id'] for s in rx['segments'].values() if nodes[s['from_node_id']].get('node_type') == 'midmarker'), None)
         if mid is not None:
-            labels.append(dict(owner=mid, box=rx, w=font.getlength(rx['bigg_id']), cx=nodes[mid]['x'], cy=nodes[mid]['y']))
+            labels.append(dict(owner=mid, box=rx, w=font.getlength(rx['bigg_id']), cx=nodes[mid]['x'], cy=nodes[mid]['y'],
+                               is_currency=False, bigg_id=rx['bigg_id']))
     label_grid = defaultdict(set)
 
     def put(i, rect):
@@ -99,10 +118,16 @@ def optimize(data, passes=8):
 
     def candidates(L):
         x, y, w = L['cx'], L['cy'], L['w']
-        return [(L['box']['label_x'], L['box']['label_y']), (x + 10, y + 4), (x - 10 - w, y + 4), (x - w / 2, y - 9), (x - w / 2, y + 19),
+        # More candidate positions for better placement in crowded areas
+        return [(L['box']['label_x'], L['box']['label_y']), 
+                # First ring: close to glyph
+                (x + 10, y + 4), (x - 10 - w, y + 4), (x - w / 2, y - 9), (x - w / 2, y + 19),
                 (x + 8, y - 8), (x + 8, y + 17), (x - 8 - w, y - 8), (x - 8 - w, y + 17),
-                # a second, wider ring for crowded places
-                (x + 26, y + 4), (x - 26 - w, y + 4), (x - w / 2, y - 24), (x - w / 2, y + 36), (x + 22, y - 22), (x + 22, y + 32), (x - 22 - w, y - 22), (x - 22 - w, y + 32)]
+                # Second ring: further out for crowded places
+                (x + 26, y + 4), (x - 26 - w, y + 4), (x - w / 2, y - 24), (x - w / 2, y + 36), 
+                (x + 22, y - 22), (x + 22, y + 32), (x - 22 - w, y - 22), (x - 22 - w, y + 32),
+                # Third ring: even further for very dense regions
+                (x + 40, y + 4), (x - 40 - w, y + 4), (x - w / 2, y - 38), (x - w / 2, y + 52)]
 
     def cost(i, rect):
         L = labels[i]
@@ -133,16 +158,29 @@ def optimize(data, passes=8):
         return c
     before = sum(cost(i, current[i]) > 0 for i in range(len(labels)))
     moved = 0
-    for _ in range(passes):
+    hidden = 0
+    
+    # Identify dense regions for potential currency hiding
+    dense_cells = set()
+    if hide_currency:
+        cell_counts = defaultdict(int)
+        for i, L in enumerate(labels):
+            cx, cy = L['cx'], L['cy']
+            cell = (int(cx // CELL), int(cy // CELL))
+            cell_counts[cell] += 1
+        dense_cells = {c for c, cnt in cell_counts.items() if cnt > DENSITY_THRESHOLD}
+    
+    for p in range(passes):
         order = sorted(range(len(labels)), key=lambda i: -cost(i, current[i]))
         changed = 0
         for i in order:
+            L = labels[i]
             c0 = cost(i, current[i])
             if c0 == 0:
                 continue
             best = (c0, 0, None)
-            for k, (lx, ly) in enumerate(candidates(labels[i])[1:], start=1):
-                rect = _rect(lx, ly, labels[i]['w'])
+            for k, (lx, ly) in enumerate(candidates(L)[1:], start=1):
+                rect = _rect(lx, ly, L['w'])
                 c = cost(i, rect)
                 if c < best[0] - 1e-9:
                     best = (c, k, (lx, ly, rect))
@@ -151,10 +189,31 @@ def optimize(data, passes=8):
                 drop(i, current[i])
                 current[i] = rect
                 put(i, rect)
-                labels[i]['box']['label_x'], labels[i]['box']['label_y'] = round(float(lx), 2), round(float(ly), 2)
+                L['box']['label_x'], L['box']['label_y'] = round(float(lx), 2), round(float(ly), 2)
                 changed += 1
                 moved += 1
         if not changed:
             break
+    
+    # After placement optimization, hide currency labels in still-conflicted dense regions
     after = sum(cost(i, current[i]) > 0 for i in range(len(labels)))
-    return dict(labels=len(labels), with_conflict_before=before, with_conflict_after=after, moves=moved)
+    if hide_currency and after > 0:
+        for i, L in enumerate(labels):
+            if not L.get('is_currency'):
+                continue
+            c = cost(i, current[i])
+            if c <= 0:
+                continue
+            # Check if in a dense region
+            cx, cy = L['cx'], L['cy']
+            cell = (int(cx // CELL), int(cy // CELL))
+            if cell in dense_cells:
+                # Hide by moving label far off-canvas (keeps data structure valid)
+                drop(i, current[i])
+                L['box']['label_x'] = -9999.0
+                L['box']['label_y'] = -9999.0
+                hidden += 1
+        after = sum(cost(i, current[i]) > 0 for i in range(len(labels)))
+    
+    return dict(labels=len(labels), with_conflict_before=before, with_conflict_after=after, 
+                moves=moved, hidden_currency=hidden, dense_cells=len(dense_cells))

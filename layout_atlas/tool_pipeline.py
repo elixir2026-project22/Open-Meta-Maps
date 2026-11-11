@@ -30,7 +30,15 @@ SOURCE_PATHS = False  # reuse the expert's original curves (Escher Bezier chains
 ORIENTATION = 'full'  # 'off' | 'sides' (currency copies on the substrate / product side) | 'full' (also reactions outside the expert structures between their substrates and products)
 LAYOUT_STYLE = 'legacy'  # 'legacy' | 'expert' (V7: every algorithm-placed connection is a Bezier curve solved from expert-map constraints; no orthogonal polylines)
 COMPLETION_CONTEXT = 'auto'  # 'auto' (V6: uncovered reactions are placed beside the glyphs of their own metabolites) | 'off'
-EDGE_ROUTING = 'libavoid'  # 'libavoid' (orthogonal, all edges: the earlier behaviour) | 'hybrid' (routes only blocked algorithm-placed edges, smooths corners) | 'none' (straight lines)
+EDGE_ROUTING = 'libavoid'  # 'libavoid' (orthogonal, all edges) | 'hybrid' (routes only blocked algorithm-placed edges) | 'none' (straight lines)
+# Routing behavior by layout style and model size:
+#   - layout_style='expert': Uses Bezier curve fitting (edge_style.apply) for all algorithm-placed edges.
+#     Expert-style curves are smoother and follow expert-derived templates. No libavoid routing is used
+#     because the Bezier curves already avoid obstacles via iterative candidate selection.
+#   - layout_style='legacy' with <= ROUTING_THRESHOLD reactions: Uses libavoid orthogonal routing.
+#   - layout_style='legacy' with > ROUTING_THRESHOLD reactions: Routing is deferred (edge_routing.measure only).
+# For scalable=True (large models), straight connections are used initially; edge_style is applied separately.
+ROUTING_THRESHOLD = 500  # reactions; above this, routing is deferred for legacy style
 CONTEXT = 'auto'  # 'auto' (reactions without non-currency participants share nodes and sit next to related reactions) | 'off'
 INSTANCES = 'auto'  # 'auto' (V3: decide how many visual instances each metabolite gets) | 'off'
 LAYOUT = 'global'  # 'global' (one map for the whole model, <=3,000 reactions) | 'tiled' (50-reaction views tiled on a grid; also the automatic fallback)
@@ -516,7 +524,13 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         completion_report['attachment_rate_final'] = completion_context_module.attachment_rate(model, scene, currency(model), {rid for b in blocks for rid in b['reaction_ids']}, completion_skip)
     expert_geometry = layout_quality.expert_geometry(blocks, scene)
     attempts = []
-    for route, labels in (((False, False),) if scalable or EDGE_ROUTING in ('hybrid', 'none') or LAYOUT_STYLE == 'expert' else ((True, True), (True, False), (False, False))):
+    # Routing decision: expert style uses Bezier curves (edge_style), legacy uses libavoid
+    # For large models (> ROUTING_THRESHOLD reactions), defer routing to avoid long build times
+    skip_libavoid = (scalable or 
+                     EDGE_ROUTING in ('hybrid', 'none') or 
+                     LAYOUT_STYLE == 'expert' or
+                     len(model['reactions']) > ROUTING_THRESHOLD)
+    for route, labels in (((False, False),) if skip_libavoid else ((True, True), (True, False), (False, False))):
         metric = drawing.export(model, core, folder, 'map', blocks=blocks, full_model=full_model, route=route, scene=scene, label_obstacles=labels)
         status = (metric.get('routing') or {}).get('status')
         attempts.append(dict(route=route, label_obstacles=labels, status=status if route else 'not_requested'))
