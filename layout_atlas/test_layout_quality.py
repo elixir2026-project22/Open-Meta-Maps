@@ -154,6 +154,11 @@ def test_svg_has_no_provenance_legend():
     assert "width=\"330\"" not in svg
     assert "Expert-derived" not in svg
     assert "Curated:" not in svg  # legend text must not be painted into the SVG
+    assert 'data-kind="generated"' in svg
+    assert 'stroke="#222"' in svg
+    for colour in epv.COLORS.values():
+        assert f'stroke="{colour}"' not in svg
+        assert f'fill="{colour}"' not in svg
 
 
 if __name__ == "__main__":
