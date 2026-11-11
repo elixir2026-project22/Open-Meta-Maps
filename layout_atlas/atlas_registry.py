@@ -274,7 +274,7 @@ def write_registry(db=None, manifest=None, path=None):
     for blob, in db.execute('SELECT payload FROM modules'):
         p = unpack(blob)
         licences[p.get('license') or p.get('licence') or '?'] += 1
-    for name in ('brenda', 'human_maps'):
+    for name in ('brenda', 'human_maps', 'wikipathways_geometry'):
         ext = DATA / 'extensions' / name / 'modules.json.gz'
         if ext.exists():
             with gzip.open(ext, 'rt') as f:
@@ -283,7 +283,7 @@ def write_registry(db=None, manifest=None, path=None):
                 licences[m.get('license') or m.get('licence') or '?'] += 1
             mods[name] = mods.get(name, 0) + len(items)
     ext_meta = {}
-    for name in ('brenda', 'human_maps'):
+    for name in ('brenda', 'human_maps', 'wikipathways_geometry'):
         src = DATA / 'extensions' / name / 'SOURCE.json'
         if src.exists():
             ext_meta[name] = read(src)
@@ -371,7 +371,7 @@ def validate(path=None, include_extensions=True):
         db.close()
 
     if include_extensions:
-        for name in ('brenda', 'human_maps'):
+        for name in ('brenda', 'human_maps', 'wikipathways_geometry'):
             ext = DATA / 'extensions' / name / 'modules.json.gz'
             if not ext.exists():
                 continue

@@ -23,6 +23,9 @@
 !/data/extensions/human_maps/SOURCE.json
 !/data/extensions/human_maps/modules.json.gz
 !/data/extensions/human_maps/import_audit.json
+/data/extensions/wikipathways_geometry/*
+!/data/extensions/wikipathways_geometry/SOURCE.json
+!/data/extensions/wikipathways_geometry/modules.json.gz
 /data/references
 /data/source_inputs/archives/human_maps.zip*
 /data/references/yeast_original
