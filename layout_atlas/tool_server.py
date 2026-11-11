@@ -10,11 +10,12 @@
 * POST /api/jobs/<id>/views/<view_id>  draw one view (queued behind running jobs)
 * DELETE /api/jobs/<id>      cancel a running job and delete its folder
 
-Lifetime: each open tab pings /api/ping every few seconds and sends /api/bye on pagehide. When the last tab is gone
-(and none ping within a short grace, ~8 s, so reloads survive) and no job is running or queued, the server stops itself
-(disable with --keep-running). If a job is still running when the last tab closes, the server exits after that job finishes
-unless a tab reconnects. If the port is taken by an older instance of this same tool, that instance is stopped and replaced;
-any other program on the port is left alone and the next free port is used.
+Lifetime: each open tab sends /api/bye on pagehide (primary signal) and also pings /api/ping while visible. When the last tab is
+gone (bye, or a multi-minute stale fallback that tolerates Chrome background-timer throttling) and a short grace (~8 s) has
+passed so reloads survive, and no job is running or queued, the server stops itself (disable with --keep-running). If a job
+is still running when the last tab closes, the server exits after that job finishes unless a tab reconnects. If the port is
+taken by an older instance of this same tool, that instance is stopped and replaced; any other program on the port is left
+alone and the next free port is used.
 
 Jobs run one at a time in a separate process (tool_pipeline.py).  The server only listens on 127.0.0.1, checks the Host
 header (DNS-rebinding guard), limits uploads to 25 MB, never executes uploaded content and never serves job inputs back.
@@ -233,6 +234,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
                  b"function ping(){fetch('/api/ping?c='+id,{method:'POST',keepalive:true}).catch(function(){})}"
                  b"function bye(){try{navigator.sendBeacon('/api/bye?c='+encodeURIComponent(id),'')}catch(e){}}"
                  b"ping();setInterval(ping,4000);"
+                 b"document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')ping()});"
+                 b"window.addEventListener('focus',ping);"
                  b"window.addEventListener('pagehide',bye);window.addEventListener('unload',bye)})();</script>")
 
     def html_bytes(self, data):
@@ -353,8 +356,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
 CLIENTS = {}  # open page id -> last time it pinged
 LIFE = dict(ever=False, empty_since=None, keep=False, pending_exit=False)
-GRACE = 8.0    # seconds with no open tab before stop (covers reload/navigation gaps)
-STALE = 45.0   # a page that has not pinged for this long counts as closed
+GRACE = 8.0     # seconds with no open tab before stop (covers reload/navigation gaps)
+STALE = 300.0   # fallback only: hidden Chrome tabs may ping only ~once/min; several minutes of silence before counting closed
 WAKE = threading.Event()
 
 
@@ -378,7 +381,7 @@ def _busy():
 
 
 def idle_watch(httpd):
-    """Stop once every tab has gone (bye or stale) and nothing is running; wait out GRACE so reloads survive."""
+    """Stop after explicit bye (or multi-minute stale fallback) and GRACE, once nothing is running."""
     while True:
         WAKE.wait(timeout=1.0)
         WAKE.clear()

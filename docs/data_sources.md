@@ -1,6 +1,6 @@
 # Data sources and licensing
 
-The default Atlas is `data/open_core.sqlite`. Its layouts come only from:
+The default Atlas is `data/open_core.sqlite` plus the in-tree extensions under `data/extensions/`. Module counts: [`data/atlas_registry.json`](../data/atlas_registry.json). Layouts come only from:
 
 | Source | Licence as recorded in this repository | Notes |
 |---|---|---|
@@ -21,8 +21,8 @@ Other bundled files: `data/rhea/` (Rhea reaction data); `data/identifier_bridge.
 | Material | Reason |
 |---|---|
 | Human-maps companion SVG | SVG exports are CC BY-SA; only official Escher JSON (CC BY 4.0) is imported |
-| Yeast-maps (GPL-3.0) / original yeast map | Removed |
-| MicroMap | Removed (NC-SA) |
+| Yeast-maps (GPL-3.0) / original yeast map | Excluded |
+| MicroMap (NC-SA) | Excluded |
 | `data/references/` | Local acquisition cache; not redistributed with the checkout |
 
 MetaCarto is cited only as related work; none of its code or maps is included.
