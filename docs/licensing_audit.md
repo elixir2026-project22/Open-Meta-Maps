@@ -14,8 +14,9 @@ Core SQLite modules (checked by reading the module payloads), plus default exten
 | Reactome | 3,405 | CC0 for data and derived files; CC BY 4.0 for pathway illustrations and artwork | `source_inputs/terms/reactome.html` | OK for layout data; if Reactome illustrations are ever added, CC BY 4.0 attribution is required |
 | Escher maps | 9,098 | CC0-1.0 | Escher community-maps repository `LICENSE` is CC0 | OK |
 | BRENDA pathway maps | 11,703 | CC BY 4.0 | https://www.brenda.dsmz.de/license.php; doi:10.1093/nar/gkaf1113 | OK (layout possibly automatic; retrieval deprioritises vs expert maps) |
-| Human-maps | 8,540 | CC BY 4.0 | official `escher/` JSON only | OK (SVGs with embedded BY-SA are not imported) |
+| Human-maps | 8,540 | CC BY 4.0 (JSON) | official `escher/` JSON only | OK — companion SVGs are CC BY-SA and are **not** imported |
 | Metabolism Regulation gallery | 423 | CC BY 4.0 | https://metabolismregulation.github.io/about/; SBGN-ML under `source_inputs/raw/metabolismregulation/` | OK (hand-drawn; attribution required) |
+| PANTHER Pathway | 238 | CC BY 4.0 | `data.pantherdb.org` CD4.1 CellDesigner; `source_inputs/raw/panther/` | OK (labels bridged via BiGG/ChEBI identity layer) |
 
 ### Escher maps
 
@@ -36,15 +37,16 @@ The 22 maps come from the Escher community-maps repository (BiGG-based maps for 
 | ~~`model_input.py`, `central_reference.json` (sbml2escher)~~ | removed 2026-11-10: the SBML reader is now libSBML-based (`layout_atlas/model_io.py`), the currency list is `data/currency_metabolites.json` | **Resolved** |
 | `data/routing/source.zip` (adaptagrams, libavoid) | adaptagrams is LGPL; exact terms not re-checked | **Open**: confirm and add the LGPL notice |
 | Yeast-maps / original yeast map | GPL-3.0 (Yeast-maps) | **Removed** from packages, acquisition and docs. Not redistributed. |
-| Human-maps (official `escher/` JSON) | CC BY 4.0 | **Included** (8,540 modules via `database.escher_diagram`). Companion SVG exports embed BY-SA metadata and are **not** imported; the Escher JSON files have no BY-SA marks. |
+| Human-maps (official `escher/` JSON) | CC BY 4.0 | **Included** (8,540 modules via `database.escher_diagram`). Companion SVG exports are **CC BY-SA** and are **not** imported; provenance/`SOURCE.json` record the JSON-only CC BY 4.0 scope. |
 | Metabolism Regulation gallery SBGN-ML | CC BY 4.0 | **Included** via generic `layout_atlas/sbgn.py` (`data/extensions/metabolismregulation/`). See [metabolismregulation_import.md](metabolismregulation_import.md). |
+| PANTHER Pathway CellDesigner | CC BY 4.0 | **Included** (8 metabolic CD4.1 maps → 238 modules) via generic `celldesigner.py` + `identity_labels.py`. See [panther_pilot.md](panther_pilot.md). |
 | `data/extensions/{units,source_paths,reaction_geometry_templates}` | derived from the open-core maps | inherits the Escher-map status above |
 | `data/annotation_bridge.json` | derived from model annotations (identifier links) | inherits the model licences above |
 
 ## 3. Not in the repository (verified by `.gitignore` and tracked-file listing)
 
 - BRENDA pathway modules: CC BY 4.0 (https://www.brenda.dsmz.de/license.php); included by default under `data/extensions/brenda/` with per-module attribution to BRENDA + NAR 2026 doi:10.1093/nar/gkaf1113; layout provenance marked possibly automatic. The former optional `brenda` data package entry was removed as redundant.
-- PANTHER Pathway (CC BY 4.0): **pilot only** — live SBML download from pantherdb.org was blocked by Cloudflare (HTTP 403) from this environment; no files imported. See [panther_pilot.md](panther_pilot.md).
+- PANTHER Pathway (CC BY 4.0): **included** from `data.pantherdb.org` FTP CD4.1 (www HTML still Cloudflare-blocked). See [panther_pilot.md](panther_pilot.md).
 - MicroMap (NC-SA): removed entirely; `celldesigner.py` remains as a generic CellDesigner importer.
 - `data/references/`, `Ref/`, `Presentation/`, `results/`: not tracked.
 
@@ -55,4 +57,4 @@ The 22 maps come from the Escher community-maps repository (BiGG-based maps for 
 3. ~~Record the upstream licence of the `sbml2escher` files~~ (resolved: dependency removed); record the licence of adaptagrams/libavoid; `THIRD_PARTY_NOTICES.md` exists.
 4. Add Rhea and Human-GEM citations; keep every upstream `LICENSE` next to its data.
 5. Choose the software licence (not chosen yet) after step 2, since it determines what can be combined.
-6. Re-run the PANTHER CellDesigner pilot once pantherdb.org SBML can be fetched; decide on default Atlas inclusion only after coordinates / reaction mapping are confirmed.
+6. ~~Re-run the PANTHER CellDesigner pilot~~ (done via data.pantherdb.org; identity bridge + default extension).

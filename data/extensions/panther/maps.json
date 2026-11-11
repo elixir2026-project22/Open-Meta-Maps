@@ -1,0 +1,231 @@
+[
+  {
+    "id": "87283bb1bbdcb4ace39b4712",
+    "source": "panther",
+    "source_id": "ATP_synthesis",
+    "species": "PANTHER Pathway (multi-organism schematic)",
+    "lineage": "panther:ATP_synthesis",
+    "name": "ATP synthesis",
+    "license": "CC-BY-4.0",
+    "source_sha256": "ae4f6e19db99713202b186da821b3df5224168daa37ba7f96d6ac401b75265dd",
+    "provenance_status": "panther_celldesigner_cd4",
+    "attribution": "PANTHER Pathway (https://pantherdb.org/), Creative Commons Attribution 4.0 International; CellDesigner maps from https://data.pantherdb.org/ftp/pathway/3.4/CD4.1/.",
+    "layout_origin": {
+      "status": "expert_hand_drawn",
+      "counted_as_expert_design": true,
+      "reason": "source_map_expert_layout"
+    },
+    "version": "3.4/CD4.1",
+    "url": "https://data.pantherdb.org/ftp/pathway/3.4/CD4.1/ATP_synthesis.xml",
+    "path": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/panther/ATP_synthesis.xml",
+    "format": "celldesigner",
+    "events": 6,
+    "glyphs": 23,
+    "modules": 6,
+    "audit": {
+      "decoded_with_controls": 6,
+      "incomplete_participant_identity_or_stoichiometry": 1,
+      "branch_geometry_not_decoded": 1
+    }
+  },
+  {
+    "id": "d64d4606014906fb9a537377",
+    "source": "panther",
+    "source_id": "Cholesterol_biosynthesis",
+    "species": "PANTHER Pathway (multi-organism schematic)",
+    "lineage": "panther:Cholesterol_biosynthesis",
+    "name": "Cholesterol biosynthesis",
+    "license": "CC-BY-4.0",
+    "source_sha256": "ca9295b80c7ed3b988663a7d860a6f3334fb47ae567cb9efeb45053c6820092b",
+    "provenance_status": "panther_celldesigner_cd4",
+    "attribution": "PANTHER Pathway (https://pantherdb.org/), Creative Commons Attribution 4.0 International; CellDesigner maps from https://data.pantherdb.org/ftp/pathway/3.4/CD4.1/.",
+    "layout_origin": {
+      "status": "expert_hand_drawn",
+      "counted_as_expert_design": true,
+      "reason": "source_map_expert_layout"
+    },
+    "version": "3.4/CD4.1",
+    "url": "https://data.pantherdb.org/ftp/pathway/3.4/CD4.1/Cholesterol_biosynthesis.xml",
+    "path": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/panther/Cholesterol_biosynthesis.xml",
+    "format": "celldesigner",
+    "events": 11,
+    "glyphs": 48,
+    "modules": 33,
+    "audit": {
+      "decoded_direct_no_controls": 9,
+      "decoded_with_controls": 2,
+      "branch_geometry_not_decoded": 1
+    }
+  },
+  {
+    "id": "52b5f9fda679664c674713d3",
+    "source": "panther",
+    "source_id": "De_novo_purine_biosynthesis",
+    "species": "PANTHER Pathway (multi-organism schematic)",
+    "lineage": "panther:De_novo_purine_biosynthesis",
+    "name": "De novo purine biosynthesis",
+    "license": "CC-BY-4.0",
+    "source_sha256": "8da6a48fd7649931081a38deed59e5e142fad00e9b462c8eca51d4a9817a4130",
+    "provenance_status": "panther_celldesigner_cd4",
+    "attribution": "PANTHER Pathway (https://pantherdb.org/), Creative Commons Attribution 4.0 International; CellDesigner maps from https://data.pantherdb.org/ftp/pathway/3.4/CD4.1/.",
+    "layout_origin": {
+      "status": "expert_hand_drawn",
+      "counted_as_expert_design": true,
+      "reason": "source_map_expert_layout"
+    },
+    "version": "3.4/CD4.1",
+    "url": "https://data.pantherdb.org/ftp/pathway/3.4/CD4.1/De_novo_purine_biosynthesis.xml",
+    "path": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/panther/De_novo_purine_biosynthesis.xml",
+    "format": "celldesigner",
+    "events": 25,
+    "glyphs": 105,
+    "modules": 81,
+    "audit": {
+      "decoded_with_controls": 25
+    }
+  },
+  {
+    "id": "d9f3bc2c169c8acf2d7c7c04",
+    "source": "panther",
+    "source_id": "Fructose_galactose_metabolism",
+    "species": "PANTHER Pathway (multi-organism schematic)",
+    "lineage": "panther:Fructose_galactose_metabolism",
+    "name": "Fructose galactose metabolism",
+    "license": "CC-BY-4.0",
+    "source_sha256": "ebb8486a9a697fb1bfe890eab1c11b8984e53a1cc700d47a6cbb56c9dd5397b1",
+    "provenance_status": "panther_celldesigner_cd4",
+    "attribution": "PANTHER Pathway (https://pantherdb.org/), Creative Commons Attribution 4.0 International; CellDesigner maps from https://data.pantherdb.org/ftp/pathway/3.4/CD4.1/.",
+    "layout_origin": {
+      "status": "expert_hand_drawn",
+      "counted_as_expert_design": true,
+      "reason": "source_map_expert_layout"
+    },
+    "version": "3.4/CD4.1",
+    "url": "https://data.pantherdb.org/ftp/pathway/3.4/CD4.1/Fructose_galactose_metabolism.xml",
+    "path": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/panther/Fructose_galactose_metabolism.xml",
+    "format": "celldesigner",
+    "events": 12,
+    "glyphs": 33,
+    "modules": 22,
+    "audit": {
+      "decoded_with_controls": 12,
+      "branch_geometry_not_decoded": 2,
+      "incomplete_participant_identity_or_stoichiometry": 1
+    }
+  },
+  {
+    "id": "ea6c384857cb277e093276a8",
+    "source": "panther",
+    "source_id": "Glycolysis",
+    "species": "PANTHER Pathway (multi-organism schematic)",
+    "lineage": "panther:Glycolysis",
+    "name": "Glycolysis",
+    "license": "CC-BY-4.0",
+    "source_sha256": "6802c8fa6e7e0c9090e2e80ff3c6668f51b0ae9c2a4057279fd0e296b0d6e603",
+    "provenance_status": "panther_celldesigner_cd4",
+    "attribution": "PANTHER Pathway (https://pantherdb.org/), Creative Commons Attribution 4.0 International; CellDesigner maps from https://data.pantherdb.org/ftp/pathway/3.4/CD4.1/.",
+    "layout_origin": {
+      "status": "expert_hand_drawn",
+      "counted_as_expert_design": true,
+      "reason": "source_map_expert_layout"
+    },
+    "version": "3.4/CD4.1",
+    "url": "https://data.pantherdb.org/ftp/pathway/3.4/CD4.1/Glycolysis.xml",
+    "path": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/panther/Glycolysis.xml",
+    "format": "celldesigner",
+    "events": 11,
+    "glyphs": 32,
+    "modules": 25,
+    "audit": {
+      "decoded_with_controls": 7,
+      "incomplete_participant_identity_or_stoichiometry": 1,
+      "decoded_direct_no_controls": 4
+    }
+  },
+  {
+    "id": "fc5748a9019f7d9554dcc2ef",
+    "source": "panther",
+    "source_id": "Pentose_phosphate_pathway",
+    "species": "PANTHER Pathway (multi-organism schematic)",
+    "lineage": "panther:Pentose_phosphate_pathway",
+    "name": "Pentose phosphate pathway",
+    "license": "CC-BY-4.0",
+    "source_sha256": "65a259ee31951febbed05a67296d99a23ae868f3956d5ccf577d3dc7f92c9f26",
+    "provenance_status": "panther_celldesigner_cd4",
+    "attribution": "PANTHER Pathway (https://pantherdb.org/), Creative Commons Attribution 4.0 International; CellDesigner maps from https://data.pantherdb.org/ftp/pathway/3.4/CD4.1/.",
+    "layout_origin": {
+      "status": "expert_hand_drawn",
+      "counted_as_expert_design": true,
+      "reason": "source_map_expert_layout"
+    },
+    "version": "3.4/CD4.1",
+    "url": "https://data.pantherdb.org/ftp/pathway/3.4/CD4.1/Pentose_phosphate_pathway.xml",
+    "path": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/panther/Pentose_phosphate_pathway.xml",
+    "format": "celldesigner",
+    "events": 15,
+    "glyphs": 43,
+    "modules": 49,
+    "audit": {
+      "decoded_with_controls": 15,
+      "incomplete_participant_identity_or_stoichiometry": 3
+    }
+  },
+  {
+    "id": "db173d7c9b1763595b2fc0f5",
+    "source": "panther",
+    "source_id": "Pyruvate_metabolism",
+    "species": "PANTHER Pathway (multi-organism schematic)",
+    "lineage": "panther:Pyruvate_metabolism",
+    "name": "Pyruvate metabolism",
+    "license": "CC-BY-4.0",
+    "source_sha256": "fa16bcce479e059721068370c29535aa941e8f195c5407f38a78db4b0856ab41",
+    "provenance_status": "panther_celldesigner_cd4",
+    "attribution": "PANTHER Pathway (https://pantherdb.org/), Creative Commons Attribution 4.0 International; CellDesigner maps from https://data.pantherdb.org/ftp/pathway/3.4/CD4.1/.",
+    "layout_origin": {
+      "status": "expert_hand_drawn",
+      "counted_as_expert_design": true,
+      "reason": "source_map_expert_layout"
+    },
+    "version": "3.4/CD4.1",
+    "url": "https://data.pantherdb.org/ftp/pathway/3.4/CD4.1/Pyruvate_metabolism.xml",
+    "path": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/panther/Pyruvate_metabolism.xml",
+    "format": "celldesigner",
+    "events": 4,
+    "glyphs": 35,
+    "modules": 6,
+    "audit": {
+      "decoded_with_controls": 4,
+      "incomplete_participant_identity_or_stoichiometry": 6,
+      "branch_geometry_not_decoded": 2
+    }
+  },
+  {
+    "id": "0459c1ad1804a8bd5dfef9f7",
+    "source": "panther",
+    "source_id": "TCA_cycle",
+    "species": "PANTHER Pathway (multi-organism schematic)",
+    "lineage": "panther:TCA_cycle",
+    "name": "TCA cycle",
+    "license": "CC-BY-4.0",
+    "source_sha256": "7f4eda2b8b50251e26c4375d83d8cbc4ce6bf49266a1948117a07861684a0c88",
+    "provenance_status": "panther_celldesigner_cd4",
+    "attribution": "PANTHER Pathway (https://pantherdb.org/), Creative Commons Attribution 4.0 International; CellDesigner maps from https://data.pantherdb.org/ftp/pathway/3.4/CD4.1/.",
+    "layout_origin": {
+      "status": "expert_hand_drawn",
+      "counted_as_expert_design": true,
+      "reason": "source_map_expert_layout"
+    },
+    "version": "3.4/CD4.1",
+    "url": "https://data.pantherdb.org/ftp/pathway/3.4/CD4.1/TCA_cycle.xml",
+    "path": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/panther/TCA_cycle.xml",
+    "format": "celldesigner",
+    "events": 8,
+    "glyphs": 43,
+    "modules": 16,
+    "audit": {
+      "decoded_with_controls": 8,
+      "incomplete_participant_identity_or_stoichiometry": 2,
+      "branch_geometry_not_decoded": 1
+    }
+  }
+]

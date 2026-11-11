@@ -8,7 +8,7 @@ Status: 2026-11-11. Engineering review of how extracted layouts are stored and r
 |---|---|
 | `data/open_core.sqlite` | Redistributable Atlas (tracked). Tables: `maps`, `modules`, `reactions`, `reviews`, `retained_observations`. |
 | `data/atlas.sqlite` | Runtime working copy (gitignored). Copied from `open_core.sqlite` on first run (`core.py`). |
-| `data/extensions/*/modules.json.gz` | Default extensions (BRENDA, Human-maps, WikiPathways geometry, Metabolism Regulation) loaded by `database.modules()`. |
+| `data/extensions/*/modules.json.gz` | Default extensions (BRENDA, Human-maps, WikiPathways geometry, Metabolism Regulation, PANTHER) loaded by `database.modules()`. |
 | `data/source_inputs/` | Observations, raw inputs, `source_registry.json`, terms snapshots. |
 | `data/input_manifest.json` | SHA-256 of files under `source_inputs/` (version label `0.3-source-inputs`). |
 | `data/acquisition.json` | Acquisition ledger (Reactome diagrams, reference paths, failures). |

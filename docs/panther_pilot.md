@@ -1,39 +1,32 @@
-# PANTHER Pathway pilot (CellDesigner)
+# PANTHER Pathway import (CellDesigner)
 
-Status: **acquisition blocked** from this environment (2026-11-11). No bulk import. No PANTHER modules added to the Atlas.
+Status: **imported** into the default Atlas as extension `panther` (2026-11-11).
 
-## Goal
+## Source
 
-Pilot 5–10 metabolic PANTHER pathways through the generic CellDesigner importer (`layout_atlas/celldesigner.py`) and report whether observed coordinates and reaction centre-line mapping work. Licence target: CC BY 4.0.
+- FTP CellDesigner CD4.1: https://data.pantherdb.org/ftp/pathway/3.4/CD4.1/
+- Terms: https://pantherdb.org/tou.jsp · Licence **CC BY 4.0**
+- Version: **3.4 / CD4.1**
+- Raw XML: `data/source_inputs/raw/panther/` (8 metabolic pathways in this first tranche)
 
-## Acquisition attempts
+Note: `www.pantherdb.org` HTML endpoints still return Cloudflare 403 from some environments; the **data.pantherdb.org** FTP tree is reachable and is the acquisition path used here.
 
-All live `pantherdb.org` / `archive.pantherdb.org` / `ftp.pantherdb.org` endpoints returned **HTTP 403** with a Cloudflare challenge page (`Just a moment…`, ~5–45 KB HTML), including:
+## Identity mapping
 
-- Pathway list and diagram pages
-- Guessed SBML URLs such as `/pathway/resource/P00051.sbml`, `/pathway/sbml.jsp?acc=P00051`
-- Pathway zip mirrors under archive / data hosts
+PANTHER species names are plain labels (e.g. `Glucose`), not `Label[compartment]`. The generic CellDesigner importer resolves them through `layout_atlas/identity_labels.py`, which uses the existing BiGG↔ChEBI tables in `data/identifier_bridge.json` plus metabolite display names from the public example models. Composite glyph labels (e.g. `2 NADH + 2 H+`) stay unresolved; those reactions are excluded rather than invented.
 
-Automated browsers (Chrome headless, Playwright with system Chrome, curl_cffi browser impersonation, cloudscraper) did not clear the challenge (only `__cf_bm` cookie; body remained the interstitial). Wayback Machine had no archived SBML payloads for the probed resource URLs. BioModels / EuropePMC / Zenodo / OSF / Pathway Commons searches did not yield redistributable PANTHER CellDesigner SBML files.
+## Decode totals (8 maps)
 
-No authentic PANTHER SBML was saved under `/tmp/panther_pilot/` (only challenge HTML).
+| | Count |
+|---|---:|
+| Glyph aliases with centres | **362** |
+| SBML reactions | 113 |
+| Decoded non-branch centre-lines | **92** |
+| Explicitly excluded | 21 |
+| Atlas modules | **238** |
 
-## Decode / mapping findings
+Build: `python3 layout_atlas/panther_library.py`. Modules load by default via `database.modules()`.
 
-**Not exercised on PANTHER files** — none were obtained. The generic importer remains in place for a future re-run:
+## Provenance
 
-- `celldesigner.parse` / `celldesigner.decode` read CellDesigner SBML species aliases (bounds → glyph centres) and non-branch reaction extensions (`baseReactant` / `baseProduct` + `editPoints`).
-- Callers supply `source` / `license` / attribution metadata; there is no MicroMap- or PANTHER-specific branch.
-
-## Outcome
-
-| Item | Result |
-|---|---|
-| Files downloaded | 0 |
-| Modules imported into Atlas | 0 (pilot only; no bulk) |
-| Coordinates / reaction mapping on PANTHER | Unknown until SBML can be fetched |
-| Recommended follow-up | Re-run the pilot from a network that can pass the pantherdb.org Cloudflare check; decode 5–10 metabolic pathways; decide on default Atlas inclusion only after that report |
-
-## Licence note
-
-PANTHER Pathway content is advertised as CC BY 4.0. It is **not** redistributed here until acquisition and decode are confirmed.
+Per-file SHA-256, version, licence and attribution: `data/extensions/panther/SOURCE.json` and `data/source_inputs/source_registry.json`.

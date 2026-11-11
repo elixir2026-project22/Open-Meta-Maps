@@ -36,9 +36,19 @@ ATTRIBUTION = {
         'Metabolism Regulation gallery (CC BY 4.0); '
         'https://metabolismregulation.github.io/gallery/'
     ),
+    'panther': (
+        'PANTHER Pathway CellDesigner maps (CC BY 4.0); '
+        'https://data.pantherdb.org/ftp/pathway/3.4/CD4.1/'
+    ),
 }
 
-DEFAULT_EXTENSIONS = ('brenda', 'human_maps', 'wikipathways_geometry', 'metabolismregulation')
+DEFAULT_EXTENSIONS = (
+    'brenda',
+    'human_maps',
+    'wikipathways_geometry',
+    'metabolismregulation',
+    'panther',
+)
 
 DDL = '''
 CREATE TABLE IF NOT EXISTS modules(

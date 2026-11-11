@@ -5,12 +5,15 @@ CellDesigner4 extension specification and cd2sbgnml GeometryUtils. Unsupported
 branch/anchor clipping is explicitly excluded, not replaced with invented paths.
 
 Generic importer: callers pass source / licence / name / species metadata.
+Species identities prefer Label[compartment]; otherwise the shared
+identity_labels bridge (BiGG/ChEBI from public models) resolves plain labels.
 """
 import re
 import xml.etree.ElementTree as ET
 from collections import Counter, defaultdict
 
 from core import *
+import identity_labels
 
 
 def canonical(label):
@@ -18,20 +21,37 @@ def canonical(label):
     return m[1] + '@' + m[2] if m else None
 
 
-def parse(path):
-    """Parse a CellDesigner SBML document into species, aliases and reactions."""
+def parse(path, resolve_identities=True):
+    """Parse a CellDesigner SBML document into species, aliases and reactions.
+
+    When resolve_identities is True (default), plain species names are mapped
+    through identity_labels (existing BiGG/ChEBI bridge). Set False to keep the
+    strict Label[compartment]-only behaviour.
+    """
     root = ET.parse(path).getroot()
     species, aliases, reactions, issues = {}, {}, [], Counter()
+    index = identity_labels.label_index() if resolve_identities else None
     for e in root.iter():
         tag = local(e)
         if tag == 'species' and e.tag.startswith('{http://www.sbml.org/sbml/'):
-            species[e.get('id')] = dict(id=e.get('id'), name=e.get('name', ''), identity=canonical(e.get('name', '')), sbml_compartment=e.get('compartment'))
+            name = e.get('name', '')
+            comp_id = e.get('compartment') or 'local'
+            if resolve_identities:
+                identity, meta = identity_labels.resolve_label(name, compartment=comp_id if comp_id != 'default' else 'local', index=index)
+                issues['identity_' + meta.get('status', 'unknown')] += 1
+            else:
+                identity, meta = canonical(name), dict(status='label_compartment_only')
+            species[e.get('id')] = dict(id=e.get('id'), name=name, identity=identity, identity_meta=meta, sbml_compartment=e.get('compartment'))
         elif tag == 'speciesAlias':
             b = next((c for c in e if local(c) == 'bounds'), None)
             if b is None:
                 issues['alias_without_bounds'] += 1
                 continue
             aliases[e.get('id')] = dict(species=e.get('species'), bounds={k: float(b.get(k, 0)) for k in ('x', 'y', 'w', 'h')}, observed=True)
+    for aid, alias in list(aliases.items()):
+        if alias['species'] not in species:
+            issues['alias_species_missing'] += 1
+            del aliases[aid]
     for e in root.iter():
         if local(e) != 'reaction' or not e.tag.startswith('{http://www.sbml.org/sbml/'):
             continue
@@ -74,6 +94,24 @@ def parse(path):
                               reversibility_origin='explicit' if reversible is not None else 'SBML_L2_default_true',
                               glyph_links=refs, core_aliases=sorted(set(core)), paths=paths))
     return dict(species=species, aliases=aliases, reactions=reactions, issues=dict(issues))
+
+
+def equation_matches(rx, target):
+    """True when a CellDesigner reaction equation matches a GEM reaction's metabolites."""
+    if not rx.get('equation_numeric_complete'):
+        return False
+    sc = {chem(k): v for k, v in rx.get('coefficients', {}).items()}
+    tc = {chem(k): float(v) for k, v in (target.get('metabolites') or {}).items()}
+    if not sc or set(tc) != set(sc):
+        return False
+    # allow a global scale factor (same / reversed recording)
+    keys = sorted(sc)
+    if not keys:
+        return False
+    factor = tc[keys[0]] / sc[keys[0]] if sc[keys[0]] else None
+    if factor is None or not np.isfinite(factor) or abs(factor) < 1e-12:
+        return False
+    return all(abs(tc[k] - sc[k] * factor) < 1e-8 for k in keys)
 
 
 def local_to_global(start, end, points):
