@@ -94,11 +94,12 @@ Share of edges longer than 3× median length is 0.13–0.41 on GEMs. Worst edges
 currency or biomass spokes.
 
 - **e_coli_core:** `R_BIOMASS_Ecoli_core_w_GAM` ↔ `M_nadp_c` / `M_nadph_c` / `M_nadh_c` / `M_nad_c`
-  (≈5.6–6.0× median). Crossing hotspots also list `BIOMASS_Ecoli_core_w_GAM`, `GLUN`, `PPS`.
-- **iIT341:** `M_h_c` ↔ `R_SERt2r` / `R_PSD_HP` / `R_PSSA_HP` (≈16×); densest crossing window
-  includes `BIOMASS_HP_published` (104 crossings involving that reaction).
-- **iCH360:** `M_nadph_c` ↔ `R_EAR181y` / `R_3OAR181`; densest window dominated by `Biomass`
-  (142 crossings).
+  (≈5.6–6.0× median). Densest true 400 px window: 19 algorithm crossings (e.g. `ACALD` / PTS).
+- **iIT341:** `M_h_c` ↔ `R_SERt2r` / `R_PSD_HP` / `R_PSSA_HP` (≈16×); densest 400 px window
+  has 85 algorithm crossings (`C140SN` / `C160SN` / …); a nearby window still lists
+  `BIOMASS_HP_published` (46).
+- **iCH360:** `M_nadph_c` ↔ `R_EAR181y` / `R_3OAR181`; densest windows still dominated by
+  biomass / completion spokes (recompute after the window-count fix before quoting a number).
 - **Mycoplasma:** `M_pi_c` / `M_atp_c` ↔ `R_Coabc` / `R_SPMDabc` (≈22–25×); hotspot around
   `Biomass`, `PTRC*`, `TYRTRS`.
 
