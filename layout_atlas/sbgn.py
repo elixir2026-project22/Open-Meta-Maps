@@ -100,7 +100,7 @@ def _normalize_ident(uri):
     uri = unquote(uri.strip())
     if uri.startswith('#'):
         return None
-    # identifiers.org/CHEBI:58165 or .../chebi/58165
+    # identifiers.org/CHEBI:58165 (CURIE form) or .../chebi/58165 (slash form)
     m = re.search(r'identifiers\.org/([^/\s]+)/([^/\s?#]+)', uri, re.I)
     if m:
         ns, val = m.group(1).lower(), m.group(2)
@@ -118,6 +118,25 @@ def _normalize_ident(uri):
             return f'RHEA:{val}'
         if ns in ('kegg.compound', 'kegg.reaction'):
             return f'{ns}:{val}'
+        return f'{ns}:{val}'
+    m = re.search(
+        r'identifiers\.org/(CHEBI|chebi|RHEA|rhea|ec-code|EC|uniprot|ncbigene|hgnc\.symbol)[:_]([^/\s?#]+)',
+        uri, re.I,
+    )
+    if m:
+        ns, val = m.group(1).lower(), m.group(2)
+        if ns in ('chebi',):
+            return f'chebi:{val.replace("CHEBI:", "").replace("chebi:", "")}'
+        if ns == 'rhea':
+            return f'RHEA:{val}'
+        if ns in ('ec-code', 'ec'):
+            return f'ec-code:{val}'
+        if ns == 'uniprot':
+            return f'uniprot:{val}'
+        if ns == 'ncbigene':
+            return f'ncbigene:{val}'
+        if ns == 'hgnc.symbol':
+            return f'hgnc.symbol:{val}'
         return f'{ns}:{val}'
     m = re.search(r'obo/CHEBI[_:](\d+)', uri, re.I)
     if m:
@@ -374,6 +393,14 @@ def decode(
                 refs.setdefault('rhea', []).append(ident.split(':', 1)[-1])
             elif ident.lower().startswith('ec-code:'):
                 refs.setdefault('ec-code', []).append(ident.split(':', 1)[-1])
+        # Unique Rhea match from participant ChEBI equations (canonical_ids)
+        try:
+            from canonical_ids import match_rhea
+            hits = match_rhea(dict(coefficients=coefficients))
+            if hits:
+                refs['rhea'] = sorted(set(refs.get('rhea') or []) | set(hits))
+        except Exception:
+            pass
         path_pts = []
         for ent, arc in bag['substrates'] + bag['products']:
             if arc.get('points'):

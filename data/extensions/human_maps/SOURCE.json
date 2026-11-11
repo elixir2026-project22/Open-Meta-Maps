@@ -11,5 +11,7 @@
   "import_policy": "official escher/ JSON only via database.escher_diagram + diagram_modules; SVG/BY-SA excluded",
   "by_sa_note": "Companion SVG exports under the Human-maps repository embed Creative Commons Attribution-ShareAlike (CC BY-SA) metadata and are NOT imported. The official escher/ JSON maps that feed database.escher_diagram are CC BY 4.0; Atlas modules and SOURCE provenance record CC-BY-4.0 for those JSON inputs only.",
   "access_date": "2026-11-11",
-  "license_scope": "official escher/ JSON maps only"
+  "license_scope": "official escher/ JSON maps only",
+  "reaction_namespace": "human.gem",
+  "canonicalization": "Human-GEM reactions.tsv crosswalk → bigg.reaction / metanetx.reaction / rhea when annotated; MAR kept under human.gem"
 }

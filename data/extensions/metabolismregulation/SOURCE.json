@@ -9,7 +9,7 @@
   "access_date": "2026-11-11",
   "maps": 22,
   "modules": 423,
-  "families": 48,
+  "families": 47,
   "admitted_to_open_core": true,
   "partition": "open_core",
   "import_policy": "gallery + atlas-downloads SBGN-ML via layout_atlas/sbgn.py + database.diagram_modules",
@@ -336,5 +336,6 @@
     "url": "https://metabolismregulation.github.io/about/"
   },
   "decode_failures": [],
-  "excluded_modules": 0
+  "excluded_modules": 0,
+  "canonicalization": "Unique Rhea matches via participant ChEBI equations; native sbgn.process retained"
 }
