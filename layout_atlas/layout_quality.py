@@ -54,6 +54,27 @@ def expert_geometry(blocks, scene):
 from collections import defaultdict as _dd
 
 CELL = 200.0
+REGION_WINDOW = 400.0
+REGION_STRIDE = 200.0
+
+
+def _region_window_keys(x, y, x0, y0):
+    """Indices (kx, ky) of 400 px windows (stride 200) that contain (x, y).
+
+    Window (kx, ky) covers ``[x0 + 200·kx, x0 + 200·kx + 400) × [y0 + 200·ky, …)``,
+    matching the rectangle drawn in the tool UI.  An event at x belongs to
+    ``k ∈ {⌊(x−x0)/200⌋, ⌊(x−x0)/200⌋ − 1}`` (and likewise for y).
+    """
+    fx = int((x - x0) // REGION_STRIDE)
+    fy = int((y - y0) // REGION_STRIDE)
+    keys = []
+    for kx in (fx - 1, fx):
+        for ky in (fy - 1, fy):
+            wx0 = x0 + kx * REGION_STRIDE
+            wy0 = y0 + ky * REGION_STRIDE
+            if wx0 <= x < wx0 + REGION_WINDOW and wy0 <= y < wy0 + REGION_WINDOW:
+                keys.append((kx, ky))
+    return keys
 
 
 def _grid_add(grid, idx, lo, hi):
@@ -160,7 +181,8 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, str
     for k, (a, b) in enumerate(zip(seg_a, seg_b)):
         _grid_add(grid_s, k, np.minimum(a, b), np.maximum(a, b))
     cross = dict(algorithm_algorithm=0, algorithm_expert=0, expert_expert=0, same_reaction=0, same_reaction_expert=0)
-    cross_points, per_edge_cross = [], _dd(int)
+    # ``cross_points`` is capped for the issues payload; ``all_cross_events`` keeps every location for region windows.
+    cross_points, all_cross_events, per_edge_cross = [], [], _dd(int)
     for k, (a, b) in enumerate(zip(seg_a, seg_b)):
         i = seg_edge[k]
         cand = np.array(sorted(c for c in _grid_query(grid_s, np.minimum(a, b), np.maximum(a, b)) if seg_edge[c] > i), dtype=int)
@@ -175,8 +197,10 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, str
                     both_expert = edges[i]['expert'] and edges[j]['expert']
                     cross['same_reaction_expert' if both_expert else 'same_reaction'] += 1
                     per_edge_cross[i] += 1; per_edge_cross[j] += 1
+                    ev = dict(kind='same_reaction_expert' if both_expert else 'same_reaction', reactions=[edges[i]['rid']], metabolites=[edges[i]['met'], edges[j]['met']], x=round(float(pt[0]), 1), y=round(float(pt[1]), 1))
+                    all_cross_events.append(ev)
                     if len(cross_points) < max_issues:
-                        cross_points.append(dict(kind='same_reaction_expert' if both_expert else 'same_reaction', reactions=[edges[i]['rid']], metabolites=[edges[i]['met'], edges[j]['met']], x=round(float(pt[0]), 1), y=round(float(pt[1]), 1)))
+                        cross_points.append(ev)
                 continue
             if set(edges[i]['ends']) & set(edges[j]['ends']):
                 continue
@@ -184,8 +208,10 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, str
             kindc = 'expert_expert' if ei and ej else ('algorithm_algorithm' if not ei and not ej else 'algorithm_expert')
             cross[kindc] += 1
             per_edge_cross[i] += 1; per_edge_cross[j] += 1
+            ev = dict(kind=kindc, reactions=[edges[i]['rid'], edges[j]['rid']], x=round(float(pt[0]), 1), y=round(float(pt[1]), 1))
+            all_cross_events.append(ev)
             if len(cross_points) < max_issues:
-                cross_points.append(dict(kind=kindc, reactions=[edges[i]['rid'], edges[j]['rid']], x=round(float(pt[0]), 1), y=round(float(pt[1]), 1)))
+                cross_points.append(ev)
     # ---- obstacles on the final curves (algorithm connections only)
     node_hits, label_hits, hit_points = 0, 0, []
     for e in algo:
@@ -246,35 +272,37 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, str
     all_len = np.array([float(np.sum(np.hypot(*np.diff(e['pts'], axis=0).T))) for e in edges]) if edges else np.zeros(1)
     mids = np.array([[n['x'], n['y']] for n in nodes.values() if n.get('node_type') == 'midmarker'], float)
     spacing = float(np.median(cKDTree(mids).query(mids, k=2)[0][:, 1])) if len(mids) > 2 else 60.0
-    # ---- worst local regions (400 px windows, stride 200)
+    # ---- worst local regions (400 px windows, stride 200; counted area == drawn box)
+    # Crossings here match the Connection-crossings headline: algorithm×algorithm and algorithm×expert only
+    # (same-reaction and expert×expert are tracked elsewhere, not in these windows).
     allx = centres[:, 0]; ally = centres[:, 1]
     windows = []
     if len(centres):
         x0, y0 = float(allx.min()), float(ally.min())
-        events = [(c['x'], c['y'], 'crossing', c['reactions']) for c in cross_points if c['kind'] != 'expert_expert'] + \
+        region_cross_kinds = ('algorithm_algorithm', 'algorithm_expert')
+        events = [(c['x'], c['y'], 'crossing', c['reactions']) for c in all_cross_events if c['kind'] in region_cross_kinds] + \
                  [(h['x'], h['y'], 'obstacle', [h['reaction']]) for h in hit_points] + \
                  [(float(centres[i][0]), float(centres[i][1]), 'node_overlap', []) for i, _ in node_overlap]
         mid_pts = [(float(np.mean(e['pts'][:, 0])), float(np.mean(e['pts'][:, 1]))) for e in edges]
         cells = _dd(lambda: dict(crossings=0, obstacles=0, node_overlaps=0, edges=0, reactions=set()))
         for x, y, what, rs in events:
-            for ox in (0, 1):
-                for oy in (0, 1):
-                    key = (int((x - x0) // 400) - ox + 1, int((y - y0) // 400) - oy + 1)
-                    c = cells[key]
-                    c['crossings' if what == 'crossing' else 'obstacles' if what == 'obstacle' else 'node_overlaps'] += 1
-                    c['reactions'].update(rs)
+            for key in _region_window_keys(x, y, x0, y0):
+                c = cells[key]
+                c['crossings' if what == 'crossing' else 'obstacles' if what == 'obstacle' else 'node_overlaps'] += 1
+                c['reactions'].update(rs)
         for x, y in mid_pts:
-            for ox in (0, 1):
-                for oy in (0, 1):
-                    cells[(int((x - x0) // 400) - ox + 1, int((y - y0) // 400) - oy + 1)]['edges'] += 1
+            for key in _region_window_keys(x, y, x0, y0):
+                cells[key]['edges'] += 1
         ranked = sorted(cells.items(), key=lambda kv: (-(kv[1]['crossings'] + kv[1]['obstacles'] + kv[1]['node_overlaps']), -kv[1]['edges'], kv[0]))
         taken = []
-        for (gx, gy), c in ranked:
-            cx, cy = x0 + gx * 400 - 200 + 200, y0 + gy * 400 - 200 + 200
+        for (kx, ky), c in ranked:
+            wx, wy = x0 + kx * REGION_STRIDE, y0 + ky * REGION_STRIDE
+            cx, cy = wx + REGION_WINDOW / 2.0, wy + REGION_WINDOW / 2.0
             if c['crossings'] + c['obstacles'] + c['node_overlaps'] == 0 or any(abs(cx - tx) < 300 and abs(cy - ty) < 300 for tx, ty in taken):
                 continue
             taken.append((cx, cy))
-            windows.append(dict(x=round(cx - 200, 1), y=round(cy - 200, 1), w=400, h=400, crossings=c['crossings'], obstacle_hits=c['obstacles'], node_overlaps=c['node_overlaps'],
+            windows.append(dict(x=round(wx, 1), y=round(wy, 1), w=int(REGION_WINDOW), h=int(REGION_WINDOW),
+                                crossings=c['crossings'], obstacle_hits=c['obstacles'], node_overlaps=c['node_overlaps'],
                                 edges=c['edges'], reactions=sorted(c['reactions'])[:10]))
             if len(windows) == 5:
                 break
@@ -329,7 +357,10 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, str
             crossing_density=dict(worst_window_crossings=windows[0]['crossings'] if windows else 0),
             orientation=ori, composition=comp, structure_continuity=continuity),
         worst_regions=windows,
-        note='computed from the final map.json; crossings are counted on sampled final curves, source-split; structure continuity scores reused expert structures on the final geometry')
+        note='computed from the final map.json; crossings are counted on sampled final curves, source-split; '
+             'worst_regions use uncapped algorithm×algorithm and algorithm×expert crossings in true 400 px / stride-200 boxes '
+             '(same as Connection crossings; same-reaction and expert×expert not counted there); '
+             'structure continuity scores reused expert structures on the final geometry')
     issues = dict(isolated_reactions=outlier_rows, crossings=cross_points, obstacle_hits=hit_points, curve_anomalies=anomalies, worst_regions=windows,
                   node_overlaps=[dict(x=round(float(centres[i][0]), 1), y=round(float(centres[i][1]), 1)) for i, _ in node_overlap][:max_issues],
                   split_structures=[d for d in continuity.get('details') or [] if d.get('components', 1) > 1][:max_issues])
