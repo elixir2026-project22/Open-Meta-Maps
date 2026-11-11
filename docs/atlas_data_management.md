@@ -8,37 +8,40 @@ Status: 2026-11-11. How extracted layouts are stored and registered. Not legal a
 |---|---|
 | `data/open_core.sqlite` | Redistributable Atlas (tracked). Tables: `maps`, `modules`, `reactions`, `reviews`, `retained_observations`. Open-core modules: Escher (in-repo `escher_cutter`) + Reactome + WikiPathways semantic. |
 | `data/atlas.sqlite` | Runtime working copy (gitignored). Copied from `open_core.sqlite` on first run (`core.py`). |
-| `data/extensions/*/modules.json.gz` | Default extensions (BRENDA, Human-maps, WikiPathways geometry, Metabolism Regulation, PANTHER) loaded by `database.modules()`. |
-| `data/atlas_registry.json` | Machine-readable build/registry summary (counts, licences, input manifest and source-registry hashes). |
+| `data/extensions/*/modules.json.gz` | Default extensions (BRENDA, Human-maps, WikiPathways geometry, Metabolism Regulation, PANTHER) loaded by `database.modules()`. Units exist under `extensions/units/` but are **not** in the default load. |
+| `data/atlas_registry.json` | Machine-readable build/registry summary (counts, licences, per-source extraction methods, input manifest and source-registry hashes). |
 | `data/source_inputs/` | Observations, raw inputs, `source_registry.json`, crosswalks, terms snapshots. |
 | `data/input_manifest.json` | SHA-256 of files under `source_inputs/` (version label `0.3-source-inputs`). |
 | `data/acquisition.json` | Acquisition ledger (Reactome diagrams, reference paths, failures). |
 | `data/packages.json` | Optional release packages (`atlas-full` only). |
 
-`database.build()` rebuilds `atlas.sqlite` from the in-repo Escher cutter, WikiPathways GPML, Reactome archive, and non-Escher observations (geometry-only WikiPathways). `layout_atlas/escher_rebuild.py` surgically replaces open-core Escher rows.
+`database.build()` rebuilds `atlas.sqlite` from the in-repo Escher cutter, WikiPathways GPML, Reactome archive, and non-Escher observations (geometry-only WikiPathways). `layout_atlas/escher_rebuild.py` surgically replaces open-core Escher rows. `atlas_registry.normalize_open_core()` fills provenance (including `extraction`) without recutting windows.
 
-## Provenance on records
-
-### Maps
+## Provenance on every map and module
 
 Open-core and extension map payloads carry `source`, `license`, `source_sha256`, `species`, `lineage`, `name`, `provenance_status`, `attribution`, `layout_origin`, `version`, and `atlas_schema_version` when normalized. Escher and WikiPathways maps also carry `url` / `source_path` when the registry row is known. Reactome maps take URL/version from `acquisition.json` during normalization.
 
-### Modules
-
-Every module payload duplicates the indexed columns and includes `license`, `source_sha256`, `original_instance`, `layout_origin`, `atlas_schema_version`, `core_family`, `variant`, and `geometry_fingerprint`.
-
-**Extraction provenance** (Stage A/C schema) on cut modules:
+Every module payload duplicates the indexed columns and includes `license`, `source_sha256`, `original_instance`, `layout_origin`, `atlas_schema_version`, `core_family`, `variant`, `geometry_fingerprint`, and an **`extraction`** block:
 
 ```json
 "extraction": {
-  "method": "escher_community_windows",
+  "method": "diagram_modules",
   "version": "atlas-extraction-1",
-  "parameters": {"max_roots": "all", "window_sizes": [1, 2, 4, 8, 12, 24, 40]},
-  "counts": {"source_events": 95, "modules": 332, "coverage": 1.0}
+  "parameters": {"max_roots": 24, "window_sizes": [1, 2, 4, 8, 12, 24]},
+  "counts": {"source_events": 95, "modules": 144, "reactions_covered": 79, "coverage": 0.8316}
 }
 ```
 
-Community Escher modules use `method: escher_community_windows`. Extension SOURCE.json files record cutter / import policy strings for BRENDA, Human-maps, WikiPathways geometry, Metabolism Regulation, and PANTHER.
+| Method | Used for | Notes |
+|---|---|---|
+| `escher_community_windows` | Open-core Escher (`escher_cutter`) | All roots; sizes 1–40; reproducible |
+| `diagram_modules` | Reactome, WikiPathways semantic, Human-maps, Metabolism Regulation, PANTHER | BFS windows; parameters recorded |
+| `geometry_modules` | WikiPathways geometry extension | Same cutter over metabolite–metabolite GPML edges |
+| `brenda_library.extract` | BRENDA extension | Singletons, pairs, windows, components |
+| `units_library.decompose` | Units extension (companion layer) | Non-overlapping 3–12 reaction units |
+| `legacy_observations` | Remaining `from_legacy` path (geometry-only observations) | `version: unreproducible`, `inferred: true` |
+
+Registry `extraction.by_source` summarises method, parameters, map/module counts per source.
 
 ### Reaction identifiers
 
@@ -60,9 +63,15 @@ Remap tooling: `layout_atlas/canonical_ids.py`. Crosswalk: `data/source_inputs/c
 - `reviews`: schema present, unused (0 rows).
 - `retained_observations`: exclusion ledger (`disconnected_visible_core`, `outside_v03_size_bound`, `reactome_replaced_by_fixed_v97`).
 
+## Retrieval ranking
+
+`retrieval.select` keeps coverage (`2 × matched reactions`) as the dominant term and does not change `selection_score` for compactness. Among biochemical proposals (`biol ≥ 1`), compactness (`matched_nodes / bbox_area`) breaks ties, and when two same-source proposals match the **same** reaction set only the denser drawing is kept — pathway maps beat sprawling whole-model windows without dropping coverage.
+
+`layout_priority` still demotes `possibly_automatic` layouts (BRENDA).
+
 ## Source registry
 
-`data/source_inputs/source_registry.json` is the file-level ledger. Every row records **licence**, **URL**, **version**, **retrieval date**, and **extraction method**. Coverage includes WikiPathways, Escher, Metabolism Regulation, PANTHER, Reactome (archive-v97 diagrams), BRENDA (remote SVG + SOURCE hash), Human-maps (130 official Escher JSON paths), and the Human-GEM reaction crosswalk.
+`data/source_inputs/source_registry.json` is the file-level ledger. Every row records **licence**, **URL**, **version**, **retrieval date**, and **extraction method**. Coverage includes WikiPathways, Escher, Metabolism Regulation, PANTHER, Reactome (archive-v97 diagrams), BRENDA, Human-maps, and the Human-GEM reaction crosswalk.
 
 ## WikiPathways layout
 
@@ -72,8 +81,12 @@ Pipeline: `layout_atlas/wikipathways_rebuild.py` over GPML in the **20261110** s
 - Geometry-only windows live in `data/extensions/wikipathways_geometry/` so sqlite stays under GitHub’s size limit; both load by default via `database.modules()`.
 - Licence: WikiPathways content is **CC0**; Atlas stamps `CC0-1.0`.
 
-## Reasonable follow-ups
+## Validation
+
+`atlas_registry.validate()` fails on missing licence / source / `layout_origin` / `extraction.method` / schema version / dangling module `map_id`.
+
+## Follow-ups
 
 1. Keep `data/atlas_registry.json` and the About page in sync after every Atlas rebuild.
-2. Raise PANTHER chemical retrieval when richer reaction annotations are available (do not invent unmapped identifiers).
-3. Validation test: fail on missing licence / source / `extraction` / `layout_origin` / schema version on newly written modules.
+2. Stage B: coverage-preserving recut (size-scaled roots, independent windows only) and units as a companion layer.
+3. Raise PANTHER chemical retrieval when richer reaction annotations are available (do not invent unmapped identifiers).

@@ -9,5 +9,12 @@
   "partition": "open_core",
   "admitted_to_open_core": true,
   "modules": 11703,
-  "pathways": 194
+  "pathways": 194,
+  "extraction": {
+    "methods": {
+      "brenda_library.extract": 11703
+    },
+    "modules": 11703,
+    "atlas_schema_version": 1
+  }
 }

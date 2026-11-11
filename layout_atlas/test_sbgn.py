@@ -35,6 +35,8 @@ def main():
     mods = database.diagram_modules(d)
     assert mods, 'diagram_modules returned nothing'
     assert all(m['license'] == 'CC-BY-4.0' for m in mods)
+    assert all((m.get('extraction') or {}).get('method') == 'diagram_modules' for m in mods)
+    assert mods[0]['extraction']['counts']['modules'] == len(mods)
     # All gallery files decode without raising
     n_events = 0
     for p in files:

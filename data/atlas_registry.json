@@ -3,8 +3,8 @@
   "generated": "2026-11-11",
   "open_core": {
     "path": "data/open_core.sqlite",
-    "sha256": "d31a9785b1538fed2001b5a30e0441a5a23809359c6cca7606d3c632a51c185c",
-    "bytes": 66555904,
+    "sha256": "6955b18dbc834b180a447ebe676f54e8574ab4bdb7559e476a033389f0445c21",
+    "bytes": 67805184,
     "maps": {
       "escher": 22,
       "reactome": 86,
@@ -44,7 +44,14 @@
       "partition": "open_core",
       "admitted_to_open_core": true,
       "modules": 11703,
-      "pathways": 194
+      "pathways": 194,
+      "extraction": {
+        "methods": {
+          "brenda_library.extract": 11703
+        },
+        "modules": 11703,
+        "atlas_schema_version": 1
+      }
     },
     "human_maps": {
       "source": "human_maps",
@@ -59,7 +66,16 @@
       "import_policy": "official escher/ JSON only via database.escher_diagram + diagram_modules; SVG/BY-SA excluded",
       "by_sa_note": "Companion SVG exports under the Human-maps repository embed Creative Commons Attribution-ShareAlike (CC BY-SA) metadata and are NOT imported. The official escher/ JSON maps that feed database.escher_diagram are CC BY 4.0; Atlas modules and SOURCE provenance record CC-BY-4.0 for those JSON inputs only.",
       "access_date": "2026-11-11",
-      "license_scope": "official escher/ JSON maps only"
+      "license_scope": "official escher/ JSON maps only",
+      "reaction_namespace": "human.gem",
+      "canonicalization": "Human-GEM reactions.tsv crosswalk → bigg.reaction / metanetx.reaction / rhea when annotated; MAR kept under human.gem",
+      "extraction": {
+        "methods": {
+          "diagram_modules": 8540
+        },
+        "modules": 8540,
+        "atlas_schema_version": 1
+      }
     },
     "wikipathways_geometry": {
       "source": "wikipathways",
@@ -68,7 +84,13 @@
       "license_url": "https://www.wikipathways.org/terms.html",
       "modules": 29673,
       "quality": "geometry_only",
-      "extraction": "diagram_modules BFS windows over metabolite–metabolite GPML edges",
+      "extraction": {
+        "methods": {
+          "geometry_modules": 29673
+        },
+        "modules": 29673,
+        "atlas_schema_version": 1
+      },
       "admitted_to_open_core": true,
       "partition": "open_core",
       "note": "Stored as extension to keep open_core.sqlite under GitHub size limits; loaded by default with database.modules()",
@@ -85,7 +107,7 @@
       "access_date": "2026-11-11",
       "maps": 22,
       "modules": 423,
-      "families": 48,
+      "families": 47,
       "admitted_to_open_core": true,
       "partition": "open_core",
       "import_policy": "gallery + atlas-downloads SBGN-ML via layout_atlas/sbgn.py + database.diagram_modules",
@@ -412,7 +434,15 @@
         "url": "https://metabolismregulation.github.io/about/"
       },
       "decode_failures": [],
-      "excluded_modules": 0
+      "excluded_modules": 0,
+      "canonicalization": "Unique Rhea matches via participant ChEBI equations; native sbgn.process retained",
+      "extraction": {
+        "methods": {
+          "diagram_modules": 423
+        },
+        "modules": 423,
+        "atlas_schema_version": 1
+      }
     },
     "panther": {
       "source": "panther",
@@ -556,22 +586,201 @@
       },
       "decode_failures": [],
       "excluded_modules": 0,
-      "identity_layer": "layout_atlas/identity_labels.py"
+      "identity_layer": "layout_atlas/identity_labels.py",
+      "canonicalization": "Native celldesigner.reaction retained; no unique Rhea equation match for current ChEBI coverage",
+      "extraction": {
+        "methods": {
+          "diagram_modules": 238
+        },
+        "modules": 238,
+        "atlas_schema_version": 1
+      }
     }
   },
   "input_manifest": {
     "version": "0.3-source-inputs",
-    "files": 2364,
-    "sha256": "d01d7794b1aeffa51ce7dd5e5548a4447b19079547308179055c8fa300ca29d7"
+    "files": 2367,
+    "sha256": "d373e2daa694dc57d72c0b03fec1eab01ab47b57a98b81af93be19c163ea5fb2"
   },
   "source_registry": {
     "path": "data/source_inputs/source_registry.json",
-    "sha256": "718173fcb757ed108a6ee74e81b763682ee6c995607649f5f75235d034e92dc7",
+    "sha256": "38266bb3c5ff3934b890ae7c3651cf46d78c68e620a2c7e2680495430061018a",
     "wikipathways_release": "20261110"
   },
   "extraction": {
-    "pipeline": "database.build / escher_cutter / diagram_modules / from_legacy",
     "atlas_schema_version": 1,
-    "escher": "escher_community_windows (atlas-extraction-1)"
+    "pipeline": "database.build / escher_cutter / diagram_modules / from_legacy",
+    "cutters": {
+      "escher_community_windows": "escher_cutter (all roots; sizes 1–40)",
+      "diagram_modules": "database.diagram_modules BFS windows",
+      "geometry_modules": "diagram_modules over metabolite–metabolite GPML edges",
+      "brenda_library.extract": "BRENDA SVG cutter (singletons, pairs, windows, components)",
+      "units_library.decompose": "non-overlapping structure units (companion layer)",
+      "legacy_observations": "from_legacy (geometry-only observations; unreproducible)"
+    },
+    "by_source": {
+      "brenda": {
+        "method": "brenda_library.extract",
+        "methods": {
+          "brenda_library.extract": 11703
+        },
+        "parameters": {
+          "window_sizes": [
+            4,
+            8,
+            12,
+            24
+          ],
+          "pair_degree_cap": 8,
+          "max_module_nodes": 100,
+          "include_singletons": true,
+          "include_components": true
+        },
+        "version": "atlas-extraction-1",
+        "inferred": false,
+        "maps": 193,
+        "modules": 11703,
+        "reactions_covered": 2848
+      },
+      "escher": {
+        "method": "escher_community_windows",
+        "methods": {
+          "escher_community_windows": 13047
+        },
+        "parameters": {
+          "max_roots": "all",
+          "window_sizes": [
+            1,
+            2,
+            4,
+            8,
+            12,
+            24,
+            40
+          ],
+          "link": "primary_segment_entity",
+          "plus_full_component": true,
+          "max_reactions": 40,
+          "max_nodes": 100
+        },
+        "version": "atlas-extraction-1",
+        "inferred": false,
+        "maps": 22,
+        "modules": 13047,
+        "reactions_covered": 4267
+      },
+      "human_maps": {
+        "method": "diagram_modules",
+        "methods": {
+          "diagram_modules": 8540
+        },
+        "parameters": {
+          "max_roots": 24,
+          "window_sizes": [
+            1,
+            2,
+            4,
+            8,
+            12,
+            24
+          ]
+        },
+        "version": "atlas-extraction-1",
+        "inferred": false,
+        "maps": 130,
+        "modules": 8540,
+        "reactions_covered": 3938
+      },
+      "metabolismregulation": {
+        "method": "diagram_modules",
+        "methods": {
+          "diagram_modules": 423
+        },
+        "parameters": {
+          "max_roots": 24,
+          "window_sizes": [
+            1,
+            2,
+            4,
+            8,
+            12,
+            24
+          ]
+        },
+        "version": "atlas-extraction-1",
+        "inferred": false,
+        "maps": 22,
+        "modules": 423,
+        "reactions_covered": 106
+      },
+      "panther": {
+        "method": "diagram_modules",
+        "methods": {
+          "diagram_modules": 238
+        },
+        "parameters": {
+          "max_roots": 24,
+          "window_sizes": [
+            1,
+            2,
+            4,
+            8,
+            12,
+            24
+          ]
+        },
+        "version": "atlas-extraction-1",
+        "inferred": false,
+        "maps": 8,
+        "modules": 238,
+        "reactions_covered": 57
+      },
+      "reactome": {
+        "method": "diagram_modules",
+        "methods": {
+          "diagram_modules": 3405
+        },
+        "parameters": {
+          "max_roots": 24,
+          "window_sizes": [
+            1,
+            2,
+            4,
+            8,
+            12,
+            24
+          ]
+        },
+        "version": "atlas-extraction-1",
+        "inferred": false,
+        "maps": 86,
+        "modules": 3405,
+        "reactions_covered": 955
+      },
+      "wikipathways": {
+        "method": "geometry_modules",
+        "methods": {
+          "diagram_modules": 1245,
+          "geometry_modules": 29673
+        },
+        "parameters": {
+          "max_roots": 24,
+          "window_sizes": [
+            1,
+            2,
+            4,
+            8,
+            12,
+            24
+          ],
+          "underlying": "diagram_modules over metabolite–metabolite GPML edges"
+        },
+        "version": "atlas-extraction-1",
+        "inferred": false,
+        "maps": 934,
+        "modules": 30918,
+        "reactions_covered": 10261
+      }
+    }
   }
 }

@@ -6,6 +6,40 @@ from core import *
 from semantics import rhea_index,parse_gpml
 from atlas_registry import SCHEMA_VERSION, ensure_schema, pack, unpack, connect_path
 
+# Extraction provenance shared with escher_cutter (method / version / parameters / counts).
+EXTRACTION_VERSION = 'atlas-extraction-1'
+WINDOW_SIZES = (1, 2, 4, 8, 12, 24)
+DEFAULT_MAX_ROOTS = 24
+
+def extraction_block(method, parameters, counts=None, *, version=EXTRACTION_VERSION, inferred=False):
+ """Provenance block written onto every map and module produced by a cutter."""
+ block=dict(method=method, version=version, parameters=dict(parameters or {}))
+ if counts is not None: block['counts']=dict(counts)
+ if inferred: block['inferred']=True
+ return block
+
+def extraction_counts(modules, source_events=None):
+ """Per-map cutter counts: modules emitted, distinct reactions covered, coverage."""
+ covered=set()
+ for m in modules:
+  rxns=m.get('reactions') or []
+  if rxns:
+   for r in rxns: covered.add(r.get('key') or r.get('id'))
+  else:
+   for n in m.get('nodes') or []:
+    if n.get('role')=='reaction': covered.add(n['key'])
+ n_cov=len(covered)
+ n_events=source_events if source_events is not None else (n_cov or None)
+ coverage=round(n_cov/n_events, 4) if n_events else None
+ return dict(source_events=n_events, modules=len(modules), reactions_covered=n_cov, coverage=coverage)
+
+def attach_extraction(modules, method, parameters, source_events=None, *, version=EXTRACTION_VERSION, inferred=False):
+ """Stamp the same per-map extraction block on every module in the cut."""
+ counts=extraction_counts(modules, source_events=source_events)
+ block=extraction_block(method, parameters, counts, version=version, inferred=inferred)
+ for m in modules: m['extraction']=block
+ return block
+
 def connect():
  """Open the runtime Atlas DB (atlas.sqlite), ensuring schema v1 objects exist."""
  DATA.mkdir(exist_ok=True)
@@ -76,9 +110,15 @@ def from_legacy(m):
   for a,b in m.get('core_edges',[]):
    rk=a if a.startswith('r:') else b;mk=b if rk==a else a;c=rx[rk[2:]]['coefficients'].get(entities[mk],0);edges.append(dict(a=a,b=b,flow='substrate' if c<0 else 'product',coefficient=c))
   reactions=[dict(r,key='r:'+str(r['key']),references={'bigg.reaction':[r['id']]} if m['source']=='escher' else {'reactome':[r['id']]}) for r in m['reactions']];size=m['size']
- return dict(id=m['id'],source=m['source'],species=m['species'],lineage=m['lineage'],map_id=m['map_id'],name=m['name'],license=m['license'],quality=m['quality'],size=size,nodes=nodes,edges=edges,reactions=reactions,attachments=m['attachments'],ports=m.get('all_participant_ports',m['ports']),legacy_id=m['id'],source_sha256=m['source_sha256'],review_status='not_required',original_instance='data/source_inputs/module_observations.json.gz')
+ # Remaining observation path (WikiPathways geometry_only); community Escher uses escher_cutter.
+ extraction=extraction_block(
+  'legacy_observations',
+  dict(size_cap=40, node_cap=100, original_instance='data/source_inputs/module_observations.json.gz'),
+  version='unreproducible', inferred=True,
+ )
+ return dict(id=m['id'],source=m['source'],species=m['species'],lineage=m['lineage'],map_id=m['map_id'],name=m['name'],license=m['license'],quality=m['quality'],size=size,nodes=nodes,edges=edges,reactions=reactions,attachments=m['attachments'],ports=m.get('all_participant_ports',m['ports']),legacy_id=m['id'],source_sha256=m['source_sha256'],review_status='not_required',original_instance='data/source_inputs/module_observations.json.gz',extraction=extraction)
 
-def diagram_modules(d,max_roots=24):
+def diagram_modules(d,max_roots=DEFAULT_MAX_ROOTS,window_sizes=WINDOW_SIZES):
  # d has explicit visible glyphs and semantic or annotated event records.
  g=nx.Graph();rx={r['key']:r for r in d['events']}
  def core_visible(r):
@@ -87,10 +127,10 @@ def diagram_modules(d,max_roots=24):
   g.add_node(k,role='reaction')
   for mk in core_visible(r):g.add_node(mk,role='metabolite');g.add_edge(k,mk)
  subsets=set()
- roots=sorted(rx);step=max(1,len(roots)//max_roots)
+ roots=sorted(rx);step=max(1,len(roots)//max_roots) if max_roots else 1
  for root in roots[::step]:
-  order=[k for k in nx.bfs_tree(g,root) if k in rx][:24]
-  for n in (1,2,4,8,12,24):
+  order=[k for k in nx.bfs_tree(g,root) if k in rx][:max(window_sizes)]
+  for n in window_sizes:
    if len(order)>=n:subsets.add(tuple(sorted(order[:n])))
  out=[]
  for rs in sorted(subsets):
@@ -112,6 +152,7 @@ def diagram_modules(d,max_roots=24):
    outside=sorted(n for n in g[k] if n not in rs)
    if outside:ports.append(dict(key=k,outside_reactions=outside,scope='available_source_map'))
   out.append(dict(id=uid([d['id'],rs]),source=d['source'],species=d['species'],lineage=d['lineage'],map_id=d['id'],name=d['name'],license=d['license'],quality='semantic_transfer',size=len(rs),nodes=nodes,edges=edges,reactions=selected,attachments=[],ports=ports,source_sha256=d['source_sha256'],review_status='not_required',original_instance=d.get('path'),biochemical_visibility='complete reference reaction; partial observed drawing'))
+ attach_extraction(out, 'diagram_modules', dict(max_roots=max_roots, window_sizes=list(window_sizes)), source_events=len(rx))
  return out
 
 def wp_diagram(d,rhea):

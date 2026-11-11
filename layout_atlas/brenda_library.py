@@ -238,6 +238,7 @@ def extract(d):
             if len(rs) >= 2:
                 subsets.add(rs)
         title = d['pathways'][slug].get('title') or slug
+        pathway_mods = []
         for rs in sorted(subsets):
             keys = set(rs)
             for r in rs:
@@ -268,7 +269,7 @@ def extract(d):
                      for k in sorted(keys - set(rs)) if uses[k] - set(rs)]
             attach = [dict(alias='m:' + c, reaction='r:' + r, kind='cofactor', name=nodes[c]['name'], ligand_id=nodes[c].get('ligand_id'),
                            xy=[nodes[c]['x'], nodes[c]['y']]) for r in rs for c in cof.get(r, [])]
-            modules.append(dict(
+            pathway_mods.append(dict(
                 id=uid(['brenda-instance', slug, rs]), source='brenda', species='pathway-level; organism assignment not in source SVG',
                 lineage='brenda:' + slug, map_id=uid(['brenda-pathway', slug]), name=title, pathway_slug=slug,
                 license='CC-BY-4.0', source_citation=cite, partition='open_core', admitted_to_open_core=True,
@@ -277,6 +278,13 @@ def extract(d):
                 source_sha256=d['source_sha256'], original_instance=f'BRENDA_map.svg#pw_{slug}', original_coordinates=original,
                 review_status='not_required', compartment_evidence='none in source SVG',
                 biochemical_visibility='reaction and ligand identifiers per node; no stoichiometry or direction in the SVG'))
+        database.attach_extraction(
+            pathway_mods, 'brenda_library.extract',
+            dict(window_sizes=list(CONFIG['window_sizes']), pair_degree_cap=CONFIG['pair_degree_cap'],
+                 max_module_nodes=CONFIG['max_module_nodes'], include_singletons=True, include_components=True),
+            source_events=len(rx),
+        )
+        modules.extend(pathway_mods)
     return modules, excluded
 
 

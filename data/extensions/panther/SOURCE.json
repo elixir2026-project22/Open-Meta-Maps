@@ -141,5 +141,12 @@
   "decode_failures": [],
   "excluded_modules": 0,
   "identity_layer": "layout_atlas/identity_labels.py",
-  "canonicalization": "Native celldesigner.reaction retained; no unique Rhea equation match for current ChEBI coverage"
+  "canonicalization": "Native celldesigner.reaction retained; no unique Rhea equation match for current ChEBI coverage",
+  "extraction": {
+    "methods": {
+      "diagram_modules": 238
+    },
+    "modules": 238,
+    "atlas_schema_version": 1
+  }
 }

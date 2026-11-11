@@ -157,6 +157,10 @@ def build(version=VERSION, access_date=None):
             layout_origin=dict(LAYOUT_ORIGIN_EXPERT), version=version, url=d.get('url'),
             path=d.get('path'), format='celldesigner', events=len(d['events']), glyphs=len(d['glyphs']),
             modules=len(mods), audit=d.get('audit'),
+            extraction=(mods[0].get('extraction') if mods else database.extraction_block(
+                'diagram_modules', dict(max_roots=24, window_sizes=[1, 2, 4, 8, 12, 24]),
+                dict(source_events=len(d['events']), modules=0, reactions_covered=0, coverage=None),
+            )),
         ))
         per_map.append(dict(source_id=d.get('source_id'), name=d['name'], sha256=d['source_sha256'],
                             events=len(d['events']), glyphs=len(d['glyphs']), modules=len(mods),

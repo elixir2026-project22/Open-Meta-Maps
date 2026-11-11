@@ -543,6 +543,12 @@ def build():
         ids = sorted(m['id'] for m in built)
         for m in built:
             m['sibling_units'] = [x for x in ids if x != m['id']]
+        database.attach_extraction(
+            built, 'units_library.decompose',
+            dict(min_size=CONFIG['min_size'], max_size=CONFIG['max_size'],
+                 max_appendix_total=CONFIG['max_appendix_total'], ring_rule=CONFIG['ring_rule']),
+            source_events=len(rks),
+        )
         mods.extend(built)
         sizes = [m['size'] for m in built]
         per_map.append(dict(map=d['id'], source=d['source'], name=d['name'], core_reactions=len(rks), units=len(built), unit_reactions=sum(sizes), orphan_reactions=len({r for o in orphans for r in o}),
