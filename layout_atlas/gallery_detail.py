@@ -89,7 +89,7 @@ function go2(){R=(window.__S&&__S[k]||{})[id];D=window.CATALOG||[];
  if(!R){app.textContent=tr('This module is not a variant representative; only representatives have detail pages (see display_ids.json).');return}
  var b=$('back');if(document.referrer&&/\\/catalog(_units)?\\//.test(document.referrer))b.onclick=function(e){e.preventDefault();history.back()};
  document.title=R.name+' · Open Meta Maps';document.querySelector('main h1').innerHTML='<span class="dn">'+esc(R.name)+'</span>';
- render();document.addEventListener('langchange',function(){try{render()}catch(e){fail(esc(String(e&&e.message||e)))}});
+ render();
  if(window.CATALOG)famReady();else load('search-index.js',famReady)}
 function famReady(){D=window.CATALOG||[];fam=D.filter(function(d){return d[9]===R.fid}).sort(function(a,b){return a[15]-b[15]});famDone=true;fillFam();fillGroup();fillRed()}
 var ent={},rx={},nodeIdx={},GEO=null,famDone=false,tok=0,TB=[],LS='s';try{LS=localStorage.getItem('ls')==='o'?'o':'s'}catch(e){}

@@ -1,15 +1,13 @@
 """Shared offline page template (inline CSS, no network) for every generated HTML index."""
 import html,os,re
 from core import ROOT,OUT
-from i18n_zh import ZH_EXTRA
 
 CSS='''
 :root{color-scheme:light dark;--bg:#f4f7f8;--panel:#fff;--ink:#17323d;--mute:#5b7480;--line:#dbe4e8;--accent:#0b7285;--accent-ink:#fff;--soft:#e7f1f3;--edge:#9baab4;--rx:#b66b28;--met:#167e83;--shadow:0 1px 2px rgba(20,50,60,.06),0 4px 14px rgba(20,50,60,.05)}
 @media(prefers-color-scheme:dark){:root{--bg:#10191d;--panel:#182429;--ink:#e3edf0;--mute:#90a8b2;--line:#2b3b42;--accent:#52b7c9;--accent-ink:#06242b;--soft:#1f3239;--edge:#6d818b;--rx:#e09a5a;--met:#4fc1c6;--shadow:none}}
-html.lp body{visibility:hidden}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,"Segoe UI","PingFang SC","Hiragino Sans GB","Noto Sans CJK SC",sans-serif}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
 a{color:var(--accent);text-underline-offset:2px}
 a:hover{text-decoration-thickness:2px}
 .top{background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
@@ -104,32 +102,13 @@ button.lnk{font:inherit;background:none;border:0;color:var(--accent);cursor:poin
 .tabs{display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--line);margin-bottom:12px}.tabs button{font:inherit;font-size:14px;background:none;border:0;border-bottom:3px solid transparent;padding:6px 14px;cursor:pointer;color:var(--mute)}.tabs button[aria-selected=true]{color:var(--ink);border-color:var(--accent);font-weight:600}
 .vbox.tall{height:min(65vh,560px)}.vbox svg{touch-action:none;cursor:grab}.note.err{border-color:#c0392b;background:rgba(192,57,43,.1)}.lead2{color:var(--mute);max-width:90ch}
 .pdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}ul.checks{list-style:none;padding:0;margin:6px 0}ul.checks li{padding:2px 0}ul.checks .ok b{color:#2e7d32}ul.checks .bad b{color:#c0392b}details.det{margin:12px 0}details.det>summary{cursor:pointer;color:var(--accent)}
-.lang{margin-left:auto;font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
 @media(max-width:640px){.top{position:static}.grp+.grp{border-left:0;padding-left:0}.top nav{flex-direction:column;gap:4px}main{padding:20px 14px 40px}.top .in{padding:8px 14px}th,td{padding:8px 10px}.grid{grid-template-columns:1fr}.filters label,.filters input,.filters select{width:100%}}
 '''
 
 GROUPS=[('',[('Map Generator','layout_atlas/results/tool/index.html','tool'),('About / Provenance','layout_atlas/results/about/index.html','about')])]
 NAV=[x for _,g in GROUPS for x in g]
 
-ZH={'Map Generator':'地图生成器','About / Provenance':'关于 / 来源','Tool':'工具','Layout tool':'布局工具','Home':'首页','Module catalog':'模块图录','Database':'数据库','Experiments & applications':'实验与应用','Drawing-geometry experiment':'绘图几何实验','Module composition search':'模块组合搜索','Cases':'案例',
-'Home page':'首页',
-'module instances':'模块实例','structural families':'结构家族','layout variants':'布局变体','catalog pages':'图录页数','species':'物种','singleton families':'单例家族',
-'Module instances by source':'按来源统计的模块实例','Layout variants by source':'按来源统计的布局变体','Provenance and licence':'来源与许可','Search the variants':'检索布局变体','Browse all pages':'浏览全部页面',
-'Search':'搜索','Source':'来源','Species':'物种','Quality':'质量','Min size':'最小规模','Max size':'最大规模','Reset':'重置','Module':'模块','Size':'规模','Instances':'实例数','Licence':'许可',
-'Filter this page':'筛选本页','Overview':'总览','Full provenance':'完整来源记录','Catalog':'图录','all':'全部','Family':'家族','Variant':'变体','Source map':'来源图',
-'Layout atlas v0.3':'布局图录 v0.3','Downloads:':'下载：','Reactions':'反应数','Compartments':'区室','Files':'文件','View':'视图','Target':'目标','Case':'案例',
-'Chemical coverage':'化学覆盖','Module coverage':'模块覆盖','Label overlaps':'标签重叠','Straight crossings':'直线交叉','Accepted change':'是否采用',
-'Browse':'浏览','Expert maps and current results':'专家图与当前结果','Six-model full-scope results':'六模型完整范围结果','Data and verification':'数据与验证','Model / all views':'模型／全部视图','Module coverage / reactions':'模块覆盖／总反应','Strict equation coverage':'严格方程覆盖','Data':'数据','Skeleton and mapping':'骨架与映射',
-'Current research report':'当前研究报告','P0 drawing improvements':'P0绘图改进实测','Context composition':'上下文组合实测','Old vs new drawing':'新旧绘图对照','Improvement and failure cases':'改善与失败案例','Run instructions':'运行说明',
-'Expert E. coli core map':'专家 E. coli 核心图','Current context-composition result':'当前上下文组合实验','Data directory':'数据目录说明','Results directory':'结果目录说明','Automatic verification':'自动验收结果','Paired completion scores':'配对补全逐案例得分',
-'Open Meta Maps':'Open Meta Maps'}
-LANG_JS='''<script>(function(){var Z=%s,O=new WeakMap(),A=[],zh=false,b=document.getElementById('lang');
-window.isZh=function(){return zh};window.tr=function(s,v){var o=(zh&&Z[s]!==undefined)?Z[s]:s;if(v)for(var k in v)o=o.split('{'+k+'}').join(v[k]);return o};
-function walk(n){document.querySelectorAll('[data-zh]').forEach(function(e){if(e._en===undefined)e._en=e.textContent});var w=document.createTreeWalker(n,NodeFilter.SHOW_TEXT),x;while(x=w.nextNode()){if(x.parentNode.closest&&x.parentNode.closest('[data-zh]'))continue;var k=x.nodeValue.trim();if(Z[k]!==undefined){O.set(x,x.nodeValue);A.push(x)}}}
-function dz(z){document.querySelectorAll('[data-zh]').forEach(function(e){if(e._en===undefined)e._en=e.textContent;e.textContent=z?e.getAttribute('data-zh'):e._en})}
-function attrs(z){['placeholder','title','aria-label','alt'].forEach(function(a){document.querySelectorAll('['+a+']').forEach(function(e){var p='_'+a;if(e[p]===undefined)e[p]=e.getAttribute(a);var dz2=e.getAttribute('data-'+a+'-zh');e.setAttribute(a,z?(dz2||(Z[e[p]]!==undefined?Z[e[p]]:e[p])):e[p])})})}
-function apply(z){zh=z;document.documentElement.lang=z?'zh':'en';b.value=z?'zh':'en';A.forEach(function(x){var o=O.get(x),k=o.trim();x.nodeValue=z?o.replace(k,Z[k]):o});attrs(z);dz(z);try{localStorage.setItem('lang',z?'zh':'en')}catch(e){}document.documentElement.classList.remove('lp');document.dispatchEvent(new Event('langchange'))}
-walk(document.body||document.documentElement);b.onchange=function(){apply(b.value==='zh')};var s=null;try{s=localStorage.getItem('lang')}catch(e){}if(!s)s=/^zh/i.test(navigator.language||'')?'zh':'en';apply(s==='zh')})();</script>'''
+TR_JS='''<script>window.tr=function(s,v){var o=s;if(v)for(var k in v)o=o.split('{'+k+'}').join(v[k]);return o};</script>'''
 
 def rel(path,target):
     return os.path.relpath(ROOT/target,os.path.dirname(path)).replace(os.sep,'/')
@@ -139,28 +118,26 @@ def esc(x):return html.escape(str(x))
 def page(path,title,body,section='',lead='',lang='en',script='',crumbs=None,footer='',zh=None):
     """Complete HTML document; `path` is the output file, used for relative site links."""
     path=str(path)
-    title_zh=None
-    if isinstance(title,tuple):title,title_zh=title
+    if isinstance(title,tuple):title=title[0]
     def link(l,h,key):return f'<a href="{rel(path,h)}"'+(' aria-current="page"' if key==section else '')+f'>{l}</a>'
     links=''.join('<div class="grp">'+(f'<span class="gl">{g}</span>' if g else '')+''.join(link(*x) for x in items)+'</div>' for g,items in GROUPS)
-    top=f'<header class="top"><div class="in"><a class="brand" href="{rel(path,"index.html")}">Open Meta Maps</a><nav aria-label="Site">{links}</nav><select class="lang dn" id="lang" aria-label="Language"><option value="en">English</option><option value="zh">中文</option></select></div></header>'
+    top=f'<header class="top"><div class="in"><a class="brand" href="{rel(path,"index.html")}">Open Meta Maps</a><nav aria-label="Site">{links}</nav></div></header>'
     crumb=''
     if crumbs:crumb='<div class="crumbs">'+' › '.join((f'<a href="{h}">'+(bi(*l) if isinstance(l,tuple) else esc(l))+'</a>' if h else (bi(*l) if isinstance(l,tuple) else esc(l))) for l,h in crumbs)+'</div>'
     lead_html=f'<p class="lead">{lead}</p>' if lead else ''
-    z=dict(ZH);z.update(ZH_EXTRA);z.update(zh or {});z[title]=z.get(title,title);import json;lang_js=LANG_JS%json.dumps(z,ensure_ascii=False).replace('</','<\\/')
     foot=f'<footer>{footer}</footer>' if footer else ''
-    return (f'<!doctype html><html lang="{lang}"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><script>try{{var l=localStorage.getItem("lang");if(l?l==="zh":/^zh/i.test(navigator.language||"")){{document.documentElement.classList.add("lp");setTimeout(function(){{document.documentElement.classList.remove("lp")}},1500)}}}}catch(e){{}}</script>'
-            f'<title>{esc(title if title=="Open Meta Maps" else title+" · Open Meta Maps")}</title><style>{CSS}</style>{top}<main>{crumb}<h1>{bi(title,title_zh) if title_zh else esc(title)}</h1>{lead_html}{body}</main>{foot}{script}{lang_js}</html>')
+    return (f'<!doctype html><html lang="{lang}"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
+            f'<title>{esc(title if title=="Open Meta Maps" else title+" · Open Meta Maps")}</title><style>{CSS}</style>{top}<main>{crumb}<h1>{esc(title)}</h1>{lead_html}{body}</main>{foot}{script}{TR_JS}</html>')
 
 def write(path,title,body,**kw):
     path.write_text(page(path,title,body,**kw))
 
-def bi(en,zh):
-    return f'<span data-zh="{esc(zh)}">{esc(en)}</span>'
+def bi(en,zh=None):
+    """Return escaped English label (zh ignored; kept for call-site compatibility)."""
+    return esc(en)
 
 def stat(value,label,zh=None):
-    lab=bi(label,zh) if zh else esc(label)
-    return f'<div class="stat"><b>{value}</b><span>{lab}</span></div>'
+    return f'<div class="stat"><b>{value}</b><span>{esc(label)}</span></div>'
 
 def table(headers,rows,raw=False):
     """rows of cells; cells are escaped unless raw=True."""

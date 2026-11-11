@@ -57,9 +57,9 @@ COMPLETION = 'spaced'  # 'spaced' (free nodes keep a minimum distance) | 'classi
 REACTION_STYLE = 'line'  # 'line' (reactions are lines between metabolites, like the curated maps) | 'marker' (earlier style: a dot per reaction)
 
 
-STEPS = [('parse', 'Parse the model', '解析模型'), ('map', 'Match library structures', '匹配库中的结构'),
-         ('select', 'Select structures', '选择结构'), ('skeleton', 'Build the skeleton', '搭建骨架'),
-         ('complete', 'Complete the map', '补全图'), ('report', 'Write the report', '生成报告')]
+STEPS = [('parse', 'Parse the model'), ('map', 'Match library structures'),
+         ('select', 'Select structures'), ('skeleton', 'Build the skeleton'),
+         ('complete', 'Complete the map'), ('report', 'Write the report')]
 SOURCE_COLORS = {'escher': '#128781', 'reactome': '#3d6fa3', 'wikipathways': '#8a5fb0', 'brenda': '#b04a4a', 'human_maps': '#2d6a8f', 'metabolismregulation': '#6b4f2a', 'panther': '#8a6b3d'}
 LEVEL_RANK = {'complete_equation': 0, 'reaction_reference': 1, 'partial_reference': 2, 'ec_topology': 3, 'geometry': 4}
 LEVEL_NAMES = {'complete_equation': 'complete_equation', 'reaction_reference': 'reference_supported', 'partial_reference': 'reference_supported',
@@ -67,9 +67,9 @@ LEVEL_NAMES = {'complete_equation': 'complete_equation', 'reaction_reference': '
 
 
 class Failure(Exception):
-    def __init__(self, code, en, zh):
+    def __init__(self, code, en):
         super().__init__(en)
-        self.code, self.en, self.zh = code, en, zh
+        self.code, self.en = code, en
 
 
 class Job:
@@ -83,7 +83,7 @@ class Job:
         self.state.setdefault('id', self.folder.name)
         self.state.setdefault('status', 'queued')
         self.state.setdefault('step', 'parse')
-        self.state.setdefault('steps', [dict(key=k, label_en=en, label_zh=zh, state='pending', seconds=None) for k, en, zh in STEPS])
+        self.state.setdefault('steps', [dict(key=k, label_en=en, state='pending', seconds=None) for k, en in STEPS])
         self.state.setdefault('progress', 0.0)
         self.state.setdefault('log', [])
         self.state.setdefault('warnings', [])
@@ -103,8 +103,8 @@ class Job:
         self.state['log'] = self.state['log'][-400:]
         self.save()
 
-    def warn(self, code, en, zh):
-        self.state['warnings'].append(dict(code=code, message_en=en, message_zh=zh))
+    def warn(self, code, en):
+        self.state['warnings'].append(dict(code=code, message_en=en))
         self.log('WARNING: ' + en)
 
     def step(self, key):
@@ -117,8 +117,8 @@ class Job:
                 self._step_started[key] = time.time()
         self.state['step'] = key
         self.state['status'] = 'running'
-        self.state['progress'] = round(([k for k, _, _ in STEPS].index(key)) / len(STEPS), 3)
-        self.log(dict((k, en) for k, en, _ in STEPS)[key])
+        self.state['progress'] = round(([k for k, _ in STEPS].index(key)) / len(STEPS), 3)
+        self.log(dict((k, en) for k, en in STEPS)[key])
 
     def finish(self):
         for s in self.state['steps']:
@@ -128,18 +128,18 @@ class Job:
         self.state['status'], self.state['progress'] = 'done', 1.0
         self.save()
 
-    def fail(self, code, en, zh):
+    def fail(self, code, en):
         for s in self.state['steps']:
             if s['state'] == 'running':
                 s['state'] = 'failed'
         self.state['status'] = 'failed'
-        self.state['error'] = dict(code=code, message_en=en, message_zh=zh)
+        self.state['error'] = dict(code=code, message_en=en)
         self.log('FAILED: ' + en)
 
-    def add_file(self, rel, title_en, title_zh, kind):
+    def add_file(self, rel, title_en, kind):
         p = self.folder / rel
         self.state['files'] = [f for f in self.state['files'] if f['name'] != rel] + [
-            dict(name=rel, title_en=title_en, title_zh=title_zh, kind=kind, bytes=p.stat().st_size)]
+            dict(name=rel, title_en=title_en, kind=kind, bytes=p.stat().st_size)]
         self.save()
 
 
@@ -147,7 +147,7 @@ class Job:
 def reject_unsafe_xml(path):
     head = Path(path).read_bytes()
     if re.search(rb'<!DOCTYPE|<!ENTITY', head, re.I):
-        raise Failure('unsafe_xml', 'The SBML file contains a DOCTYPE or ENTITY declaration, which is not accepted.', 'SBML 文件含有 DOCTYPE 或 ENTITY 声明，已拒绝。')
+        raise Failure('unsafe_xml', 'The SBML file contains a DOCTYPE or ENTITY declaration, which is not accepted.')
 
 
 def cobra_annotations(entry):
@@ -167,7 +167,7 @@ def cobra_annotations(entry):
 def normalize_model(model, job):
     for key in ('metabolites', 'reactions'):
         if not isinstance(model.get(key), list) or not model[key]:
-            raise Failure('bad_format', f'The model has no {key}.', f'模型里没有 {key}。')
+            raise Failure('bad_format', f'The model has no {key}.')
     for m in model['metabolites']:
         m['annotations'] = cobra_annotations(m)
         m.setdefault('compartment', 'unknown')
@@ -176,12 +176,11 @@ def normalize_model(model, job):
         r.setdefault('lower_bound', -1000.)
         r.setdefault('upper_bound', 1000.)
         if not isinstance(r.get('metabolites'), dict) or not r['metabolites']:
-            raise Failure('bad_format', f"Reaction {r.get('id')} has no stoichiometry.", f"反应 {r.get('id')} 没有化学计量。")
+            raise Failure('bad_format', f"Reaction {r.get('id')} has no stoichiometry.")
     ids = {m['id'] for m in model['metabolites']}
     unknown = {k for r in model['reactions'] for k in r['metabolites']} - ids
     if unknown:
-        raise Failure('bad_format', f'{len(unknown)} reaction participants are not declared as metabolites (e.g. {sorted(unknown)[0]}).',
-                      f'有 {len(unknown)} 个反应参与物没有在代谢物里声明（例如 {sorted(unknown)[0]}）。')
+        raise Failure('bad_format', f'{len(unknown)} reaction participants are not declared as metabolites (e.g. {sorted(unknown)[0]}).')
     model.setdefault('id', 'uploaded_model')
     # BiGG-style identifiers (glu__L_c, PGI): add the same bigg.* identifiers the fixed BiGG models are given, transparently.
     pattern = re.compile(r'^[A-Za-z0-9_]+_[a-z][a-z0-9]?$')
@@ -195,8 +194,7 @@ def normalize_model(model, job):
             if 'bigg.reaction' not in xrefs(r['annotations']):
                 r['annotations'].append(dict(qualifier='{http://biomodels.net/biology-qualifiers/}is', uri='http://identifiers.org/bigg.reaction/' + r['id']))
         if added:
-            job.warn('bigg_like_ids', 'Identifiers look like BiGG IDs; they were used as BiGG identifiers for matching (inferred, not annotated in the file).',
-                     '标识符看起来是 BiGG 风格，匹配时按 BiGG 标识符使用（由文件推断，并非文件里的注释）。')
+            job.warn('bigg_like_ids', 'Identifiers look like BiGG IDs; they were used as BiGG identifiers for matching (inferred, not annotated in the file).')
     return model
 
 
@@ -537,7 +535,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
                                 violated=[(r['canonical_metabolite_id'], r['attached_reaction_ids']) for r in broken][:20],
                                 moved=(instance_report or {}).get('protected_groups'))
         if broken:
-            raise Failure('protected_split', 'A protected group of connections was split (%d groups).' % len(broken), '受保护的局部连接被拆散（%d 组）。' % len(broken))
+            raise Failure('protected_split', 'A protected group of connections was split (%d groups).' % len(broken))
     node_overlap_kinds = instances_module.overlap_breakdown(scene) if INSTANCES == 'auto' else None
     if completion_report is not None:
         completion_report['attachment_rate_final'] = completion_context_module.attachment_rate(model, scene, currency(model), {rid for b in blocks for rid in b['reaction_ids']}, completion_skip)
@@ -918,7 +916,7 @@ def draw_global_map(job, model, selected, folder, prov_kinds, n_reactions, plan=
     try:
         with gl.deadline(GLOBAL_BUDGET_S):
             metric = draw_map(model, selected, folder / 'full', full_model=model, scalable=True, log=job.log, plan=plan)
-            for name, kind, en, zh in (('map.svg', 'svg', 'Completed map (global layout)', '补全图（全局布局）'), ('map.json', 'json', 'Completed map, Escher JSON', '补全图（Escher JSON）'), ('layout_issues.json', 'json', 'Layout issues (where the problems are)', '绘图问题位置清单')):
+            for name, kind, en in (('map.svg', 'svg', 'Completed map (global layout)'), ('map.json', 'json', 'Completed map, Escher JSON'), ('layout_issues.json', 'json', 'Layout issues (where the problems are)')):
                 (folder / name).write_bytes((folder / 'full' / name).read_bytes())
             if REACTION_STYLE == 'line':
                 import line_render
@@ -927,15 +925,13 @@ def draw_global_map(job, model, selected, folder, prov_kinds, n_reactions, plan=
                 (folder / 'map.svg').write_text(epv.recolor_svg((folder / 'map.svg').read_text(), prov_kinds))
     except Exception as e:  # includes the time budget
         GLOBAL_FAILURE = f'{type(e).__name__}: {str(e)[:200]}'
-        job.warn('global_failed', f'The global layout failed ({GLOBAL_FAILURE}); the map is built from tiled views instead.',
-                 f'全局布局失败（{GLOBAL_FAILURE}）；改用分视图平铺生成地图。')
+        job.warn('global_failed', f'The global layout failed ({GLOBAL_FAILURE}); the map is built from tiled views instead.')
         for name in ('map.svg', 'map.json'):
             (folder / name).unlink(missing_ok=True)
         return None
-    for name, kind, en, zh in (('map.svg', 'svg', 'Completed map (global layout)', '补全图（全局布局）'), ('map.json', 'json', 'Completed map, Escher JSON', '补全图（Escher JSON）')):
-        job.add_file(name, en, zh, kind)
-    job.warn('global_degraded', 'Global map without routing: connections are straight lines (structure edges keep their own lines or curves); long edges and crossings are not optimised yet.',
-             '全局地图未做路由：连线为直线（专家结构的边保留结构自己的线形或曲线）；长边和交叉尚未优化。')
+    for name, kind, en in (('map.svg', 'svg', 'Completed map (global layout)'), ('map.json', 'json', 'Completed map, Escher JSON')):
+        job.add_file(name, en, kind)
+    job.warn('global_degraded', 'Global map without routing: connections are straight lines (structure edges keep their own lines or curves); long edges and crossings are not optimised yet.')
     network = global_network_metrics(model, folder / 'map.json')
     job.state['views'] = []  # a global map has no separate views; the modules tab lists the structures
     job.save()
@@ -972,9 +968,9 @@ def run_job(folder):
         job.step('parse')
         upload = next(iter(sorted((folder / 'upload').glob('model.*'))), None)
         if upload is None:
-            raise Failure('bad_format', 'No uploaded model found.', '没有找到上传的模型。')
+            raise Failure('bad_format', 'No uploaded model found.')
         if upload.stat().st_size > LIMITS['max_bytes']:
-            raise Failure('too_large', 'The file is larger than 25 MB.', '文件超过 25 MB。')
+            raise Failure('too_large', 'The file is larger than 25 MB.')
         if upload.suffix.lower() == '.xml':
             reject_unsafe_xml(upload)
         try:
@@ -982,15 +978,14 @@ def run_job(folder):
         except Failure:
             raise
         except Exception as e:
-            raise Failure('bad_format', f'The file could not be read as SBML or COBRA JSON: {str(e)[:200]}', f'无法按 SBML 或 COBRA JSON 读取该文件：{str(e)[:200]}')
+            raise Failure('bad_format', f'The file could not be read as SBML or COBRA JSON: {str(e)[:200]}')
         model = normalize_model(model, job)
         if len(model['reactions']) > LIMITS['max_reactions']:
-            raise Failure('too_large', f"The model has {len(model['reactions'])} reactions (limit {LIMITS['max_reactions']}).", f"模型有 {len(model['reactions'])} 个反应（上限 {LIMITS['max_reactions']}）。")
+            raise Failure('too_large', f"The model has {len(model['reactions'])} reactions (limit {LIMITS['max_reactions']}).")
         coverage = annotation_coverage(model)
         job.log(f"Model {model['id']}: {len(model['reactions'])} reactions, {len(model['metabolites'])} metabolites; annotation coverage {coverage}")
         if coverage['bigg'] < .2 and coverage['rhea'] < .2 and coverage['ec'] < .2:
-            job.warn('few_annotations', 'Almost no reaction carries BiGG, Rhea or EC annotations; few structures can be matched by identity.',
-                     '几乎没有反应带 BiGG、Rhea 或 EC 注释，按标识匹配到的结构会很少。')
+            job.warn('few_annotations', 'Almost no reaction carries BiGG, Rhea or EC annotations; few structures can be matched by identity.')
         original = uid(model)
         g = model_graph(model)
         allids = {r['id'] for r in model['reactions']}
@@ -1032,8 +1027,7 @@ def run_job(folder):
             pools_ec.append(core_ec)
             job.log(f'EC candidates (open core): {einfo["candidates"]} found, screened against the equations: {ec_screening["open_core"]}')
         if libs['ec']:
-            job.warn('ec_extended', 'EC extended mode is on: structures matched only through a shared EC number are marked as functional layout suggestions, not as curated.',
-                     'EC 扩展模式已开启：仅通过相同 EC 号匹配的结构只标为“功能布局建议”，不算人工绘制来源。')
+            job.warn('ec_extended', 'EC extended mode is on: structures matched only through a shared EC number are marked as functional layout suggestions, not as curated.')
         for p in pools_strong + [p for pool in pools_ec for p in pool]:
             t = templates.get(p['template_id'])
             if t:
@@ -1126,7 +1120,7 @@ def run_job(folder):
         evidence_summary = epv.evidence_summary(provenance)
         job.log('Evidence: ' + ', '.join(f'{k} {v}' for k, v in evidence_summary['chemical_compatibility'].items()) + f"; identity revoked {evidence_summary['identity_revoked']}")
         dump(folder / 'reaction_provenance.json', list(provenance.values()))
-        job.add_file('reaction_provenance.json', 'Reaction provenance', '逐反应来源', 'json')
+        job.add_file('reaction_provenance.json', 'Reaction provenance', 'json')
         prov_kinds = {rid: v['provenance'] for rid, v in provenance.items()}
         prov_counts = Counter(prov_kinds.values())
         legend = [(k, prov_counts.get(k, 0)) for k in epv.KINDS]
@@ -1140,8 +1134,8 @@ def run_job(folder):
             render_skeleton_svg(model, blocks, containers, bridges, anchors, status, folder / 'skeleton.svg')
         else:
             grid_skeleton_svg(model, blocks, folder / 'skeleton.svg')
-        job.add_file('skeleton.svg', 'Skeleton (expert structures + bridges)', '骨架（专家结构 + 桥接）', 'svg')
-        job.add_file('skeleton.json', 'Skeleton data', '骨架数据', 'json')
+        job.add_file('skeleton.svg', 'Skeleton (expert structures + bridges)', 'svg')
+        job.add_file('skeleton.json', 'Skeleton data', 'json')
         try:
             skel_cards = []
             for b in sorted(blocks, key=lambda b: (-len(b['reaction_ids']), b['id'])):
@@ -1163,9 +1157,9 @@ def run_job(folder):
         map_note = None
         if len(allids) <= LIMITS['full_routed_max_reactions']:
             metric = draw_map(model, selected, folder / 'full', full_model=model)
-            for name, kind, en, zh in (('map.svg', 'svg', 'Completed map (routed)', '补全图（已布线）'), ('map.json', 'json', 'Completed map, Escher JSON', '补全图（Escher JSON）'), ('layout_issues.json', 'json', 'Layout issues (where the problems are)', '绘图问题位置清单')):
+            for name, kind, en in (('map.svg', 'svg', 'Completed map (routed)'), ('map.json', 'json', 'Completed map, Escher JSON'), ('layout_issues.json', 'json', 'Layout issues (where the problems are)')):
                 (folder / name).write_bytes((folder / 'full' / name).read_bytes())
-                job.add_file(name, en, zh, kind)
+                job.add_file(name, en, kind)
             if REACTION_STYLE == 'line':
                 import line_render
                 line_render.render_file(folder / 'map.json', folder / 'map.svg', prov_kinds)
@@ -1185,7 +1179,7 @@ def run_job(folder):
                     try:
                         vmetrics[v['id']] = draw_one_view(model, selected, {x['id']: x for x in views}, v['id'], folder)
                         done.append(v['id'])
-                        job.add_file(f"views/{v['id']}.svg", f"View {v['id']}", f"视图 {v['id']}", 'svg')
+                        job.add_file(f"views/{v['id']}.svg", f"View {v['id']}", 'svg')
                     except Exception as e:
                         failed.append(v['id'])
                         job.log(f"View {v['id']} failed: {str(e)[:120]}")
@@ -1195,20 +1189,19 @@ def run_job(folder):
                     job.state['progress'] = round(4 / 6 + (i + 1) / len(views) / 6, 3)
                     job.save()
                 if failed:
-                    job.warn('views_failed', f'{len(failed)} of {len(views)} views could not be drawn and are missing from the tiled map.', f'{len(views)} 个视图中有 {len(failed)} 个无法绘制，整图里缺少它们。')
+                    job.warn('views_failed', f'{len(failed)} of {len(views)} views could not be drawn and are missing from the tiled map.')
                 if done:
                     merge_tiles(model, folder, done, len(selected))
                     (folder / 'map.svg').write_text(epv.recolor_svg((folder / 'map.svg').read_text(), {}))
-                    for name, kind, en, zh in (('map.svg', 'svg', 'Completed map (tiled views, routed)', '补全图（分视图平铺，已布线）'), ('map.json', 'json', 'Completed map, Escher JSON', '补全图（Escher JSON）')):
-                        job.add_file(name, en, zh, kind)
+                    for name, kind, en in (('map.svg', 'svg', 'Completed map (tiled views, routed)'), ('map.json', 'json', 'Completed map, Escher JSON')):
+                        job.add_file(name, en, kind)
                 map_note = dict(kind='tiled_fallback' if LAYOUT == 'global' else 'tiled_views', requested_layout=LAYOUT, fallback_reason=(GLOBAL_FAILURE or None), views_drawn=len(done), views_total=len(views), views_failed=failed,
                                 metrics={k: sum((m.get(k) or 0) for m in vmetrics.values()) for k in ('node_overlap_pairs', 'label_overlap_pairs', 'straight_crossings')})
             else:
                 map_note = global_note
         else:
             job.log('Very large model: no whole map; views can be drawn on demand')
-            job.warn('no_whole_map', f'The model has more than {LIMITS["whole_map_max_reactions"]} reactions: only the skeleton is produced; draw individual views on demand.',
-                     f'模型反应数超过 {LIMITS["whole_map_max_reactions"]}：只生成骨架，视图请按需绘制。')
+            job.warn('no_whole_map', f'The model has more than {LIMITS["whole_map_max_reactions"]} reactions: only the skeleton is produced; draw individual views on demand.')
             map_note = dict(kind='skeleton_only', views_total=len(views))
 
         job.step('report')
@@ -1238,11 +1231,11 @@ def run_job(folder):
                                 reactions=b['reaction_ids'], match_level=b['match_level'], partition=b.get('partition', 'open_core'),
                                 provenance=dict(Counter(prov_kinds[r] for r in b['reaction_ids']))))
         dump(folder / 'modules.json', modules)
-        job.add_file('modules.json', 'Used structures', '使用的结构', 'json')
+        job.add_file('modules.json', 'Used structures', 'json')
         licenses = dict(policy='Per-module source licenses are preserved; research-partition content keeps its own terms.',
                         layout_sources=[{k: b.get(k) for k in ('id', 'template_id', 'map_id', 'source', 'lineage', 'license', 'partition', 'source_citation', 'source_sha256', 'original_instance')} for b in blocks])
         dump(folder / 'licenses.json', licenses)
-        job.add_file('licenses.json', 'Source licenses', '来源许可', 'json')
+        job.add_file('licenses.json', 'Source licenses', 'json')
         pending = sorted(r for r, s in status.items() if s == 'pending_algorithm')
         import orientation as orientation_report
         layout_quality_report = dict(orientation_mode=ORIENTATION, expert_geometry=(map_note or {}).get('expert_geometry'), final_geometry=(map_note or {}).get('layout_quality_final'))
@@ -1265,21 +1258,20 @@ def run_job(folder):
                       seconds=round(time.time() - job.t0, 1),
                       limits='Matching depends on the model annotations; the skeleton covers only reactions with an expert structure; completion is algorithmic.')
         dump(folder / 'report.json', report)
-        job.add_file('report.json', 'Report', '报告', 'json')
+        job.add_file('report.json', 'Report', 'json')
         job.state['summary'] = dict(model=report['model'] | dict(id=model['id']), annotation_coverage=coverage, covered=covered, provenance=dict(prov_counts), ec_screening=ec_screening, layout_quality=layout_quality_report,
                                     modules=dict(count=len(blocks), by_source=report['by_source']), map_kind=(map_note or {}).get('kind'), map_layout=dict(requested=(map_note or {}).get('requested_layout'), fallback_reason=(map_note or {}).get('fallback_reason'), degraded=(map_note or {}).get('degraded'), network=(map_note or {}).get('network')), seconds=report['seconds'])
         failed = [k for k, v in integrity.items() if v['passed'] is False]
         if failed:
-            job.fail('integrity', 'Integrity check failed: ' + ', '.join(failed) + '. The files were kept for inspection but must not be used.',
-                     '完整性检查未通过：' + '、'.join(failed) + '。文件已保留供检查，不能直接使用。')
+            job.fail('integrity', 'Integrity check failed: ' + ', '.join(failed) + '. The files were kept for inspection but must not be used.')
             return job.state['status']
         job.finish()
         job.log('Done')
     except Failure as f:
-        job.fail(f.code, f.en, f.zh)
+        job.fail(f.code, f.en)
     except Exception as e:  # keep the traceback in the log, show a short message
         job.log(traceback.format_exc()[-1500:])
-        job.fail('internal_error', f'Internal error: {str(e)[:200]}', f'内部错误：{str(e)[:200]}')
+        job.fail('internal_error', f'Internal error: {str(e)[:200]}')
     return job.state['status']
 
 
@@ -1314,15 +1306,15 @@ def draw_view(folder, view_id):
         for v in job.state['views']:
             if v['id'] == view_id:
                 v['state'] = 'done'
-        job.add_file(f'views/{view_id}.svg', f'View {view_id}', f'视图 {view_id}', 'svg')
-        job.add_file(f'views/{view_id}.json', f'View {view_id}, Escher JSON', f'视图 {view_id}（Escher JSON）', 'json')
+        job.add_file(f'views/{view_id}.svg', f'View {view_id}', 'svg')
+        job.add_file(f'views/{view_id}.json', f'View {view_id}, Escher JSON', 'json')
         job.log(f'View {view_id} drawn')
     except Exception as e:
         job.log(traceback.format_exc()[-1500:])
         for v in job.state['views']:
             if v['id'] == view_id:
                 v['state'] = 'none'
-        job.warn('view_failed', f'View {view_id} could not be drawn: {str(e)[:160]}', f'视图 {view_id} 无法绘制：{str(e)[:160]}')
+        job.warn('view_failed', f'View {view_id} could not be drawn: {str(e)[:160]}')
 
 
 if __name__ == '__main__':

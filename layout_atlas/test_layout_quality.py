@@ -107,7 +107,7 @@ def test_detailed_panel_keeps_goals_only():
     labels = [r["label"] for g in d["panel"]["groups"] for r in g["rows"]]
     assert "Local crossing hotspot" in labels
     assert "Blank space / space utilisation" in labels
-    # Cycle stays a detail row marked 待优化 / not yet optimised
+    # Cycle stays a detail row marked not yet optimised
     cycle_rows = [r for r in groups["structure_flow"]["rows"] if r["code"] == "cycle_circularity"]
     assert cycle_rows and cycle_rows[0]["stage"] == lq.STAGE_NOT_YET
     # Flow direction is debug-only (collapsed), never a main Structure & flow row
@@ -145,8 +145,7 @@ def test_svg_has_no_provenance_legend():
     import ec_provenance as epv
     import line_render
 
-    assert epv.LABELS["expert_derived"][0] == "Curated"
-    assert epv.LABELS["expert_derived"][1] == "人工绘制"
+    assert epv.LABELS["expert_derived"] == "Curated"
     assert not hasattr(epv, "legend_svg")
     data = _crossing_map()
     kinds = {r["bigg_id"]: "generated" for r in data[1]["reactions"].values()}
