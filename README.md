@@ -75,7 +75,7 @@ Layout quality and expert-geometry reuse are reported separately; exact matches,
 
 The default Atlas (`data/open_core.sqlite`, copied to `atlas.sqlite` on first run) integrates pathway knowledge from Escher maps, Human-maps, WikiPathways, Reactome and BRENDA. Source versions, hashes and licence evidence are in `data/source_inputs/`. Every original source is credited in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) together with the licence recorded for it; items whose licence is still to be confirmed are marked as such, see [docs/licensing_audit.md](docs/licensing_audit.md). BRENDA pathway modules (CC BY 4.0) are included by default; layout provenance is marked possibly automatic so expert Escher/WikiPathways/Reactome modules are preferred when equivalent.
 
-The repository software licence is **to be specified before the public release**; it is independent of the licences of the data.
+The software (source code) is released under the [MIT License](LICENSE). The data are licensed separately: the default Atlas combines CC0 and CC BY 4.0 sources, so the Atlas and the maps generated from it are distributed under **CC BY 4.0**, and reuse must keep the source attributions listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Documentation
 
