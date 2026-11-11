@@ -13,7 +13,7 @@ Core SQLite modules (checked by reading the module payloads), plus default exten
 | WikiPathways | 4,696 | CC0 | `source_inputs/terms/wikipathways.html` (CC0 waiver for content); snapshot **20261110** | OK |
 | Reactome | 3,405 | CC0 for data and derived files; CC BY 4.0 for pathway illustrations and artwork | `source_inputs/terms/reactome.html` | OK for layout data; if Reactome illustrations are ever added, CC BY 4.0 attribution is required |
 | Escher maps | 9,098 | CC0-1.0 | Escher community-maps repository `LICENSE` is CC0 | OK |
-| BRENDA pathway maps | 11,703 | CC BY 4.0 | https://www.brenda.dsmz.de/license.php; doi:10.1093/nar/gkaf1113 | OK (layout possibly automatic; retrieval deprioritises vs expert maps) |
+| BRENDA pathway maps | 11,703 | CC BY 4.0 | https://www.brenda.dsmz.de/license.php; doi:10.1093/nar/gkaf1113 | OK (layout possibly automatic; retrieval deprioritises vs curated community maps) |
 | Human-maps | 8,540 | CC BY 4.0 (JSON) | official `escher/` JSON only | OK — companion SVGs are CC BY-SA and are **not** imported |
 | Metabolism Regulation gallery | 423 | CC BY 4.0 | https://metabolismregulation.github.io/about/; SBGN-ML under `source_inputs/raw/metabolismregulation/` | OK (hand-drawn; attribution required) |
 | PANTHER Pathway | 238 | CC BY 4.0 | `data.pantherdb.org` CD4.1 CellDesigner; `source_inputs/raw/panther/` | OK (labels bridged via BiGG/ChEBI identity layer) |

@@ -26,7 +26,7 @@ skipped in `evaluate` and should be read from compose’s `layout_issues.json` /
 
 ## Metric table
 
-Maps composed with `--source-paths` (Bézier/`expert` layout is the default; 2026-11-11). `geom_*` are from
+Maps composed with `--source-paths` (Bézier/`curated` layout is the default; 2026-11-11). `geom_*` are from
 `layout_quality` (Bezier-aware). Straight-line gdMetriX crossings are omitted for larger GEMs.
 
 | model | runtime_s | participant_consistency | overlapping_pairs | overlap_area_share | long_edge_share | species_in_other_compartment | aspect_ratio | geom_crossings | geom_label_overlaps | stress | procrustes | knn_preservation |
@@ -55,7 +55,7 @@ Machine-readable copy: [`docs/evaluation/summary.csv`](evaluation/summary.csv).
 
 ## Structure continuity
 
-Computed from the final `map.json` for each reused expert structure (≥2 reactions): share of
+Computed from the final `map.json` for each reused curated structure (≥2 reactions): share of
 reaction pairs that share a non-currency metabolite and lie within **3× median reaction spacing**,
 plus how many structures split into more than one geometric piece. Scale-free; no model-specific
 thresholds. Shown on the tool Layout quality card (EN + zh).
@@ -66,7 +66,7 @@ thresholds. Shown on the tool Layout quality card (EN + zh).
 | iIT341 | 0.906 | 85 | 4 | 235 |
 | iMM904 | 0.893 | 131 | 7 | 484 |
 
-Expert structures stay mostly contiguous on these maps; residual splits are sparse (≈5% of
+Curated structures stay mostly contiguous on these maps; residual splits are sparse (≈5% of
 structures on the larger GEMs) and are listed under `layout_issues.json` → `split_structures`.
 
 ## Where we are weakest (with examples)
@@ -129,10 +129,10 @@ No model-specific special cases; no thresholds tuned to one map. Implement on a 
 branch, not here.
 
 1. **Reaction-axis orientation as a hard local constraint**  
-   After placement (and after expert blocks are fixed), enforce opposite half-planes for
+   After placement (and after curated blocks are fixed), enforce opposite half-planes for
    non-currency reactants vs products for every reaction, including transporters. Extend the
    existing orientation pass to multi-substrate reactions and to edges that currently keep
-   expert currency copies on the wrong side.
+   curated currency copies on the wrong side.
 
 2. **Compartment-aware global packing**  
    Treat compartments as soft regions (or nested group layouts): place all cytosolic cores
@@ -155,7 +155,7 @@ branch, not here.
    constants (scale by median reaction spacing only).
 
 6. **Identity-poor pathway models**  
-   For Reactome / non-BiGG SBML, strengthen topology + annotation bridges (ChEBI/EC) so expert
+   For Reactome / non-BiGG SBML, strengthen topology + annotation bridges (ChEBI/EC) so curated
    geometry can attach; today these maps lean on topology-only modules and still show long
    edges between loosely placed islands.
 
