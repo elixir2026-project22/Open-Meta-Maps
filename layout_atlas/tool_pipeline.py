@@ -26,14 +26,23 @@ import traceback
 from core import *
 
 LIMITS = dict(max_bytes=25 * 1024 * 1024, max_reactions=20000, full_routed_max_reactions=150, whole_map_max_reactions=3000, view_size=50)
-SOURCE_PATHS = False  # reuse the expert's original curves (Escher Bezier chains) for the edges of matched structures
-ORIENTATION = 'full'  # 'off' | 'sides' (currency copies on the substrate / product side) | 'full' (also reactions outside the expert structures between their substrates and products)
-LAYOUT_STYLE = 'expert'  # 'legacy' | 'expert' (V7: every algorithm-placed connection is a Bezier curve solved from expert-map constraints; no orthogonal polylines)
+SOURCE_PATHS = False  # reuse the curated map's original curves (Escher Bezier chains) for the edges of matched structures
+ORIENTATION = 'full'  # 'off' | 'sides' (currency copies on the substrate / product side) | 'full' (also reactions outside the curated structures between their substrates and products)
+LAYOUT_STYLE = 'curated'  # 'legacy' | 'curated' (V7: Bezier curves from curated-map constraints; no orthogonal polylines). Deprecated alias: 'expert' → 'curated'.
+
+def normalize_layout_style(value):
+    """Map user/API layout_style to the canonical value. 'expert' is a deprecated alias of 'curated'."""
+    if value in ('curated', 'expert'):
+        return 'curated'
+    if value == 'legacy':
+        return 'legacy'
+    return 'curated'
+
 COMPLETION_CONTEXT = 'auto'  # 'auto' (V6: uncovered reactions are placed beside the glyphs of their own metabolites) | 'off'
 EDGE_ROUTING = 'libavoid'  # 'libavoid' (orthogonal, all edges) | 'hybrid' (routes only blocked algorithm-placed edges) | 'none' (straight lines)
 # Routing behavior by layout style and model size:
-#   - layout_style='expert': Uses Bezier curve fitting (edge_style.apply) for all algorithm-placed edges.
-#     Expert-style curves are smoother and follow expert-derived templates. No libavoid routing is used
+#   - layout_style='curated': Uses Bezier curve fitting (edge_style.apply) for all algorithm-placed edges.
+#     Curated-style curves follow community-map templates. No libavoid routing is used
 #     because the Bezier curves already avoid obstacles via iterative candidate selection.
 #   - layout_style='legacy' with <= ROUTING_THRESHOLD reactions: Uses libavoid orthogonal routing.
 #   - layout_style='legacy' with > ROUTING_THRESHOLD reactions: Routing is deferred (edge_routing.measure only).
@@ -45,7 +54,7 @@ LAYOUT = 'global'  # 'global' (one map for the whole model, <=3,000 reactions) |
 GLOBAL_FAILURE = ''
 GLOBAL_BUDGET_S = 1500
 COMPLETION = 'spaced'  # 'spaced' (free nodes keep a minimum distance) | 'classic' (drawing.complete only)
-REACTION_STYLE = 'line'  # 'line' (reactions are lines between metabolites, like the expert maps) | 'marker' (earlier style: a dot per reaction)
+REACTION_STYLE = 'line'  # 'line' (reactions are lines between metabolites, like the curated maps) | 'marker' (earlier style: a dot per reaction)
 
 
 STEPS = [('parse', 'Parse the model', '解析模型'), ('map', 'Match library structures', '匹配库中的结构'),
@@ -467,7 +476,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     context_report, context_assign = None, {}
     if CONTEXT == 'auto':
         import context as context_module
-        context_module.LAYOUT_STYLE_BACKBONE = (LAYOUT_STYLE == 'expert')
+        context_module.LAYOUT_STYLE_BACKBONE = (LAYOUT_STYLE == 'curated')
         covered = {rid for p in selected for rid in p['reaction_ids']} | {rid for b in bridges for rid in b['reaction_ids']}
         regions, context_report = context_module.find(model, currency(model), covered)
         core, context_assign, placed = context_module.place(model, core, currency(model), regions, covered)
@@ -495,13 +504,13 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         if log:
             log(f"  metabolite instances: +{instance_report['added']}, merged {instance_report['shared_nodes_merged']}, reattached {instance_report['reactions_reattached']}; edges >250: {instance_report['edges_over_250']}, >1000: {instance_report['edges_over_1000']}")
     regions_report = None
-    if LAYOUT_STYLE == 'expert' and os.environ.get('OPM_REGIONS', 'off') == 'on':    # opt-in pathway-region organisation
+    if LAYOUT_STYLE == 'curated' and os.environ.get('OPM_REGIONS', 'off') == 'on':    # opt-in pathway-region organisation
         import regions as regions_module
         scene, regions_report = regions_module.organize(model, scene, blocks, currency(model))
         if log:
             log('  regions: ' + str(regions_report))
     composition_report = None
-    if LAYOUT_STYLE == 'expert' and os.environ.get('OPM_COMPOSE', 'on') != 'off':
+    if LAYOUT_STYLE == 'curated' and os.environ.get('OPM_COMPOSE', 'on') != 'off':
         import composition
         scene, composition_report = composition.compose(model, scene, blocks, currency(model))
         if log:
@@ -538,7 +547,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     # For large models (> ROUTING_THRESHOLD reactions), defer routing to avoid long build times
     skip_libavoid = (scalable or 
                      EDGE_ROUTING in ('hybrid', 'none') or 
-                     LAYOUT_STYLE == 'expert' or
+                     LAYOUT_STYLE == 'curated' or
                      len(model['reactions']) > ROUTING_THRESHOLD)
     for route, labels in (((False, False),) if skip_libavoid else ((True, True), (True, False), (False, False))):
         metric = drawing.export(model, core, folder, 'map', blocks=blocks, full_model=full_model, route=route, scene=scene, label_obstacles=labels)
@@ -599,7 +608,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     expert_reactions = {rid for b in blocks for rid in b['reaction_ids']}
     data[0]['metadata']['preserved_edges'] = sorted([rid, mid] for (rid, mid), key in scene['participants'].items() if key.startswith('copy:') and rid in expert_reactions)
     skip_edges = data[0]['metadata']['preserved_edges'] + [[p['reaction'], p['metabolite']] for p in data[0]['metadata'].get('source_paths', [])]
-    if LAYOUT_STYLE == 'expert':
+    if LAYOUT_STYLE == 'curated':
         import edge_style
         t_style = time.time()
         metric['edge_style'] = dict(edge_style.apply(data, skip_edges), seconds=round(time.time() - t_style, 1))
@@ -610,7 +619,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         metric['label_placement'] = dict(label_placement.optimize(data), seconds=round(time.time() - t_labels, 1))
         if log:
             log(f"  label placement: {metric['label_placement']}")
-        metric['edge_routing'] = dict(mode='expert (Bezier connections)')
+        metric['edge_routing'] = dict(mode='curated (Bezier connections)')
         if os.environ.get('OPM_PERIPHERAL', 'on') != 'off':   # the switch exists for before / after comparisons
             import peripheral as peripheral_module
             import quality_gate
@@ -943,7 +952,7 @@ def run_job(folder):
     libs.update(options.get('libraries', {}))
     libs.pop('micromap', None)  # MicroMap (NC-SA) removed; ignore stale option keys
     global REACTION_STYLE, COMPLETION, SOURCE_PATHS, LAYOUT, ORIENTATION, INSTANCES, CONTEXT, EDGE_ROUTING, COMPLETION_CONTEXT, LAYOUT_STYLE
-    LAYOUT_STYLE = options.get('layout_style') if options.get('layout_style') in ('legacy', 'expert') else 'expert'
+    LAYOUT_STYLE = normalize_layout_style(options.get('layout_style'))
     COMPLETION_CONTEXT = options.get('completion_context') if options.get('completion_context') in ('auto', 'off') else 'auto'
     EDGE_ROUTING = options.get('edge_routing') if options.get('edge_routing') in ('libavoid', 'hybrid', 'none') else 'libavoid'
     CONTEXT = options.get('context') if options.get('context') in ('auto', 'off') else 'auto'
@@ -952,7 +961,7 @@ def run_job(folder):
     SOURCE_PATHS = bool(options.get('source_paths'))
     LAYOUT = options.get('layout') if options.get('layout') in ('global', 'tiled') else 'global'
     import global_layout as _gl
-    _gl.BACKBONE = (LAYOUT_STYLE == 'expert')
+    _gl.BACKBONE = (LAYOUT_STYLE == 'curated')
     _gl.BLOCK_LAYOUT = options.get('block_layout') if options.get('block_layout') in ('auto', 'single') else 'auto'
     REACTION_STYLE = options.get('reaction_style') if options.get('reaction_style') in ('line', 'marker') else 'line'
     COMPLETION = options.get('completion') if options.get('completion') in ('spaced', 'classic') else 'spaced'
@@ -1065,7 +1074,7 @@ def run_job(folder):
             selected = [p for p in selected if p not in _drop]
             job.log(f'Dropped {len(_drop)} topology-only structure(s) that covered very large reactions: {sorted(_big & {r for p in _drop for r in p["reaction_ids"]})}')
         lowconf_report = None
-        if LAYOUT_STYLE == 'expert' and os.environ.get('OPM_LOWCONF', 'off') == 'on':    # opt-in low-confidence structure decomposition
+        if LAYOUT_STYLE == 'curated' and os.environ.get('OPM_LOWCONF', 'off') == 'on':    # opt-in low-confidence structure decomposition
             import lowconf
             selected, lowconf_report = lowconf.split(model, currency(model), selected)
             job.log(f"Low-confidence decomposition: {len(lowconf_report['split'])} structure(s) split, {lowconf_report['kept']} kept, of {lowconf_report['checked']} topology-only: {lowconf_report['split']}")

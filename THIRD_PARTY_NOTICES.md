@@ -1,8 +1,8 @@
 # Third-party sources and attribution
 
-Open Meta Maps publishes **processed structures**: the module graphs, reaction identities, geometric layouts and layout constraints that were extracted from existing expert-drawn pathway maps and pathway databases. Each source below is credited, and the licence as recorded in this project is stated. Where the recorded licence could not be confirmed, that is said explicitly. This file records provenance; it is not legal advice. See [docs/licensing_audit.md](docs/licensing_audit.md) for the evidence behind each entry.
+Open Meta Maps publishes **processed structures**: the module graphs, reaction identities, geometric layouts and layout constraints that were extracted from existing community-drawn pathway maps and pathway databases. Each source below is credited, and the licence as recorded in this project is stated. Where the recorded licence could not be confirmed, that is said explicitly. This file records provenance; it is not legal advice. See [docs/licensing_audit.md](docs/licensing_audit.md) for the evidence behind each entry.
 
-## Expert layout sources (the Atlas)
+## Curated layout sources (the Atlas)
 
 | Source | What is used | Where it comes from | Licence as recorded |
 |---|---|---|---|

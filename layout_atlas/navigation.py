@@ -1,52 +1,456 @@
-"""Generate a portable local navigation page from the saved experiment summaries."""
-import html,os,re
+"""Generate the Home and About pages. Single source of truth: run this module, commit the HTML.
+
+  python3 layout_atlas/navigation.py
+
+Counts and licences come from data/atlas_registry.json.
+"""
+import html
+import json
 from pathlib import Path
-from core import *
+
+from core import ROOT
 import ui
 
-LINKS=[('Module catalog (pathway-fragment reuse)','layout_atlas/results/catalog/index.html','17,221 instances / 6,094 layout variants'),('Structure-unit catalog (experimental)','layout_atlas/results/catalog_units/index.html','2,963 non-overlapping structure units'),('Layout tool','layout_atlas/results/tool/index.html','Upload a model or pick an example; get a map from the expert structures')]
+REG = ROOT / 'data' / 'atlas_registry.json'
 
-ZHX={"Module catalog (pathway-fragment reuse)": "模块图录（通路片段复用）", "Structure-unit catalog (experimental)": "结构单元复用图录（实验性）", "2,963 non-overlapping structure units": "2,963 个不重叠的结构单元", "Layout tool": "布局工具", "Upload a model or pick an example; get a map from the expert structures": "上传模型或选一个示例，用专家结构生成地图", "Tool": "工具", "Independent structure": "独立结构", "Independent structure: a module instance that is not contained in a larger module of the same source map. Instances at several scales are cut from the same subsystem, so most are redundant overlapping windows; independent structures are the meaningful unit count.": "独立结构：不被同一来源图中更大模块包含的模块实例。同一子系统会被切成多个尺度的实例，因此大多数是冗余的重叠窗口；独立结构才是有意义的计数单位。","Reaction group": "反应组", "Modules whose sets of reactions are identical (equal canonical reaction identity): alternative expert drawings of the same chemistry, for example the same reactions drawn in different maps. Identity rule: Rhea master ID, else BiGG ID annotated with exactly one Rhea ID, else BiGG ID, else Reactome ID. Different namespaces are not equated, so counts are a lower bound. A reaction group can span more than one connectivity shape (family).": "反应组：反应集合完全相同（规范反应身份相同）的模块，即同一组化学反应的不同专家画法，例如在不同地图中画的同一组反应。身份规则：Rhea 主ID；否则带有唯一 Rhea 注释的 BiGG ID；否则 BiGG ID；否则 Reactome ID。不同命名空间不会被视为相同，因此数量是下限值。一个反应组可以跨越多种连接形状（家族）。", "Reaction groups are a lower bound: reaction identities from different namespaces are not equated, and geometry-only modules have no reaction identity.": "反应组是下限值：不同命名空间的反应身份不会被视为相同，仅几何的模块没有反应身份。","Size tiers":"规模分级","micro (1 reaction): stored for provenance and statistics, not used for retrieval; small (2–3 reactions): used only to fill gaps; structure (≥4 reactions): reusable local layout. Module instances are overlapping windows cut from source maps, so counts are not independent designs.":"微型（1 个反应）：仅为来源记录与统计保存，不参与检索；小型（2–3 个反应）：只用于补缺；结构单元（≥4 个反应）：可复用的局部布局。模块实例是从来源图上切出的相互重叠的窗口，因此数量并不代表独立设计的数量。","Display codes":"显示编号","F0001… (families, largest first), F0001-v2 (variant 2 of that family, by instance count) and M00001… (modules) are display-only and deterministic; original ids are unchanged. The mapping is in layout_atlas/results/catalog/display_ids.json.":"F0001…（家族，实例最多者在前）、F0001-v2（该家族第2种画法，按实例数排序）和 M00001…（模块）仅用于显示且结果固定；原始ID不变。对应表见 layout_atlas/results/catalog/display_ids.json。","Definitions": "术语定义", "Module instance": "模块实例", "One module (a connected set of reactions) as drawn on one source map.": "一张来源图上画出的一个模块（相连的一组反应）。", "Family": "家族", "All instances with the same connectivity shape: reactions and metabolites can differ; only the connection pattern is the same. Same colour in the catalog.": "连接形状相同的全部实例：反应和代谢物可以不同，只是连接模式相同；在图录中颜色相同。", "Variant": "变体（画法）", "A different drawn layout of one family; instances with identical layouts share a variant.": "同一家族的不同布局画法；布局相同的实例属于同一变体。", "Geometry only": "仅几何", "The source drawing has positions but no reaction identifiers, so only the layout is stored.": "来源图只有位置而没有反应标识符，因此只保存布局。","Drawing-geometry experiment (P0)":"绘图几何实验（P0）","Module composition search (P2)":"模块组合搜索（P2）","The database is the module catalog: 17,221 module instances, 3,127 families and 6,094 layout variants. The other pages are experiments and applications run with it.":"数据库即模块图录：17,221个模块实例、3,127个结构家族、6,094个布局变体；其余页面是基于该数据库运行的实验与应用。","Current approach and results": "研究报告 · 当前方案与结果", "Measured drawing improvements": "P0绘图改进实测", "Independent research source (CC BY-NC-SA)": "独立研究来源（NC-SA）", "Module choice and pose under fixed coverage": "覆盖保持下的模块与姿态选择", "Four drawing conditions on E. coli core": "E. coli core 四条件对照", "17,221 instances / 6,094 layout variants": "17,221实例 / 6,094布局变体", "Deterministically selected cases": "确定性选取的案例", "Commands and layout of the code": "运行说明", "95 reactions, rendered with the original coordinates and curves. Click for the vector image.": "95 反应，按原始坐标和曲线渲染。点击查看矢量图。", "Module coverage includes geometry transfer; the strict-equation column also requires compartment verification. These are application coverage figures, not independent generalisation scores.": "模块覆盖包含几何迁移；严格方程列还要求区室核实。以下是应用覆盖，不是独立泛化得分。", "Expert layout database → module skeleton → layout completion for known reactions · current v0.3": "专家布局数据库 → 模块骨架 → 已知反应布局补全 · 当前 v0.3", "Files organised on 2026-11-06. Old versions removed; required source inputs and current results are kept.": "文件整理于2026-11-06。旧版本已删除；当前必要来源输入和当前实验结果保留。", "Common command:": "常用命令："}
+ZHX = {
+    'Open the Map Generator': '打开地图生成器',
+    'About and data provenance': '关于与数据来源',
+    'Choose a model': '选择模型',
+    'Generate': '生成',
+    'Download': '下载',
+    'About Open Meta Maps': '关于 Open Meta Maps',
+    'How it works': '工作原理',
+    'The Atlas': 'Atlas',
+    'Data sources and licensing': '数据来源与许可',
+    'Matching and layout defaults': '匹配与布局默认',
+    'Layout after curated reuse': '复用人工绘制结构之后的布局',
+    'Reproducibility': '可复现性',
+    'Documentation': '文档',
+    'Source': '来源',
+    'What is used': '使用内容',
+    'Modules': '模块数',
+    'Licence': '许可',
+    'Status': '状态',
+    'Used by default': '默认使用',
+    'module structures (default Atlas)': '模块结构（默认 Atlas）',
+    'open-core SQLite modules': '开放核心 SQLite 模块',
+    'reactions in open-core': '开放核心中的反应',
+}
 
-DEFS='''<dl class="defs"><dt>Module instance</dt><dd>One module (a connected set of reactions) as drawn on one source map.</dd><dt>Family</dt><dd>All instances with the same connectivity shape: reactions and metabolites can differ; only the connection pattern is the same. Same colour in the catalog.</dd><dt>Variant</dt><dd>A different drawn layout of one family; instances with identical layouts share a variant.</dd><dt>Display codes</dt><dd>F0001… (families, largest first), F0001-v2 (variant 2 of that family, by instance count) and M00001… (modules) are display-only and deterministic; original ids are unchanged. The mapping is in layout_atlas/results/catalog/display_ids.json.</dd><dt>Size tiers</dt><dd>micro (1 reaction): stored for provenance and statistics, not used for retrieval; small (2–3 reactions): used only to fill gaps; structure (≥4 reactions): reusable local layout. Module instances are overlapping windows cut from source maps, so counts are not independent designs.</dd><dt>Reaction group</dt><dd>Modules whose sets of reactions are identical (equal canonical reaction identity): alternative expert drawings of the same chemistry, for example the same reactions drawn in different maps. Identity rule: Rhea master ID, else BiGG ID annotated with exactly one Rhea ID, else BiGG ID, else Reactome ID. Different namespaces are not equated, so counts are a lower bound. A reaction group can span more than one connectivity shape (family).</dd><dt>Independent structure</dt><dd>Independent structure: a module instance that is not contained in a larger module of the same source map. Instances at several scales are cut from the same subsystem, so most are redundant overlapping windows; independent structures are the meaningful unit count.</dd><dt>Geometry only</dt><dd>The source drawing has positions but no reaction identifiers, so only the layout is stored.</dd></dl>'''
-HOME_CSS='<style>.hero{padding:18px 0 8px}.hero h1{font-size:clamp(28px,5vw,44px)}.cta{display:inline-block;background:var(--accent);color:var(--accent-ink);padding:12px 26px;border-radius:999px;text-decoration:none;font-weight:600;font-size:17px;margin:6px 10px 6px 0}.cta.alt{background:var(--soft);color:var(--ink)}.steps3{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin:24px 0}.steps3 .card b{display:block;color:var(--accent);font-size:13px;letter-spacing:.06em;text-transform:uppercase}.steps3 .card h3{margin:4px 0}</style>'
-TOOL='layout_atlas/results/tool/index.html'
+
+def _registry():
+    return json.loads(REG.read_text())
+
+
+def _fmt(n):
+    return f'{int(n):,}'
+
+
+HOME_CSS = (
+    '<style>.hero{padding:18px 0 8px}.hero h1{font-size:clamp(28px,5vw,44px)}'
+    '.cta{display:inline-block;background:var(--accent);color:var(--accent-ink);padding:12px 26px;'
+    'border-radius:999px;text-decoration:none;font-weight:600;font-size:17px;margin:6px 10px 6px 0}'
+    '.cta.alt{background:var(--soft);color:var(--ink)}'
+    '.steps3{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin:24px 0}'
+    '.steps3 .card b{display:block;color:var(--accent);font-size:13px;letter-spacing:.06em;text-transform:uppercase}'
+    '.steps3 .card h3{margin:4px 0}</style>'
+)
+TOOL = 'layout_atlas/results/tool/index.html'
+
+
 def home():
- b=ui.bi
- steps=''.join(f'<div class="card"><b>{n}</b><h3>{b(*t)}</h3><p class="meta">{b(*d)}</p></div>' for n,t,d in [
-  ('1',('Choose a model','选择模型'),('Upload an SBML (.xml) or BiGG/COBRA (.json) genome-scale model, or pick an example: e_coli_core, iIT341, iMM904 or iML1515.','上传 SBML（.xml）或 BiGG/COBRA（.json）基因组规模代谢模型，或选择示例：e_coli_core、iIT341、iMM904、iML1515。')),
-  ('2',('Generate','生成'),('One click. Expert-drawn pathway structures are reused where they fit; every other reaction is completed by the layout algorithm. All reactions and metabolites of your model are kept.','一键生成。有匹配的地方复用专家绘制的通路结构，其余反应由布局算法补全；模型中的全部反应和代谢物都会保留。')),
-  ('3',('Download','下载'),('Get the complete map as an editable SVG or as Escher JSON, and open it in Escher or any vector editor.','得到完整地图，可下载可编辑的 SVG 或 Escher JSON，并在 Escher 或矢量图编辑器中继续修改。'))])
- body=HOME_CSS+f'<div class="hero"><a class="cta" href="{TOOL}">'+b('Open the Map Generator','打开地图生成器')+f'</a><a class="cta alt" href="layout_atlas/results/about/index.html">'+b('About and data provenance','关于与数据来源')+'</a></div><div class="steps3">'+steps+'</div><div class="note">'+b('Research Details on the result page show, for each reaction, whether its geometry was reused from an expert map, only guided by topology, or generated by the algorithm. The expert structure database behind this is described under About / Provenance.','结果页的 Research Details 会逐类说明每个反应的几何来自专家图复用、仅有拓扑参考，还是完全由算法生成。其背后的专家结构数据库见 About / Provenance。')+'</div>'
- lead=b('Upload a genome-scale metabolic model and get a complete, readable and editable metabolic network map, drawn in the style of expert-made maps.','上传基因组规模代谢模型，得到完整、可读、可编辑的代谢网络图，风格贴近专家手绘地图。')
- ui.write(ROOT/'index.html','Open Meta Maps',body,section='home',zh=ZHX,lead=lead)
+    b = ui.bi
+    steps = ''.join(
+        f'<div class="card"><b>{n}</b><h3>{b(*t)}</h3><p class="meta">{b(*d)}</p></div>'
+        for n, t, d in [
+            (
+                '1',
+                ('Choose a model', '选择模型'),
+                (
+                    'Upload an SBML (.xml) or BiGG/COBRA (.json) genome-scale model, or pick an example: e_coli_core, iIT341, iMM904 or iML1515.',
+                    '上传 SBML（.xml）或 BiGG/COBRA（.json）基因组规模代谢模型，或选择示例：e_coli_core、iIT341、iMM904、iML1515。',
+                ),
+            ),
+            (
+                '2',
+                ('Generate', '生成'),
+                (
+                    'One click. Matched Atlas structures keep their curated geometry; every other reaction is completed with Bézier connections. All reactions and metabolites of your model are kept.',
+                    '一键生成。匹配到的 Atlas 结构保留人工绘制的几何，其余反应用 Bézier 连线补全；模型中的全部反应和代谢物都会保留。',
+                ),
+            ),
+            (
+                '3',
+                ('Download', '下载'),
+                (
+                    'Get the complete map as editable SVG or Escher JSON, with per-reaction provenance and licence metadata.',
+                    '得到完整地图（可编辑 SVG 或 Escher JSON），以及逐反应来源与许可元数据。',
+                ),
+            ),
+        ]
+    )
+    body = (
+        HOME_CSS
+        + f'<div class="hero"><a class="cta" href="{TOOL}">'
+        + b('Open the Map Generator', '打开地图生成器')
+        + f'</a><a class="cta alt" href="layout_atlas/results/about/index.html">'
+        + b('About and data provenance', '关于与数据来源')
+        + '</a></div><div class="steps3">'
+        + steps
+        + '</div><div class="note">'
+        + b(
+            'Research Details on the result page report, for each reaction, whether its geometry was reused from a curated community map, only guided by topology or EC, or generated by the algorithm. The Atlas behind this is described under About / Provenance.',
+            '结果页的 Research Details 会说明每个反应的几何来自人工绘制社区图的复用、仅拓扑 / EC 参考，还是由算法生成。其背后的 Atlas 见 About / Provenance。',
+        )
+        + '</div>'
+    )
+    lead = b(
+        'Upload a genome-scale metabolic model and get a complete, readable and editable metabolic map, drawn from public community pathway layouts where they fit.',
+        '上传基因组规模代谢模型，得到完整、可读、可编辑的代谢地图；能匹配的地方复用公开社区通路布局。',
+    )
+    ui.write(ROOT / 'index.html', 'Open Meta Maps', body, section='home', zh=ZHX, lead=lead)
+
 
 def about():
- e=html.escape;b=ui.bi
- summary=read(OUT/'database_summary.json');tc=read(OUT/'catalog/display_ids.json')['tiers'];rd=read(OUT/'catalog/display_ids.json').get('redundancy') or {};rgs=read(OUT/'reaction_groups_summary.json');src=summary['by_source']
- cfg=read(Path(__file__).parent/'config.json');so=cfg.get('sources',{})
- def sec(t,zt,inner,id=''):return f'<section class="panel"'+(f' id="{id}"' if id else '')+f'><h2>{b(t,zt)}</h2>{inner}</section>'
- s1=sec('About Open Meta Maps','关于 Open Meta Maps','<p><b>'+b('Expert-informed metabolic map generation for genome-scale metabolic models.','面向基因组规模代谢模型的、由专家知识引导的代谢地图生成。')+'</b></p><p>'+b('Open Meta Maps combines reusable layouts from expert-drawn maps with computational layout algorithms to generate metabolic network maps automatically, for exploration, visualisation and sharing, while keeping the reaction information of your model.','Open Meta Maps 把专家绘制地图中可复用的布局与计算布局算法结合起来，自动生成代谢网络图，便于探索、可视化和分享，同时保留模型的反应信息。')+'</p>')
- st=[('1',('Learn from expert maps','从专家地图中学习'),('Reusable pathway structures are extracted from expert-drawn metabolic maps; their reaction identity, network connections and geometry are stored in an internal knowledge base.','从专家绘制的代谢图中提取可复用的通路结构，把反应身份、网络连接和几何存入内部知识库。')),
-  ('2',('Transfer expert layouts','迁移专家布局'),('For an uploaded model, matching structures are retrieved and their geometry is reused where it fits. Exact reaction matches, topology-only references and EC suggestions are kept clearly apart.','对上传的模型检索匹配的结构，并在合适的地方复用其几何。精确反应匹配、仅拓扑参考和 EC 建议被明确区分。')),
-  ('3',('Complete and optimise','补全与优化'),('Reactions without reusable expert geometry are placed by the algorithm; pathway organisation, Bézier connections, label placement and layout-quality assessment follow.','没有可复用专家几何的反应由算法放置，随后进行通路组织、Bézier 连接、标签放置和布局质量评估。'))]
- s2=sec('How It Works','工作原理','<div class="steps3">'+''.join(f'<div class="card"><b>{n}</b><h3>{b(*tt)}</h3><p class="meta">{b(*d)}</p></div>' for n,tt,d in st)+'</div><p>'+b('Every generated map passes an integrity check that verifies that reactions, stoichiometry and compartment information are preserved. This is an integrity check, not a validation of the biological correctness of the model.','每张生成的地图都会做完整性检查，验证反应、化学计量和区室信息被保留。这是“完整性检查”，不是对模型生物学正确性的验证。')+'</p>')
- big=''.join(ui.stat(f'{v:,}',en,zh) for v,en,zh in [(tc['total'],'module instances','模块实例'),(rd.get('maximal',0),'independent structures','独立结构'),(rd.get('structure',0),'independent structures with ≥4 reactions','个 ≥4 反应的独立结构')])
- byso=' · '.join(f'{k} {v:,}' for k,v in src.items())
- dbst=('<details class="det"><summary>'+b('Database Statistics','数据库统计')+'</summary><div class="stats">'+ui.stat(f'{summary["families"]:,}','structural families','结构家族')+ui.stat(f'{summary["variants"]:,}','layout variants (over all module instances)','布局变体（统计全部模块实例）')+ui.stat(f'{rd.get("families",0):,} / {rd.get("variants",0):,}','families / layout variants among independent structures','独立结构涉及的家族 / 布局变体')+ui.stat(f'{rgs["groups_in_more_than_one_source_map"]:,}','reaction groups drawn in ≥2 maps','组反应在多张图中被画过')+ui.stat(f'{summary["by_quality"].get("geometry_only",0):,}','geometry-only module instances','仅几何的模块实例')+ui.stat(f'{tc["small"]+tc["structure"]:,}','module instances with ≥2 reactions','个 ≥2 反应的模块实例')+'</div><h3>'+b('Module instances by source','按来源统计的模块实例')+'</h3><p class="meta"><span class="dn">'+e(byso)+'</span></p><p class="meta">'+b('Layout variants (6,094) outnumber independent structures (4,129) because they are counted over a different scope: variants are distinct drawings of the 3,127 structural families counted over all 17,221 module instances, including the overlapping windows, whereas independent structures are only the module instances not contained in a larger module of the same source map; among those there are 1,232 families and 1,712 layout variants.','布局变体（6,094）多于独立结构（4,129），是因为统计范围不同：变体统计的是全部 17,221 个模块实例（含相互重叠的窗口）所属 3,127 个结构家族的不同画法；独立结构只统计不被同一来源图中更大模块包含的模块实例，其中涉及 1,232 个家族、1,712 个布局变体。')+'</p><p class="meta">'+b('Reaction groups are a lower bound: reaction identities from different namespaces are not equated, and geometry-only modules have no reaction identity.','反应组是下限值：不同命名空间的反应身份不会被视为相同，仅几何的模块没有反应身份。')+'</p></details>')
- s3=sec('Expert Knowledge Base','专家知识库','<div class="stats">'+big+'</div><p class="meta">'+b('These are different counting levels of the same collection, not independent pathway designs: module instances are overlapping windows cut from expert maps, and independent structures are the ones not contained in a larger module of the same map.','这三个数字是同一集合的不同统计层级，并不是独立的通路设计：模块实例是从专家图上切出的重叠窗口，独立结构是不被同一张图中更大模块包含的那部分。')+'</p>'+dbst)
- def row(*cells):return '<tr>'+''.join(f'<td>{c}</td>' for c in cells)+'</tr>'
- th=''.join(f'<th>{b(*h)}</th>' for h in [('Source','来源'),('Role','用途'),('Licence (from the data registry)','许可（来自数据登记）'),('Status','状态')])
- core=b('Core expert layout reference','核心专家布局参考');dflt=b('Used by default','默认使用')
- tbl='<div class="tablewrap"><table><thead><tr>'+th+'</tr></thead><tbody>'+row('Escher maps',core,'CC0-1.0',dflt)+row('Reactome',b('Core pathway layout reference','核心通路布局参考'),'CC0-1.0 (data); '+b('see licence file','见许可文件')+' (reactome.org/license)',dflt)+row('WikiPathways',b('Core pathway layout reference','核心通路布局参考'),'CC0-1.0',dflt),'CC BY-NC-SA 4.0',b('Optional; non-commercial use and share-alike apply','可选；仅限非商业，并需相同方式共享'))+row('Human-maps',b('Default Atlas expert layouts','默认 Atlas 专家布局'),'CC BY 4.0',dflt)+row('BRENDA pathway maps',b('Default Atlas pathway modules','默认 Atlas 通路模块'),'CC BY 4.0',b('Included by default; layout possibly automatic','默认包含；布局可能为自动生成'))+'</tbody></table></div>'
- s4=sec('Data Sources & Licensing','数据来源与许可',tbl+'<p>'+b('Core sources are used by default and remain subject to their own licences and attribution requirements. Licence information is recorded for every reused structure. Outputs and downloads must also respect the usage restrictions of the sources they use,','核心来源默认使用，并仍受各自许可和署名要求约束。许可信息按每个被复用的结构记录。输出和下载同样须遵守所用来源的使用限制，'))
- s5=sec('Reproducibility & Transparency','可复现性与透明性','<p>'+b('Every result contains:','每个结果都包含：')+'</p><ul><li><b>'+b('Reaction provenance','反应来源')+'</b>: '+b('whether the geometry was reused from an expert map, only a topology / EC reference, or generated by the algorithm','几何来自专家复用、仅拓扑 / EC 参考，还是由算法生成')+'</li><li><b>'+b('Layout quality','布局质量')+'</b></li><li><b>'+b('Generation settings','生成设置')+'</b></li><li><b>'+b('Licensing information','许可信息')+'</b></li></ul><p>'+b('Expert-geometry reuse and topology-only references are reported separately and are never merged into a single reuse rate.','专家几何复用和仅拓扑参考分开报告，不合并成单一的复用比例。')+'</p><p class="meta">'+b('Report files','报告文件')+': <code>report.json</code> · <code>reaction_provenance.json</code> · <code>licenses.json</code> · '+b('Software and knowledge-base version','软件与知识库版本')+f': v{e(str(cfg.get("version","")))}</p>')
- rl=lambda h:os.path.relpath(ROOT/h,ROOT/"layout_atlas/results/about").replace(os.sep,"/")
- cards=''.join(f'<a class="card" href="{rl(h)}" style="text-decoration:none"><h3>{b(*tt)}</h3><p class="meta">{e(d)}</p></a>' for tt,h,d in [(('Module Catalog','模块图录'),'layout_atlas/results/catalog/index.html','17,221 / 6,094'),(('Structure-unit Catalog (experimental)','结构单元图录（实验性）'),'layout_atlas/results/catalog_units/index.html','2,963')] if (ROOT/h).exists() and not os.environ.get('OPM_PUBLIC_PAGES'))
- s6=sec('Research & Developer Resources','研究与开发者资源','<div class="grid">'+cards+'</div>')
- d=ROOT/'layout_atlas/results/about';d.mkdir(exist_ok=True)
- ui.write(d/'index.html',('About / Provenance','关于 / 来源'),s1+s2+s3+s4+s5+s6,section='about',zh=ZHX,lead=b('The scientific method behind the maps, and how transparent it is.','地图背后的科学方法及其透明性。'))
+    e = html.escape
+    b = ui.bi
+    reg = _registry()
+    oc = reg['open_core']
+    ext = reg['extensions']
+    mods = oc['modules_with_extensions']
+    total = sum(mods.values())
+    core_sum = sum(oc['modules'].values())
+    version = '0.3'
+    try:
+        version = str(json.loads((Path(__file__).parent / 'config.json').read_text()).get('version') or version)
+    except Exception:
+        pass
+
+    def sec(t, zt, inner):
+        return f'<section class="panel"><h2>{b(t, zt)}</h2>{inner}</section>'
+
+    s1 = sec(
+        'About Open Meta Maps',
+        '关于 Open Meta Maps',
+        '<p><b>'
+        + b(
+            'Collect public community-drawn pathway layouts, reuse them for a genome-scale model, and complete the rest algorithmically.',
+            '尽可能收集公开的社区绘制通路布局，在基因组规模模型上复用，并用算法补全其余部分。',
+        )
+        + '</b></p><p>'
+        + b(
+            'Open Meta Maps is ELIXIR BioHackathon Europe 2026 Project 22 (Open Pathway Maps). The Atlas stores reusable structures extracted from community-drawn maps; the Layout Composer matches them to an uploaded GEM, keeps curated geometry where it fits, and places every remaining reaction. Layout benchmarks and the evaluation CLI are development aids, not the project goal.',
+            'Open Meta Maps 是 ELIXIR BioHackathon Europe 2026 的 Project 22（Open Pathway Maps）。Atlas 保存从社区绘制地图提取的可复用结构；Layout Composer 将其匹配到上传的 GEM，在合适处保留人工绘制的几何，并放置其余全部反应。布局基准与评价 CLI 是开发辅助，不是项目目标。',
+        )
+        + '</p>',
+    )
+
+    steps = [
+        (
+            '1',
+            ('Build the Atlas', '构建 Atlas'),
+            (
+                'Pathway structures (topology, reaction identity, geometry, licence) are extracted from public community maps and stored with provenance.',
+                '从公开社区地图提取通路结构（拓扑、反应身份、几何、许可），并带来源信息一并保存。',
+            ),
+        ),
+        (
+            '2',
+            ('Match and transfer', '匹配与迁移'),
+            (
+                'For an uploaded model, matching structures are retrieved; exact matches, topology-only references and optional EC suggestions are kept clearly apart.',
+                '对上传的模型检索匹配结构；精确匹配、仅拓扑参考与可选的 EC 建议被明确区分。',
+            ),
+        ),
+        (
+            '3',
+            ('Complete with Bézier layout', '以 Bézier 布局补全'),
+            (
+                'Reactions without reusable curated geometry are placed by the algorithm; Bézier connections, labels and layout-quality checks follow. Nothing from the model is dropped.',
+                '没有可复用人工绘制几何的反应由算法放置，随后进行 Bézier 连线、标签与布局质量检查。模型中的内容不会丢弃。',
+            ),
+        ),
+    ]
+    s2 = sec(
+        'How it works',
+        '工作原理',
+        '<div class="steps3">'
+        + ''.join(f'<div class="card"><b>{n}</b><h3>{b(*tt)}</h3><p class="meta">{b(*d)}</p></div>' for n, tt, d in steps)
+        + '</div><p>'
+        + b(
+            'Every generated map passes an integrity check that reactions, stoichiometry and compartments are preserved. That check is not a validation of the biological correctness of the model.',
+            '每张生成的地图都会检查反应、化学计量和区室是否被保留。这不是对模型生物学正确性的验证。',
+        )
+        + '</p>',
+    )
+
+    by_line = ' · '.join(
+        f'{k} {_fmt(v)}'
+        for k, v in [
+            ('escher', mods['escher']),
+            ('reactome', mods['reactome']),
+            ('wikipathways', mods['wikipathways'] + mods['wikipathways_geometry']),
+            ('human_maps', mods['human_maps']),
+            ('brenda', mods['brenda']),
+            ('metabolismregulation', mods['metabolismregulation']),
+            ('panther', mods['panther']),
+        ]
+    )
+    s3 = sec(
+        'The Atlas',
+        'Atlas',
+        '<div class="stats">'
+        + ui.stat(_fmt(total), 'module structures (default Atlas)', '模块结构（默认 Atlas）')
+        + ui.stat(_fmt(core_sum), 'open-core SQLite modules', '开放核心 SQLite 模块')
+        + ui.stat(_fmt(oc['reactions']), 'reactions in open-core', '开放核心中的反应')
+        + '</div><p class="meta">'
+        + b(
+            'Default Atlas module counts by source (open-core SQLite plus default extensions; from data/atlas_registry.json):',
+            '默认 Atlas 按来源的模块数（开放核心 SQLite 加默认扩展；来自 data/atlas_registry.json）：',
+        )
+        + ' <span class="dn">'
+        + e(by_line)
+        + '</span></p><p class="meta">'
+        + b(
+            'WikiPathways appears as semantic modules in open_core.sqlite plus a geometry-only extension kept separate for repository size; both load by default.',
+            'WikiPathways 在 open_core.sqlite 中有语义模块，另有因仓库体积而单独存放的仅几何扩展；两者默认都会加载。',
+        )
+        + '</p>',
+    )
+
+    def row(*cells):
+        return '<tr>' + ''.join(f'<td>{c}</td>' for c in cells) + '</tr>'
+
+    th = ''.join(
+        f'<th>{b(*h)}</th>'
+        for h in [
+            ('Source', '来源'),
+            ('What is used', '使用内容'),
+            ('Modules', '模块数'),
+            ('Licence', '许可'),
+            ('Status', '状态'),
+        ]
+    )
+    dflt = b('Used by default', '默认使用')
+    wp_mods = mods['wikipathways'] + mods['wikipathways_geometry']
+    tbl = (
+        '<div class="tablewrap"><table><thead><tr>'
+        + th
+        + '</tr></thead><tbody>'
+        + row(
+            'Escher',
+            b(f'{oc["maps"]["escher"]} community maps', f'{oc["maps"]["escher"]} 张社区地图'),
+            _fmt(mods['escher']),
+            'CC0-1.0',
+            dflt,
+        )
+        + row(
+            'Reactome',
+            b(f'release 97 · {oc["maps"]["reactome"]} diagrams', f'第 97 版 · {oc["maps"]["reactome"]} 张图'),
+            _fmt(mods['reactome']),
+            'CC0 (data)',
+            dflt,
+        )
+        + row(
+            'WikiPathways',
+            b(
+                f'release 20261110 · {oc["maps"]["wikipathways"]} maps; {_fmt(mods["wikipathways"])} semantic + {_fmt(mods["wikipathways_geometry"])} geometry-only modules',
+                f'发布 20261110 · {oc["maps"]["wikipathways"]} 张图；{_fmt(mods["wikipathways"])} 个语义模块 + {_fmt(mods["wikipathways_geometry"])} 个仅几何模块',
+            ),
+            _fmt(wp_mods),
+            'CC0-1.0',
+            dflt,
+        )
+        + row(
+            'Human-maps',
+            b(
+                f'{ext["human_maps"]["maps"]} official Escher JSON maps (SVG/BY-SA not imported)',
+                f'{ext["human_maps"]["maps"]} 张官方 Escher JSON（不导入 SVG/BY-SA）',
+            ),
+            _fmt(mods['human_maps']),
+            'CC BY 4.0',
+            dflt,
+        )
+        + row(
+            'BRENDA',
+            b(
+                f'{ext["brenda"]["pathways"]} pathway maps; layout possibly automatic',
+                f'{ext["brenda"]["pathways"]} 张通路图；布局可能为自动生成',
+            ),
+            _fmt(mods['brenda']),
+            'CC BY 4.0',
+            dflt,
+        )
+        + row(
+            'Metabolism Regulation',
+            b(
+                f'{ext["metabolismregulation"]["maps"]} SBGN-ML gallery maps (hand-drawn)',
+                f'{ext["metabolismregulation"]["maps"]} 张 SBGN-ML 图廊地图（手绘）',
+            ),
+            _fmt(mods['metabolismregulation']),
+            'CC BY 4.0',
+            dflt,
+        )
+        + row(
+            'PANTHER',
+            b(
+                f'version {ext["panther"]["version"]} · {ext["panther"]["maps"]} CellDesigner maps',
+                f'版本 {ext["panther"]["version"]} · {ext["panther"]["maps"]} 张 CellDesigner 图',
+            ),
+            _fmt(mods['panther']),
+            'CC BY 4.0',
+            dflt,
+        )
+        + '</tbody></table></div>'
+    )
+    s4 = sec(
+        'Data sources and licensing',
+        '数据来源与许可',
+        tbl
+        + '<p>'
+        + b(
+            'MicroMap and Yeast-maps are not included. KEGG is not an Atlas source. Full attribution: THIRD_PARTY_NOTICES.md. Evidence notes: docs/licensing_audit.md.',
+            '未收录 MicroMap 与 Yeast-maps。KEGG 不是 Atlas 来源。完整署名见 THIRD_PARTY_NOTICES.md；证据说明见 docs/licensing_audit.md。',
+        )
+        + '</p><p>'
+        + b(
+            'The software is MIT (LICENSE). The default Atlas mixes CC0 and CC BY 4.0 sources, so the Atlas and maps generated from it are distributed under CC BY 4.0; reuse must keep the attributions in THIRD_PARTY_NOTICES.md.',
+            '软件为 MIT（LICENSE）。默认 Atlas 混合 CC0 与 CC BY 4.0 来源，因此 Atlas 与由此生成的地图按 CC BY 4.0 分发；再利用须保留 THIRD_PARTY_NOTICES.md 中的署名。',
+        )
+        + '</p>',
+    )
+
+    s5 = sec(
+        'Matching and layout defaults',
+        '匹配与布局默认',
+        '<ul><li>'
+        + b(
+            'Matching uses EC currentisation (ExPASy), Rhea metabolite scoring for EC disambiguation, name normalisation, weighted Jaccard (currency metabolites half-weighted), and vicinity propagation for BRENDA. Details: docs/reaction_map_matching.md.',
+            '匹配包括 EC 现行化（ExPASy）、用于 EC 消歧的 Rhea 代谢物评分、名称规范化、加权 Jaccard（辅因子半权），以及 BRENDA 的邻域传播。详见 docs/reaction_map_matching.md。',
+        )
+        + '</li><li>'
+        + b(
+            'EC similarity extension is optional and off by default (CLI --ec; Map Generator checkbox). Recommendation: docs/ec_extension_recommendation.md.',
+            'EC 相似性扩展为可选，默认关闭（CLI --ec；地图生成器中的复选框）。建议见 docs/ec_extension_recommendation.md。',
+        )
+        + '</li><li>'
+        + b(
+            'Layout default is Bézier / layout_style=curated (the former name expert remains accepted as a deprecated alias). Orthogonal libavoid remains available only as CLI --layout-style legacy.',
+            '布局默认为 Bézier / layout_style=curated（旧名 expert 仍可作为已弃用别名）。正交 libavoid 仅作为 CLI 的 --layout-style legacy 保留。',
+        )
+        + '</li><li>'
+        + b(
+            'Map Generator: python3 project.py tool or ./start_tool.command. Examples: e_coli_core, iIT341, iMM904, iML1515. Viewer supports pan, wheel/pinch zoom and a minimap. The server exits when the last browser tab closes (grace ~8 s); pass --keep-running to disable.',
+            '地图生成器：python3 project.py tool 或 ./start_tool.command。示例：e_coli_core、iIT341、iMM904、iML1515。查看器支持平移、滚轮／双指缩放与缩略图。最后一个浏览器标签关闭后服务器退出（宽限约 8 秒）；加 --keep-running 可关闭该行为。',
+        )
+        + '</li><li>'
+        + b(
+            'Layout evaluation CLI (development aid): pip install -r layout_atlas/requirements-eval.txt, then python3 project.py evaluate --gem MODEL.xml --map DIR/map.json. See docs/layout_evaluation.md.',
+            '布局评价 CLI（开发辅助）：pip install -r layout_atlas/requirements-eval.txt，然后 python3 project.py evaluate --gem MODEL.xml --map DIR/map.json。见 docs/layout_evaluation.md。',
+        )
+        + '</li></ul>',
+    )
+
+    s5b = sec(
+        'Layout after curated reuse',
+        '复用人工绘制结构之后的布局',
+        '<p>'
+        + b(
+            'After matching, the Composer keeps curated blocks rigid, completes uncovered reactions, orients free reactions, composes stray components, draws Bézier connections and places labels. Full stage table and Project 22 rule status: README (Layout after curated reuse).',
+            '匹配之后，Composer 将人工绘制的结构块保持为刚性、补全未覆盖反应、调整自由反应朝向、归拢游离组分、绘制 Bézier 连线并放置标签。分阶段说明与 Project 22 规则对照见 README（Layout after curated reuse）。',
+        )
+        + '</p><ul><li>'
+        + b(
+            'Rigid skeleton and completion: drawing.pack_modules, completion.complete_spaced, completion_context.place, instances.optimize (currency stays private side glyphs).',
+            '刚性骨架与补全：drawing.pack_modules、completion.complete_spaced、completion_context.place、instances.optimize（辅因子保持每反应私有的 side 图元）。',
+        )
+        + '</li><li>'
+        + b(
+            'Orientation, composition, peripherals: orientation.apply (default full); composition.compose and peripheral.attach on; whole-block relocation off unless OPM_BLOCK_RELOC=on.',
+            '朝向、排版与外围：orientation.apply（默认 full）；composition.compose 与 peripheral.attach 默认开；整块迁移仅在 OPM_BLOCK_RELOC=on 时启用。',
+        )
+        + '</li><li>'
+        + b(
+            'Bézier curated style (edge_style.apply), optional --source-paths; labels via label_placement.optimize; integrity via tool_pipeline.check_integrity.',
+            'Bézier 人工绘制风格（edge_style.apply），可选 --source-paths；标签由 label_placement.optimize；完整性由 tool_pipeline.check_integrity。',
+        )
+        + '</li><li>'
+        + b(
+            'Project 22 rules (crossings, overlaps, long edges, participant consistency, compartments, compactness, reproducibility, scale): mostly partial; compartment respect and build-on-previous-layout not yet product goals. Gaps: 2D component packing, harder orientation, compose --seed.',
+            'Project 22 规则（交叉、重叠、长边、参与物朝向、区室、紧凑性、可复现、规模）：多为部分满足；区室约束与“在既有布局上增量”尚未作为产品目标。缺口：二维组分打包、更强朝向约束、compose --seed。',
+        )
+        + '</li></ul>',
+    )
+
+    s6 = sec(
+        'Reproducibility',
+        '可复现性',
+        '<p>'
+        + b('Every result contains:', '每个结果都包含：')
+        + '</p><ul><li><b>'
+        + b('Reaction provenance', '反应来源')
+        + '</b>: '
+        + b(
+            'curated (community layout), topology-only suggestion, functional (EC) suggestion, bridge or generated, with matching evidence',
+            '人工绘制（社区布局）、仅拓扑建议、功能（EC）建议、桥接或算法生成，并带匹配证据',
+        )
+        + '</li><li><b>'
+        + b('Layout quality', '布局质量')
+        + '</b></li><li><b>'
+        + b('Generation settings', '生成设置')
+        + '</b></li><li><b>'
+        + b('Licensing metadata', '许可元数据')
+        + '</b> (<code>licenses.json</code>)</li></ul><p>'
+        + b(
+            'Curated-geometry reuse, topology-only references and EC suggestions are reported separately and never merged into one reuse rate.',
+            '人工绘制几何复用、仅拓扑参考与 EC 建议分开报告，不合并成单一复用率。',
+        )
+        + '</p><p class="meta">'
+        + b('Report files', '报告文件')
+        + ': <code>report.json</code> · <code>reaction_provenance.json</code> · <code>licenses.json</code> · '
+        + b('Software version', '软件版本')
+        + f': v{e(version)} · '
+        + b('Registry generated', '登记生成日期')
+        + f': {e(reg.get("generated", ""))}</p>',
+    )
+
+    about_path = ROOT / 'layout_atlas' / 'results' / 'about' / 'index.html'
+    cards = ''.join(
+        f'<a class="card" href="{ui.rel(about_path, path)}" style="text-decoration:none"><h3>{b(en, zh)}</h3></a>'
+        for en, zh, path in [
+            ('Installation', '安装', 'docs/installation.md'),
+            ('Data sources', '数据来源', 'docs/data_sources.md'),
+            ('Reaction–map matching', '反应–地图匹配', 'docs/reaction_map_matching.md'),
+            ('Methodology', '方法', 'docs/methodology.md'),
+            ('Layout evaluation', '布局评价', 'docs/layout_evaluation.md'),
+            ('Limitations', '局限', 'docs/limitations.md'),
+            ('Third-party notices', '第三方声明', 'THIRD_PARTY_NOTICES.md'),
+            ('Atlas data layout', 'Atlas 数据布局', 'data/README.md'),
+        ]
+    )
+    s7 = sec('Documentation', '文档', '<div class="grid">' + cards + '</div>')
+
+    d = ROOT / 'layout_atlas' / 'results' / 'about'
+    d.mkdir(parents=True, exist_ok=True)
+    ui.write(
+        d / 'index.html',
+        ('About / Provenance', '关于 / 来源'),
+        s1 + s2 + s3 + s4 + s5 + s5b + s6 + s7,
+        section='about',
+        zh=ZHX,
+        lead=b(
+            'Purpose, Atlas sources, matching defaults and licensing for Open Meta Maps.',
+            'Open Meta Maps 的目标、Atlas 来源、匹配默认与许可。',
+        ),
+    )
+
 
 def generate():
- home();about();return dict(status='generated')
-if __name__=='__main__':print(generate())
+    home()
+    about()
+    return dict(status='generated', registry=str(REG.relative_to(ROOT)))
+
+
+if __name__ == '__main__':
+    print(generate())

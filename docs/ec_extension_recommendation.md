@@ -4,7 +4,7 @@ Measured on **e_coli_core** and **iIT341** after the matching improvements and r
 
 ## Summary table
 
-| Model | EC | Modules | Expert-module rxns | layout_prov exact / adapted / topo / func | EC kept / rejected | Crossings | Labels | Node ov. | p90 (px) | Runtime (s) |
+| Model | EC | Modules | Curated-module rxns | layout_prov exact / adapted / topo / func | EC kept / rejected | Crossings | Labels | Node ov. | p90 (px) | Runtime (s) |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | e_coli_core | off | 11 | 68 | 66 / 0 / 2 / 0 | — | 75 | 7 | 0 | 121.9 | 36.4 |
 | e_coli_core | on | 11 | 68 | 66 / 0 / 2 / 0 | 301 / 80 | 75 | 7 | 0 | 121.9 | 50.9 |
@@ -14,7 +14,7 @@ Measured on **e_coli_core** and **iIT341** after the matching improvements and r
 ## Coverage and quality
 
 - e_coli_core: EC on changes nothing placed; screening still runs (~15 s extra).
-- iIT341: +12 structures (all `ec_topology`, mostly BRENDA), +24 expert-module reactions, −17 generated; crossings/labels/p90 improve. Functional provenance: 23 reactions.
+- iIT341: +12 structures (all `ec_topology`, mostly BRENDA), +24 curated-module reactions, −17 generated; crossings/labels/p90 improve. Functional provenance: 23 reactions.
 
 ## Sample of kept `ec_topology` placements (iIT341)
 
