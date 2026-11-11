@@ -1,12 +1,437 @@
 {
- "integrity": {
-  "model_integrity": true,
-  "visualization_coverage": true,
-  "identity_integrity": {
-   "ok": true,
-   "direction_normalized_reverse_only": [
-    "FORt"
-   ]
+  "integrity": {
+    "model_integrity": true,
+    "visualization_coverage": true,
+    "identity_integrity": {
+      "ok": true,
+      "direction_normalized_reverse_only": [
+        "FORt"
+      ]
+    }
+  },
+  "layout_quality": {
+    "orientation_mode": "full",
+    "expert_geometry": {
+      "structures": 3,
+      "distortion_rms_px_mean": 4.78,
+      "distortion_rms_px_max": 5.7,
+      "distortion_max_px": 15.7,
+      "mean_displacement_px": 5.2,
+      "note": "residual after translation, rotation and uniform scaling of each structure"
+    },
+    "final_geometry": {
+      "edges": {
+        "total": 360,
+        "algorithm": 217,
+        "curated": 143,
+        "expert": 143
+      },
+      "core": {
+        "crossings": {
+          "counted": 47,
+          "total": 78,
+          "same_reaction": 20,
+          "same_reaction_curated": 0,
+          "same_reaction_expert": 0,
+          "algorithm_algorithm": 12,
+          "algorithm_curated": 35,
+          "curated_curated": 11,
+          "algorithm_expert": 35,
+          "expert_expert": 11,
+          "main_metabolite": 5,
+          "currency_involved": 42,
+          "per_100_edges": 21.66
+        },
+        "overlaps": {
+          "overlapping_pairs": 7,
+          "node_overlap_pairs": 0,
+          "label_overlap_pairs": 7,
+          "curves_through_nodes": 3,
+          "curves_through_labels": 1
+        },
+        "collisions": {
+          "overlapping_pairs": 7,
+          "node_overlap_pairs": 0,
+          "label_overlap_pairs": 7,
+          "curves_through_nodes": 3,
+          "curves_through_labels": 1
+        },
+        "long_lines": {
+          "p90_reaction_spacings": 1.36,
+          "edge_len_max_rel": 15.91,
+          "p90_px": 127.6,
+          "reaction_spacing_px": 93.9
+        },
+        "length_p90": {
+          "px": 127.6,
+          "in_reaction_spacings": 1.36,
+          "reaction_spacing_px": 93.9
+        },
+        "participant_placement": {
+          "inout_opposite_share": 0.813,
+          "inout_opposite_share_core": 0.794,
+          "reactions_all": 75,
+          "reactions_core": 63,
+          "threshold_deg": 120.0
+        },
+        "core_orientation": {
+          "opposite_sides_share": 0.794,
+          "reactions": 63
+        },
+        "cofactor_clones": {
+          "currency_hub_violations": 0,
+          "currency_long_arc_share": 0.0,
+          "currency_glyphs": 175,
+          "hub_threshold_spacings": 4.0,
+          "long_threshold_spacings": 3.0
+        },
+        "structure_continuity": {
+          "contiguous_pair_share": 0.856,
+          "pairs": 146,
+          "contiguous_pairs": 125,
+          "structures": 11,
+          "split_structures": 0,
+          "split_structure_share": 0.0,
+          "reaction_spacing_px": 93.9,
+          "adjacency_factor": 3.0,
+          "note": "Share of expert-structure reaction pairs that share a non-currency metabolite and lie within adjacency_factor × median reaction spacing; split_structures count structures whose contiguous pairs form more than one geometric piece."
+        },
+        "bezier_coverage": {
+          "share": 1.0,
+          "algorithm_edges": 217,
+          "bezier": 217,
+          "straight_lines": 0,
+          "polylines_with_bends": 0,
+          "orthogonal_polylines": 0
+        }
+      },
+      "details": {
+        "length": {
+          "p50": 55.9,
+          "p90": 127.6,
+          "p99": 301.5,
+          "over_250": 13,
+          "over_1000": 0,
+          "edge_len_max_rel": 15.91,
+          "median_px": 55.9
+        },
+        "line_shape": {
+          "detour_median": 1.015,
+          "detour_p90": 1.065,
+          "detour_over_1_6": 1,
+          "hooks": 0,
+          "sharp_turns": 0,
+          "self_intersections": 0,
+          "bends_per_arc": 0.089,
+          "bent_arc_share": 0.0417
+        },
+        "cycles": {
+          "cycle_circularity": 0.2889,
+          "cycle_direction": "cw",
+          "cycle_direction_consistency": 0.575,
+          "cycle_order_consistency": 1.0,
+          "cycles": 40,
+          "cycle_len": 3
+        },
+        "flow_main_dir": "right",
+        "flow_main_dir_share": 0.3016,
+        "exchange_periphery_share": 0.4167,
+        "blank_space": {
+          "blank_space_share": 0.5459,
+          "largest_empty_rect_share": 0.2399,
+          "cell_px": 56.31,
+          "spacing_px": 93.9
+        },
+        "blank_space_share": 0.5459,
+        "largest_empty_rect_share": 0.2399,
+        "unrelated_overlaps": {
+          "node_overlaps": 0.0,
+          "edge_through_node": 4.0,
+          "collinear_edge_overlaps": 0.0,
+          "total": 4.0
+        },
+        "aspect_ratio": 0.6771,
+        "aspect_ratio_target": 1.0,
+        "aspect_ratio_vs_target": 0.3229,
+        "area_per_node": 17446.4,
+        "species_in_other_compartment": 0.716,
+        "participant_consistency": 0.7983,
+        "subsystem_conventions": {
+          "glycolysis_above_tca": "not applicable",
+          "ppp_right_of_glycolysis": "not applicable",
+          "note": "no subsystem annotations on reactions"
+        },
+        "thresholds_note": "inout opposite ≥120.0° and participant_consistency >90.0° are Project 22 first guesses; hub/long currency thresholds are relative to median reaction spacing; blank_space / unrelated_overlaps follow MetaCarto ideas (CC BY 4.0; reimplemented, not copied)",
+        "crossing_density": {
+          "worst_window_crossings": 16
+        },
+        "orientation": {
+          "all_participants": {
+            "reactions": 75,
+            "opposite_sides_share": 0.813,
+            "angle_median": 167
+          },
+          "core_participants": {
+            "reactions": 63,
+            "opposite_sides_share": 0.794,
+            "angle_median": 167
+          },
+          "threshold_deg": 120.0,
+          "opposite_sides_share": 0.813,
+          "angle_median": 167
+        },
+        "composition": {
+          "canvas": [
+            1764,
+            2640
+          ],
+          "aspect": 0.6683,
+          "aspect_ratio": 0.6683,
+          "space_utilisation": 0.6,
+          "cell_px": 375,
+          "neighbour5_median_px": 181,
+          "neighbour5_p90_px": 400,
+          "neighbour5_max_px": 670,
+          "isolated_reactions": 0,
+          "isolation_threshold_px": 1449,
+          "max_reactions_in_one_cell": 16
+        },
+        "structure_continuity": {
+          "contiguous_pair_share": 0.856,
+          "pairs": 146,
+          "contiguous_pairs": 125,
+          "structures": 11,
+          "split_structures": 0,
+          "split_structure_share": 0.0,
+          "reaction_spacing_px": 93.9,
+          "adjacency_factor": 3.0,
+          "note": "Share of expert-structure reaction pairs that share a non-currency metabolite and lie within adjacency_factor × median reaction spacing; split_structures count structures whose contiguous pairs form more than one geometric piece.",
+          "details": [
+            {
+              "structure": "05a4558d51e0bf86849aae74",
+              "reactions": 40,
+              "pairs": 121,
+              "contiguous_pairs": 103,
+              "components": 1,
+              "contiguous_pair_share": 0.851
+            },
+            {
+              "structure": "66e523bfda3063fb7bc3f362",
+              "reactions": 8,
+              "pairs": 13,
+              "contiguous_pairs": 10,
+              "components": 1,
+              "contiguous_pair_share": 0.769
+            },
+            {
+              "structure": "9211a8b51455966ed1e43e05",
+              "reactions": 4,
+              "pairs": 4,
+              "contiguous_pairs": 4,
+              "components": 1,
+              "contiguous_pair_share": 1.0
+            },
+            {
+              "structure": "971f14e1968aca1cc71b2819",
+              "reactions": 2,
+              "pairs": 1,
+              "contiguous_pairs": 1,
+              "components": 1,
+              "contiguous_pair_share": 1.0
+            },
+            {
+              "structure": "c92a78b488ce41a6ddcee705",
+              "reactions": 2,
+              "pairs": 1,
+              "contiguous_pairs": 1,
+              "components": 1,
+              "contiguous_pair_share": 1.0
+            },
+            {
+              "structure": "f7d3b0457a3623f5dfa41644",
+              "reactions": 2,
+              "pairs": 1,
+              "contiguous_pairs": 1,
+              "components": 1,
+              "contiguous_pair_share": 1.0
+            },
+            {
+              "structure": "65b9b47c824e721a8fd8f1a3",
+              "reactions": 2,
+              "pairs": 1,
+              "contiguous_pairs": 1,
+              "components": 1,
+              "contiguous_pair_share": 1.0
+            },
+            {
+              "structure": "bee463ed50b4ae60148e680a",
+              "reactions": 2,
+              "pairs": 1,
+              "contiguous_pairs": 1,
+              "components": 1,
+              "contiguous_pair_share": 1.0
+            },
+            {
+              "structure": "25c16d0297cc8e93b1baeac3",
+              "reactions": 2,
+              "pairs": 1,
+              "contiguous_pairs": 1,
+              "components": 1,
+              "contiguous_pair_share": 1.0
+            },
+            {
+              "structure": "e438f2b91e1aac39d0cdfd93",
+              "reactions": 2,
+              "pairs": 1,
+              "contiguous_pairs": 1,
+              "components": 1,
+              "contiguous_pair_share": 1.0
+            },
+            {
+              "structure": "bef3018080f970b4fa23df1f",
+              "reactions": 2,
+              "pairs": 1,
+              "contiguous_pairs": 1,
+              "components": 1,
+              "contiguous_pair_share": 1.0
+            }
+          ]
+        },
+        "edges_footnote": {
+          "algorithm": 217,
+          "curated": 143,
+          "total": 360
+        },
+        "warnings": [],
+        "bezier_coverage": {
+          "share": 1.0,
+          "algorithm_edges": 217,
+          "bezier": 217,
+          "straight_lines": 0,
+          "polylines_with_bends": 0,
+          "orthogonal_polylines": 0
+        },
+        "runtime_seconds": 66.9
+      },
+      "worst_regions": [
+        {
+          "x": 450.0,
+          "y": 608.2,
+          "w": 400,
+          "h": 400,
+          "crossings": 16,
+          "obstacle_hits": 0,
+          "node_overlaps": 0,
+          "edges": 58,
+          "reactions": [
+            "ACALD",
+            "ACONTa",
+            "ACONTb",
+            "MALS",
+            "MDH",
+            "ME1",
+            "ME2",
+            "PDH",
+            "PFL",
+            "PPC"
+          ]
+        },
+        {
+          "x": 50.0,
+          "y": 608.2,
+          "w": 400,
+          "h": 400,
+          "crossings": 12,
+          "obstacle_hits": 0,
+          "node_overlaps": 0,
+          "edges": 72,
+          "reactions": [
+            "AKGt2r",
+            "GLNS",
+            "GLNabc",
+            "GLUDy",
+            "GLUN",
+            "GLUSy",
+            "GLUt2r",
+            "ICL",
+            "SUCCt2_2",
+            "SUCCt3"
+          ]
+        },
+        {
+          "x": 1450.0,
+          "y": 608.2,
+          "w": 400,
+          "h": 400,
+          "crossings": 9,
+          "obstacle_hits": 0,
+          "node_overlaps": 0,
+          "edges": 36,
+          "reactions": [
+            "BIOMASS_Ecoli_core_w_GAM",
+            "ENO",
+            "GND",
+            "PFK",
+            "PGK",
+            "RPE",
+            "TKT2"
+          ]
+        },
+        {
+          "x": 1450.0,
+          "y": 208.2,
+          "w": 400,
+          "h": 400,
+          "crossings": 4,
+          "obstacle_hits": 2,
+          "node_overlaps": 0,
+          "edges": 34,
+          "reactions": [
+            "BIOMASS_Ecoli_core_w_GAM",
+            "GAPD",
+            "TALA",
+            "TKT1",
+            "TPI"
+          ]
+        },
+        {
+          "x": 250.0,
+          "y": 1408.2,
+          "w": 400,
+          "h": 400,
+          "crossings": 4,
+          "obstacle_hits": 0,
+          "node_overlaps": 0,
+          "edges": 25,
+          "reactions": [
+            "NADTRHD",
+            "THD2"
+          ]
+        }
+      ],
+      "note": "computed from the final map.json; crossings are counted on sampled final curves, source-split (algorithm×algorithm + algorithm×curated; curated×curated not in the headline) and role-split (main-metabolite vs currency-involved); worst_regions use uncapped counted crossings in true 400 px / stride-200 boxes; structure continuity scores reused curated structures; 120° opposite-side threshold is a Project 22 first guess"
+    },
+    "orientation": {
+      "all_participants": {
+        "reactions": 75,
+        "opposite_sides_share": 0.813,
+        "angle_median": 167
+      },
+      "core_participants": {
+        "reactions": 63,
+        "opposite_sides_share": 0.794,
+        "angle_median": 167
+      },
+      "threshold_deg": 120.0,
+      "opposite_sides_share": 0.813,
+      "angle_median": 167
+    }
+  },
+  "model": {
+    "id": "e_coli_core",
+    "name": "",
+    "reactions": 95,
+    "metabolites": 72,
+    "hash": "deb260e7fc6459b5636d095d"
   }
- }
 }

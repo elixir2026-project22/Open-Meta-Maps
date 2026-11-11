@@ -45,6 +45,34 @@ def test_overlaps_no_touch():
     assert m["overlapping_pairs"] == 0.0
 
 
+def test_blank_space_empty_canvas_mostly_blank():
+    # Four corners occupied; most of the middle is blank after clear radius.
+    pts = [(0.0, 0.0), (100.0, 0.0), (0.0, 100.0), (100.0, 100.0)]
+    m = metrics.blank_space(pts, segments=[], label_boxes=[], spacing=20.0)
+    assert m["blank_space_share"] is not None
+    assert m["blank_space_share"] > 0.2
+    assert m["largest_empty_rect_share"] is not None
+    assert m["largest_empty_rect_share"] > 0.0
+
+
+def test_blank_space_dense_ink_low_blank():
+    # Dense grid of points with small spacing → little blank space.
+    pts = [(x, y) for x in range(0, 50, 5) for y in range(0, 50, 5)]
+    m = metrics.blank_space(pts, spacing=10.0, cell_factor=0.6, clear_spacings=1.0)
+    assert m["blank_space_share"] is not None
+    assert m["blank_space_share"] < 0.5
+
+
+def test_unrelated_overlaps_node_hit():
+    # Two nodes from unrelated reactions almost on top of each other.
+    node_xy = {"a": (0.0, 0.0), "b": (5.0, 0.0)}
+    node_reaction = {"a": "R1", "b": "R2"}
+    segs = []
+    related = set()
+    m = metrics.unrelated_overlaps(node_xy, node_reaction, segs, related, node_radius=7.0)
+    assert m["unrelated_node_overlaps"] == 1.0
+
+
 def test_structure_continuity_adjacent():
     from evaluation.continuity import structure_continuity
 
@@ -77,5 +105,8 @@ if __name__ == "__main__":
     test_participant_consistency_same_side()
     test_long_edge_share()
     test_overlaps_no_touch()
+    test_blank_space_empty_canvas_mostly_blank()
+    test_blank_space_dense_ink_low_blank()
+    test_unrelated_overlaps_node_hit()
     test_structure_continuity_adjacent()
     print("ok")

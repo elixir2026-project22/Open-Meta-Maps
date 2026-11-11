@@ -3,16 +3,19 @@
 Pathway-specific metrics are adapted from layout-benchmark `metrics.py` (MIT).
 General graph-drawing metrics come from gdMetriX when installed (GPL-3.0; optional
 import only — never vendored).
+
+``blank_space`` and ``unrelated_overlaps`` are clean-room reimplementations of ideas
+from MetaCarto (`src/layout/metrics.py`, CC BY 4.0) — see docs/layout_evaluation.md.
 """
 
 from __future__ import annotations
 
 import math
 import os
-from typing import Any
+from typing import Any, Iterable, Sequence
 
 import numpy as np
-from scipy.spatial import ConvexHull, procrustes
+from scipy.spatial import ConvexHull, cKDTree, procrustes
 from scipy.spatial.distance import pdist
 from scipy.stats import spearmanr
 
@@ -21,6 +24,8 @@ from .pathway import PRODUCT, REACTANT, SPECIES, Pathway
 Positions = dict[str, tuple[float, float]]
 SYMMETRY_MAX_NODES = 300
 CROSSING_MAX_EDGES = 1200  # number_of_crossings is quadratic; skip on large GEMs
+BLANK_CELL_FACTOR = 0.6  # cell size ≈ 0.6 × median reaction spacing (MetaCarto idea)
+BLANK_CLEAR_SPACINGS = 1.0  # a cell is blank if no ink within ~1× spacing
 
 try:
     from shapely import STRtree, box
@@ -94,7 +99,9 @@ def general_metrics(pathway: Pathway, pos: Positions) -> dict[str, float | None]
         "edge_length_deviation": _f(gdMetriX.edge_length_deviation, g, pos=pos),
         "edge_orthogonality": _f(gdMetriX.edge_orthogonality, g, pos=pos),
         "stress": _f(gdMetriX.stress, g, pos=pos),
-        "aspect_ratio": _f(gdMetriX.aspect_ratio, g, pos=pos),
+        # gdMetriX aspect is kept under a separate key; public aspect_ratio is always W/H.
+        "gdmetrix_aspect_ratio": _f(gdMetriX.aspect_ratio, g, pos=pos),
+        "aspect_ratio": None,
         "area_per_node": (lambda a: (a / max(n, 1)) if a is not None else None)(_f(gdMetriX.area, g, pos=pos)),
         "homogeneity": _f(gdMetriX.homogeneity, g, pos=pos),
         "coherence_to_average_flow": _f(gdMetriX.coherence_to_average_flow, directed, pos=pos),
@@ -307,15 +314,287 @@ def long_edge_details(pathway: Pathway, pos: Positions, long_factor: float = 3.0
 
 
 def compactness_fallback(pos: Positions) -> dict[str, float | None]:
-    """Aspect ratio and area per node without gdMetriX (axis-aligned bbox)."""
+    """Aspect ratio (W/H) and area per node without gdMetriX (axis-aligned bbox).
+
+    ``aspect_ratio`` is always width÷height (Project 22 / transfer-check definition),
+    not max/min. gdMetriX may still report its own aspect under ``gdmetrix_aspect_ratio``.
+    """
     if len(pos) < 2:
-        return {"aspect_ratio_bbox": None, "area_per_node_bbox": None}
+        return {"aspect_ratio": None, "aspect_ratio_bbox": None, "area_per_node_bbox": None}
     xy = np.array(list(pos.values()), float)
     w = float(xy[:, 0].max() - xy[:, 0].min())
     h = float(xy[:, 1].max() - xy[:, 1].min())
+    wh = w / max(h, 1e-9)
     return {
-        "aspect_ratio_bbox": (max(w, h) / max(min(w, h), 1e-9)),
+        "aspect_ratio": wh,
+        "aspect_ratio_bbox": wh,
         "area_per_node_bbox": (w * h) / len(pos),
+    }
+
+
+def _largest_empty_rectangle(empty: np.ndarray) -> int:
+    """Largest-area axis-aligned rectangle of True cells (histogram stack method)."""
+    if empty.size == 0:
+        return 0
+    rows, cols = empty.shape
+    height = np.zeros(cols, dtype=int)
+    best = 0
+    for r in range(rows):
+        for c in range(cols):
+            height[c] = height[c] + 1 if empty[r, c] else 0
+        stack: list[int] = []
+        for c in range(cols + 1):
+            h = int(height[c]) if c < cols else 0
+            while stack and height[stack[-1]] > h:
+                top = stack.pop()
+                width = c if not stack else c - stack[-1] - 1
+                best = max(best, int(height[top]) * width)
+            stack.append(c)
+    return best
+
+
+def blank_space(
+    points: np.ndarray | Sequence[Sequence[float]] | None = None,
+    segments: Sequence[Sequence[Sequence[float]]] | np.ndarray | None = None,
+    label_boxes: Sequence[Sequence[float]] | np.ndarray | None = None,
+    *,
+    spacing: float | None = None,
+    cell_factor: float = BLANK_CELL_FACTOR,
+    clear_spacings: float = BLANK_CLEAR_SPACINGS,
+    pad_spacings: float = 0.5,
+) -> dict[str, float | None]:
+    """Raster blank-space share and largest empty rectangle (MetaCarto idea; clean-room).
+
+    Grid cell size is ``cell_factor ×`` median reaction spacing (default 0.6). Nodes,
+    polyline segments and label boxes are stamped as ink. A cell counts as blank only
+    if no ink lies within ``clear_spacings ×`` spacing (default 1). Returns:
+
+    - ``blank_space_share`` — blank cells / cells
+    - ``largest_empty_rect_share`` — largest empty axis-aligned rectangle / canvas cells
+    - ``cell_px``, ``spacing_px``, ``grid`` shape metadata
+
+    Single implementation for the evaluation CLI, the Layout quality panel, and any
+    component-packing work that needs the same whitespace definition.
+    """
+    pts = np.asarray(points if points is not None else np.zeros((0, 2)), float).reshape(-1, 2)
+    segs = [] if segments is None else list(segments)
+    boxes = [] if label_boxes is None else [tuple(map(float, b)) for b in label_boxes if len(b) >= 4]
+
+    if spacing is None or spacing <= 0:
+        if len(pts) >= 2:
+            d = cKDTree(pts).query(pts, k=2)[0][:, 1]
+            d = d[d > 0]
+            spacing = float(np.median(d)) if len(d) else 60.0
+        else:
+            spacing = 60.0
+    cell = max(float(cell_factor) * float(spacing), 1.0)
+    clear_r = max(float(clear_spacings) * float(spacing), cell)
+
+    coords = [pts] if len(pts) else []
+    for s in segs:
+        a = np.asarray(s[0], float)
+        b = np.asarray(s[1], float)
+        coords.append(np.vstack([a, b]))
+    for b in boxes:
+        coords.append(np.array([[b[0], b[1]], [b[2], b[3]]], float))
+    if not coords:
+        return {
+            "blank_space_share": None,
+            "largest_empty_rect_share": None,
+            "cell_px": cell,
+            "spacing_px": float(spacing),
+            "cells": 0.0,
+        }
+    all_xy = np.vstack(coords)
+    pad = float(pad_spacings) * float(spacing)
+    x0 = float(all_xy[:, 0].min()) - pad
+    y0 = float(all_xy[:, 1].min()) - pad
+    x1 = float(all_xy[:, 0].max()) + pad
+    y1 = float(all_xy[:, 1].max()) + pad
+    ncols = max(int(math.ceil((x1 - x0) / cell)), 1)
+    nrows = max(int(math.ceil((y1 - y0) / cell)), 1)
+    # Cap very large grids (huge GEMs) to keep evaluation interactive.
+    max_cells = 400_000
+    if ncols * nrows > max_cells:
+        scale = math.sqrt((ncols * nrows) / max_cells)
+        cell *= scale
+        ncols = max(int(math.ceil((x1 - x0) / cell)), 1)
+        nrows = max(int(math.ceil((y1 - y0) / cell)), 1)
+
+    ink = np.zeros((nrows, ncols), dtype=bool)
+
+    def stamp_xy(x: float, y: float) -> None:
+        c = int((x - x0) // cell)
+        r = int((y - y0) // cell)
+        if 0 <= r < nrows and 0 <= c < ncols:
+            ink[r, c] = True
+
+    def stamp_segment(a: np.ndarray, b: np.ndarray) -> None:
+        length = float(np.hypot(*(b - a)))
+        steps = max(int(math.ceil(length / (0.5 * cell))), 1)
+        for t in np.linspace(0.0, 1.0, steps + 1):
+            p = a + t * (b - a)
+            stamp_xy(float(p[0]), float(p[1]))
+
+    for p in pts:
+        stamp_xy(float(p[0]), float(p[1]))
+    for s in segs:
+        stamp_segment(np.asarray(s[0], float), np.asarray(s[1], float))
+    for x_a, y_a, x_b, y_b in boxes:
+        c0 = max(int((min(x_a, x_b) - x0) // cell), 0)
+        c1 = min(int((max(x_a, x_b) - x0) // cell), ncols - 1)
+        r0 = max(int((min(y_a, y_b) - y0) // cell), 0)
+        r1 = min(int((max(y_a, y_b) - y0) // cell), nrows - 1)
+        ink[r0 : r1 + 1, c0 : c1 + 1] = True
+
+    # Dilate ink: cell is non-blank if any ink is within clear_r.
+    rad = int(math.ceil(clear_r / cell))
+    occupied = ink.copy()
+    if rad > 0 and ink.any():
+        ys, xs = np.nonzero(ink)
+        for dy in range(-rad, rad + 1):
+            for dx in range(-rad, rad + 1):
+                if dx * dx + dy * dy > (clear_r / cell) ** 2 + 1e-9:
+                    continue
+                yy = ys + dy
+                xx = xs + dx
+                m = (yy >= 0) & (yy < nrows) & (xx >= 0) & (xx < ncols)
+                occupied[yy[m], xx[m]] = True
+
+    total = float(nrows * ncols)
+    blank = ~occupied
+    blank_n = float(blank.sum())
+    largest = _largest_empty_rectangle(blank)
+    return {
+        "blank_space_share": round(blank_n / total, 4) if total else None,
+        "largest_empty_rect_share": round(largest / total, 4) if total else None,
+        "cell_px": round(cell, 2),
+        "spacing_px": round(float(spacing), 1),
+        "cells": total,
+        "grid_rows": float(nrows),
+        "grid_cols": float(ncols),
+        "cell_factor": float(cell_factor),
+        "clear_spacings": float(clear_spacings),
+    }
+
+
+def blank_space_from_positions(
+    pos: Positions,
+    edges: Iterable[tuple[str, str]] | None = None,
+    label_boxes: Sequence[Sequence[float]] | None = None,
+    spacing: float | None = None,
+    **kwargs: Any,
+) -> dict[str, float | None]:
+    """``blank_space`` from node id→(x,y) and undirected edges (component-packing friendly)."""
+    points = np.array(list(pos.values()), float).reshape(-1, 2) if pos else np.zeros((0, 2))
+    segs = []
+    if edges is not None:
+        for u, v in edges:
+            if u in pos and v in pos:
+                segs.append((pos[u], pos[v]))
+    return blank_space(points, segs, label_boxes, spacing=spacing, **kwargs)
+
+
+def unrelated_overlaps(
+    node_xy: dict[str, tuple[float, float]],
+    node_reaction: dict[str, str],
+    segments: Sequence[tuple[str, str, np.ndarray, np.ndarray]],
+    related: set[tuple[str, str]],
+    *,
+    node_radius: float = 7.0,
+    collinear_tol: float = 3.0,
+) -> dict[str, float | None]:
+    """Overlaps between reactions that share no non-currency metabolite (MetaCarto idea).
+
+    Counts:
+    - ``unrelated_node_overlaps`` — node centres of unrelated reactions closer than 2×radius
+    - ``unrelated_edge_through_node`` — a segment of reaction A passes near a node of unrelated B
+    - ``unrelated_collinear_edge_overlaps`` — nearly collinear overlapping segment pairs of unrelated reactions
+    """
+    ids = [n for n in node_xy if n in node_reaction]
+    if len(ids) < 2:
+        return {
+            "unrelated_node_overlaps": 0.0,
+            "unrelated_edge_through_node": 0.0,
+            "unrelated_collinear_edge_overlaps": 0.0,
+        }
+
+    def related_pair(a: str, b: str) -> bool:
+        if a == b:
+            return True
+        return (a, b) in related or (b, a) in related
+
+    # node-on-node
+    xy = np.array([node_xy[n] for n in ids], float)
+    tree = cKDTree(xy)
+    node_hits = 0
+    for i, j in tree.query_pairs(2.0 * node_radius):
+        if not related_pair(node_reaction[ids[i]], node_reaction[ids[j]]):
+            node_hits += 1
+
+    # edge through node (query nearby node centres only)
+    through = 0
+    if ids:
+        for rid_a, _nid_u, a, b in segments:
+            ab = b - a
+            lab2 = float(ab @ ab)
+            if lab2 < 1e-12:
+                continue
+            mid = 0.5 * (a + b)
+            half = 0.5 * float(np.hypot(*ab)) + node_radius
+            for j in tree.query_ball_point(mid, half):
+                nid = ids[j]
+                rid_b = node_reaction[nid]
+                if related_pair(rid_a, rid_b):
+                    continue
+                p = xy[j]
+                t = float((p - a) @ ab) / lab2
+                if t <= 0.05 or t >= 0.95:
+                    continue
+                proj = a + t * ab
+                if float(np.hypot(*(p - proj))) <= node_radius:
+                    through += 1
+
+    # collinear edge-on-edge (unrelated)
+    collinear = 0
+    seg_list = list(segments)
+    for i in range(len(seg_list)):
+        ra, _, a1, b1 = seg_list[i]
+        d1 = b1 - a1
+        n1 = float(np.hypot(*d1))
+        if n1 < 1e-6:
+            continue
+        u1 = d1 / n1
+        for j in range(i + 1, len(seg_list)):
+            rb, _, a2, b2 = seg_list[j]
+            if related_pair(ra, rb):
+                continue
+            d2 = b2 - a2
+            n2 = float(np.hypot(*d2))
+            if n2 < 1e-6:
+                continue
+            u2 = d2 / n2
+            if abs(float(u1 @ u2)) < 0.98:  # not nearly parallel
+                continue
+            # distance between infinite lines via cross of offsets
+            off = a2 - a1
+            dist = abs(float(off[0] * u1[1] - off[1] * u1[0]))
+            if dist > collinear_tol:
+                continue
+            # project endpoints of seg2 onto seg1 parameter
+            def param(p):
+                return float((p - a1) @ u1)
+
+            lo = max(0.0, min(param(a2), param(b2)))
+            hi = min(n1, max(param(a2), param(b2)))
+            if hi - lo > collinear_tol:  # overlapping run
+                collinear += 1
+
+    return {
+        "unrelated_node_overlaps": float(node_hits),
+        "unrelated_edge_through_node": float(through),
+        "unrelated_collinear_edge_overlaps": float(collinear),
+        "unrelated_overlaps_total": float(node_hits + through + collinear),
     }
 
 
@@ -325,7 +604,21 @@ def all_benchmark_metrics(pathway: Pathway, pos: Positions, reference: Positions
     m["participant_consistency"] = participant_consistency(pathway, pos)
     m.update(compartment_metrics(pathway, pos))
     m.update(long_edge_metrics(pathway, pos))
-    m.update(compactness_fallback(pos))
+    compact = compactness_fallback(pos)
+    m.update(compact)
+    # Prefer W/H bbox aspect; leave gdMetriX value only under gdmetrix_aspect_ratio.
+    if compact.get("aspect_ratio") is not None:
+        m["aspect_ratio"] = compact["aspect_ratio"]
+    if m.get("area_per_node") is None and compact.get("area_per_node_bbox") is not None:
+        m["area_per_node"] = compact["area_per_node_bbox"]
+    # Raster blank space on the placed undirected graph (same function the panel uses).
+    m.update(
+        {
+            k: v
+            for k, v in blank_space_from_positions(pos, pathway.undirected().edges()).items()
+            if k in ("blank_space_share", "largest_empty_rect_share", "cell_px", "spacing_px")
+        }
+    )
     if reference is not None:
         m.update(reference_similarity(pos, reference))
     return m

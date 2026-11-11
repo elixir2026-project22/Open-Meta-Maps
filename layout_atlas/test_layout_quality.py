@@ -56,10 +56,15 @@ def test_region_window_keys_membership():
 def test_worst_region_count_matches_drawn_box():
     data = _crossing_map()
     summary, issues = lq.evaluate(data, max_issues=10)
-    crossings = [c for c in issues["crossings"] if c["kind"] in ("algorithm_algorithm", "algorithm_expert")]
+    crossings = [c for c in issues["crossings"] if c["kind"] in ("algorithm_algorithm", "algorithm_curated", "algorithm_expert")]
     assert len(crossings) == 2, crossings
     # Uncapped list used for windows even when max_issues is tiny.
     assert summary["core"]["crossings"]["algorithm_algorithm"] == 2
+    assert "main_metabolite" in summary["core"]["crossings"]
+    assert "cofactor_clones" in summary["core"]
+    assert "participant_placement" in summary["core"]
+    assert "line_shape" in summary["details"]
+    assert summary["core"]["crossings"]["algorithm_expert"] == summary["core"]["crossings"]["algorithm_curated"]
 
     near = [c for c in crossings if abs(c["x"] - 150) < 1 and abs(c["y"] - 150) < 1]
     far = [c for c in crossings if abs(c["x"] - 750) < 1 and abs(c["y"] - 750) < 1]

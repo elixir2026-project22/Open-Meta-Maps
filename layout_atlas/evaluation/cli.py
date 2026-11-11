@@ -24,9 +24,15 @@ def _dump(path: Path, obj):
 
 def _flat_row(report: dict) -> dict:
     b = report.get("benchmark") or {}
-    g = (report.get("geometry") or {}).get("core") or {}
+    geom = report.get("geometry") or {}
+    g = geom.get("core") or {}
+    d = geom.get("details") or {}
     cross = g.get("crossings") or {}
-    coll = g.get("collisions") or {}
+    coll = g.get("overlaps") or g.get("collisions") or {}
+    long_lines = g.get("long_lines") or {}
+    place = g.get("participant_placement") or {}
+    cof = g.get("cofactor_clones") or {}
+    stab = report.get("reproducibility") or report.get("stability_vs_compare") or {}
     return {
         "model": report.get("model"),
         "placement_share": (report.get("coverage") or {}).get("placement_share"),
@@ -35,17 +41,45 @@ def _flat_row(report: dict) -> dict:
         "crossing_density": b.get("crossing_density"),
         "overlapping_pairs": b.get("overlapping_pairs"),
         "overlap_area_share": b.get("overlap_area_share"),
-        "participant_consistency": b.get("participant_consistency"),
-        "species_in_other_compartment": b.get("species_in_other_compartment"),
+        "participant_consistency": b.get("participant_consistency") if b.get("participant_consistency") is not None else d.get("participant_consistency"),
+        "inout_opposite_share": place.get("inout_opposite_share"),
+        "inout_opposite_share_core": place.get("inout_opposite_share_core"),
+        "species_in_other_compartment": b.get("species_in_other_compartment") if b.get("species_in_other_compartment") is not None else d.get("species_in_other_compartment"),
         "long_edge_share": b.get("long_edge_share"),
+        "edge_len_max_rel": long_lines.get("edge_len_max_rel") or d.get("edge_len_max_rel") or (d.get("length") or {}).get("edge_len_max_rel"),
         "edge_length_deviation": b.get("edge_length_deviation"),
-        "aspect_ratio": b.get("aspect_ratio") if b.get("aspect_ratio") is not None else b.get("aspect_ratio_bbox"),
-        "area_per_node": b.get("area_per_node") if b.get("area_per_node") is not None else b.get("area_per_node_bbox"),
-        "stress": b.get("stress"),
-        "procrustes": b.get("procrustes"),
-        "distance_correlation": b.get("distance_correlation"),
-        "knn_preservation": b.get("knn_preservation"),
-        "geom_crossings_total": cross.get("total"),
+        "aspect_ratio": (
+            d.get("aspect_ratio")
+            if d.get("aspect_ratio") is not None
+            else (b.get("aspect_ratio") if b.get("aspect_ratio") is not None else b.get("aspect_ratio_bbox"))
+        ),
+        "area_per_node": (
+            d.get("area_per_node")
+            if d.get("area_per_node") is not None
+            else (b.get("area_per_node") if b.get("area_per_node") is not None else b.get("area_per_node_bbox"))
+        ),
+        "currency_hub_violations": cof.get("currency_hub_violations"),
+        "currency_long_arc_share": cof.get("currency_long_arc_share"),
+        "bends_per_arc": (d.get("line_shape") or {}).get("bends_per_arc"),
+        "cycle_circularity": (d.get("cycles") or {}).get("cycle_circularity"),
+        "cycle_direction_consistency": (d.get("cycles") or {}).get("cycle_direction_consistency"),
+        "cycle_order_consistency": (d.get("cycles") or {}).get("cycle_order_consistency"),
+        "flow_main_dir_share": d.get("flow_main_dir_share"),
+        "exchange_periphery_share": d.get("exchange_periphery_share"),
+        "blank_space_share": d.get("blank_space_share") if d.get("blank_space_share") is not None else b.get("blank_space_share"),
+        "largest_empty_rect_share": (
+            d.get("largest_empty_rect_share")
+            if d.get("largest_empty_rect_share") is not None
+            else b.get("largest_empty_rect_share")
+        ),
+        "unrelated_overlaps_total": (d.get("unrelated_overlaps") or {}).get("total"),
+        "unrelated_node_overlaps": (d.get("unrelated_overlaps") or {}).get("node_overlaps"),
+        "unrelated_edge_through_node": (d.get("unrelated_overlaps") or {}).get("edge_through_node"),
+        "unrelated_collinear_edge_overlaps": (d.get("unrelated_overlaps") or {}).get("collinear_edge_overlaps"),
+        "geom_crossings_counted": cross.get("counted", cross.get("total")),
+        "geom_crossings_main": cross.get("main_metabolite"),
+        "geom_crossings_currency": cross.get("currency_involved"),
+        "geom_overlapping_pairs": coll.get("overlapping_pairs"),
         "geom_node_overlap_pairs": coll.get("node_overlap_pairs"),
         "geom_label_overlap_pairs": coll.get("label_overlap_pairs"),
         "structure_continuity": (
@@ -58,6 +92,11 @@ def _flat_row(report: dict) -> dict:
             if isinstance(report.get("structure_continuity"), dict)
             else (g.get("structure_continuity") or {}).get("split_structures")
         ),
+        "procrustes": b.get("procrustes") if b.get("procrustes") is not None else stab.get("procrustes_disparity") or stab.get("procrustes_mean"),
+        "distance_correlation": b.get("distance_correlation"),
+        "knn_preservation": b.get("knn_preservation"),
+        "reproducibility_mean_displacement": stab.get("mean_displacement") or stab.get("mean_displacement_mean"),
+        "stress": b.get("stress"),
         "gdmetrix": (report.get("dependencies") or {}).get("gdmetrix"),
     }
 

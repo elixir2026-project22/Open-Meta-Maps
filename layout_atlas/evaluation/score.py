@@ -143,6 +143,20 @@ def score_escher_map(
             except Exception:
                 seconds = None
 
+    if isinstance(geom_summary, dict) and "error" not in geom_summary:
+        details = geom_summary.setdefault("details", {})
+        if seconds is not None:
+            details.setdefault("runtime_seconds", seconds)
+        # Prefer map-native aspect_ratio (W/H) in the shared geometry block.
+        if details.get("aspect_ratio") is not None:
+            benchmark["aspect_ratio"] = details["aspect_ratio"]
+        if details.get("area_per_node") is not None and benchmark.get("area_per_node") is None:
+            benchmark["area_per_node"] = details["area_per_node"]
+        if details.get("species_in_other_compartment") is not None and benchmark.get("species_in_other_compartment") is None:
+            benchmark["species_in_other_compartment"] = details["species_in_other_compartment"]
+        if details.get("participant_consistency") is not None and benchmark.get("participant_consistency") is None:
+            benchmark["participant_consistency"] = details["participant_consistency"]
+
     return dict(
         model=pathway.name,
         gem=str(gem_path.resolve()),
@@ -159,7 +173,9 @@ def score_escher_map(
             "Development evaluation (not a fair tool comparison). "
             "Atlas sources are never excluded for evaluation overlap. "
             "Pathway metrics adapted from elixir2026-project22/layout-benchmark (MIT); "
-            "gdMetriX is optional (GPL-3.0)."
+            "transfer-check field names for cofactor/cycle/flow rules; "
+            "120° opposite-side threshold is a Project 22 first guess; "
+            "gdMetriX is optional (GPL-3.0, CLI-only extras)."
         ),
     )
 
@@ -194,6 +210,9 @@ def score_paths(
         b = escher_bridge.escher_positions(pathway, escher_bridge.load_escher(compare_map))
         report["stability_vs_compare"] = position_displacement(a, b)
         report["reproducibility"] = reproducibility([a, b])
+        geom = report.get("geometry")
+        if isinstance(geom, dict) and "error" not in geom:
+            geom.setdefault("details", {})["reproducibility"] = report["stability_vs_compare"]
     return report
 
 
