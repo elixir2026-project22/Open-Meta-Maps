@@ -1,0 +1,83 @@
+[
+  {
+    "index": 1,
+    "path": "docs/images/hotspot_repair/e_coli_core_hotspot_1.png",
+    "before_crossings": 16,
+    "after_crossings": 2,
+    "region": {
+      "x": 450.0,
+      "y": 608.2,
+      "w": 400,
+      "h": 400,
+      "crossings": 16,
+      "obstacle_hits": 0,
+      "node_overlaps": 0,
+      "edges": 58,
+      "reactions": [
+        "ACALD",
+        "ACONTa",
+        "ACONTb",
+        "MALS",
+        "MDH",
+        "ME1",
+        "ME2",
+        "PDH",
+        "PFL",
+        "PPC"
+      ]
+    }
+  },
+  {
+    "index": 2,
+    "path": "docs/images/hotspot_repair/e_coli_core_hotspot_2.png",
+    "before_crossings": 12,
+    "after_crossings": 1,
+    "region": {
+      "x": 50.0,
+      "y": 608.2,
+      "w": 400,
+      "h": 400,
+      "crossings": 12,
+      "obstacle_hits": 0,
+      "node_overlaps": 0,
+      "edges": 72,
+      "reactions": [
+        "AKGt2r",
+        "GLNS",
+        "GLNabc",
+        "GLUDy",
+        "GLUN",
+        "GLUSy",
+        "GLUt2r",
+        "ICL",
+        "SUCCt2_2",
+        "SUCCt3"
+      ]
+    }
+  },
+  {
+    "index": 3,
+    "path": "docs/images/hotspot_repair/e_coli_core_hotspot_3.png",
+    "before_crossings": 9,
+    "after_crossings": 1,
+    "region": {
+      "x": 1450.0,
+      "y": 608.2,
+      "w": 400,
+      "h": 400,
+      "crossings": 9,
+      "obstacle_hits": 0,
+      "node_overlaps": 0,
+      "edges": 36,
+      "reactions": [
+        "BIOMASS_Ecoli_core_w_GAM",
+        "ENO",
+        "GND",
+        "PFK",
+        "PGK",
+        "RPE",
+        "TKT2"
+      ]
+    }
+  }
+]

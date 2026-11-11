@@ -1,0 +1,84 @@
+[
+  {
+    "index": 1,
+    "path": "docs/images/hotspot_repair/iIT341_hotspot_1.png",
+    "before_crossings": 61,
+    "after_crossings": 35,
+    "region": {
+      "x": 2450.0,
+      "y": 6250.0,
+      "w": 400,
+      "h": 400,
+      "crossings": 61,
+      "obstacle_hits": 40,
+      "node_overlaps": 0,
+      "edges": 74,
+      "reactions": [
+        "ACKr",
+        "AHSERL2",
+        "ASPO2",
+        "BIOMASS_HP_published",
+        "CYSabc",
+        "EX_cys__L_e",
+        "PDH2",
+        "PTAr",
+        "THZSN",
+        "UHGADA_HP"
+      ]
+    }
+  },
+  {
+    "index": 2,
+    "path": "docs/images/hotspot_repair/iIT341_hotspot_2.png",
+    "before_crossings": 33,
+    "after_crossings": 25,
+    "region": {
+      "x": 1650.0,
+      "y": 4650.0,
+      "w": 400,
+      "h": 400,
+      "crossings": 33,
+      "obstacle_hits": 15,
+      "node_overlaps": 0,
+      "edges": 68,
+      "reactions": [
+        "C140SN",
+        "C160SN",
+        "C180SN",
+        "C181SN",
+        "KAS_HP",
+        "KAS_HP2",
+        "PASYN_HP",
+        "U23GAAT_HP",
+        "U2GAAT",
+        "U2GAAT2"
+      ]
+    }
+  },
+  {
+    "index": 3,
+    "path": "docs/images/hotspot_repair/iIT341_hotspot_3.png",
+    "before_crossings": 21,
+    "after_crossings": 19,
+    "region": {
+      "x": 1850.0,
+      "y": 3650.0,
+      "w": 400,
+      "h": 400,
+      "crossings": 21,
+      "obstacle_hits": 4,
+      "node_overlaps": 0,
+      "edges": 43,
+      "reactions": [
+        "BC10_new",
+        "FADOX",
+        "FRD5",
+        "HYDA1",
+        "LDH_D1",
+        "MDH4",
+        "NADPHQR",
+        "NDH_1"
+      ]
+    }
+  }
+]
