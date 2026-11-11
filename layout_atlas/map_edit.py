@@ -132,17 +132,14 @@ def apply_edit(data, edit):
     return out
 
 
-def _prov_kinds_legend(folder: Path):
-    kinds, legend = {}, []
+def _prov_kinds(folder: Path):
+    """Reaction id → provenance kind for SVG colouring (legend lives in the tool UI)."""
+    kinds = {}
     prov_path = folder / 'reaction_provenance.json'
     if prov_path.is_file():
         rows = json.loads(prov_path.read_text())
         kinds = {r['reaction']: r['provenance'] for r in rows if 'reaction' in r and 'provenance' in r}
-        from collections import Counter
-        import ec_provenance as epv
-        counts = Counter(kinds.values())
-        legend = [(k, counts.get(k, 0)) for k in epv.KINDS]
-    return kinds, legend
+    return kinds
 
 
 def _refresh_quality(folder: Path, data):
@@ -162,7 +159,7 @@ def _refresh_quality(folder: Path, data):
         # orientation summary uses the map; keep mode if present
         mode = lq.get('orientation_mode')
         if mode and mode != 'off':
-            kinds, _ = _prov_kinds_legend(folder)
+            kinds = _prov_kinds(folder)
             try:
                 lq['orientation'] = orientation_module.summary(data, kinds)
             except Exception:
@@ -224,9 +221,9 @@ def save_map_edit(folder: Path, edit, *, filename='map.json'):
     tmp = folder / 'map.json.tmp'
     tmp.write_text(json.dumps(edited, ensure_ascii=False))
     os.replace(tmp, map_path)
-    kinds, legend = _prov_kinds_legend(folder)
+    kinds = _prov_kinds(folder)
     import line_render
-    line_render.render_file(map_path, folder / 'map.svg', kinds, legend or None)
+    line_render.render_file(map_path, folder / 'map.svg', kinds)
     quality = _refresh_quality(folder, edited)
     for name in ('map.json', 'map.svg', 'report.json'):
         _update_file_bytes(folder, name)

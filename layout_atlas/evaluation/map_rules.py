@@ -472,37 +472,45 @@ def unrelated_overlaps_from_escher(data, edges: list[dict]) -> dict[str, Any]:
     }
 
 
-def aspect_ratio_wh(body: dict, canvas: dict | None = None) -> dict[str, float | None]:
-    """Width / height of the content bbox (one definition everywhere)."""
+def content_bbox(body: dict, canvas: dict | None = None) -> dict[str, float | None]:
+    """Axis-aligned bbox of metabolite + midmarker nodes (one definition for size / aspect / packing).
+
+    Map size, aspect ratio (W/H) and blank-space utilisation all use this content box.
+    Falls back to the Escher canvas only when fewer than two content nodes exist.
+    """
     nodes = body["nodes"]
-    xy = np.array([[n["x"], n["y"]] for n in nodes.values() if n.get("node_type") in ("metabolite", "midmarker")], float)
+    xy = np.array(
+        [[n["x"], n["y"]] for n in nodes.values() if n.get("node_type") in ("metabolite", "midmarker") and "x" in n],
+        float,
+    )
     if len(xy) < 2:
         if canvas and canvas.get("width") and canvas.get("height"):
             w, h = float(canvas["width"]), float(canvas["height"])
-            return dict(aspect_ratio=round(w / max(h, 1e-9), 4), width=w, height=h, aspect_ratio_target=ASPECT_RATIO_TARGET)
-        return dict(aspect_ratio=None, aspect_ratio_target=ASPECT_RATIO_TARGET)
+            return dict(
+                width=round(w, 1),
+                height=round(h, 1),
+                aspect_ratio=round(w / max(h, 1e-9), 4),
+                aspect_ratio_target=ASPECT_RATIO_TARGET,
+                aspect_ratio_vs_target=round(abs(w / max(h, 1e-9) - ASPECT_RATIO_TARGET), 4),
+                source="canvas",
+            )
+        return dict(width=None, height=None, aspect_ratio=None, aspect_ratio_target=ASPECT_RATIO_TARGET,
+                    aspect_ratio_vs_target=None, source=None)
     w = float(xy[:, 0].max() - xy[:, 0].min())
     h = float(xy[:, 1].max() - xy[:, 1].min())
     return dict(
-        aspect_ratio=round(w / max(h, 1e-9), 4),
         width=round(w, 1),
         height=round(h, 1),
+        aspect_ratio=round(w / max(h, 1e-9), 4),
         aspect_ratio_target=ASPECT_RATIO_TARGET,
         aspect_ratio_vs_target=round(abs(w / max(h, 1e-9) - ASPECT_RATIO_TARGET), 4),
+        source="content_nodes",
     )
 
 
-def area_per_node(body: dict, canvas: dict | None = None) -> float | None:
-    nodes = [n for n in body["nodes"].values() if n.get("node_type") in ("metabolite", "midmarker")]
-    n = len(nodes)
-    if n < 1:
-        return None
-    if canvas and canvas.get("width") and canvas.get("height"):
-        return float(canvas["width"]) * float(canvas["height"]) / n
-    xy = np.array([[n["x"], n["y"]] for n in nodes], float)
-    w = float(xy[:, 0].ptp()) + 1.0
-    h = float(xy[:, 1].ptp()) + 1.0
-    return (w * h) / n
+def aspect_ratio_wh(body: dict, canvas: dict | None = None) -> dict[str, float | None]:
+    """Width / height of the content bbox (one definition everywhere)."""
+    return content_bbox(body, canvas)
 
 
 def species_in_other_compartment(body: dict) -> float | None:
@@ -547,91 +555,6 @@ def species_in_other_compartment(body: dict) -> float | None:
     return intruders / len(members)
 
 
-def participant_consistency_90(body: dict) -> float | None:
-    """Benchmark participant_consistency: share of reactant×product pairs with angle > 90°."""
-    nodes = body["nodes"]
-    opposite = pairs = 0
-    for rx in body["reactions"].values():
-        mid = None
-        for s in rx["segments"].values():
-            for nid in (s["from_node_id"], s["to_node_id"]):
-                if nodes.get(nid, {}).get("node_type") == "midmarker":
-                    mid = nodes[nid]
-                    break
-            if mid is not None:
-                break
-        if mid is None:
-            continue
-        coeff = {m["bigg_id"]: m["coefficient"] for m in rx.get("metabolites") or [] if isinstance(m, dict)}
-        reactants, products = [], []
-        for s in rx["segments"].values():
-            for nid in (s["from_node_id"], s["to_node_id"]):
-                n = nodes.get(nid) or {}
-                if n.get("node_type") != "metabolite":
-                    continue
-                v = np.array([n["x"] - mid["x"], n["y"] - mid["y"]], float)
-                if coeff.get(n.get("bigg_id"), 0) < 0:
-                    reactants.append(v)
-                else:
-                    products.append(v)
-        for a in reactants:
-            for b in products:
-                pairs += 1
-                opposite += float(np.dot(a, b)) < 0  # >90°
-    return opposite / pairs if pairs else None
-
-
-# Subsystem name fragments for optional convention checks (annotation-driven).
-_GLYCOLYSIS = re.compile(r"glycolysis|embden", re.I)
-_TCA = re.compile(r"tca|citric|krebs|tricarboxylic", re.I)
-_PPP = re.compile(r"pentose.?phosphate|ppp", re.I)
-
-
-def subsystem_conventions(body: dict, subsystems: dict[str, str] | None = None) -> dict[str, Any]:
-    """Glycolysis above TCA; PPP right of glycolysis. ``not applicable`` without annotations."""
-    if not subsystems:
-        return dict(
-            glycolysis_above_tca="not applicable",
-            ppp_right_of_glycolysis="not applicable",
-            note="no subsystem annotations on reactions",
-        )
-    mids = _midmarkers(body)
-    groups = dict(glycolysis=[], tca=[], ppp=[])
-    for rid, sub in subsystems.items():
-        if rid not in mids or not sub:
-            continue
-        if _GLYCOLYSIS.search(sub):
-            groups["glycolysis"].append(mids[rid])
-        if _TCA.search(sub):
-            groups["tca"].append(mids[rid])
-        if _PPP.search(sub):
-            groups["ppp"].append(mids[rid])
-
-    def mean_xy(pts):
-        arr = np.array(pts, float)
-        return float(arr[:, 0].mean()), float(arr[:, 1].mean())
-
-    out: dict[str, Any] = {}
-    if groups["glycolysis"] and groups["tca"]:
-        _, gy = mean_xy(groups["glycolysis"])
-        _, ty = mean_xy(groups["tca"])
-        # Escher y grows downward: "above" ⇒ smaller y
-        out["glycolysis_above_tca"] = bool(gy < ty)
-        out["glycolysis_y"] = round(gy, 1)
-        out["tca_y"] = round(ty, 1)
-    else:
-        out["glycolysis_above_tca"] = "not applicable"
-    if groups["glycolysis"] and groups["ppp"]:
-        gx, _ = mean_xy(groups["glycolysis"])
-        px, _ = mean_xy(groups["ppp"])
-        out["ppp_right_of_glycolysis"] = bool(px > gx)
-        out["glycolysis_x"] = round(gx, 1)
-        out["ppp_x"] = round(px, 1)
-    else:
-        out["ppp_right_of_glycolysis"] = "not applicable"
-    return out
-
-
 def collect_map_rule_details(
     data,
     edges: list[dict],
@@ -639,7 +562,12 @@ def collect_map_rule_details(
     spacing: float,
     subsystems: dict[str, str] | None = None,
 ) -> dict[str, Any]:
-    """Bundle transfer-check / layout-rule detail metrics for the shared evaluator."""
+    """Bundle transfer-check / layout-rule detail metrics for the shared evaluator.
+
+    ``subsystems`` is accepted for call-site compatibility but unused (subsystem
+    convention rows were dropped from the Layout quality panel).
+    """
+    del subsystems  # kept in the signature so callers need not change
     body = data[1]
     canvas = body.get("canvas") or {}
     mids = _midmarkers(body)
@@ -650,21 +578,21 @@ def collect_map_rule_details(
     out.update(flow_direction_metrics(body))
     out.update(cycle_metrics(body))
     out.update(exchange_periphery_share(body))
-    out.update(blank_space_from_escher(data, edges, spacing))
+    blank = blank_space_from_escher(data, edges, spacing)
+    out.update(blank)
+    # Space utilisation is the complement of blank_space_share on the same raster.
+    bs = blank.get("blank_space_share")
+    out["space_utilisation"] = round(1.0 - bs, 4) if bs is not None else None
     out.update(unrelated_overlaps_from_escher(data, edges))
-    out.update(aspect_ratio_wh(body, canvas))
-    apn = area_per_node(body, canvas)
-    out["area_per_node"] = round(apn, 1) if apn is not None else None
+    out.update(content_bbox(body, canvas))
     out["species_in_other_compartment"] = (
         round(v, 4) if (v := species_in_other_compartment(body)) is not None else None
     )
-    out["participant_consistency"] = (
-        round(v, 4) if (v := participant_consistency_90(body)) is not None else None
-    )
-    out["subsystem_conventions"] = subsystem_conventions(body, subsystems)
     out["thresholds_note"] = (
-        f"inout opposite ≥{OPPOSITE_DEG}° and participant_consistency >{PARTICIPANT_CONSISTENCY_DEG}° "
-        "are Project 22 first guesses; hub/long currency thresholds are relative to median reaction spacing; "
-        "blank_space / unrelated_overlaps follow MetaCarto ideas (CC BY 4.0; reimplemented, not copied)"
+        f"inout opposite ≥{OPPOSITE_DEG}° is a Project 22 first guess; "
+        f"participant_consistency >{PARTICIPANT_CONSISTENCY_DEG}° stays on the evaluate CLI; "
+        "hub/long currency thresholds are relative to median reaction spacing; "
+        "blank_space / unrelated_overlaps follow MetaCarto ideas (CC BY 4.0; reimplemented, not copied); "
+        "map size, aspect W/H and blank/utilisation share one content-node bbox"
     )
     return out

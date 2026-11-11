@@ -324,30 +324,24 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, str
             if len(windows) == 5:
                 break
     ori = orientation_module.summary(data, orientation_kinds)
-    # ---- global composition: space use, module spacing anomalies, aspect, densest place (cells scale with the typical reaction spacing)
+    # ---- packing diagnostics on reaction midmarkers (isolation / densest cell)
     mids_xy = mids if len(mids) else np.zeros((0, 2))
-    comp = {}
+    isolated_n = 0
+    densest_cell = None
+    outlier_rows = []
     if len(mids_xy) > 8:
         cell = max(spacing * 4.0, 50.0)
         gx = ((mids_xy[:, 0] - mids_xy[:, 0].min()) // cell).astype(int)
         gy = ((mids_xy[:, 1] - mids_xy[:, 1].min()) // cell).astype(int)
-        occupied = len(set(zip(gx.tolist(), gy.tolist())))
-        total_cells = int((gx.max() + 1) * (gy.max() + 1))
         d5 = cKDTree(mids_xy).query(mids_xy, k=min(6, len(mids_xy)))[0][:, -1]
         med = float(np.median(d5))
         outliers = np.flatnonzero(d5 > 8.0 * max(med, 1.0))
         counts = _dd(int)
         for a_, b_ in zip(gx.tolist(), gy.tolist()):
             counts[a_, b_] += 1
-        W_, H_ = (mids_xy.max(0) - mids_xy.min(0))
-        # aspect = W/H (one definition everywhere; not max/min)
-        comp = dict(canvas=[round(float(W_)), round(float(H_))], aspect=round(float(W_ / max(H_, 1.0)), 4), aspect_ratio=round(float(W_ / max(H_, 1.0)), 4),
-                    space_utilisation=round(occupied / max(total_cells, 1), 4),
-                    cell_px=round(cell), neighbour5_median_px=round(med), neighbour5_p90_px=round(float(np.percentile(d5, 90))), neighbour5_max_px=round(float(d5.max())),
-                    isolated_reactions=int(len(outliers)), isolation_threshold_px=round(8.0 * med), max_reactions_in_one_cell=int(max(counts.values())))
+        isolated_n = int(len(outliers))
+        densest_cell = int(max(counts.values()))
         outlier_rows = [dict(x=round(float(mids_xy[i][0]), 1), y=round(float(mids_xy[i][1]), 1), neighbour5_px=round(float(d5[i]))) for i in outliers[:200]]
-    else:
-        outlier_rows = []
     n_alg = max(len(algo), 1)
     counted_cross = cross['algorithm_algorithm'] + cross['algorithm_curated']
     continuity = _structure_continuity(data, structures=structures)
@@ -361,12 +355,26 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, str
     p90_px = float(np.percentile(all_len, 90)) if len(all_len) else 0.0
     med_len = float(np.median(all_len)) if len(all_len) else 0.0
     max_rel = round(float(np.max(all_len) / max(med_len, 1e-9)), 3) if len(all_len) else None
-    # Optional subsystem map from metadata.source_reactions
-    subsystems = {}
-    for rid, info in (meta.get('source_reactions') or {}).items():
-        if isinstance(info, dict) and info.get('subsystem'):
-            subsystems[rid] = info['subsystem']
-    rules = collect_map_rule_details(data, edges, all_len, spacing, subsystems=subsystems or None)
+    rules = collect_map_rule_details(data, edges, all_len, spacing)
+    # One content bbox for map size / aspect / blank·utilisation (see map_rules.content_bbox).
+    bbox_w, bbox_h = rules.get('width'), rules.get('height')
+    blank_share = rules.get('blank_space_share')
+    space_util = rules.get('space_utilisation')
+    comp = {}
+    if bbox_w is not None and bbox_h is not None:
+        comp = dict(
+            canvas=[round(float(bbox_w)), round(float(bbox_h))],
+            aspect=rules.get('aspect_ratio'),
+            aspect_ratio=rules.get('aspect_ratio'),
+            aspect_ratio_target=rules.get('aspect_ratio_target'),
+            aspect_ratio_vs_target=rules.get('aspect_ratio_vs_target'),
+            blank_space_share=blank_share,
+            space_utilisation=space_util,
+            largest_empty_rect_share=rules.get('largest_empty_rect_share'),
+            cell_px=rules.get('cell_px'),
+            isolated_reactions=isolated_n,
+            max_reactions_in_one_cell=densest_cell,
+        )
     cofactor = dict(
         currency_hub_violations=rules.get('currency_hub_violations'),
         currency_long_arc_share=rules.get('currency_long_arc_share'),
@@ -401,6 +409,54 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, str
         currency_involved=cross['currency_involved'],
         per_100_edges=round(100.0 * counted_cross / n_alg, 2),
     )
+    line_shape = dict(
+        detour_median=round(float(np.median(detours)), 3) if detours else None,
+        detour_p90=round(float(np.percentile(detours, 90)), 3) if detours else None,
+        detour_over_1_6=int(sum(d > 1.6 for d in detours)),
+        hooks=hooks, sharp_turns=sharp, self_intersections=selfx,
+        bends_per_arc=rules.get('bends_per_arc'), bent_arc_share=rules.get('bent_arc_share'))
+    cycles = dict(cycle_circularity=rules.get('cycle_circularity'), cycle_direction=rules.get('cycle_direction'),
+                  cycle_direction_consistency=rules.get('cycle_direction_consistency'),
+                  cycle_order_consistency=rules.get('cycle_order_consistency'),
+                  cycles=rules.get('cycles'), cycle_len=rules.get('cycle_len'))
+    unrelated = dict(
+        node_overlaps=rules.get('unrelated_node_overlaps'),
+        edge_through_node=rules.get('unrelated_edge_through_node'),
+        collinear_edge_overlaps=rules.get('unrelated_collinear_edge_overlaps'),
+        total=rules.get('unrelated_overlaps_total'),
+    )
+    crossing_density = dict(worst_window_crossings=windows[0]['crossings'] if windows else 0)
+    details = dict(
+        line_shape=line_shape,
+        cycles=cycles,
+        flow_main_dir=rules.get('flow_main_dir'),
+        flow_main_dir_share=rules.get('flow_main_dir_share'),
+        exchange_periphery_share=rules.get('exchange_periphery_share'),
+        blank_space=dict(
+            blank_space_share=blank_share,
+            space_utilisation=space_util,
+            largest_empty_rect_share=rules.get('largest_empty_rect_share'),
+            cell_px=rules.get('cell_px'),
+            spacing_px=rules.get('spacing_px'),
+        ),
+        blank_space_share=blank_share,
+        space_utilisation=space_util,
+        largest_empty_rect_share=rules.get('largest_empty_rect_share'),
+        unrelated_overlaps=unrelated,
+        aspect_ratio=rules.get('aspect_ratio'),
+        aspect_ratio_target=rules.get('aspect_ratio_target'),
+        aspect_ratio_vs_target=rules.get('aspect_ratio_vs_target'),
+        species_in_other_compartment=rules.get('species_in_other_compartment'),
+        thresholds_note=rules.get('thresholds_note'),
+        crossing_density=crossing_density,
+        orientation=ori, composition=comp, structure_continuity=continuity,
+        edges_footnote=dict(algorithm=len(algo), curated=len(edges) - len(algo), total=len(edges)),
+        warnings=warnings,
+        bezier_coverage=bezier,
+    )
+    details['panel'] = _detailed_metrics_panel(details, line_shape=line_shape, cycles=cycles,
+                                               unrelated=unrelated, crossing_density=crossing_density,
+                                               composition=comp)
     summary = dict(
         edges=dict(total=len(edges), algorithm=len(algo), curated=len(edges) - len(algo), expert=len(edges) - len(algo)),
         core=dict(
@@ -412,6 +468,7 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, str
                 edge_len_max_rel=max_rel,
                 p90_px=round(p90_px, 1),
                 reaction_spacing_px=round(spacing, 1),
+                over_250=int((all_len > 250).sum()) if len(all_len) else 0,
             ),
             length_p90=dict(px=round(p90_px, 1), in_reaction_spacings=round(p90_px / max(spacing, 1.0), 2), reaction_spacing_px=round(spacing, 1)),
             participant_placement=dict(
@@ -425,63 +482,245 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, str
             cofactor_clones=cofactor,
             structure_continuity=continuity_core,
             bezier_coverage=bezier),  # not a card; quality-gate hard check + warning
-        details=dict(
-            length=dict(p50=round(float(np.percentile(all_len, 50)), 1) if len(all_len) else None,
-                        p90=round(p90_px, 1), p99=round(float(np.percentile(all_len, 99)), 1) if len(all_len) else None,
-                        over_250=int((all_len > 250).sum()) if len(all_len) else 0,
-                        over_1000=int((all_len > 1000).sum()) if len(all_len) else 0,
-                        edge_len_max_rel=max_rel, median_px=round(med_len, 1) if len(all_len) else None),
-            line_shape=dict(
-                detour_median=round(float(np.median(detours)), 3) if detours else None,
-                detour_p90=round(float(np.percentile(detours, 90)), 3) if detours else None,
-                detour_over_1_6=int(sum(d > 1.6 for d in detours)),
-                hooks=hooks, sharp_turns=sharp, self_intersections=selfx,
-                bends_per_arc=rules.get('bends_per_arc'), bent_arc_share=rules.get('bent_arc_share')),
-            cycles=dict(cycle_circularity=rules.get('cycle_circularity'), cycle_direction=rules.get('cycle_direction'),
-                        cycle_direction_consistency=rules.get('cycle_direction_consistency'),
-                        cycle_order_consistency=rules.get('cycle_order_consistency'),
-                        cycles=rules.get('cycles'), cycle_len=rules.get('cycle_len')),
-            flow_main_dir=rules.get('flow_main_dir'),
-            flow_main_dir_share=rules.get('flow_main_dir_share'),
-            exchange_periphery_share=rules.get('exchange_periphery_share'),
-            blank_space=dict(
-                blank_space_share=rules.get('blank_space_share'),
-                largest_empty_rect_share=rules.get('largest_empty_rect_share'),
-                cell_px=rules.get('cell_px'),
-                spacing_px=rules.get('spacing_px'),
-            ),
-            blank_space_share=rules.get('blank_space_share'),
-            largest_empty_rect_share=rules.get('largest_empty_rect_share'),
-            unrelated_overlaps=dict(
-                node_overlaps=rules.get('unrelated_node_overlaps'),
-                edge_through_node=rules.get('unrelated_edge_through_node'),
-                collinear_edge_overlaps=rules.get('unrelated_collinear_edge_overlaps'),
-                total=rules.get('unrelated_overlaps_total'),
-            ),
-            aspect_ratio=rules.get('aspect_ratio'),
-            aspect_ratio_target=rules.get('aspect_ratio_target'),
-            aspect_ratio_vs_target=rules.get('aspect_ratio_vs_target'),
-            area_per_node=rules.get('area_per_node'),
-            species_in_other_compartment=rules.get('species_in_other_compartment'),
-            participant_consistency=rules.get('participant_consistency'),
-            subsystem_conventions=rules.get('subsystem_conventions'),
-            thresholds_note=rules.get('thresholds_note'),
-            crossing_density=dict(worst_window_crossings=windows[0]['crossings'] if windows else 0),
-            orientation=ori, composition=comp, structure_continuity=continuity,
-            edges_footnote=dict(algorithm=len(algo), curated=len(edges) - len(algo), total=len(edges)),
-            warnings=warnings,
-            bezier_coverage=bezier),
+        details=details,
         worst_regions=windows,
         note='computed from the final map.json; crossings are counted on sampled final curves, source-split '
              '(algorithm×algorithm + algorithm×curated; curated×curated not in the headline) and role-split '
              '(main-metabolite vs currency-involved); worst_regions use uncapped counted crossings in true '
              '400 px / stride-200 boxes; structure continuity scores reused curated structures; '
-             '120° opposite-side threshold is a Project 22 first guess')
+             '120° opposite-side threshold is a Project 22 first guess; '
+             'Detailed metrics keep only layout goals (one content bbox for size/aspect/blank)')
     issues = dict(isolated_reactions=outlier_rows, crossings=cross_points, obstacle_hits=hit_points, curve_anomalies=anomalies, worst_regions=windows,
                   node_overlaps=[dict(x=round(float(centres[i][0]), 1), y=round(float(centres[i][1]), 1)) for i, _ in node_overlap][:max_issues],
                   split_structures=[d for d in continuity.get('details') or [] if d.get('components', 1) > 1][:max_issues],
                   warnings=warnings)
     return summary, issues
+
+
+
+STAGE_NOT_YET = 'not yet optimised'
+STAGE_NOT_YET_ZH = '待优化'
+
+
+def _row(label, value, *, code=None, tip=None, better=None, target=None, stage=None, miss=False):
+    """One Detailed-metrics table row (English label is the i18n key in the tool page)."""
+    return dict(
+        label=label,
+        value=value,
+        code=code,
+        tip=tip,
+        better=better,
+        target=target,
+        stage=stage,
+        miss=bool(miss),
+    )
+
+
+def _pct(v):
+    if v is None:
+        return '—'
+    return f'{round(100 * float(v))}%'
+
+
+def _na(v):
+    return '—' if v is None or v == '' else v
+
+
+def _detailed_metrics_panel(details, *, line_shape, cycles, unrelated, crossing_density, composition):
+    """Grouped rows for the Layout quality → Detailed metrics panel.
+
+    Selection rule: only metrics the layout optimises or should optimise. Pipeline
+    diagnostics (composition_pass / peripheral) are attached later by the tool UI
+    when those keys exist on ``details``.
+    """
+    ls, cy, uo, cd, comp = line_shape, cycles, unrelated, crossing_density, composition or {}
+    worst = (cd or {}).get('worst_window_crossings')
+    uo_total = (uo or {}).get('total')
+    detour_over = ls.get('detour_over_1_6')
+    hooks = ls.get('hooks')
+    sharp = ls.get('sharp_turns')
+    selfx = ls.get('self_intersections')
+    bends = ls.get('bends_per_arc')
+    exch = details.get('exchange_periphery_share')
+    circ = cy.get('cycle_circularity')
+    flow = details.get('flow_main_dir_share')
+    species = details.get('species_in_other_compartment')
+    blank = details.get('blank_space_share')
+    util = details.get('space_utilisation')
+    if util is None and blank is not None:
+        util = round(1.0 - float(blank), 4)
+    aspect = details.get('aspect_ratio')
+    aspect_t = details.get('aspect_ratio_target')
+    aspect_d = details.get('aspect_ratio_vs_target')
+    largest = details.get('largest_empty_rect_share')
+    isolated = comp.get('isolated_reactions')
+    densest = comp.get('max_reactions_in_one_cell')
+    canvas = comp.get('canvas')
+
+    groups = [
+        dict(id='connections', label='Connections', collapsed=False, rows=[
+            _row(
+                'Local crossing hotspot',
+                _na(worst),
+                code='worst_window_crossings',
+                tip='Most algorithm×algorithm / algorithm×curated crossings inside one 400 px window (stride 200). Lower is better; target as few as possible (headline crossings are on the cards).',
+                better='lower', target='as few as possible',
+                stage='Bézier routing · quality gate',
+                miss=(worst is not None and worst > 8),
+            ),
+            _row(
+                'Unrelated overlaps',
+                f"{_na((uo or {}).get('node_overlaps'))} / {_na((uo or {}).get('edge_through_node'))} / {_na((uo or {}).get('collinear_edge_overlaps'))}",
+                code='unrelated_overlaps',
+                tip='Overlaps between reactions that share no non-currency metabolite (node · edge-through-node · collinear edge). Lower is better; target 0.',
+                better='lower', target='0',
+                stage='spacing / relaxation · Bézier routing',
+                miss=(uo_total is not None and float(uo_total) > 0),
+            ),
+        ]),
+        dict(id='line_shape', label='Line shape', collapsed=False, rows=[
+            _row(
+                'Detour (median · p90 · above 1.6)',
+                f"{_na(ls.get('detour_median'))} / {_na(ls.get('detour_p90'))} / {_na(detour_over)}",
+                code='detour',
+                tip='Path length ÷ straight chord for algorithm connections. Lower is better; Bézier routing penalises detour above 1.6.',
+                better='lower', target='≤ 1.6',
+                stage='Bézier routing',
+                miss=(detour_over is not None and detour_over > 0) or (ls.get('detour_p90') is not None and ls.get('detour_p90') > 1.6),
+            ),
+            _row(
+                'Hooks / sharp turns / self-intersections',
+                f"{_na(hooks)} / {_na(sharp)} / {_na(selfx)}",
+                code='curve_anomalies',
+                tip='Curve-shape defects on algorithm Béziers (large winding hooks, sharp corners, self-crossings). Lower is better; target 0.',
+                better='lower', target='0',
+                stage='Bézier routing',
+                miss=((hooks or 0) + (sharp or 0) + (selfx or 0)) > 0,
+            ),
+            _row(
+                'Bends per connection',
+                f"{_na(bends)}" + (f" · bent {_pct(ls.get('bent_arc_share'))}" if ls.get('bent_arc_share') is not None else ''),
+                code='bends_per_arc',
+                tip='Mean direction changes per connection. Lower is better on curated Bézier maps; target near 0.',
+                better='lower', target='near 0',
+                stage='Bézier routing',
+                miss=(bends is not None and bends > 0.5),
+            ),
+        ]),
+        dict(id='structure_flow', label='Structure & flow', collapsed=False, rows=[
+            _row(
+                'Exchange reactions on the periphery',
+                _pct(exch),
+                code='exchange_periphery_share',
+                tip='Share of exchange/demand reactions that sit in the outer band of their component. Higher is better; target most exchanges outside the core.',
+                better='higher', target='≥ 50%',
+                stage='composition & peripherals',
+                miss=(exch is not None and exch < 0.5),
+            ),
+            _row(
+                'Cycle circularity / direction / order',
+                f"{_na(circ)} / {_na(cy.get('cycle_direction_consistency'))} ({_na(cy.get('cycle_direction'))}) / {_na(cy.get('cycle_order_consistency'))}",
+                code='cycle_circularity',
+                tip='How round and consistently oriented drawn cycles are (isoperimetric quotient and neighbour order). Higher is better. Backlog: ring/cycle placement for algorithm-placed cycles.',
+                better='higher', target='higher circularity & consistency',
+                stage=STAGE_NOT_YET,
+                miss=(circ is not None and circ < 0.35),
+            ),
+            _row(
+                'Species in another compartment',
+                _na(species) if species is None else f'{round(float(species), 3)}',
+                code='species_in_other_compartment',
+                tip='Share of metabolite glyphs that fall inside another compartment hull. Lower is better; target 0. Compartment packing is not yet optimised.',
+                better='lower', target='0',
+                stage=STAGE_NOT_YET,
+                miss=(species is not None and float(species) > 0.05),
+            ),
+        ]),
+        dict(id='space_shape', label='Space & shape', collapsed=False, rows=[
+            _row(
+                'Map size',
+                (f"{canvas[0]} × {canvas[1]} px" if canvas else '—'),
+                code='content_bbox',
+                tip='Width × height of the content-node bounding box (metabolites + reaction midmarkers). Same box as aspect and blank space.',
+                better=None, target='readable, not sprawling',
+                stage='composition & packing',
+                miss=False,
+            ),
+            _row(
+                'Aspect ratio (W/H) vs target',
+                f"{_na(aspect)} · target {_na(aspect_t)} · |Δ| {_na(aspect_d)}",
+                code='aspect_ratio',
+                tip='Content width ÷ height versus target 1.0. Closer to the target is better.',
+                better='closer to target', target='1.0',
+                stage='composition & packing',
+                miss=(aspect_d is not None and float(aspect_d) > 0.5),
+            ),
+            _row(
+                'Blank space / space utilisation',
+                f"{_pct(blank)} blank · {_pct(util)} used",
+                code='blank_space_share',
+                tip='Blank cells versus occupied cells on one raster of the content box (utilisation = 1 − blank). Lower blank / higher utilisation is better.',
+                better='lower blank', target='balanced packing',
+                stage='composition & packing',
+                miss=(blank is not None and float(blank) > 0.7),
+            ),
+            _row(
+                'Largest empty rectangle',
+                _pct(largest),
+                code='largest_empty_rect_share',
+                tip='Largest empty axis-aligned block as a share of the blank-space grid. Lower is better; large voids mean weak packing.',
+                better='lower', target='small voids',
+                stage='composition & packing',
+                miss=(largest is not None and float(largest) > 0.35),
+            ),
+            _row(
+                'Isolated reactions',
+                _na(isolated),
+                code='isolated_reactions',
+                tip='Reactions whose 5th-nearest neighbour is farther than 8 × the median 5th-neighbour distance. Lower is better; target 0.',
+                better='lower', target='0',
+                stage='composition & packing',
+                miss=(isolated is not None and isolated > 0),
+            ),
+            _row(
+                'Most reactions in one cell',
+                _na(densest),
+                code='max_reactions_in_one_cell',
+                tip='Peak reaction count in one spacing-scaled packing cell. Lower local peaks are better; flags overcrowding.',
+                better='lower', target='no extreme peaks',
+                stage='composition & packing',
+                miss=(densest is not None and densest > 20),
+            ),
+        ]),
+    ]
+    repro = details.get('reproducibility')
+    if isinstance(repro, dict) and (repro.get('procrustes_disparity') is not None or repro.get('mean_displacement') is not None
+                                    or repro.get('procrustes_mean') is not None or repro.get('mean_displacement_mean') is not None):
+        groups.append(dict(id='reproducibility', label='Reproducibility', collapsed=False, rows=[
+            _row(
+                'Reproducibility (Procrustes / mean displacement)',
+                f"{_na(repro.get('procrustes_disparity', repro.get('procrustes_mean')))} / {_na(repro.get('mean_displacement', repro.get('mean_displacement_mean')))}",
+                code='reproducibility',
+                tip='Displacement versus a compare-map (evaluate --compare-map). Lower is better. Not a compose objective yet (no seed flag / build-on-previous-layout).',
+                better='lower', target='stable across runs',
+                stage=STAGE_NOT_YET,
+                miss=False,
+            ),
+        ]))
+    # Debug-only: global flow fights curated orientations — keep off the main table.
+    if flow is not None or details.get('flow_main_dir'):
+        groups.append(dict(id='debug', label='Debug diagnostics', collapsed=True, debug=True, rows=[
+            _row(
+                'Main flow-direction share',
+                _pct(flow) + (f" ({details.get('flow_main_dir')})" if details.get('flow_main_dir') else ''),
+                code='flow_main_dir_share',
+                tip='Share of reactant→product axes aligned with the dominant reading direction. Debug only — not an optimisation target (would fight curated orientations).',
+                better=None, target='n/a (debug)',
+                stage='debug only',
+                miss=False,
+            ),
+        ]))
+    return dict(groups=groups, stage_not_yet=STAGE_NOT_YET, stage_not_yet_zh=STAGE_NOT_YET_ZH)
 
 
 def _turn_stats(pts):

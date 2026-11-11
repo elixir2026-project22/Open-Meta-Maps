@@ -57,7 +57,7 @@ def run(gem, out, ec=False, no_library=False, library='windows', reaction_style=
     c = s['covered']
     print(f"\nDone: {s['model']['id']} ({s['model']['reactions']} reactions) -> {out}")
     pv = s.get('provenance', {})
-    print(f"  structures used: {s['modules']['count']}; provenance of the {c['total']} reactions: expert-derived {pv.get('expert_derived', 0)}, "
+    print(f"  structures used: {s['modules']['count']}; provenance of the {c['total']} reactions: curated {pv.get('expert_derived', 0)}, "
           f"topology-only suggestion {pv.get('topology_layout_suggestion', 0)}, functional (EC) suggestion {pv.get('functional_layout_suggestion', 0)}, "
           f"bridge {pv.get('bridge', 0)}, generated {pv.get('generated', 0)}")
     print('  files: ' + ', '.join(f['name'] for f in state['files']))

@@ -41,22 +41,28 @@ def _flat_row(report: dict) -> dict:
         "crossing_density": b.get("crossing_density"),
         "overlapping_pairs": b.get("overlapping_pairs"),
         "overlap_area_share": b.get("overlap_area_share"),
-        "participant_consistency": b.get("participant_consistency") if b.get("participant_consistency") is not None else d.get("participant_consistency"),
+        "participant_consistency": b.get("participant_consistency"),
         "inout_opposite_share": place.get("inout_opposite_share"),
         "inout_opposite_share_core": place.get("inout_opposite_share_core"),
         "species_in_other_compartment": b.get("species_in_other_compartment") if b.get("species_in_other_compartment") is not None else d.get("species_in_other_compartment"),
         "long_edge_share": b.get("long_edge_share"),
-        "edge_len_max_rel": long_lines.get("edge_len_max_rel") or d.get("edge_len_max_rel") or (d.get("length") or {}).get("edge_len_max_rel"),
+        "edge_len_max_rel": long_lines.get("edge_len_max_rel"),
         "edge_length_deviation": b.get("edge_length_deviation"),
         "aspect_ratio": (
             d.get("aspect_ratio")
             if d.get("aspect_ratio") is not None
             else (b.get("aspect_ratio") if b.get("aspect_ratio") is not None else b.get("aspect_ratio_bbox"))
         ),
-        "area_per_node": (
-            d.get("area_per_node")
-            if d.get("area_per_node") is not None
-            else (b.get("area_per_node") if b.get("area_per_node") is not None else b.get("area_per_node_bbox"))
+        "area_per_node": b.get("area_per_node") if b.get("area_per_node") is not None else b.get("area_per_node_bbox"),
+        "blank_space_share": (
+            d.get("blank_space_share")
+            if d.get("blank_space_share") is not None
+            else ((d.get("blank_space") or {}).get("blank_space_share") if isinstance(d.get("blank_space"), dict) else b.get("blank_space_share"))
+        ),
+        "space_utilisation": (
+            d.get("space_utilisation")
+            if d.get("space_utilisation") is not None
+            else ((d.get("composition") or {}).get("space_utilisation") if isinstance(d.get("composition"), dict) else None)
         ),
         "currency_hub_violations": cof.get("currency_hub_violations"),
         "currency_long_arc_share": cof.get("currency_long_arc_share"),
@@ -66,7 +72,6 @@ def _flat_row(report: dict) -> dict:
         "cycle_order_consistency": (d.get("cycles") or {}).get("cycle_order_consistency"),
         "flow_main_dir_share": d.get("flow_main_dir_share"),
         "exchange_periphery_share": d.get("exchange_periphery_share"),
-        "blank_space_share": d.get("blank_space_share") if d.get("blank_space_share") is not None else b.get("blank_space_share"),
         "largest_empty_rect_share": (
             d.get("largest_empty_rect_share")
             if d.get("largest_empty_rect_share") is not None

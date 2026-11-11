@@ -98,8 +98,69 @@ def test_window_uses_uncapped_crossings():
     assert any(w["crossings"] == 1 for w in summary["worst_regions"])
 
 
+def test_detailed_panel_keeps_goals_only():
+    data = _crossing_map()
+    summary, _ = lq.evaluate(data, max_issues=10)
+    d = summary["details"]
+    assert "panel" in d
+    groups = {g["id"]: g for g in d["panel"]["groups"]}
+    labels = [r["label"] for g in d["panel"]["groups"] for r in g["rows"]]
+    assert "Local crossing hotspot" in labels
+    assert "Blank space / space utilisation" in labels
+    # Cycle stays a detail row marked 待优化 / not yet optimised
+    cycle_rows = [r for r in groups["structure_flow"]["rows"] if r["code"] == "cycle_circularity"]
+    assert cycle_rows and cycle_rows[0]["stage"] == lq.STAGE_NOT_YET
+    # Flow direction is debug-only (collapsed), never a main Structure & flow row
+    assert all(r["code"] != "flow_main_dir_share" for r in groups["structure_flow"]["rows"])
+    if "debug" in groups:
+        assert groups["debug"].get("debug") is True
+        assert groups["debug"].get("collapsed") is True
+        assert any(r["code"] == "flow_main_dir_share" for r in groups["debug"]["rows"])
+    # Reproducibility is optional detail only (not a main card); absent without compare-map
+    assert "reproducibility" not in groups
+    # Removed duplicates / pure statistics / transfer-check extras
+    assert "length" not in d
+    assert "participant_consistency" not in d
+    assert "area_per_node" not in d
+    assert "subsystem_conventions" not in d
+    assert "density" not in labels
+    assert "catalyst" not in " ".join(labels).lower()
+    # One content bbox: aspect and blank/utilisation agree
+    if d.get("blank_space_share") is not None and d.get("space_utilisation") is not None:
+        assert abs((d["blank_space_share"] + d["space_utilisation"]) - 1.0) < 1e-6
+    if d.get("composition") and d.get("aspect_ratio") is not None:
+        assert d["composition"]["aspect_ratio"] == d["aspect_ratio"]
+
+
+def test_content_bbox_shared():
+    from evaluation.map_rules import content_bbox
+
+    data = _crossing_map()
+    box = content_bbox(data[1], data[1].get("canvas"))
+    assert box["aspect_ratio"] is not None
+    assert box["width"] is not None and box["height"] is not None
+
+
+def test_svg_has_no_provenance_legend():
+    import ec_provenance as epv
+    import line_render
+
+    assert epv.LABELS["expert_derived"][0] == "Curated"
+    assert epv.LABELS["expert_derived"][1] == "人工绘制"
+    assert not hasattr(epv, "legend_svg")
+    data = _crossing_map()
+    kinds = {r["bigg_id"]: "generated" for r in data[1]["reactions"].values()}
+    svg = line_render.render(data, kinds)
+    assert "width=\"330\"" not in svg
+    assert "Expert-derived" not in svg
+    assert "Curated:" not in svg  # legend text must not be painted into the SVG
+
+
 if __name__ == "__main__":
     test_region_window_keys_membership()
     test_worst_region_count_matches_drawn_box()
     test_window_uses_uncapped_crossings()
+    test_detailed_panel_keeps_goals_only()
+    test_content_bbox_shared()
+    test_svg_has_no_provenance_legend()
     print("ok")

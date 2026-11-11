@@ -67,7 +67,7 @@ def evaluate_map(data, skip_edges, disconnected=0):
         disconnected=disconnected,
         collisions=co['curves_through_nodes'] + co['curves_through_labels'] + co['label_overlap_pairs'] + co['node_overlap_pairs'],
         crossings=x['algorithm_algorithm'] + x.get('algorithm_curated', x.get('algorithm_expert', 0)),
-        long_edges=s['details']['length']['over_250'],
+        long_edges=(c.get('long_lines') or {}).get('over_250', 0),
         detail=dict(through_nodes=co['curves_through_nodes'], through_labels=co['curves_through_labels'], label_overlaps=co['label_overlap_pairs'], node_overlaps=co['node_overlap_pairs'])), s, issues
 
 

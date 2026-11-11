@@ -2,7 +2,7 @@
 
 Expert maps (Escher, WikiPathways, Reactome) show metabolites as the nodes and reactions as curves/lines between them, with the reaction
 name written beside the line.  The Escher mid-marker is only an anchor for the label and the branch point; it is not drawn here.
-The colour of a reaction line is its provenance (expert-derived, topology suggestion, functional/EC suggestion, bridge, generated).
+The colour of a reaction line is its provenance (curated / expert_derived key, topology suggestion, functional/EC suggestion, bridge, generated).
 
 Input is the Escher JSON written by the drawing pipeline (map.json); nothing about the chemistry is changed, only how it is displayed.
 The old marker style stays available (`reaction_style = "marker"`): the drawing code in drawing.py is not modified.
@@ -64,8 +64,11 @@ def _curved_path(reaction, path, nodes):
     return d, curved
 
 
-def render(data, kinds=None, legend=None):
-    """SVG text of the map in line style.  `kinds` maps reaction id -> provenance kind; `legend` is [(kind, count)]."""
+def render(data, kinds=None):
+    """SVG text of the map in line style.  `kinds` maps reaction id -> provenance kind.
+
+    Provenance legend counts live in the Map Generator UI / report.json, not in the SVG.
+    """
     body = data[1]
     nodes, reactions = body['nodes'], body['reactions']
     canvas = body.get('canvas') or {}
@@ -129,15 +132,13 @@ def render(data, kinds=None, legend=None):
             continue  # dense-region currency hide
         labels.append(f'<text data-nl="{escape(nid)}" x="{n["label_x"]:.1f}" y="{n["label_y"]:.1f}" font-family="{FONT}" font-size="{12 if primary else 10.5}" fill="{"#17323d" if primary else "#6b7f88"}" stroke="#fff" stroke-width="3" paint-order="stroke">{escape(n.get("bigg_id", ""))}</text>')
     svg += labels
-    if legend:
-        svg.append(epv.legend_svg(legend))
     svg.append('</svg>')
     return ''.join(svg)
 
 
-def render_file(json_path, svg_path, kinds=None, legend=None):
+def render_file(json_path, svg_path, kinds=None):
     data = json.loads(open(json_path).read())
-    text = render(data, kinds, legend)
+    text = render(data, kinds)
     meta = data[0].get('metadata', {}).get('layout_sources')
     if meta:
         offset = text.index('>') + 1

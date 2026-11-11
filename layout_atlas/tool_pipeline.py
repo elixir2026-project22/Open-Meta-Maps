@@ -908,7 +908,7 @@ def global_network_metrics(model, map_path):
                 note='components: the GEM graph without currency metabolites vs the drawing, where every copy of a metabolite is its own node')
 
 
-def draw_global_map(job, model, selected, folder, prov_kinds, legend, n_reactions, plan=None):
+def draw_global_map(job, model, selected, folder, prov_kinds, n_reactions, plan=None):
     """One map for the whole model (scalable global steps, see global_layout).  Returns the map note, or None when the global layout failed
     (the caller then falls back to the tiled views; the failure is recorded and shown, never hidden)."""
     import global_layout as gl
@@ -922,9 +922,9 @@ def draw_global_map(job, model, selected, folder, prov_kinds, legend, n_reaction
                 (folder / name).write_bytes((folder / 'full' / name).read_bytes())
             if REACTION_STYLE == 'line':
                 import line_render
-                line_render.render_file(folder / 'map.json', folder / 'map.svg', prov_kinds, legend)
+                line_render.render_file(folder / 'map.json', folder / 'map.svg', prov_kinds)
             else:
-                (folder / 'map.svg').write_text(epv.recolor_svg((folder / 'map.svg').read_text(), prov_kinds, legend))
+                (folder / 'map.svg').write_text(epv.recolor_svg((folder / 'map.svg').read_text(), prov_kinds))
     except Exception as e:  # includes the time budget
         GLOBAL_FAILURE = f'{type(e).__name__}: {str(e)[:200]}'
         job.warn('global_failed', f'The global layout failed ({GLOBAL_FAILURE}); the map is built from tiled views instead.',
@@ -1032,8 +1032,8 @@ def run_job(folder):
             pools_ec.append(core_ec)
             job.log(f'EC candidates (open core): {einfo["candidates"]} found, screened against the equations: {ec_screening["open_core"]}')
         if libs['ec']:
-            job.warn('ec_extended', 'EC extended mode is on: structures matched only through a shared EC number are marked as functional layout suggestions, not as expert-derived.',
-                     'EC 扩展模式已开启：仅通过相同 EC 号匹配的结构只标为“功能布局建议”，不算专家来源。')
+            job.warn('ec_extended', 'EC extended mode is on: structures matched only through a shared EC number are marked as functional layout suggestions, not as curated.',
+                     'EC 扩展模式已开启：仅通过相同 EC 号匹配的结构只标为“功能布局建议”，不算人工绘制来源。')
         for p in pools_strong + [p for pool in pools_ec for p in pool]:
             t = templates.get(p['template_id'])
             if t:
@@ -1168,15 +1168,15 @@ def run_job(folder):
                 job.add_file(name, en, zh, kind)
             if REACTION_STYLE == 'line':
                 import line_render
-                line_render.render_file(folder / 'map.json', folder / 'map.svg', prov_kinds, legend)
+                line_render.render_file(folder / 'map.json', folder / 'map.svg', prov_kinds)
             else:
-                (folder / 'map.svg').write_text(epv.recolor_svg((folder / 'map.svg').read_text(), prov_kinds, legend))
+                (folder / 'map.svg').write_text(epv.recolor_svg((folder / 'map.svg').read_text(), prov_kinds))
             map_note = dict(kind='routed_full', routing=(metric.get('routing') or {}).get('status'), routing_attempts=metric.get('routing_attempts'),
                             metrics={k: metric.get(k) for k in ('node_overlap_pairs', 'label_overlap_pairs', 'straight_crossings')}, source_paths=metric.get('source_paths'), expert_geometry=metric.get('expert_geometry'), instance_optimization=metric.get('instance_optimization'), context_placement=metric.get('context_placement'), completion_context=metric.get('completion_context'), layout_quality_final=metric.get('layout_quality_final'), edge_style=metric.get('edge_style'), peripheral=metric.get('peripheral'), block_relocation=metric.get('block_relocation'), region_placement=metric.get('region_placement'), regions=metric.get('regions'), expert_submodule=metric.get('expert_submodule'), label_placement=metric.get('label_placement'), protected=metric.get('protected'), node_overlap_kinds=metric.get('node_overlap_kinds'), edge_routing=metric.get('edge_routing'))
         elif len(allids) <= LIMITS['whole_map_max_reactions']:
             global_note = None
             if LAYOUT == 'global':
-                global_note = draw_global_map(job, model, selected, folder, prov_kinds, legend, len(allids), plan=global_plan)
+                global_note = draw_global_map(job, model, selected, folder, prov_kinds, len(allids), plan=global_plan)
             if global_note is None:
                 job.log(f'Large model: drawing {len(views)} views, then tiling them into one map')
                 done, failed = [], []
@@ -1198,7 +1198,7 @@ def run_job(folder):
                     job.warn('views_failed', f'{len(failed)} of {len(views)} views could not be drawn and are missing from the tiled map.', f'{len(views)} 个视图中有 {len(failed)} 个无法绘制，整图里缺少它们。')
                 if done:
                     merge_tiles(model, folder, done, len(selected))
-                    (folder / 'map.svg').write_text(epv.recolor_svg((folder / 'map.svg').read_text(), {}, legend))
+                    (folder / 'map.svg').write_text(epv.recolor_svg((folder / 'map.svg').read_text(), {}))
                     for name, kind, en, zh in (('map.svg', 'svg', 'Completed map (tiled views, routed)', '补全图（分视图平铺，已布线）'), ('map.json', 'json', 'Completed map, Escher JSON', '补全图（Escher JSON）')):
                         job.add_file(name, en, zh, kind)
                 map_note = dict(kind='tiled_fallback' if LAYOUT == 'global' else 'tiled_views', requested_layout=LAYOUT, fallback_reason=(GLOBAL_FAILURE or None), views_drawn=len(done), views_total=len(views), views_failed=failed,
