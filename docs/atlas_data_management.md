@@ -88,15 +88,34 @@ What actually happened:
 5. **`map_observations.json.gz` was not updated** (still `version=20261010` for all 2,215 WP rows; still `import_or_propagation_unresolved`).
 6. **Consistency bug:** all 3,451 retained geometry-only modules still pointed at **old** `map_id` values that no longer exist in `maps` (0 hits). `source_sha256` still matched a new map row.
 
-So the refresh did ingest the new GPML into `maps` and re-derived semantic modules from unchanged bindable files, but it was a **partial** Atlas rebuild: module/reaction coverage did not grow with the larger map set, and geometry-only rows were left with dangling `map_id`s. Net −22 modules = the dropped geometry-only set only. Unchanged total reaction count is a coincidence of reindexing the same semantic WP slice (plus untouched Escher/Reactome rows).
+So the first refresh ingested new GPML into `maps` and re-derived semantic modules from unchanged bindable files, but it was a **partial** Atlas rebuild. That was corrected by a **complete rebuild** (below).
+
+## WikiPathways 20261110 complete rebuild
+
+Pipeline: `layout_atlas/wikipathways_rebuild.py` over **all 2,215** GPML files (generic; no species/map special cases).
+
+| | Partial refresh (prior) | Complete rebuild |
+|---|---:|---:|
+| WP maps | 2215 | 2215 |
+| WP semantic modules (open_core) | 1245 | **1245** (re-cut from GPML) |
+| WP geometry_only modules | 3451 retained / 22 dropped | **29,673** (re-cut; default extension) |
+| Maps with ≥1 module | ~929 | **934** (65 semantic + 869 geometry) |
+| Maps without modules | ~1286 | **1281** (no Rhea-validated events and no metabolite–metabolite edges — typically gene/signaling drawings) |
+| WP reactions indexed | 4879 | **4879** (geometry_only has no chemical ids) |
+| Reactions total | 63274 | **63274** |
+| `map_observations` version | 20261010 / unresolved | **20261110** / `resolved_pathway_id` |
+| Dangling `map_id` | 3451 | **0** |
+
+Changed GPMLs (Apis urea cycle; yeast NAD / sulfate / ubiquinol / pyrimidine salvage) are re-cut into geometry_only modules. Licence: WikiPathways content is **CC0**; GPML files have no per-file `License` attribute; Atlas stamps `CC0-1.0`.
+
+Geometry-only windows are stored in `data/extensions/wikipathways_geometry/` (loaded by default via `database.modules()`) so `open_core.sqlite` stays under GitHub’s size limit; semantic WP modules remain in sqlite.
 
 ## Reasonable fixes (this PR)
 
-1. Document findings (this file), including the WP refresh verification above.
-2. Remap retained WikiPathways geometry-only `map_id` / `lineage` onto the new map rows by `source_sha256`; record the audit in `wikipathways_refresh.json`.
-3. Schema v1: `meta` table (`schema_version`, registry pointer), `retained_observations` in DDL, source/lineage indexes; `ensure_schema()` on connect.
-4. Normalize open-core map/module provenance (licence required; fill url/version/attribution from registry where known; set `layout_origin`; resolve WP `provenance_status` via `lineage_hint` / WP id).
-5. Write `data/atlas_registry.json` (counts, licences, input sha, schema version) and refresh `input_manifest.json`.
-6. Validation test: fail on missing licence / source / `layout_origin` / schema version / dangling module `map_id`.
+1. Document findings (this file), including partial-refresh verification and the complete rebuild.
+2. Remap (interim) then **fully re-extract** WikiPathways modules from all 20261110 GPML; regenerate observations / registry / manifest.
+3. Schema v1: `meta` table, source/lineage indexes; `ensure_schema()` on connect.
+4. Normalize open-core provenance fields; write `data/atlas_registry.json`.
+5. Validation test: fail on missing licence / source / `layout_origin` / schema version / dangling module `map_id`.
 
-Out of scope (kept lean): full re-extraction of geometry-only modules for all 2,215 GPML files; dropping payload column duplication; deleting the empty `reviews` table; bulk-rewriting module observation lineages; taxon-id coverage for every species string.
+Out of scope (kept lean): dropping payload column duplication; deleting the empty `reviews` table; taxon-id coverage for every species string; treating gene-only WikiPathways drawings as metabolic geometry modules.
