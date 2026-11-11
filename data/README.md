@@ -26,7 +26,7 @@ The number of module instances or source files is not the number of independent 
 
 ```sh
 python3 project.py data list
-python3 project.py data fetch brenda       # or: reference-maps, atlas-full, all
+python3 project.py data fetch brenda       # or: atlas-full, all
 ```
 
 Details and terms: [`docs/data_packages.md`](../docs/data_packages.md). A normal run needs none of them.

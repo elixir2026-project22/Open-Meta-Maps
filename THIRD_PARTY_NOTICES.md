@@ -31,7 +31,7 @@ Open Meta Maps publishes **processed structures**: the module graphs, reaction i
 
 ## Not included in this repository
 
-- Human-maps and Yeast-maps archives were removed because of conflicting embedded licences.
+- Yeast-maps (GPL-3.0) and the original Yeast-maps CellDesigner map are excluded. Human-maps (CC BY 4.0) is admitted via its official Escher JSON.
 
 ## Related work
 

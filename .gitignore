@@ -19,5 +19,6 @@
 /data/extensions/brenda
 /data/references
 /data/source_inputs/archives/human_maps.zip*
-/data/source_inputs/archives/yeast_maps.zip*
+/data/references/yeast_original
+/data/references/yeast_maps
 

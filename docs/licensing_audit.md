@@ -32,7 +32,8 @@ Action: confirm the licence of each of the 22 maps with their authors or the Esc
 | `data/escher_schema/map-schema-1-0-0.json` | Escher, MIT (`LICENSE` copied) | OK |
 | ~~`model_input.py`, `central_reference.json` (sbml2escher)~~ | removed 2026-11-10: the SBML reader is now libSBML-based (`layout_atlas/model_io.py`), the currency list is `data/currency_metabolites.json` | **Resolved** |
 | `data/routing/source.zip` (adaptagrams, libavoid) | adaptagrams is LGPL; exact terms not re-checked | **Open**: confirm and add the LGPL notice |
-| `human_maps.zip`, `yeast_maps.zip` (Human-maps, Yeast-maps) | recorded as "repository CC-BY-4.0 / GPL-3.0; embedded SVG BY-SA-4.0 conflict" | **Removed** (2026-11-10), together with their 251 map observations; they contributed 0 modules to the open core. `input_manifest.json`, `source_registry.json` and `extensions/source_paths/SOURCE.json` were updated to match. `acquire.py` still contains the download code for them (not run by default); they are not redistributed |
+| Yeast-maps / original yeast map | GPL-3.0 (Yeast-maps) | **Removed** from packages, acquisition and docs. Not redistributed. |
+| Human-maps (`human_maps.zip`, official `escher/` JSON) | repository CC BY 4.0 | **Included**: import via Escher module extraction into the open-core Atlas; check embedded map metadata for BY-SA markings |
 | `data/extensions/{units,source_paths,reaction_geometry_templates}` | derived from the open-core maps | inherits the Escher-map status above |
 | `data/annotation_bridge.json` | derived from model annotations (identifier links) | inherits the model licences above |
 
@@ -44,7 +45,7 @@ Action: confirm the licence of each of the 22 maps with their authors or the Esc
 
 ## 4. Recommended actions, in order
 
-1. ~~Remove `human_maps.zip`, `yeast_maps.zip` and their derived observations~~ (done; repository history rewritten).
+1. ~~Remove Yeast-maps / yeast_original~~ (done). Human-maps re-admitted under CC BY 4.0 via official Escher JSON.
 2. Decide how to handle the BiGG-licensed example models and the Escher maps: obtain written confirmation, replace them with permissively licensed equivalents, or state the non-commercial restriction in the README.
 3. ~~Record the upstream licence of the `sbml2escher` files~~ (resolved: dependency removed); record the licence of adaptagrams/libavoid; `THIRD_PARTY_NOTICES.md` exists.
 4. Add Rhea and Human-GEM citations; keep every upstream `LICENSE` next to its data.

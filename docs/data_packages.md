@@ -4,9 +4,9 @@ The repository contains the **open-core Atlas** (`data/open_core.sqlite`: 17,221
 
 | Package | Content | Terms |
 |---|---|---|
-| `atlas-full` | the full `atlas.sqlite` (same modules and reactions as the open core; the `maps` table additionally lists the Human-maps and Yeast-maps sources) | see the package notice |
+| `atlas-full` | the full `atlas.sqlite` (open-core Atlas snapshot) | see the package notice |
 | `brenda` | BRENDA pathway-map extension (trial) | layout origin not confirmed: research use only |
-| `reference-maps` | Human-maps, Yeast-maps, original yeast map, rule history, with provenance records | per-source terms differ and are not all confirmed; see `docs/licensing_audit.md` |
+| ~~`reference-maps`~~ | withdrawn: Yeast-maps / original yeast map dropped (GPL-3.0); Human-maps move into the open-core Atlas via official Escher JSON | — |
 
 ```sh
 python3 project.py data list                 # what exists, size, terms, installed or not
