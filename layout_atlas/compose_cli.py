@@ -16,7 +16,7 @@ import tool_server
 RESULT_FILES = ['job.json', 'map.json', 'map.svg', 'report.json', 'skeleton.json', 'skeleton.svg', 'modules.json', 'licenses.json', 'selected.json.gz', 'views.json']
 
 
-def run(gem, out, ec=False, no_library=False, micromap=False, brenda=False, library='windows', reaction_style='line', completion='spaced', source_paths=False, layout='global', orientation='full', block_layout='auto', instances='auto', context='auto', edge_routing='libavoid', completion_context='auto', layout_style='expert'):
+def run(gem, out, ec=False, no_library=False, brenda=False, library='windows', reaction_style='line', completion='spaced', source_paths=False, layout='global', orientation='full', block_layout='auto', instances='auto', context='auto', edge_routing='libavoid', completion_context='auto', layout_style='expert'):
     gem, out = Path(gem).resolve(), Path(out).resolve()  # the pipeline runs in layout_atlas/, so paths must be absolute
     if not gem.is_file():
         raise SystemExit(f'GEM file not found: {gem}')
@@ -32,7 +32,7 @@ def run(gem, out, ec=False, no_library=False, micromap=False, brenda=False, libr
     shutil.rmtree(out / 'upload', ignore_errors=True)
     (out / 'upload').mkdir()
     shutil.copy(gem, out / 'upload' / ('model' + gem.suffix.lower()))
-    libraries = dict(core=not no_library, ec=bool(ec), micromap=bool(micromap), brenda=bool(brenda))
+    libraries = dict(core=not no_library, ec=bool(ec), brenda=bool(brenda))
     dump(out / 'options.json', dict(libraries=libraries, library=library, reaction_style=reaction_style, completion=completion, source_paths=bool(source_paths), layout=layout, orientation=orientation, block_layout=block_layout, instances=instances, context=context, edge_routing=edge_routing, completion_context=completion_context, layout_style=layout_style))
     import tool_pipeline as tp
     tp.Job(out).save()

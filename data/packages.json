@@ -14,17 +14,6 @@
    "notice": "package_notices/atlas-full.md"
   },
   {
-   "name": "micromap",
-   "title": "MicroMap extension (modules, observations, reference files)",
-   "file": "openmetamaps-micromap-data-v1.tar.gz",
-   "sha256": "895305e882ee012b9143e9791071cee6f6d37b4fee2867bc73dbb16148020554",
-   "bytes": 111374575,
-   "files": 27,
-   "licence": "CC BY-NC-SA 4.0 (non-commercial, share-alike). MicroMap v4.0, Ines Thiele, doi:10.7910/DVN/FZKMJ8.",
-   "marker": "extensions/micromap/SOURCE.json",
-   "notice": "package_notices/micromap.md"
-  },
-  {
    "name": "brenda",
    "title": "BRENDA pathway-map extension (trial)",
    "file": "openmetamaps-brenda-data-v1.tar.gz",

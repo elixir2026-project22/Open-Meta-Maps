@@ -88,8 +88,7 @@
    "count": 11,
    "by_source": {
     "escher": 8,
-    "reactome": 2,
-    "micromap": 1
+    "reactome": 2
    }
   },
   "seconds": 11.9

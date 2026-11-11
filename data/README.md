@@ -23,11 +23,10 @@ The number of module instances or source files is not the number of independent 
 
 ## Not in this repository: optional data packages
 
-The full database used in development also has the MicroMap and BRENDA extensions, reference maps and a full `atlas.sqlite` (same modules and reactions; its `maps` table also lists the Human-maps and Yeast-maps sources). Their licences differ, so they are separate downloads:
 
 ```sh
 python3 project.py data list
-python3 project.py data fetch micromap     # or: brenda, reference-maps, atlas-full, all
+python3 project.py data fetch brenda       # or: reference-maps, atlas-full, all
 ```
 
 Details and terms: [`docs/data_packages.md`](../docs/data_packages.md). A normal run needs none of them.

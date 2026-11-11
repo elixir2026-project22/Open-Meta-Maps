@@ -2,7 +2,7 @@
 ZH_EXTRA={
 # home
 'Current approach and results':'当前方案与结果','Measured drawing improvements':'绘图改进的实测结果','Independent research source (CC BY-NC-SA)':'独立研究来源（CC BY-NC-SA）','Module choice and pose under fixed coverage':'覆盖保持下的模块与姿态选择','Four drawing conditions on E. coli core':'E. coli core 的四种绘图条件','17,221 instances / 6,094 layout variants':'17,221个实例 / 6,094个布局变体','Commands and layout of the code':'命令与代码结构',
-'Current research report':'当前研究报告','Drawing-geometry experiment (P0)':'绘图几何实验（P0）','MicroMap extension experiment (P1)':'MicroMap扩展库实验（P1）','Module composition search (P2)':'模块组合搜索（P2）','Improvement and failure cases':'改善与失败案例','Run instructions':'运行说明','Deterministically selected cases':'确定性选取的案例',
+'Current research report':'当前研究报告','Drawing-geometry experiment (P0)':'绘图几何实验（P0）','Module composition search (P2)':'模块组合搜索（P2）','Improvement and failure cases':'改善与失败案例','Run instructions':'运行说明','Deterministically selected cases':'确定性选取的案例',
 'Expert E. coli core map':'专家绘制的 E. coli core 图','Current context-composition result':'当前上下文组合结果','Full E. coli map from the current method':'当前方法生成的完整 E. coli 图',
 'Browse':'浏览','Expert maps and current results':'专家图与当前结果','Six-model full-scope results':'六个模型的完整范围结果','Data and verification':'数据与验证','Definitions':'术语定义',
 'Model / all views':'模型／全部视图','Module coverage / reactions':'模块覆盖／总反应数','Strict equation coverage':'严格方程覆盖','Data':'数据','Skeleton and mapping':'骨架与映射','Data directory':'数据目录说明','Results directory':'结果目录说明','Automatic verification':'自动验收结果','Paired completion scores':'配对补全逐案例得分',
@@ -29,12 +29,7 @@ ZH_EXTRA={
 'All trials and failures':'全部试验与失败记录','Original selection':'原始选择','Final Escher JSON':'最终 Escher JSON',
 'Frozen P1 libraries. Preserve covered reaction sets and equation-compatible sets. Same target-only completion and routing. No learned preference or target expert coordinates.':'冻结P1库；保留已覆盖反应集合与方程相容集合；相同的仅目标信息的补全与布线；不使用学习偏好，也不使用目标专家坐标。',
 'Module variant and pose selection under fixed coverage, before → after.':'覆盖保持不变时的模块变体与姿态选择，前 → 后。','Module composition search':'模块组合搜索',
-# micromap
-'Target':'目标','All reactions':'全部反应','G candidates':'G 候选数','G_D candidates':'G_D 候选数','G_D_M candidates':'G_D_M 候选数','Added chemical candidates':'新增化学候选数','Source module catalog':'来源模块图录','Full saved results':'完整保存结果',
-'Licence: CC BY-NC-SA 4.0 (MicroMap master v4.0, DOI 10.7910/DVN/FZKMJ8). Open core unchanged. G: old pool + P0; G_D: same-mapper core; G_D_M: add MicroMap.':'许可：CC BY-NC-SA 4.0（MicroMap master v4.0，DOI 10.7910/DVN/FZKMJ8）。开放核心库未改动。G：旧候选池 + P0；G_D：同映射器核心库；G_D_M：加入MicroMap。',
-'One independent master design added as a separate research source; candidate counts per source condition.':'一个独立的总设计作为单独研究来源加入；按来源条件统计候选数。','MicroMap extension experiment':'MicroMap扩展库实验',
-'Source DOI':'来源DOI','. Adapted source center-lines and algorithm-derived process centers. CC BY-NC-SA4.0.':'。已改编来源中心线与算法推导的过程中心。CC BY-NC-SA4.0。','MicroMap research layout extension':'MicroMap研究布局扩展库',
-'CC BY-NC-SA4.0. One independent master design. Not in the open core. Deterministic first6 IDs per size; observed glyphs and decoded center-line controls, algorithm-derived process centers.':'CC BY-NC-SA4.0。一个独立的总设计，不在开放核心库中。每种规模按ID确定性取前6个；图元为观测所得，中心线控制点为解码所得，过程中心由算法推导。',
+
 # geometry
 'node overlap pairs':'节点重叠对数','label overlap pairs':'标签重叠对数','label node intersections':'标签与节点相交数','straight crossings':'直线交叉数','canvas area per reaction':'每反应画布面积','condition':'条件',
 'E. coli core, fixed-candidate geometry ablation: four drawing conditions on the same frozen candidates.':'E. coli core 固定候选的几何消融：同一批冻结候选上的四种绘图条件。','Drawing-geometry experiment':'绘图几何实验',

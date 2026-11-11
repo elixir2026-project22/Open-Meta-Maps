@@ -111,7 +111,7 @@ button.lnk{font:inherit;background:none;border:0;color:var(--accent);cursor:poin
 GROUPS=[('',[('Map Generator','layout_atlas/results/tool/index.html','tool'),('About / Provenance','layout_atlas/results/about/index.html','about')])]
 NAV=[x for _,g in GROUPS for x in g]
 
-ZH={'Map Generator':'地图生成器','About / Provenance':'关于 / 来源','Tool':'工具','Layout tool':'布局工具','Home':'首页','Module catalog':'模块图录','Database':'数据库','Experiments & applications':'实验与应用','Drawing-geometry experiment':'绘图几何实验','MicroMap extension experiment':'MicroMap扩展库实验','Module composition search':'模块组合搜索','Cases':'案例',
+ZH={'Map Generator':'地图生成器','About / Provenance':'关于 / 来源','Tool':'工具','Layout tool':'布局工具','Home':'首页','Module catalog':'模块图录','Database':'数据库','Experiments & applications':'实验与应用','Drawing-geometry experiment':'绘图几何实验','Module composition search':'模块组合搜索','Cases':'案例',
 'Home page':'首页',
 'module instances':'模块实例','structural families':'结构家族','layout variants':'布局变体','catalog pages':'图录页数','species':'物种','singleton families':'单例家族',
 'Module instances by source':'按来源统计的模块实例','Layout variants by source':'按来源统计的布局变体','Provenance and licence':'来源与许可','Search the variants':'检索布局变体','Browse all pages':'浏览全部页面',
@@ -120,7 +120,7 @@ ZH={'Map Generator':'地图生成器','About / Provenance':'关于 / 来源','To
 'Layout atlas v0.3':'布局图录 v0.3','Downloads:':'下载：','Reactions':'反应数','Compartments':'区室','Files':'文件','View':'视图','Target':'目标','Case':'案例',
 'Chemical coverage':'化学覆盖','Module coverage':'模块覆盖','Label overlaps':'标签重叠','Straight crossings':'直线交叉','Accepted change':'是否采用',
 'Browse':'浏览','Expert maps and current results':'专家图与当前结果','Six-model full-scope results':'六模型完整范围结果','Data and verification':'数据与验证','Model / all views':'模型／全部视图','Module coverage / reactions':'模块覆盖／总反应','Strict equation coverage':'严格方程覆盖','Data':'数据','Skeleton and mapping':'骨架与映射',
-'Current research report':'当前研究报告','P0 drawing improvements':'P0绘图改进实测','MicroMap extension':'MicroMap扩展实测（NC-SA）','Context composition':'上下文组合实测','Old vs new drawing':'新旧绘图对照','Improvement and failure cases':'改善与失败案例','Run instructions':'运行说明',
+'Current research report':'当前研究报告','P0 drawing improvements':'P0绘图改进实测','Context composition':'上下文组合实测','Old vs new drawing':'新旧绘图对照','Improvement and failure cases':'改善与失败案例','Run instructions':'运行说明',
 'Expert E. coli core map':'专家 E. coli 核心图','Current context-composition result':'当前上下文组合实验','Data directory':'数据目录说明','Results directory':'结果目录说明','Automatic verification':'自动验收结果','Paired completion scores':'配对补全逐案例得分',
 'Open Meta Maps':'Open Meta Maps'}
 LANG_JS='''<script>(function(){var Z=%s,O=new WeakMap(),A=[],zh=false,b=document.getElementById('lang');
@@ -180,12 +180,3 @@ def rewrap(path,title,section='',lead=''):
     text=re.sub(r'<body[^>]*>','',text);text=re.sub(r'<h1>.*?</h1>','',text,count=1,flags=re.S)
     path.write_text(page(path,title,text,section=section,lead=lead))
 
-def localize_micromap(path):
-    """Idempotently wrap the English labels of the MicroMap source catalog in bilingual spans."""
-    t=path.read_text()
-    t=re.sub(r'<p>Dataset creator: (.*?) v4\.0\. ',lambda m:'<p>'+bi('Dataset creator: ','数据集作者：')+'<span class="dn">'+m.group(1)+' v4.0.</span> ',t)
-    t=re.sub(r'<p>Source reaction IDs: (.*?)</p>',lambda m:'<p>'+bi('Source reaction IDs: ','来源反应ID：')+'<span class="dn">'+m.group(1)+'</span></p>',t)
-    t=re.sub(r'<h2>(\d+) reactions</h2>',lambda m:f'<h2>{bi(m.group(1)+" reactions",m.group(1)+" 个反应")}</h2>',t)
-    t=re.sub(r'<small>Instance ([0-9a-f]+)<br>Family ([0-9a-f]+)<br>Variant ([0-9a-f]+)<br>Source MicroMap master v4\.0 / CC BY-NC-SA4\.0</small>',
-        lambda m:'<small>'+bi('Instance ','实例 ')+m.group(1)+'<br>'+bi('Family ','家族 ')+m.group(2)+'<br>'+bi('Variant ','变体 ')+m.group(3)+'<br>'+bi('Source','来源')+' MicroMap '+bi('master','总设计')+' v4.0 / CC BY-NC-SA4.0</small>',t)
-    path.write_text(t)

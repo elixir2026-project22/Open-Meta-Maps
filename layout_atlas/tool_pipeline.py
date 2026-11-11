@@ -51,7 +51,7 @@ REACTION_STYLE = 'line'  # 'line' (reactions are lines between metabolites, like
 STEPS = [('parse', 'Parse the model', '解析模型'), ('map', 'Match library structures', '匹配库中的结构'),
          ('select', 'Select structures', '选择结构'), ('skeleton', 'Build the skeleton', '搭建骨架'),
          ('complete', 'Complete the map', '补全图'), ('report', 'Write the report', '生成报告')]
-SOURCE_COLORS = {'escher': '#128781', 'reactome': '#3d6fa3', 'wikipathways': '#8a5fb0', 'micromap': '#c0792a', 'brenda': '#b04a4a'}
+SOURCE_COLORS = {'escher': '#128781', 'reactome': '#3d6fa3', 'wikipathways': '#8a5fb0', 'brenda': '#b04a4a'}
 LEVEL_RANK = {'complete_equation': 0, 'reaction_reference': 1, 'partial_reference': 2, 'ec_topology': 3, 'geometry': 4}
 LEVEL_NAMES = {'complete_equation': 'complete_equation', 'reaction_reference': 'reference_supported', 'partial_reference': 'reference_supported',
                'ec_topology': 'ec_topology', 'geometry': 'geometry_only'}
@@ -233,7 +233,7 @@ def fixed_views(model, g, max_size=50):
 
 
 def load_bridge():
-    cache = OUT / 'micromap_extension/annotation_bridge.json'
+    cache = DATA / 'annotation_bridge.json'
     if cache.exists():
         return read(cache)
     import semantic_transfer as st
@@ -420,8 +420,6 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
                     'source_path_policy', 'source_citation', 'view_clipping', 'source_sha256', 'original_instance'):
             if key in p:
                 b[key] = p[key]
-        if p['source'] == 'micromap':
-            b['anchor_confidence'] = .75
     for bridge in bridges:
         a, c = anchors.get(bridge['nodes'][0]), anchors.get(bridge['nodes'][-1])
         if a is None or c is None:
@@ -923,8 +921,9 @@ def run_job(folder):
     job = Job(folder)
     folder = job.folder
     options = read(folder / 'options.json') if (folder / 'options.json').exists() else {}
-    libs = dict(core=True, ec=False, micromap=False, brenda=False)  # EC = extended mode, off by default
+    libs = dict(core=True, ec=False, brenda=False)  # EC = extended mode, off by default
     libs.update(options.get('libraries', {}))
+    libs.pop('micromap', None)  # MicroMap (NC-SA) removed; ignore stale option keys
     global REACTION_STYLE, COMPLETION, SOURCE_PATHS, LAYOUT, ORIENTATION, INSTANCES, CONTEXT, EDGE_ROUTING, COMPLETION_CONTEXT, LAYOUT_STYLE
     LAYOUT_STYLE = options.get('layout_style') if options.get('layout_style') in ('legacy', 'expert') else 'legacy'
     COMPLETION_CONTEXT = options.get('completion_context') if options.get('completion_context') in ('auto', 'off') else 'auto'
@@ -998,14 +997,6 @@ def run_job(folder):
         job.log(f"Retrieval candidates: {len(ps)} (levels {audit['levels']})")
         job.log(f'Complete-equation candidates: {len(strong)} covering {sinfo["candidate_chemical_reactions"]} reactions')
         pools_strong = ps + strong
-        if libs['micromap']:
-            import micromap_library as ml
-            micro = ml.load()
-            templates.update({m['id']: m for m in micro})
-            mm, minfo = mapper.proposals(micro, 'micromap')
-            pools_strong += mm
-            job.log(f'MicroMap (CC BY-NC-SA research partition): {len(mm)} candidates')
-            job.warn('nc_sa', 'MicroMap-derived content is CC BY-NC-SA 4.0 (non-commercial, share-alike).', 'MicroMap 来源的内容是 CC BY-NC-SA 4.0（非商业、相同方式共享）。')
         if libs['ec']:
             ec.enrich(core)
             ecm = ec.ECMapper(model, bridge)
@@ -1246,7 +1237,7 @@ def run_job(folder):
             layout_quality_report['orientation'] = orientation_report.summary(read(folder / 'map.json'), prov_kinds)
         run_settings = dict(
             structure_library=library_kind, library_label={'windows': 'pathway-fragment reuse', 'units_sub': 'structure-unit reuse'}.get(library_kind, library_kind),
-            sources=dict(core_open_cc0_ccby=bool(libs['core']), micromap_cc_by_nc_sa=bool(libs['micromap']), brenda=bool(libs['brenda'])),
+            sources=dict(core_open_cc0_ccby=bool(libs['core']), brenda=bool(libs['brenda'])),
             ec_extension=bool(libs['ec']), ec_note='layout hints only; the reactions and stoichiometry of the target GEM are never replaced',
             drawing_engine=dict(version='V7', layout_style=LAYOUT_STYLE, completion_context=COMPLETION_CONTEXT, instances=INSTANCES, orientation=ORIENTATION, expert_curves=bool(SOURCE_PATHS),
                                 edge_routing=EDGE_ROUTING, layout=LAYOUT),

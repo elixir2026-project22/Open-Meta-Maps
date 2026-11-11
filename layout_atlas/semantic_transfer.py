@@ -178,7 +178,7 @@ class Mapper:
                     geometry_fingerprint=m['geometry_fingerprint'],reaction_ids=list(rids),node_mapping=node_map,reaction_mapping=rmap,source_glyph_mapping={k:v[2:] for k,v in node_map.items() if source[k]['role']=='metabolite'},
                     positions={k:np.array(v).tolist() for k,v in positions.items()},position_origins={node_map[k]:source[k]['position_origin'] for k in ks},
                     source_to_initial_frame=frame,match_level='complete_equation',complete_chemical_equation_verified=True,
-                    complete_equation_verified=exact_comp and m['source']!='micromap',label_compartments_verified=exact_comp,
+                    complete_equation_verified=exact_comp,label_compartments_verified=exact_comp,
                     mapping_evidence=checks,features=features,ports=targetports,score=2*len(rids)+1.2-.1*features[2]-.2*direction_cost-.2*initial_fit,
                     expert_query_coordinates_used=False,template_quality=m['quality'],match_mode='direct_full_equation_partial_visible_core',unmapped_target_nodes=sorted(set(tg)-set(node_map.values())),
                     source_path_policy='Source decoded paths retained by template ID; target routes recomputed')

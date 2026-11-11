@@ -34,14 +34,13 @@ Action: confirm the licence of each of the 22 maps with their authors or the Esc
 | `data/routing/source.zip` (adaptagrams, libavoid) | adaptagrams is LGPL; exact terms not re-checked | **Open**: confirm and add the LGPL notice |
 | `human_maps.zip`, `yeast_maps.zip` (Human-maps, Yeast-maps) | recorded as "repository CC-BY-4.0 / GPL-3.0; embedded SVG BY-SA-4.0 conflict" | **Removed** (2026-11-10), together with their 251 map observations; they contributed 0 modules to the open core. `input_manifest.json`, `source_registry.json` and `extensions/source_paths/SOURCE.json` were updated to match. `acquire.py` still contains the download code for them (not run by default); they are not redistributed |
 | `data/extensions/{units,source_paths,reaction_geometry_templates}` | derived from the open-core maps | inherits the Escher-map status above |
-| `layout_atlas/results/micromap_extension/annotation_bridge.json` | derived from model annotations (identifier links) | inherits the model licences above; name is historical, contains no MicroMap layout |
+| `data/annotation_bridge.json` | derived from model annotations (identifier links) | inherits the model licences above |
 
 ## 3. Not in the repository (verified by `.gitignore` and tracked-file listing)
 
-- MicroMap: CC BY-NC-SA 4.0 (non-commercial, share-alike). Not tracked. May be released as a separate data package under those terms only.
 - BRENDA-derived layouts: the source note says the BRENDA online version is CC BY 4.0 but the pathway-map-specific terms are not stated; not tracked.
 - `data/references/`, `Ref/`, `Presentation/`, `results/`: not tracked.
-- Code files `micromap_*.py`, `celldesigner.py` are tracked; they contain no MicroMap data.
+- `celldesigner.py` is a generic CellDesigner importer (kept for optional pathway sources).
 
 ## 4. Recommended actions, in order
 

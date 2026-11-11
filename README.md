@@ -50,7 +50,6 @@ Command line:
 python3 project.py compose --gem examples/e_coli_core.xml --out results/e_coli_core/ --source-paths --layout-style expert
 ```
 
-Example models: `e_coli_core`, `iIT341`, `iML1515` and `iMM904` in `examples/`. `python3 project.py --help` lists all commands; more detail is in [docs/installation.md](docs/installation.md). The default run uses the open-core Atlas that is part of this repository; the optional extra data (MicroMap, BRENDA, reference maps) is installed with `python3 project.py data list` / `fetch`, see [docs/data_packages.md](docs/data_packages.md).
 
 ## How it works
 
@@ -72,7 +71,7 @@ Layout quality and expert-geometry reuse are reported separately; exact matches,
 
 ## Data sources and licensing
 
-The default Atlas (`data/open_core.sqlite`, copied to `atlas.sqlite` on first run) integrates pathway knowledge from Escher maps, WikiPathways and Reactome. Source versions, hashes and licence evidence are in `data/source_inputs/`. Every original source is credited in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) together with the licence recorded for it; items whose licence is still to be confirmed are marked as such, see [docs/licensing_audit.md](docs/licensing_audit.md). Additional sources with their own terms (MicroMap, CC BY-NC-SA 4.0; BRENDA-derived layouts) are separate downloads and not part of this repository.
+The default Atlas (`data/open_core.sqlite`, copied to `atlas.sqlite` on first run) integrates pathway knowledge from Escher maps, WikiPathways and Reactome. Source versions, hashes and licence evidence are in `data/source_inputs/`. Every original source is credited in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) together with the licence recorded for it; items whose licence is still to be confirmed are marked as such, see [docs/licensing_audit.md](docs/licensing_audit.md). Optional BRENDA-derived layouts are a separate download (CC BY 4.0; layout provenance possibly automatic).
 
 The repository software licence is **to be specified before the public release**; it is independent of the licences of the data.
 

@@ -31,7 +31,6 @@ Open Meta Maps publishes **processed structures**: the module graphs, reaction i
 
 ## Not included in this repository
 
-- **MicroMap** (CC BY-NC-SA 4.0) and layouts derived from **BRENDA** are used only in a local research configuration and are not redistributed here.
 - Human-maps and Yeast-maps archives were removed because of conflicting embedded licences.
 
 ## Related work

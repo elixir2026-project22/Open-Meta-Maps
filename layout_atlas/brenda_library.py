@@ -2,7 +2,7 @@
 
 Source: the public BRENDA combined pathway map (SVG, CC BY 4.0). It is stored under
 data/references/brenda/ and decoded here into pathway-level modules in the same record
-format as the MicroMap extension.  Status: *unverified layout origin* -- the node and edge
+module record format as other Atlas extensions.  Status: *unverified layout origin* -- the node and edge
 geometry shows features of an automatic layered layout (see `layout_audit`), so these
 modules are NOT counted as expert designs and are NOT admitted to the open core until the
 data provider confirms how positions were produced.

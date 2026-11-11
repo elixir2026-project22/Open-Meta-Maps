@@ -10,13 +10,12 @@ The default Atlas is `data/open_core.sqlite`. Its layouts come only from:
 
 Source versions, SHA-256 hashes and access dates: `data/source_inputs/source_registry.json`, `origin.json` and `data/input_manifest.json`. Every Atlas structure carries its source and licence; each generated map lists the structures it used in `licenses.json`.
 
-Other bundled files: `data/rhea/` (Rhea reaction data), the identifier bridge `layout_atlas/results/micromap_extension/annotation_bridge.json` (built from the annotations of the public example models), and the example models in `examples/` the identifier tables `data/identifier_bridge.json` (BiGG metabolite to ChEBI and BiGG reaction to EC, extracted from the annotations of e_coli_core, iML1515, iMM904 and Human-GEM, with the model each entry comes from) and `data/currency_metabolites.json` (BiGG ids of currency / cofactor metabolites). The licences of the example models are to be confirmed.
+Other bundled files: `data/rhea/` (Rhea reaction data), the identifier bridge `data/annotation_bridge.json` (built from the annotations of the public example models), and the example models in `examples/` the identifier tables `data/identifier_bridge.json` (BiGG metabolite to ChEBI and BiGG reaction to EC, extracted from the annotations of e_coli_core, iML1515, iMM904 and Human-GEM, with the model each entry comes from) and `data/currency_metabolites.json` (BiGG ids of currency / cofactor metabolites). The licences of the example models are to be confirmed.
 
 ## Not included
 
 | Material | Reason |
 |---|---|
-| MicroMap extension | CC BY-NC-SA 4.0 (non-commercial, share-alike). It could be released as a separate data package under those terms, but it must not be merged into the core Atlas. |
 | BRENDA-derived layouts | Layout rights not yet verified; only the rebuild scripts are included. |
 | `data/references/` | Mixed licences; to be audited per file. |
 

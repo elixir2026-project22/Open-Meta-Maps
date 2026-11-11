@@ -14,18 +14,6 @@ def composition_index(s):
     return ui.page(OUT/'composition/index.html','Module composition search',body,section='composition',lead='<span class="stage">P2</span>Module variant and pose selection under fixed coverage, before → after.')
 
 
-def micromap_index(models):
-    e=html.escape;rows=[];figs=''
-    for m in models:
-        r={x['condition']:x for x in m['conditions']};rows.append([m['model'],r['G']['target_reactions'],*[r[k]['candidate_chemical_reactions'] for k in ('G','G_D','G_D_M')],len(m['new_candidate_chemical_ids'])])
-        for r in m.get('drawing',[]):figs+=f'<article><h2>{e(m["model"])} / {e(r["condition"])}</h2><a href="models/{m["model"]}/{r["condition"]}/map.svg"><img src="models/{m["model"]}/{r["condition"]}/map.svg" alt="{e(m["model"])} {e(r["condition"])}" loading="lazy"></a></article>'
-        if m.get('fixed_views'):
-            figs+=f'<h2><span class="dn">{e(m["model"])}</span> '+ui.bi('fixed views','固定视图')+'</h2><ul>'+''.join(f'<li><a href="models/{m["model"]}/{r["condition"]}/{r["view"]}/map.svg">{e(r["condition"])} / {e(r["view"])} (</a>'+ui.bi(f'{r["reactions"]} reactions',f'{r["reactions"]} 个反应')+')</li>' for r in m['fixed_views'])+'</ul>'
-    body=('<div class="note">Licence: CC BY-NC-SA 4.0 (MicroMap master v4.0, DOI 10.7910/DVN/FZKMJ8). Open core unchanged. G: old pool + P0; G_D: same-mapper core; G_D_M: add MicroMap.</div>'
-        '<p><a href="catalog/index.html">Source module catalog</a> · <a href="summary.json">Full saved results</a></p>'
-        +ui.table(['Target','All reactions','G candidates','G_D candidates','G_D_M candidates','Added chemical candidates'],rows)+figs)
-    return ui.page(OUT/'micromap_extension/index.html','MicroMap extension experiment',body,section='micromap',lead='<span class="stage">P1</span>One independent master design added as a separate research source; candidate counts per source condition.')
-
 
 def geometry_index(results,destination):
     cols=['condition','node_overlap_pairs','label_overlap_pairs','label_node_intersections','straight_crossings','canvas_area_per_reaction']
