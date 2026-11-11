@@ -31,14 +31,22 @@ def graph(m):
  return g
 
 class Matcher(nx.isomorphism.GraphMatcher):
- def __init__(self,*a,**k):super().__init__(*a,**k);self.steps=0
+ def __init__(self,*a,budget=5000,**k):
+  super().__init__(*a,**k);self.steps=0;self.budget=budget
  def syntactic_feasibility(self,a,b):
   self.steps+=1
-  if self.steps>5000:raise TimeoutError('isomorphism budget')
+  if self.steps>self.budget:raise TimeoutError('isomorphism budget')
   return super().syntactic_feasibility(a,b)
 
+def _iso_budget(a,b):
+ """Scale VF2 step budget with graph size: small exact matches stay thorough; large subgraphs abort sooner."""
+ n=max(len(a),len(b))
+ if n<=8:return 5000
+ if n<=16:return 2500
+ return 1200
+
 def mappings(a,b,limit=16):
- try:return list(itertools.islice(Matcher(a,b,node_match=lambda x,y:x['role']==y['role']).isomorphisms_iter(),limit))
+ try:return list(itertools.islice(Matcher(a,b,node_match=lambda x,y:x['role']==y['role'],budget=_iso_budget(a,b)).isomorphisms_iter(),limit))
  except TimeoutError:return []
 
 def geometry_error(a,b,mp):

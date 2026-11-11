@@ -395,7 +395,7 @@ MIN_AUTO = 4         # communities smaller than this are merged into their best 
 LOCAL_SPACING = (110.0, 75.0, 60.0)  # minimum centre distances inside automatic modules (reaction-reaction, metabolite-metabolite, reaction-metabolite)
 BACKBONE = False        # V7: fixed backbone chain inside automatic modules (set by tool_pipeline for --layout-style expert)
 backbone_stats = {}
-BLOCK_LAYOUT = 'single'  # default stays V1 until V2 improves the long edges. 'auto' (V2: several module arrangements, best chosen by module metrics) | 'single' (V1: one spring arrangement)
+BLOCK_LAYOUT = 'auto'  # 'auto' (stress/spring candidates scored for compactness + long links) | 'single' (one spring arrangement)
 HUB = 30             # a metabolite that touches more modules than this does not glue modules together
 
 

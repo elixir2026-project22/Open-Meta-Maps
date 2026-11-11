@@ -212,12 +212,19 @@ def relocate(data, model, scene, blocks, cur, skip_edges, budget_s=150.0, max_un
         row = dict(block=unit['block'], reactions=unit['reactions'][:6], longest_px=unit['long'][0][2], longest_in_spacings=round(unit['long'][0][2] / unit['spacing'], 1),
                    connections=[(r, m, px) for r, m, px, _ in unit['long'][:4]], tries=[])
         won = False
-        for delta in candidates(scene, unit):
+        # Cheap geometric proxy ranks candidates; only the top few get a full edge_style + evaluate
+        longs = [(r, k, px) for r, _m, px, k in unit['long']]
+        ranked = sorted(((qg.proxy_score(scene, unit['keys'], d, longs), d) for d in candidates(scene, unit)),
+                        key=lambda t: -t[0]['score'])
+        for proxy, delta in ranked[:2]:
+            if proxy['score'] < 0 and proxy['long_gain'] < unit['spacing']:
+                row['tries'].append(dict(moved_px=round(float(np.hypot(*delta)), 1), decision='skipped', reason='proxy no gain', proxy=proxy))
+                continue
             d2, redo, _ = qg.translate_module(data, scene, unit['keys'], delta, set(unit['reactions']), skip_edges)
             edge_style.apply(d2, skip_edges, only=redo)
             new, s2, i2 = qg.evaluate_map(d2, skip_edges, disconnected=far - 1)
             ok, why = _accept(base, new)
-            row['tries'].append(dict(moved_px=round(float(np.hypot(*delta)), 1), decision='accepted' if ok else 'rejected', reason=why,
+            row['tries'].append(dict(moved_px=round(float(np.hypot(*delta)), 1), decision='accepted' if ok else 'rejected', reason=why, proxy=proxy,
                                      after={k: new[k] for k in ('collisions', 'crossings', 'long_edges')}, diagnosis=_diagnose(data, scene, unit, delta, issues, i2)))
             if ok:
                 data, base, summary, issues = d2, new, s2, i2

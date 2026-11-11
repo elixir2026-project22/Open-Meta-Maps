@@ -16,7 +16,7 @@ import tool_server
 RESULT_FILES = ['job.json', 'map.json', 'map.svg', 'report.json', 'skeleton.json', 'skeleton.svg', 'modules.json', 'licenses.json', 'selected.json.gz', 'views.json']
 
 
-def run(gem, out, ec=False, no_library=False, micromap=False, brenda=False, library='windows', reaction_style='line', completion='spaced', source_paths=False, layout='global', orientation='full', block_layout='single', instances='auto', context='auto', edge_routing='libavoid', completion_context='auto', layout_style='legacy'):
+def run(gem, out, ec=False, no_library=False, micromap=False, brenda=False, library='windows', reaction_style='line', completion='spaced', source_paths=False, layout='global', orientation='full', block_layout='auto', instances='auto', context='auto', edge_routing='libavoid', completion_context='auto', layout_style='expert'):
     gem, out = Path(gem).resolve(), Path(out).resolve()  # the pipeline runs in layout_atlas/, so paths must be absolute
     if not gem.is_file():
         raise SystemExit(f'GEM file not found: {gem}')

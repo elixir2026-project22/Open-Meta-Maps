@@ -30,13 +30,18 @@ NEAR = 250.0
 LINK = 260.0
 FAR = 1000.0
 MIN_CLUSTER = 2
-MAX_NEW = 6
-SUMMARY_MIN = 12
+MAX_NEW = 8
+SUMMARY_MIN = 12          # absolute floor for summary-reaction treatment
+SUMMARY_DEGREE_PCT = 0.92 # or: reactions whose non-currency degree is at/above this percentile of the model
 import os as _os
-SUMMARY_LAYOUT = _os.environ.get('OPM_SUMMARY_LAYOUT', 'ring')   # 'columns' (two fans) | 'ring' (the earlier half-circles, for comparison)
+SUMMARY_LAYOUT = _os.environ.get('OPM_SUMMARY_LAYOUT', 'columns')  # columns fan locally; ring radiates in every direction
 SUMMARY_SPACING = 34.0
 SPLIT_PLACED = 380.0  # a single reaction that anchor-driven placement put beside a structure gets its own recorded instance of a metabolite that is further than this
 RESCUE = 700.0      # an otherwise isolated reaction attaches to the nearest instance used by another reaction up to this far
+# High-degree non-currency metabolites (shared across many reactions) get more aggressive local cloning
+HUB_METAB_PCT = 0.95
+HUB_NEAR = 180.0
+HUB_MAX_NEW = 12
 
 
 def _long(model, scene, cur, thresholds=(250.0, 1000.0)):
@@ -71,6 +76,27 @@ def _clusters(points, link):
     return sorted(groups.values(), key=lambda g: g[0])
 
 
+def _degree_threshold(model, cur, pct, floor):
+    """Data-driven degree cutoff: max(floor, percentile of non-currency participant counts)."""
+    degrees = [sum(1 for m in r['metabolites'] if m not in cur) for r in model['reactions']]
+    if not degrees:
+        return floor
+    return max(floor, int(np.percentile(degrees, pct * 100)))
+
+
+def _hub_metabolites(model, cur, pct):
+    """Metabolites used by many reactions (top percentile of usage counts), excluding currency."""
+    uses = defaultdict(int)
+    for r in model['reactions']:
+        for mid in r['metabolites']:
+            if mid not in cur:
+                uses[mid] += 1
+    if not uses:
+        return set()
+    cut = max(8, int(np.percentile(list(uses.values()), pct * 100)))
+    return {m for m, n in uses.items() if n >= cut}
+
+
 def optimize(model, scene, blocks, cur, summary=True, reuse=True, split=True):
     """Returns (new scene, report).  `scene` is not modified."""
     scene = dict(scene, positions={k: list(v) for k, v in scene['positions'].items()}, labels=dict(scene['labels']), copies=dict(scene['copies']),
@@ -81,14 +107,16 @@ def optimize(model, scene, blocks, cur, summary=True, reuse=True, split=True):
     before = _long(model, scene, cur)
     rx = {r['id']: r for r in model['reactions']}
     shared_before = {k for k in pos if k.startswith('m:')}
-    report = dict(summary_reactions=[], added=0, reattached=0)
+    summary_cut = _degree_threshold(model, cur, SUMMARY_DEGREE_PCT, SUMMARY_MIN)
+    hub_mets = _hub_metabolites(model, cur, HUB_METAB_PCT)
+    report = dict(summary_reactions=[], added=0, reattached=0, summary_degree_cut=summary_cut, hub_metabolites=len(hub_mets))
 
-    # 1. summary reactions: a private ring of instances
+    # 1. summary reactions: local stubs/columns instead of map-wide spokes (degree-driven, not name-driven)
     if summary:
         for rid in sorted(rx):
             r = rx[rid]
             core = [m for m in sorted(r['metabolites']) if m not in cur and not parts[rid, m].startswith('copy:')]
-            if rid in expert or len(core) < SUMMARY_MIN:
+            if rid in expert or len(core) < summary_cut:
                 continue
             centre = np.array(pos['r:' + rid], float)
             radius = max(160.0, len(core) * 46 / (2 * np.pi))
@@ -146,6 +174,9 @@ def optimize(model, scene, blocks, cur, summary=True, reuse=True, split=True):
         targets = [k for k in by_mid[mid] if k in pos]
         if not targets:
             continue
+        # Hub metabolites (top percentile of reaction usage) clone more aggressively so they are not map-wide spokes
+        near = HUB_NEAR if mid in hub_mets else NEAR
+        max_new = HUB_MAX_NEW if mid in hub_mets else MAX_NEW
         rp = np.array([pos['r:' + rid] for rid in rids], float)
         added = 0
         loose = []
@@ -170,11 +201,11 @@ def optimize(model, scene, blocks, cur, summary=True, reuse=True, split=True):
                 if t.startswith('copy:') and rec.get('anchor_region') and t.split(':')[1] != rec['anchor_region']:
                     continue  # a glyph of another expert structure is not this group's anchor
                 d = np.hypot(*(mp - np.array(pos[t], float)).T)
-                if float(d.max()) <= NEAR and float(d.sum()) <= cost_now:
+                if float(d.max()) <= near and float(d.sum()) <= cost_now:
                     options.append((float(d.sum()), t))
             if options:
                 best = min(options)[1]
-            elif cost_now > 0 and float(np.min(np.hypot(*(mp - here).T))) > SPLIT_PLACED and added < MAX_NEW:
+            elif cost_now > 0 and float(np.min(np.hypot(*(mp - here).T))) > SPLIT_PLACED and added < max_new:
                 best = f'inst:{mid}:{added}'
                 pos[best] = (mp.mean(axis=0) + np.array([0.0, 55.0])).tolist()
                 labels[best], copies[best] = mid, mid
@@ -195,7 +226,7 @@ def optimize(model, scene, blocks, cur, summary=True, reuse=True, split=True):
             tp = np.array([pos[t] for t in targets], float)
             d = np.hypot(*(tp - p).T)
             j = int(np.argmin(d))
-            if reuse and d[j] <= NEAR:
+            if reuse and d[j] <= near:
                 if targets[j] != 'm:' + mid:
                     report['reattached'] += 1
                 parts[rid, mid] = targets[j]
@@ -209,7 +240,7 @@ def optimize(model, scene, blocks, cur, summary=True, reuse=True, split=True):
                 tp = np.array([pos[t] for t in targets], float)
                 mean_d = float(np.mean([np.min(np.hypot(*(tp - p).T)) for _, p in members]))
                 placed_here = scene.get('completion_context', {}).get('tiers', {})
-                if added < MAX_NEW and (len(members) >= MIN_CLUSTER or mean_d > FAR or (mean_d > SPLIT_PLACED and any(rid in placed_here for rid, _ in members))):
+                if added < max_new and (len(members) >= MIN_CLUSTER or mean_d > FAR or (mean_d > SPLIT_PLACED and any(rid in placed_here for rid, _ in members))):
                     key = f'inst:{mid}:{added}'
                     pos[key] = (centre + np.array([0.0, 55.0])).tolist()
                     labels[key], copies[key] = mid, mid

@@ -621,7 +621,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             if log:
                 log('  peripheral modules: ' + str({k: v for k, v in peripheral_report.items() if k not in ('details', 'gate_rows')}))
             dump(folder / 'map.json', data)
-        if os.environ.get('OPM_BLOCK_RELOC', 'on') != 'off':     # long cross-block connections: move the whole expert block next to what it connects to, kept only if the gate accepts
+        if os.environ.get('OPM_BLOCK_RELOC', 'off') == 'on':     # demoted: stress packing should place blocks; enable with OPM_BLOCK_RELOC=on for A/B
             import block_relocation
             data, reloc = block_relocation.relocate(data, model, scene, blocks, currency(model), skip_edges, log=log)
             metric['block_relocation'] = reloc
@@ -931,7 +931,7 @@ def run_job(folder):
     LAYOUT = options.get('layout') if options.get('layout') in ('global', 'tiled') else 'global'
     import global_layout as _gl
     _gl.BACKBONE = (LAYOUT_STYLE == 'expert')
-    _gl.BLOCK_LAYOUT = options.get('block_layout') if options.get('block_layout') in ('auto', 'single') else 'single'
+        _gl.BLOCK_LAYOUT = options.get('block_layout') if options.get('block_layout') in ('auto', 'single') else 'auto'
     REACTION_STYLE = options.get('reaction_style') if options.get('reaction_style') in ('line', 'marker') else 'line'
     COMPLETION = options.get('completion') if options.get('completion') in ('spaced', 'classic') else 'spaced'
     library_kind = options.get('library', 'windows')  # module-candidate source; 'windows' (default, Atlas v0.3) | 'units_sub' (structure units + derived sub-windows)
@@ -983,7 +983,10 @@ def run_job(folder):
         mapper = st.Mapper(model, bridge)
         if core:
             library = retrieval.Library(core)
-            ps, audit = library.candidates(g, model=model, max_roots=120)
+            # Scale retrieval roots with model size: small models stay thorough; large ones cap VF2 work
+            n_rx = len(model['reactions'])
+            max_roots = 120 if n_rx <= 200 else (80 if n_rx <= 800 else 48)
+            ps, audit = library.candidates(g, model=model, max_roots=max_roots)
             strong, sinfo = mapper.proposals(core, 'open_core')
         else:
             ps, audit, strong, sinfo = [], dict(levels={}), [], dict(candidate_chemical_reactions=0)

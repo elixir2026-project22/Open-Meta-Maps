@@ -147,9 +147,12 @@ class Library:
      if valid and all(tg.has_edge(mm[e['a']],mm[e['b']]) for e in m['edges']):direct=mm
     if direct is not None:maps=[direct];partial_mode=True
     elif partial_mode:
-     try:maps=[{v:k for k,v in mp.items()} for mp in itertools.islice(database.Matcher(tg,sg,node_match=lambda a,b:a['role']==b['role']).subgraph_isomorphisms_iter(),4)]
-     except TimeoutError:maps=[]
-    else:maps=database.mappings(sg,tg,4)
+     # Skip VF2 when template is much larger than the query window (no useful subgraph match expected)
+     if len(sg)>len(tg)*2+2:maps=[]
+     else:
+      try:maps=[{v:k for k,v in mp.items()} for mp in itertools.islice(database.Matcher(tg,sg,node_match=lambda a,b:a['role']==b['role'],budget=database._iso_budget(tg,sg)).subgraph_isomorphisms_iter(),3)]
+      except TimeoutError:maps=[]
+    else:maps=database.mappings(sg,tg,3)
     for mp in maps:
      # Align to an algorithmic start only, never the query's expert coordinates.
      source={n['key']:n for n in m['nodes']};ks=sorted(mp);frame=fit_frame([source[k]['xy'] for k in ks],[generic[mp[k]] for k in ks]);positions=transform({mp[k]:source[k]['xy'] for k in ks},frame);rmap={r['key']:mp[r['key']][2:] for r in m['reactions'] if r['key'] in mp};biol=0;mapping_checks=[]
