@@ -69,13 +69,14 @@ def _final_obstacles(data):
     import drawing
     font = drawing.FONT
     body = data[1]
+    hidden = set((data[0].get('metadata') or {}).get('hidden_metabolite_labels') or [])
     rects, owner, kind, label_of = [], [], [], []
     for nid, n in body['nodes'].items():
         t = n.get('node_type')
         if t == 'metabolite':
             rects.append((n['x'] - er_NODE, n['y'] - er_NODE, n['x'] + er_NODE, n['y'] + er_NODE))
             owner.append(nid); kind.append('node'); label_of.append(n.get('bigg_id'))
-            if 'label_x' in n and not n.get('label_hidden'):
+            if 'label_x' in n and not n.get('label_hidden') and nid not in hidden:
                 w = font.getlength(n.get('bigg_id', ''))
                 rects.append((n['label_x'] - 2, n['label_y'] - 14, n['label_x'] + w + 2, n['label_y'] + 4))
                 owner.append(nid); kind.append('label'); label_of.append(n.get('bigg_id'))
