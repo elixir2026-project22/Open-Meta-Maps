@@ -18,6 +18,11 @@ def spelling(identifier):
 
 
 def annotation_bridge(models):
+    """Build a Mapper crosswalk from model annotations (legacy / enrichment path).
+
+    Prefer ``mapper_bridge`` which seeds from ``data/identifier_bridge.json`` (the
+    tracked identifier store) and only uses live models to add MetaNetX links.
+    """
     links=defaultdict(lambda:defaultdict(set));evidence=defaultdict(list);inputs=[]
     for name,path,_ in models:
         model=load_model(path);inputs.append(dict(model=name,path=str(path.relative_to(ROOT)),sha256=sha(path.read_bytes())))
@@ -31,6 +36,41 @@ def annotation_bridge(models):
     return dict(links={k:{ns:sorted(v) for ns,v in refs.items()} for k,refs in links.items()},
                 evidence=dict(evidence),inputs=inputs,
                 interpretation='Explicit annotations in fixed local target models plus underscore-escape spelling candidates; not a new MNXref release or identity certification')
+
+
+def mapper_bridge(models=None):
+    """Mapper crosswalk seeded from ``identifier_bridge`` (one identifier store).
+
+    ChEBI links come from ``data/identifier_bridge.json``. When ``models`` are
+    provided and readable, MetaNetX (and any extra ChEBI) annotations from those
+    models are merged in — they are not a second checked-in store.
+    """
+    import identifier_bridge as ib
+    links=defaultdict(lambda:defaultdict(set));evidence=defaultdict(list)
+    for bigg,chebis in ib.metabolite_chebi().items():
+        alias=spelling(bigg)
+        links[alias]['chebi'].update(chebis)
+    inputs=list(ib.sources())
+    for name,path,_ in (models or ()):
+        path=Path(path)
+        if not path.exists():
+            continue
+        model=load_model(path)
+        inputs.append(dict(model=name,path=str(path.relative_to(ROOT)) if ROOT in path.resolve().parents else str(path),
+                           sha256=sha(path.read_bytes()),role='metanetx_enrichment'))
+        for m in model['metabolites']:
+            refs=xrefs(m.get('annotations',[]));aliases=set(refs.get('bigg.metabolite',[]))
+            if name in ('e_coli_core','iML1515','iMM904','iYO844'):aliases.add(chem(m['id']))
+            for original_alias in aliases:
+                alias=spelling(original_alias)
+                for ns in ('chebi','metanetx.chemical'):
+                    links[alias][ns].update(refs.get(ns,[]))
+                if refs.get('metanetx.chemical') or refs.get('chebi'):
+                    evidence[alias].append(dict(model=name,metabolite=m['id'],references=refs))
+    return dict(
+        links={k:{ns:sorted(v) for ns,v in refs.items()} for k,refs in links.items()},
+        evidence=dict(evidence),inputs=inputs,
+        interpretation='ChEBI from data/identifier_bridge.json; MetaNetX (and extra ChEBI) enriched from available local models at load time — not a second identifier store')
 
 
 def entity_parts(entity):
@@ -178,7 +218,7 @@ class Mapper:
                     geometry_fingerprint=m['geometry_fingerprint'],reaction_ids=list(rids),node_mapping=node_map,reaction_mapping=rmap,source_glyph_mapping={k:v[2:] for k,v in node_map.items() if source[k]['role']=='metabolite'},
                     positions={k:np.array(v).tolist() for k,v in positions.items()},position_origins={node_map[k]:source[k]['position_origin'] for k in ks},
                     source_to_initial_frame=frame,match_level='complete_equation',complete_chemical_equation_verified=True,
-                    complete_equation_verified=exact_comp and m['source']!='micromap',label_compartments_verified=exact_comp,
+                    complete_equation_verified=exact_comp,label_compartments_verified=exact_comp,
                     mapping_evidence=checks,features=features,ports=targetports,score=2*len(rids)+1.2-.1*features[2]-.2*direction_cost-.2*initial_fit,
                     expert_query_coordinates_used=False,template_quality=m['quality'],match_mode='direct_full_equation_partial_visible_core',unmapped_target_nodes=sorted(set(tg)-set(node_map.values())),
                     source_path_policy='Source decoded paths retained by template ID; target routes recomputed')

@@ -1,0 +1,13 @@
+{
+  "source": "wikipathways",
+  "release": "20261110",
+  "license": "CC0-1.0",
+  "license_url": "https://www.wikipathways.org/terms.html",
+  "modules": 29673,
+  "quality": "geometry_only",
+  "extraction": "diagram_modules BFS windows over metabolite\u2013metabolite GPML edges",
+  "admitted_to_open_core": true,
+  "partition": "open_core",
+  "note": "Stored as extension to keep open_core.sqlite under GitHub size limits; loaded by default with database.modules()",
+  "date": "2026-11-11"
+}

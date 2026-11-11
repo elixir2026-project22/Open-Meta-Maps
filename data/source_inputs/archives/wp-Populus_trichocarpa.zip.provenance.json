@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Populus_trichocarpa.zip",
-  "sha256": "36a8d897ab3605b121c327055d4bae3902ccff409522a0d59d63610e387430f8",
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Populus_trichocarpa.zip",
+  "sha256": "902281972ee329340e40884d408a4042cff8011c8ab431c1bb39cfb8bc24d6e1",
   "bytes": 27684,
-  "local_path": "data/archives/wp-Populus_trichocarpa.zip"
+  "local_path": "source_inputs/archives/wp-Populus_trichocarpa.zip",
+  "access_date": "2026-11-11"
 }

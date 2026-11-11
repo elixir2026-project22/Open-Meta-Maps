@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Solanum_lycopersicum.zip",
-  "sha256": "584cbbb82d8b4bbafa579b51f23e530baf89be12d242bddd3729b990534345bf",
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Solanum_lycopersicum.zip",
+  "sha256": "b2f0bab3709a73a629bfd068080c7183592185a638e92a99c2cd2277a86ff6ef",
   "bytes": 20844,
-  "local_path": "data/archives/wp-Solanum_lycopersicum.zip"
+  "local_path": "source_inputs/archives/wp-Solanum_lycopersicum.zip",
+  "access_date": "2026-11-11"
 }

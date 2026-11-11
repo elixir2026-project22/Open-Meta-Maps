@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Caulobacter_vibrioides.zip",
-  "sha256": "5bd5fb6bc848bdf9fb9ab6991baa69a2f92666c5b3367f4d710b9c83867a1d42",
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Caulobacter_vibrioides.zip",
+  "sha256": "ab73439cc699662bb3a2feb82be860a0cd0b63197f4d66ab811e2ac24f6830dd",
   "bytes": 2476,
-  "local_path": "data/archives/wp-Caulobacter_vibrioides.zip"
+  "local_path": "source_inputs/archives/wp-Caulobacter_vibrioides.zip",
+  "access_date": "2026-11-11"
 }

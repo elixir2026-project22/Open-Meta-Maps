@@ -2,7 +2,7 @@
  {
   "code": "M03781",
   "module_id": "108ec78eb57ebc2a6863390f",
-  "source": "community",
+  "source": "escher",
   "map_name": "iJO1366.Nucleotide and histidine biosynthesis",
   "species": "Escherichia coli",
   "license": "CC0-1.0",
@@ -19,7 +19,7 @@
  {
   "code": "M07702",
   "module_id": "843ef719e701a0628fcd4ad1",
-  "source": "community",
+  "source": "escher",
   "map_name": "iAF1260.Amino_Acid_Metabolism",
   "species": "Escherichia coli",
   "license": "CC0-1.0",

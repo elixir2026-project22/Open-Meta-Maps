@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Theobroma_cacao.zip",
-  "sha256": "931b24cd745d05d95f60b38507b74ba674d5643aabad18e84f90fbb8681be5fb",
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Theobroma_cacao.zip",
+  "sha256": "1296ec0d77212874f6e8ded892b436659f6266a1b4b6d1aa68ba7e0513663922",
   "bytes": 1712,
-  "local_path": "data/archives/wp-Theobroma_cacao.zip"
+  "local_path": "source_inputs/archives/wp-Theobroma_cacao.zip",
+  "access_date": "2026-11-11"
 }

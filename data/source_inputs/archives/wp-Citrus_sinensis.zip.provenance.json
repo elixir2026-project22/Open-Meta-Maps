@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Citrus_sinensis.zip",
-  "sha256": "d9268112f37ca0af743710f706ae6910282699b0b43b8fa3beb80848cf188ad7",
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Citrus_sinensis.zip",
+  "sha256": "26e3e7999fbe0df5f7c07e4dfe0717f46a3d568b00f0e8a0c89e409a69cbdd9e",
   "bytes": 2132,
-  "local_path": "data/archives/wp-Citrus_sinensis.zip"
+  "local_path": "source_inputs/archives/wp-Citrus_sinensis.zip",
+  "access_date": "2026-11-11"
 }

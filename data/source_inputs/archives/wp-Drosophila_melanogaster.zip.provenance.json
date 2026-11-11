@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Drosophila_melanogaster.zip",
-  "sha256": "944b2a932cbe1a0394a2e181549b98666704fe4b7e9b335fcf09190f38ba8177",
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Drosophila_melanogaster.zip",
+  "sha256": "28ee8a72400b78854114c3ac48706b00dd9e07d55187155bb1fac4e69a09c197",
   "bytes": 101938,
-  "local_path": "data/archives/wp-Drosophila_melanogaster.zip"
+  "local_path": "source_inputs/archives/wp-Drosophila_melanogaster.zip",
+  "access_date": "2026-11-11"
 }

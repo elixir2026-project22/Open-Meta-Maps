@@ -35,8 +35,8 @@ def stub_far(g,m):
 
 def escher_geometry(m):
     """Original Escher drawing (pixel space): reactions as bezier edges between metabolite circles; None if the raw map is unavailable."""
-    if m['source']!='community':return None
-    name=m['name'];path=INPUTS/'raw/community'/name.split('.')[0]/(name+'.json')
+    if m['source']!='escher':return None
+    name=m['name'];path=INPUTS/'raw/escher'/name.split('.')[0]/(name+'.json')
     if not path.exists():return None
     if path not in _RAW:_RAW[path]=json.loads(path.read_text())[1]
     raw=_RAW[path];nodes=raw['nodes'];mets={};segs=[];labs=[]

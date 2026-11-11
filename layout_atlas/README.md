@@ -27,7 +27,7 @@ A run writes `map.json` (Escher), `map.svg`, `report.json`, `reaction_provenance
 | Quality | `layout_quality.py` (crossings, collisions, long connections, composition metrics, `layout_issues.json`), `quality_gate.py` (accepts a change only if the final geometry is not worse) |
 | Pages | `ui.py`, `navigation.py`, `toolpage.py`, `gallery*.py` |
 
-Files whose hashes are recorded by saved results (`routing.py`, `drawing.py`, `geometry.py`, `retrieval.py`, `semantic_transfer.py`, `micromap_experiment.py`, `micromap_library.py`, `celldesigner.py`) should not be edited casually.
+Files whose hashes are recorded by saved results (`routing.py`, `drawing.py`, `geometry.py`, `retrieval.py`, `semantic_transfer.py`, `celldesigner.py`) should not be edited casually.
 
 ## Switches
 

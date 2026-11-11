@@ -7,10 +7,9 @@
   ],
   "sources": {
     "rhea_release": 143,
-    "wikipathways_release": "20261010",
+    "wikipathways_release": "20261110",
     "reactome_release": "v97",
-    "reactome_record": 21383214,
-    "yeast_original_commit": "93b787c6986a834cac323de667aac4b93547a457"
+    "reactome_record": 21383214
   },
   "database": {
     "isomorphism_steps": 5000,

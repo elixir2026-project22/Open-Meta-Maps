@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Equus_caballus.zip",
-  "sha256": "7300816e57cbb734159ff644d6d78364c38cf2f5423e6c27f74ea8a62208d59d",
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Equus_caballus.zip",
+  "sha256": "9184e6aeb736dc9155c261a7aecfb3489118b691f26987e4fd291b1b23d8a6cb",
   "bytes": 21650,
-  "local_path": "data/archives/wp-Equus_caballus.zip"
+  "local_path": "source_inputs/archives/wp-Equus_caballus.zip",
+  "access_date": "2026-11-11"
 }

@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Canis_familiaris.zip",
-  "sha256": "b535957d6c965eb274113ce346f9e843353a73575a3a95b6228410f54bb9ad80",
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Canis_familiaris.zip",
+  "sha256": "39221bd98459a51e0f85060518507205d666c475425041e5c8f3dae5bbca6481",
   "bytes": 364400,
-  "local_path": "data/archives/wp-Canis_familiaris.zip"
+  "local_path": "source_inputs/archives/wp-Canis_familiaris.zip",
+  "access_date": "2026-11-11"
 }

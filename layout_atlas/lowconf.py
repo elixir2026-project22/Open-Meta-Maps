@@ -8,7 +8,7 @@ What this does (after `select`, before the skeleton; evidence, not layout, is wh
   trigger    the proposal is topology-only AND two of its reactions have different external neighbourhoods: the Jaccard overlap of the sets of reactions OUTSIDE the proposal that
              share a non-currency metabolite with them is below JACCARD_MAX.  The number of participants is NOT a trigger by itself (a hub reaction shows up through the overlap).
   split      the proposal is replaced by one proposal per reaction, each keeping that reaction's own source geometry (its position and the glyphs it uses, as in
-             `micromap_experiment.clip_proposals`); the evidence level is unchanged (`match_level` stays topology-only), the chemistry of the target GEM is untouched.
+             `retrieval.clip_proposals`); the evidence level is unchanged (`match_level` stays topology-only), the chemistry of the target GEM is untouched.
   everything else (exact / adapted structures, confirmed chemistry) is left exactly as selected.
 The decision is judged on the finished map like every other change (A/B switch OPM_LOWCONF=on|off).
 """

@@ -35,23 +35,20 @@ def acquire():
   except Exception as e:fail.append(dict(source=name,error=str(e)))
  try:fetch('https://raw.githubusercontent.com/pwendering/ArabidopsisCoreModel/b8cf4869172f211393fd6c5b97e58d800da13352/LICENSE','models/LICENSE.AraCore')
  except Exception as e:fail.append(dict(source='AraCore_license',error=str(e)))
- # Reuse the exact downloaded archives, preserving licensing separation.
+ # Human-maps (CC BY 4.0): official escher/ JSON only. Yeast-maps / yeast_original removed (GPL-3.0).
  refs=[]
- for source in ('human_maps','yeast_maps'):
-  path=INPUTS/'archives'/(source+'.zip')
+ path=INPUTS/'archives'/'human_maps.zip'
+ if path.exists():
   with zipfile.ZipFile(path) as z:
    for name in z.namelist():
     if '/escher/' not in name or not name.endswith('.json'):continue
-    raw=z.read(name);dest=DATA/'references'/source/Path(name).name;dest.parent.mkdir(parents=True,exist_ok=True);dest.write_bytes(raw)
-    refs.append(dict(source=source,path=str(dest.relative_to(BASE)),sha256=sha(raw),archive_sha256=sha(path.read_bytes()),status='mixed_manual_scripted; file_license_unresolved; excluded_from_core_training'))
- try:
-  raw=fetch('https://codeload.github.com/SysBioChalmers/Yeast-maps/zip/93b787c6986a834cac323de667aac4b93547a457','references/yeast_original.zip')
-  with zipfile.ZipFile(io.BytesIO(raw)) as z:
-   files=[n for n in z.namelist() if n.endswith(('SBMLfiles/Yeast8.xml','LICENSE'))]
-   for n in files:
-    dest=DATA/'references/yeast_original'/Path(n).name;dest.parent.mkdir(parents=True,exist_ok=True);dest.write_bytes(z.read(n))
-  refs.append(dict(source='yeast_original',files=files,archive_sha256=sha(raw),status='historical CellDesigner source; source lineage and license kept separate'))
- except Exception as e:fail.append(dict(source='yeast_original',error=str(e)))
+    raw=z.read(name)
+    # keep compartment/subsystem path so names stay unique
+    rel=Path(name)
+    dest=DATA/'references'/'human_maps'/rel.parent.name/rel.name
+    dest.parent.mkdir(parents=True,exist_ok=True);dest.write_bytes(raw)
+    refs.append(dict(source='human_maps',path=str(dest.relative_to(BASE)),sha256=sha(raw),archive_sha256=sha(path.read_bytes()),
+                     status='CC-BY-4.0; official escher JSON only; modules via database.escher_diagram'))
  try:
   raw=fetch('https://api.github.com/repos/MetabolicAtlas/data-generation/commits?path=maps/RULES.md&per_page=1','references/rules_history.json');refs.append(dict(source='rules_history',commits=json.loads(raw),status='No accessible path history if list empty; README claim not treated as recovered rules'))
  except Exception as e:fail.append(dict(source='rules_history',error=str(e)))

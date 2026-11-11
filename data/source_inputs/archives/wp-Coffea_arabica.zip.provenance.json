@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Coffea_arabica.zip",
-  "sha256": "13d7c8e0ae7872632d4c8f5ccb50a20f5c911bb749a17ac29d2d8841b30d2460",
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Coffea_arabica.zip",
+  "sha256": "e2a52f4a2cc06a38b91226e1ecb510adc558261ef23d9e2cfa1e2988bcd9636a",
   "bytes": 1990,
-  "local_path": "data/archives/wp-Coffea_arabica.zip"
+  "local_path": "source_inputs/archives/wp-Coffea_arabica.zip",
+  "access_date": "2026-11-11"
 }

@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Escherichia_coli.zip",
-  "sha256": "9750a26827685f8041a24262e379102fb643b0cf5b3f472d1da4edb82d846019",
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Escherichia_coli.zip",
+  "sha256": "6411d9d6e4aeb1a3931aea737988fdc02a49bd2955fb8ac94def672fa66481d9",
   "bytes": 106156,
-  "local_path": "data/archives/wp-Escherichia_coli.zip"
+  "local_path": "source_inputs/archives/wp-Escherichia_coli.zip",
+  "access_date": "2026-11-11"
 }

@@ -12,7 +12,7 @@
   "structure": {
    "structure_id": "s1",
    "code": "M03781",
-   "source": "community",
+   "source": "escher",
    "match_level": "equation",
    "license": "CC0-1.0",
    "partition": "core"
@@ -27,7 +27,7 @@
   "structure": {
    "structure_id": "s2",
    "code": "M07702",
-   "source": "community",
+   "source": "escher",
    "match_level": "topology",
    "license": "CC0-1.0",
    "partition": "core"
@@ -81,7 +81,7 @@
   "structure": {
    "structure_id": "s1",
    "code": "M03781",
-   "source": "community",
+   "source": "escher",
    "match_level": "equation",
    "license": "CC0-1.0",
    "partition": "core"
@@ -96,7 +96,7 @@
   "structure": {
    "structure_id": "s2",
    "code": "M07702",
-   "source": "community",
+   "source": "escher",
    "match_level": "topology",
    "license": "CC0-1.0",
    "partition": "core"
@@ -150,7 +150,7 @@
   "structure": {
    "structure_id": "s1",
    "code": "M03781",
-   "source": "community",
+   "source": "escher",
    "match_level": "equation",
    "license": "CC0-1.0",
    "partition": "core"
@@ -165,7 +165,7 @@
   "structure": {
    "structure_id": "s2",
    "code": "M07702",
-   "source": "community",
+   "source": "escher",
    "match_level": "topology",
    "license": "CC0-1.0",
    "partition": "core"
@@ -219,7 +219,7 @@
   "structure": {
    "structure_id": "s1",
    "code": "M03781",
-   "source": "community",
+   "source": "escher",
    "match_level": "equation",
    "license": "CC0-1.0",
    "partition": "core"
@@ -234,7 +234,7 @@
   "structure": {
    "structure_id": "s2",
    "code": "M07702",
-   "source": "community",
+   "source": "escher",
    "match_level": "topology",
    "license": "CC0-1.0",
    "partition": "core"
@@ -288,7 +288,7 @@
   "structure": {
    "structure_id": "s1",
    "code": "M03781",
-   "source": "community",
+   "source": "escher",
    "match_level": "equation",
    "license": "CC0-1.0",
    "partition": "core"
@@ -303,7 +303,7 @@
   "structure": {
    "structure_id": "s2",
    "code": "M07702",
-   "source": "community",
+   "source": "escher",
    "match_level": "topology",
    "license": "CC0-1.0",
    "partition": "core"

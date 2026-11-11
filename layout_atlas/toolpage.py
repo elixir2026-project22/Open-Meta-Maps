@@ -10,9 +10,9 @@ ZH={"EC extended mode (functional layout suggestions, off by default)": "EC 扩�
 'Mock mode: no server is used; a canned job is replayed.':'模拟模式：不使用服务器，回放一个预置任务。',
 '1 · Model file':'1 · 模型文件','Drop a .xml or .json file here, or click to choose':'把 .xml 或 .json 文件拖到这里，或点击选择','No file chosen':'尚未选择文件','Remove':'移除',
 'Only .xml (SBML) and .json (BiGG/COBRA) files are accepted.':'只接受 .xml（SBML）和 .json（BiGG/COBRA）文件。','The file is larger than 25 MB.':'文件超过 25 MB。',
-'2 · Libraries':'2 · 模板库','Core (CC0 / CC BY)':'核心库（CC0 / CC BY）','EC channel':'EC 通道','MicroMap (CC BY-NC-SA, research only)':'MicroMap（CC BY-NC-SA，仅限科研）','BRENDA (layout origin unverified)':'BRENDA（布局来源未核实）',
-'MicroMap is licensed CC BY-NC-SA 4.0: results that use it are for non-commercial research and must carry the same licence.':'MicroMap 采用 CC BY-NC-SA 4.0：使用它得到的结果仅限非商业科研，并须沿用相同许可。',
-'BRENDA-derived layouts have an unverified layout origin; do not redistribute results that use them.':'来自 BRENDA 的布局，其布局来源未经核实；使用它们得到的结果请勿再分发。',
+'2 · Libraries':'2 · 模板库','Core (CC0 / CC BY)':'核心库（CC0 / CC BY）','EC channel':'EC 通道',
+
+
 '3 · Run':'3 · 运行','Run':'运行','Cancel':'取消','Remove job':'删除任务','Progress':'进度','Status:':'状态：','Log':'日志','Job':'任务','Status':'状态','queued':'排队中','running':'运行中','done':'已完成','failed':'失败','cancelled':'已取消','pending':'等待','Seconds':'秒',
 'Results':'结果','Overview':'概览','Skeleton':'骨架','Map':'地图','Modules':'模块','Downloads':'下载',
 'Reactions covered by expert structures':'专家结构覆盖的反应','Complete equation':'方程完整','EC topology':'EC 拓扑','Geometry only':'仅几何','Bridge reactions':'桥接反应','Algorithm-completed':'算法补全','Total reactions':'反应总数',
@@ -30,7 +30,7 @@ function esc(x){return String(x).replace(/[&<>"]/g,function(c){return {'&':'&amp
 function zh(){return window.isZh&&window.isZh()}
 function L(o,k){return (zh()&&o[k+'_zh'])||o[k+'_en']||o[k]||''}
 function hb(n){return n>1048576?(n/1048576).toFixed(1)+' MB':n>1024?(n/1024).toFixed(0)+' KB':n+' B'}
-var MAX=25*1048576,file=null,job=null,timer=null,tab='overview',sort={k:'code',d:1},mods=null,PAL={community:'#2d8f6f',reactome:'#a8559a',wikipathways:'#3b77b8',micromap:'#c58a1c',ec:'#7a5fc0',brenda:'#b0603a'};
+var MAX=25*1048576,file=null,job=null,timer=null,tab='overview',sort={k:'code',d:1},mods=null,PAL={escher:'#2d8f6f',reactome:'#a8559a',wikipathways:'#3b77b8',ec:'#7a5fc0',brenda:'#b0603a'};
 function url(name){return MOCK?'mock/'+name:'/api/jobs/'+job.id+'/files/'+name}
 var lastErr=null;function showErr(o){lastErr=o||null;var e=$('err');if(!o){e.style.display='none';return}e.style.display='';e.innerHTML='<b>'+tr('Error')+'</b>: '+esc(typeof o==='string'?tr(o):L(o,'message'))}
 /* ---- file picking ---- */
@@ -41,8 +41,8 @@ var dz=$('dz');dz.onclick=function(){$('fin').click()};$('fin').onchange=functio
 ['dragleave','drop'].forEach(function(ev){dz.addEventListener(ev,function(e){e.preventDefault();dz.classList.remove('on')})});
 dz.addEventListener('drop',function(e){var f=e.dataTransfer.files[0];if(f)setFile(f)});
 /* ---- options ---- */
-function opts(){return {libraries:{core:true,ec:$('o_ec').checked,micromap:$('o_mm').checked,brenda:$('o_br').checked},views:'on_demand'}}
-function notes(){var h='';if($('o_ec').checked)h+='<p class="note">'+tr('EC extended mode adds functional layout suggestions: reactions that share an EC number but whose equations are not verified. These are suggestions, not claimed equivalences.')+'</p>';if($('o_mm').checked)h+='<p class="note">'+tr('MicroMap is licensed CC BY-NC-SA 4.0: results that use it are for non-commercial research and must carry the same licence.')+'</p>';if($('o_br').checked)h+='<p class="note">'+tr('BRENDA-derived layouts have an unverified layout origin; do not redistribute results that use them.')+'</p>';$('lnote').innerHTML=h}
+function opts(){return {libraries:{core:true,ec:$('o_ec').checked},views:'on_demand'}}
+function notes(){var h='';if($('o_ec').checked)h+='<p class="note">'+tr('EC extended mode adds functional layout suggestions: reactions that share an EC number but whose equations are not verified. These are suggestions, not claimed equivalences.')+'</p>';$('lnote').innerHTML=h}
 $('o_br').onchange=function(){if($('o_br').checked)$('o_ec').checked=true;notes()};$('o_mm').onchange=notes;$('o_ec').onchange=function(){if(!$('o_ec').checked&&$('o_br').checked)$('o_br').checked=false;notes()};
 /* ---- run ---- */
 function hint(){showErr(FILE?'Start the tool server first: python3 project.py tool — then open http://127.0.0.1:8765/tool/index.html. This page cannot run a job when opened as a local file.':'Cannot reach the tool server. Start it with: python3 project.py tool')}
@@ -143,8 +143,7 @@ BODY='''<div class="note" id="mockbar" style="display:none">Mock mode: no server
 <section class="panel"><h2>2 · Libraries</h2><div class="opts">
 <label><input type="checkbox" id="o_core" checked disabled> <span>Core (CC0 / CC BY)</span></label>
 <label><input type="checkbox" id="o_ec"> <span>EC extended mode (functional layout suggestions, off by default)</span></label>
-<label><input type="checkbox" id="o_mm"> <span>MicroMap (CC BY-NC-SA, research only)</span></label>
-<label><input type="checkbox" id="o_br"> <span>BRENDA (layout origin unverified)</span></label></div><div id="lnote"></div></section>
+</div><div id="lnote"></div></section>
 <section class="panel"><h2>3 · Run</h2><div class="vbar2"><button type="button" id="run" class="primary">Run</button><button type="button" id="cancel" disabled>Cancel</button></div>
 <div id="prog" style="display:none"><p class="meta">Status: <b id="jstat"></b></p><div class="bar big"><i id="pbar" style="width:0;background:var(--accent)"></i></div><ol class="steps" id="steps"></ol><h3>Log</h3><pre id="slog" class="slog"></pre><div id="integ"></div></div></section>
 <section class="panel" id="res" style="display:none"><h2>Results</h2><div id="tabs" class="tabs" role="tablist"><button type="button" data-t="overview" aria-selected="true">Overview</button><button type="button" data-t="skeleton">Skeleton</button><button type="button" data-t="map">Map</button><button type="button" data-t="reactions">Reactions</button><button type="button" data-t="modules">Modules</button><button type="button" data-t="downloads">Downloads</button></div><div id="pane"></div></section>'''
@@ -155,19 +154,19 @@ def mock(dest):
     job=dict(id='j_mock',status='done',progress=1,steps=[dict(key=k,label_en=e,label_zh=z,state='done',seconds=s) for k,e,z,s in steps],
      summary=dict(model=dict(id='e_coli_core',name='e_coli_core (mock)',reactions=95,metabolites=72),annotation_coverage=dict(bigg=1.0,rhea=.72,chebi=.64,ec=.41),provenance=dict(expert_derived=62,topology_layout_suggestion=6,functional_layout_suggestion=3,bridge=5,generated=19),ec_screening=dict(open_core=dict(proposals_kept=3,proposals_rejected_incompatible=2,reactions_verified_equivalent=1,reactions_insufficient_evidence=4)),
       covered=dict(expert_module_reactions=70,complete_equation=68,reference_supported=66,ec_topology=12,geometry_only=2,bridge_reactions=5,algorithm_completed=20,total=95),
-      modules=dict(count=11,by_source=dict(community=8,reactome=2,micromap=1)),seconds=11.9),
+      modules=dict(count=11,by_source=dict(escher=8,reactome=2)),seconds=11.9),
      warnings=[dict(code='mock',message_en='This is canned mock data, not a real run.',message_zh='这是预置的模拟数据，不是真实运行结果。'),dict(code='ec_extended',message_en='EC extended mode is on: functional suggestions are not verified equivalences.',message_zh='EC 扩展模式已开启：功能性建议不是已核实的等价关系。')],
      files=[dict(name='skeleton.svg',title_en='Skeleton (SVG)',title_zh='骨架（SVG）',kind='svg',bytes=2300),dict(name='map.svg',title_en='Completed map (SVG)',title_zh='补全地图（SVG）',kind='svg',bytes=2600),dict(name='modules.json',title_en='Modules used',title_zh='使用的模块',kind='json',bytes=900),dict(name='reaction_provenance.json',title_en='Reaction provenance',title_zh='反应来源依据',kind='json',bytes=5200),dict(name='report.json',title_en='Report',title_zh='报告',kind='json',bytes=700)],
      views=[dict(id='view-1',reactions=40,state='none'),dict(id='view-2',reactions=55,state='none')],log=[])
     (m/'job.json').write_text(json.dumps(job,ensure_ascii=False,indent=1))
-    mods=[dict(code='M03781',module_id='108ec78eb57ebc2a6863390f',source='community',map_name='iJO1366.Nucleotide and histidine biosynthesis',species='Escherichia coli',license='CC0-1.0',size=1,tier='micro',reactions=['GMPR'],match_level='equation'),
-          dict(code='M07702',module_id='843ef719e701a0628fcd4ad1',source='community',map_name='iAF1260.Amino_Acid_Metabolism',species='Escherichia coli',license='CC0-1.0',size=40,tier='structure',reactions=['METS','HCYSMT2','CYSTL'],match_level='equation'),
+    mods=[dict(code='M03781',module_id='108ec78eb57ebc2a6863390f',source='escher',map_name='iJO1366.Nucleotide and histidine biosynthesis',species='Escherichia coli',license='CC0-1.0',size=1,tier='micro',reactions=['GMPR'],match_level='equation'),
+          dict(code='M07702',module_id='843ef719e701a0628fcd4ad1',source='escher',map_name='iAF1260.Amino_Acid_Metabolism',species='Escherichia coli',license='CC0-1.0',size=40,tier='structure',reactions=['METS','HCYSMT2','CYSTL'],match_level='equation'),
           dict(code='M11795',module_id='',source='reactome',map_name='Selenoamino acid metabolism',species='Homo sapiens',license='CC0-1.0-data',size=8,tier='structure',reactions=['R-HSA-2408500','R-HSA-2408536'],match_level='geometry')]
     for x,p in zip(mods,[dict(expert_derived=1),dict(expert_derived=30,topology_layout_suggestion=4,bridge=3),dict(expert_derived=8,functional_layout_suggestion=3)]):x['provenance']=p
     (m/'modules.json').write_text(json.dumps(mods,ensure_ascii=False,indent=1))
     rp=[]
-    kinds=[('expert_derived',dict(kind='complete_equation',shared_ec=None,reason='all participants matched'),dict(structure_id='s1',code='M03781',source='community',match_level='equation',license='CC0-1.0',partition='core')),
-           ('topology_layout_suggestion',None,dict(structure_id='s2',code='M07702',source='community',match_level='topology',license='CC0-1.0',partition='core')),
+    kinds=[('expert_derived',dict(kind='complete_equation',shared_ec=None,reason='all participants matched'),dict(structure_id='s1',code='M03781',source='escher',match_level='equation',license='CC0-1.0',partition='core')),
+           ('topology_layout_suggestion',None,dict(structure_id='s2',code='M07702',source='escher',match_level='topology',license='CC0-1.0',partition='core')),
            ('functional_layout_suggestion',dict(kind='ec_only',shared_ec='2.7.1.1',reason='shares EC 2.7.1.1; equation not verified'),dict(structure_id='s3',code='M11795',source='reactome',match_level='ec',license='CC0-1.0-data',partition='ec')),
            ('bridge',None,None),('generated',None,None)]
     for i in range(24):

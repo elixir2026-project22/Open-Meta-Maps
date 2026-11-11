@@ -1,6 +1,6 @@
 """Reaction connection-style templates, extracted from the expert Escher maps (Atlas extension `reaction_geometry_templates`).
 
-The 22 Escher maps in `data/source_inputs/raw/community/` (CC0 / CC BY, as recorded in the source registry) draw every reaction as lines and curves between
+The 22 Escher maps in `data/source_inputs/raw/escher/` (CC0 / CC BY, as recorded in the source registry) draw every reaction as lines and curves between
 the reaction's mid-marker and the metabolite glyphs.  This module keeps, for every reaction and every participant, only the CONSTRAINTS of that drawing,
 never the curve itself, so that they can be re-solved for the real end points of another map:
 
@@ -32,7 +32,7 @@ import numpy as np
 
 from core import BASE, CURRENCY
 
-RAW = BASE.parent / 'data/source_inputs/raw/community'
+RAW = BASE.parent / 'data/source_inputs/raw/escher'
 EXT = BASE.parent / 'data/extensions/reaction_geometry_templates'
 FILE = EXT / 'templates.json.gz'
 _cache = {}
@@ -166,7 +166,7 @@ def build():
     with gzip.open(FILE, 'wt', encoding='utf-8') as fh:
         json.dump(dict(version=1, templates=templates, index=index), fh)
     meta = dict(builder='reaction_templates.py', maps=len(files), templates=len(templates), signatures=len(index), raw_files_sha256=digest.hexdigest(),
-                licence='Expert Escher community maps (CC0 / CC BY, see data/source_inputs/source_registry.json); only drawing constraints are stored, not curves or chemistry',
+                licence='Expert Escher maps (CC0 / CC BY, see data/source_inputs/source_registry.json); only drawing constraints are stored, not curves or chemistry',
                 stored='per participant: role, currency flag, side, chord angle, start/end tangent angle relative to the chord, handle length ratios, stub ratio, deviation ratio')
     (EXT / 'SOURCE.json').write_text(json.dumps(meta, indent=1))
     print(json.dumps(meta, indent=1))

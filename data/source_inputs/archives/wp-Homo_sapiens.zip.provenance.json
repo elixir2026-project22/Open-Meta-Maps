@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Homo_sapiens.zip",
-  "sha256": "1fc0e9ab37cc20ac14e0930bc2529c46ff88a9467c0daa47d25eb1b558ea90c6",
-  "bytes": 11271102,
-  "local_path": "data/archives/wp-Homo_sapiens.zip"
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Homo_sapiens.zip",
+  "sha256": "400d67f51f951681ab601503380f48eabdb5582fb23a8b4e7a0695ecc7a2b925",
+  "bytes": 11271723,
+  "local_path": "source_inputs/archives/wp-Homo_sapiens.zip",
+  "access_date": "2026-11-11"
 }

@@ -12,7 +12,7 @@ def main():
     bridge = tp.load_bridge()
     em = ec.ECMapper(model, bridge)
     core = database.modules()
-    source = next(r for m in core if m['source'] == 'community' for r in m['reactions'] if r['id'] == 'PGI' and r.get('coefficients'))
+    source = next(r for m in core if m['source'] == 'escher' for r in m['reactions'] if r['id'] == 'PGI' and r.get('coefficients'))
     target = {r['id']: r for r in model['reactions']}
     cases = []
     cases.append(('same reaction, equation maps', ep.classify_pair(source, em.reactions['PGI'], em)[0], 'verified_equivalent'))
@@ -27,9 +27,9 @@ def main():
         print(('PASS' if got == want else 'FAIL'), name, '->', got)
         ok &= got == want
     # provenance classification of a hand-made selection
-    p_eq = dict(id='a', source='community', match_level='reaction_reference', complete_chemical_equation_verified=True, reaction_ids=['PGI'], mapping_evidence=[dict(target_reaction='PGI', complete_equation=True)])
+    p_eq = dict(id='a', source='escher', match_level='reaction_reference', complete_chemical_equation_verified=True, reaction_ids=['PGI'], mapping_evidence=[dict(target_reaction='PGI', complete_equation=True)])
     p_geo = dict(id='b', source='wikipathways', match_level='geometry', reaction_ids=['PFK'], mapping_evidence=[])
-    p_ec_ok = dict(id='c', source='community', match_level='ec_topology', reaction_ids=['FBP'], ec_status={'FBP': dict(status='verified_equivalent', shared_ec=['3.1.3.11'], ambiguity=1)}, mapping_evidence=[])
+    p_ec_ok = dict(id='c', source='escher', match_level='ec_topology', reaction_ids=['FBP'], ec_status={'FBP': dict(status='verified_equivalent', shared_ec=['3.1.3.11'], ambiguity=1)}, mapping_evidence=[])
     p_ec_weak = dict(id='d', source='brenda', match_level='ec_topology', reaction_ids=['PYK'], ec_status={'PYK': dict(status='insufficient_evidence', reason='no stoichiometry', shared_ec=['2.7.1.40'], ambiguity=2)}, mapping_evidence=[])
     prov = ep.reaction_provenance(model, [p_eq, p_geo, p_ec_ok, p_ec_weak], {'ENO'})
     expected = dict(PGI='expert_derived', PFK='topology_layout_suggestion', FBP='expert_derived', PYK='functional_layout_suggestion', ENO='bridge', PGK='generated')
@@ -39,7 +39,7 @@ def main():
         ok &= got == want
     # --- chemical compatibility of two equations (identity / compatibility / layout are separate judgements) ---------------------------------
     import copy as _copy
-    mdh = next(r for m in core if m['source'] == 'community' for r in m['reactions'] if r['id'] == 'MDH' and r.get('coefficients'))
+    mdh = next(r for m in core if m['source'] == 'escher' for r in m['reactions'] if r['id'] == 'MDH' and r.get('coefficients'))
     def cmp(src, tid, mutate=None):
         tgt = _copy.deepcopy(em.reactions[tid])
         if mutate:
@@ -64,7 +64,7 @@ def main():
     # identifier match with a conflicting equation: identity revoked (not deleted), layout lent only with independent similarity
     pfk_ec = sorted(ec.target_ecs(model)['PFK'])
     templates = {'t1': dict(reactions=[dict(source, key='r:1')]), 't2': dict(reactions=[dict(source, key='r:2', references={'ec-code': pfk_ec})])}
-    mk = lambda pid, tid, key: dict(id=pid, template_id=tid, map_id='m', source='community', species='x', match_level='reaction_reference', reaction_ids=['PFK'], reaction_mapping={key: 'PFK'},
+    mk = lambda pid, tid, key: dict(id=pid, template_id=tid, map_id='m', source='escher', species='x', match_level='reaction_reference', reaction_ids=['PFK'], reaction_mapping={key: 'PFK'},
                                     mapping_evidence=[dict(target_reaction='PFK', reference=True, complete_equation=False)])
     prov = ep.reaction_provenance(model, [mk('c1', 't1', 'r:1')], set(), templates=templates, mapper=em)['PFK']
     got = (prov['provenance'], prov['identity_evidence']['revoked'], prov['identity_evidence']['kind'], prov['chemical_compatibility']['status'], prov['layout_provenance'])

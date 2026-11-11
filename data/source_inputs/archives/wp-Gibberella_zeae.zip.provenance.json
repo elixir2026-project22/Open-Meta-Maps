@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Gibberella_zeae.zip",
-  "sha256": "907f426905af969bc8ebfb0d05a5194a86146513e52f0c4d7bc8392e7607794b",
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Gibberella_zeae.zip",
+  "sha256": "dfd6e810b81a88589c6a1e83c65ad87c2666fd04b57203b1b4cb400a80087d26",
   "bytes": 6254,
-  "local_path": "data/archives/wp-Gibberella_zeae.zip"
+  "local_path": "source_inputs/archives/wp-Gibberella_zeae.zip",
+  "access_date": "2026-11-11"
 }

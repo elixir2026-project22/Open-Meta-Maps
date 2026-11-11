@@ -51,7 +51,7 @@ REACTION_STYLE = 'line'  # 'line' (reactions are lines between metabolites, like
 STEPS = [('parse', 'Parse the model', '解析模型'), ('map', 'Match library structures', '匹配库中的结构'),
          ('select', 'Select structures', '选择结构'), ('skeleton', 'Build the skeleton', '搭建骨架'),
          ('complete', 'Complete the map', '补全图'), ('report', 'Write the report', '生成报告')]
-SOURCE_COLORS = {'community': '#128781', 'reactome': '#3d6fa3', 'wikipathways': '#8a5fb0', 'micromap': '#c0792a', 'brenda': '#b04a4a'}
+SOURCE_COLORS = {'escher': '#128781', 'reactome': '#3d6fa3', 'wikipathways': '#8a5fb0', 'brenda': '#b04a4a', 'human_maps': '#2d6a8f', 'metabolismregulation': '#6b4f2a', 'panther': '#8a6b3d'}
 LEVEL_RANK = {'complete_equation': 0, 'reaction_reference': 1, 'partial_reference': 2, 'ec_topology': 3, 'geometry': 4}
 LEVEL_NAMES = {'complete_equation': 'complete_equation', 'reaction_reference': 'reference_supported', 'partial_reference': 'reference_supported',
                'ec_topology': 'ec_topology', 'geometry': 'geometry_only'}
@@ -233,15 +233,28 @@ def fixed_views(model, g, max_size=50):
 
 
 def load_bridge():
-    cache = OUT / 'micromap_extension/annotation_bridge.json'
-    if cache.exists():
-        return read(cache)
+    """Load the Mapper identifier crosswalk.
+
+    Source of truth is ``data/identifier_bridge.json``. A gzipped local cache
+    (``data/annotation_bridge.json.gz``) may be written for speed; the old
+    uncompressed ``annotation_bridge.json`` is no longer tracked.
+    """
     import semantic_transfer as st
-    missing = [str(p) for _, p, _ in EXAMPLE_MODELS if not p.exists()]
-    if missing:
-        raise FileNotFoundError('annotation_bridge.json is missing and the models needed to rebuild it are not available: ' + ', '.join(missing) +
-                                ' (BiGG models are in examples/; point OPM_HUMAN_GEM to Human-GEM.xml)')
-    return st.annotation_bridge(EXAMPLE_MODELS)
+    gz = DATA / 'annotation_bridge.json.gz'
+    if gz.exists():
+        with gzip.open(gz, 'rt') as f:
+            return json.load(f)
+    legacy = DATA / 'annotation_bridge.json'
+    if legacy.exists():
+        return read(legacy)
+    available = [(n, p, s) for n, p, s in EXAMPLE_MODELS if Path(p).exists()]
+    bridge = st.mapper_bridge(available)
+    try:
+        with gzip.open(gz, 'wt') as f:
+            json.dump(bridge, f, ensure_ascii=False)
+    except OSError:
+        pass
+    return bridge
 
 
 def save_gz(path, obj):
@@ -319,7 +332,7 @@ def thumbnail_svg(template, color, width=120, height=80):
 def split_source_name(template):
     """Community maps are named '<source model>.<map>'; Reactome / WikiPathways entries are pathway titles."""
     name = template.get('name') or ''
-    if template.get('source') == 'community' and '.' in name:
+    if template.get('source') == 'escher' and '.' in name:
         model, _, part = name.partition('.')
         return model, part
     return None, name
@@ -420,8 +433,6 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
                     'source_path_policy', 'source_citation', 'view_clipping', 'source_sha256', 'original_instance'):
             if key in p:
                 b[key] = p[key]
-        if p['source'] == 'micromap':
-            b['anchor_confidence'] = .75
     for bridge in bridges:
         a, c = anchors.get(bridge['nodes'][0]), anchors.get(bridge['nodes'][-1])
         if a is None or c is None:
@@ -923,8 +934,9 @@ def run_job(folder):
     job = Job(folder)
     folder = job.folder
     options = read(folder / 'options.json') if (folder / 'options.json').exists() else {}
-    libs = dict(core=True, ec=False, micromap=False, brenda=False)  # EC = extended mode, off by default
+    libs = dict(core=True, ec=False)  # EC = extended mode, off by default
     libs.update(options.get('libraries', {}))
+    libs.pop('micromap', None)  # MicroMap (NC-SA) removed; ignore stale option keys
     global REACTION_STYLE, COMPLETION, SOURCE_PATHS, LAYOUT, ORIENTATION, INSTANCES, CONTEXT, EDGE_ROUTING, COMPLETION_CONTEXT, LAYOUT_STYLE
     LAYOUT_STYLE = options.get('layout_style') if options.get('layout_style') in ('legacy', 'expert') else 'legacy'
     COMPLETION_CONTEXT = options.get('completion_context') if options.get('completion_context') in ('auto', 'off') else 'auto'
@@ -998,14 +1010,6 @@ def run_job(folder):
         job.log(f"Retrieval candidates: {len(ps)} (levels {audit['levels']})")
         job.log(f'Complete-equation candidates: {len(strong)} covering {sinfo["candidate_chemical_reactions"]} reactions')
         pools_strong = ps + strong
-        if libs['micromap']:
-            import micromap_library as ml
-            micro = ml.load()
-            templates.update({m['id']: m for m in micro})
-            mm, minfo = mapper.proposals(micro, 'micromap')
-            pools_strong += mm
-            job.log(f'MicroMap (CC BY-NC-SA research partition): {len(mm)} candidates')
-            job.warn('nc_sa', 'MicroMap-derived content is CC BY-NC-SA 4.0 (non-commercial, share-alike).', 'MicroMap 来源的内容是 CC BY-NC-SA 4.0（非商业、相同方式共享）。')
         if libs['ec']:
             ec.enrich(core)
             ecm = ec.ECMapper(model, bridge)
@@ -1013,20 +1017,6 @@ def run_job(folder):
             core_ec, ec_screening['open_core'] = epv.screen(core_ec, templates, ecm)
             pools_ec.append(core_ec)
             job.log(f'EC candidates (open core): {einfo["candidates"]} found, screened against the equations: {ec_screening["open_core"]}')
-            if libs['brenda']:
-                import brenda_library as bl
-                brenda = bl.load()
-                templates.update({m['id']: m for m in brenda})
-                ec.enrich(brenda)
-                ecm_b = ec.ECMapper(model, bridge)
-                b_ec, binfo = ecm_b.proposals(brenda, 'BRENDA EC')
-                b_ec, ec_screening['brenda'] = epv.screen(b_ec, templates, ecm_b)
-                pools_ec.append(b_ec)
-                job.log(f'BRENDA EC candidates: {binfo["candidates"]} found, screened: {ec_screening["brenda"]}')
-                job.warn('brenda_unverified', 'BRENDA structures have an unverified layout origin (possibly algorithmic); they are research-only.',
-                         'BRENDA 结构的布局来源未经核实（可能是算法生成），仅供研究。')
-        elif libs['brenda']:
-            job.warn('brenda_needs_ec', 'BRENDA structures are matched through the EC channel; enable it to use them.', 'BRENDA 结构通过 EC 通道匹配，需要同时启用 EC 通道。')
         if libs['ec']:
             job.warn('ec_extended', 'EC extended mode is on: structures matched only through a shared EC number are marked as functional layout suggestions, not as expert-derived.',
                      'EC 扩展模式已开启：仅通过相同 EC 号匹配的结构只标为“功能布局建议”，不算专家来源。')
@@ -1246,7 +1236,7 @@ def run_job(folder):
             layout_quality_report['orientation'] = orientation_report.summary(read(folder / 'map.json'), prov_kinds)
         run_settings = dict(
             structure_library=library_kind, library_label={'windows': 'pathway-fragment reuse', 'units_sub': 'structure-unit reuse'}.get(library_kind, library_kind),
-            sources=dict(core_open_cc0_ccby=bool(libs['core']), micromap_cc_by_nc_sa=bool(libs['micromap']), brenda=bool(libs['brenda'])),
+            sources=dict(core_open_cc0_ccby=bool(libs['core']), brenda_pathway_maps=True),
             ec_extension=bool(libs['ec']), ec_note='layout hints only; the reactions and stoichiometry of the target GEM are never replaced',
             drawing_engine=dict(version='V7', layout_style=LAYOUT_STYLE, completion_context=COMPLETION_CONTEXT, instances=INSTANCES, orientation=ORIENTATION, expert_curves=bool(SOURCE_PATHS),
                                 edge_routing=EDGE_ROUTING, layout=LAYOUT),

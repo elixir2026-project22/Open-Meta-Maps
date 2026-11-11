@@ -1,0 +1,13 @@
+{
+  "url": "https://brenda-enzymes.org/pathways/BRENDA_map.svg",
+  "sha256": "3107fc59d9c87e272e0b817e3f529b985d8118a57c78c58cf4ce0ba7d2d486da",
+  "bytes": 5688753,
+  "access_date": "2026-11-11",
+  "license": "CC-BY-4.0",
+  "license_url": "https://www.brenda.dsmz.de/license.php",
+  "attribution": "BRENDA; Chang et al. NAR 2026 doi:10.1093/nar/gkaf1113",
+  "partition": "open_core",
+  "admitted_to_open_core": true,
+  "modules": 11703,
+  "pathways": 194
+}

@@ -2,7 +2,7 @@
 
 A unit is a connected set of 3-12 reactions that forms one drawing gestalt (cycle, fork or chain) on the *core* graph
 of ONE source map (reaction/metabolite bipartite graph, currency metabolites already removed exactly as in
-`database.diagram_modules` / the community core projection).  Every reaction of a map belongs to exactly one unit (or is
+`database.diagram_modules` / the Escher core projection).  Every reaction of a map belongs to exactly one unit (or is
 an appendix of a unit, or an orphan: an isolated <3-reaction island that is stored only as a drawing statistic).
 
 Algorithm (deterministic, fixed ordering):
@@ -38,11 +38,11 @@ SMALL_CURRENCY_CHEBI = {'chebi:15377', 'chebi:15378', 'chebi:30616', 'chebi:4562
 
 # ---------------------------------------------------------------- source maps -> core graphs
 
-def community_maps():
-    """Reconstruct whole community maps as the union of their stored windows (absolute source-pixel coordinates)."""
+def escher_maps():
+    """Reconstruct whole Escher maps as the union of their stored windows (absolute source-pixel coordinates)."""
     by = defaultdict(list)
     for m in sorted(source_modules('semantic_transfer'), key=lambda m: m['id']):
-        if m['source'] == 'community':
+        if m['source'] == 'escher':
             by[m['map_id']].append(m)
     out = []
     for map_id in sorted(by):
@@ -68,7 +68,7 @@ def community_maps():
                 edges[(rk, mk)] = coef
             for r in m['reactions']:
                 rx.setdefault('r:' + str(r['key']), dict(r, key='r:' + str(r['key']), references={'bigg.reaction': [r['id']]}))
-        d = dict(id=map_id, source='community', species=wins[0]['species'], lineage=wins[0]['lineage'], name=wins[0]['name'], license=wins[0]['license'],
+        d = dict(id=map_id, source='escher', species=wins[0]['species'], lineage=wins[0]['lineage'], name=wins[0]['name'], license=wins[0]['license'],
                  source_sha256=wins[0]['source_sha256'], original_instance='data/source_inputs/module_observations.json.gz', window_count=len(wins),
                  max_coordinate_drift=drift, reactions=rx, rxy=rxy, glyphs=glyphs, edges=edges,
                  rorigin={k: 'observed' for k in rxy})
@@ -144,7 +144,7 @@ def geometry_maps(exclude_ids):
 
 
 def source_core_maps():
-    semantic = community_maps() + diagram_maps()
+    semantic = escher_maps() + diagram_maps()
     geometry = geometry_maps({d['id'] for d in semantic})
     return sorted(semantic + geometry, key=lambda d: (d['source'], d['id']))
 
@@ -548,7 +548,7 @@ def build():
         per_map.append(dict(map=d['id'], source=d['source'], name=d['name'], core_reactions=len(rks), units=len(built), unit_reactions=sum(sizes), orphan_reactions=len({r for o in orphans for r in o}),
                             shapes=dict(Counter(m['shape_type'] for m in built)), appendix_reactions=sum(len(m['appendix_reactions']) for m in built)))
         orphan_rows.extend(dict(map=d['id'], reactions=o) for o in orphans)
-        if d['source'] == 'community':
+        if d['source'] == 'escher':
             per_map[-1]['window_count'] = d['window_count']; per_map[-1]['max_coordinate_drift'] = round(d['max_coordinate_drift'], 6)
     mods.sort(key=lambda m: m['id'])
     # families and variants.  Family = role-preserving graph isomorphism.  Variant = same drawing: the BEST geometry error over
@@ -641,7 +641,7 @@ def build():
                    by_quality=dict(Counter(m['quality'] for m in mods)), source_layouts_with_units=len({m['map_id'] for m in mods}),
                    config=CONFIG, hash_seed=os.environ.get('PYTHONHASHSEED', 'random'),
                    code_sha256=sha(Path(__file__).read_bytes()),
-                   limits=['Whole-map core graphs are rebuilt from stored source records: community maps as the union of their stored windows, WikiPathways/Reactome from GPML/diagram records.',
+                   limits=['Whole-map core graphs are rebuilt from stored source records: Escher maps as the union of their stored windows, WikiPathways/Reactome from GPML/diagram records.',
                            'Orphan islands (<3 reactions with no adjacent unit) are not modules.', 'Shape type is the formation gestalt; appendices may enlarge a unit beyond 12 (<=16).'])
     dump(RESULTS / 'library_summary.json', summary)
     dump(RESULTS / 'per_map.json', per_map)

@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Mus_musculus.zip",
-  "sha256": "9b911de6486a8f45ae9d9bab31bc59a0d850b0355a04a72dc535eb532ca3ea4e",
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Mus_musculus.zip",
+  "sha256": "32ab0b73311e4eb0f214e08a53426e42c53f3c3c30e696380e57b29bf6e2b024",
   "bytes": 1948936,
-  "local_path": "data/archives/wp-Mus_musculus.zip"
+  "local_path": "source_inputs/archives/wp-Mus_musculus.zip",
+  "access_date": "2026-11-11"
 }

@@ -215,3 +215,33 @@ def route_metrics(positions,edges,paths):
   for axis in (0,1):
    other=1-axis;aligned=(np.abs(aa[...,axis]-bb[...,axis])<1e-6)&(np.abs(cc[...,axis]-dd[...,axis])<1e-6)&(np.abs(aa[...,axis]-cc[...,axis])<1e-6);length=np.minimum(np.maximum(aa[...,other],bb[...,other]),np.maximum(cc[...,other],dd[...,other]))-np.maximum(np.minimum(aa[...,other],bb[...,other]),np.minimum(cc[...,other],dd[...,other]));overlap+=int((aligned&(length>1e-6)&mask).sum())
  return dict(proper_crossings=proper,collinear_piece_overlap_pairs=overlap,bends=sum(max(0,len(points)-2) for points in paths.values()))
+
+
+class CanonicalGraph(nx.Graph):
+    """Keep seeded fallback layouts independent of Python set iteration."""
+    def subgraph(self, nodes):
+        keys=set(nodes)&set(self);out=CanonicalGraph()
+        out.add_nodes_from((k,dict(self.nodes[k])) for k in sorted(keys))
+        edges=sorted(tuple(sorted((a,b))) for a,b in self.edges() if a in keys and b in keys)
+        out.add_edges_from((a,b,dict(self.edges[a,b])) for a,b in edges)
+        return out
+
+
+def clip_proposals(selected, sub):
+    """Keep only the parts of selected proposals that fall inside a view subgraph."""
+    import copy
+    ids={r['id'] for r in sub['reactions']};g=model_graph(sub);out=[]
+    for p in selected:
+        rids=sorted(set(p['reaction_ids'])&ids)
+        # Single leftover reactions are drawing units, not multi-reaction skeletons.
+        if len(rids)<2:continue
+        keys={'r:'+r for r in rids}
+        for r in rids:keys.update(g['r:'+r])
+        q=copy.deepcopy(p);q['reaction_ids']=rids;q['positions']={k:v for k,v in p['positions'].items() if k in keys}
+        q['node_mapping']={k:v for k,v in p['node_mapping'].items() if v in q['positions']}
+        q['reaction_mapping']={k:v for k,v in p['reaction_mapping'].items() if v in rids}
+        q['mapping_evidence']=[e for e in p.get('mapping_evidence',[]) if e.get('target_reaction') in rids or e.get('target_reaction') is None]
+        q['source_glyph_mapping']={k:v for k,v in p.get('source_glyph_mapping',{}).items() if 'm:'+v in q['positions']}
+        q['view_clipping']=dict(original_proposal=p['id'],full_reaction_ids=p['reaction_ids'],visible_reaction_ids=rids)
+        q['id']=uid([p['id'],'fixed-view',rids]);out.append(q)
+    return out

@@ -15,7 +15,7 @@ Use:
   python3 source_paths.py build        # extract -> data/extensions/source_paths/
   python3 source_paths.py show <map_id|name part> [reaction id]
   paths_for_block(block)               # per selected structure: chains in the FINAL frame, relative to the reaction's midpoint
-Only Escher ('community') maps are extracted so far; WikiPathways / Reactome follow the same layout of the data file.
+Only Escher ('escher') maps are extracted so far; WikiPathways / Reactome follow the same layout of the data file.
 """
 import gzip
 import sys
@@ -139,7 +139,7 @@ def build():
     maps, total = {}, Counter()
     totals_by_format = defaultdict(Counter)
     for m in obs:
-        if m['source'] == 'community' and m['format'] == 'escher':
+        if m['source'] == 'escher' and m['format'] == 'escher':
             e = extract_map(m)
         elif m['source'] == 'wikipathways' and m['format'] == 'gpml':
             e = extract_gpml_map(m)

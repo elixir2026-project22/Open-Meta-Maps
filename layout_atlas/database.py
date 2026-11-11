@@ -1,28 +1,39 @@
 """Dual indexes: biochemical observations and core-shape templates with provenance."""
 import functools
+import gzip
 import zlib,itertools,xml.etree.ElementTree as ET
 from core import *
 from semantics import rhea_index,parse_gpml
+from atlas_registry import SCHEMA_VERSION, ensure_schema, pack, unpack, connect_path
 
-def pack(v):return zlib.compress(json.dumps(v,ensure_ascii=False).encode(),6)
-def unpack(v):return json.loads(zlib.decompress(v))
 def connect():
- DATA.mkdir(exist_ok=True);db=sqlite3.connect(DATA/'atlas.sqlite')
- db.executescript('''CREATE TABLE IF NOT EXISTS modules(id TEXT PRIMARY KEY,source TEXT,species TEXT,lineage TEXT,quality TEXT,size INTEGER,core_family TEXT,variant TEXT,payload BLOB);
- CREATE INDEX IF NOT EXISTS core_family_idx ON modules(core_family);
- CREATE TABLE IF NOT EXISTS reactions(module_id TEXT,reaction_key TEXT,namespace TEXT,identifier TEXT,PRIMARY KEY(module_id,reaction_key,namespace,identifier));
- CREATE INDEX IF NOT EXISTS biological_idx ON reactions(namespace,identifier);
- CREATE TABLE IF NOT EXISTS maps(id TEXT PRIMARY KEY,source TEXT,species TEXT,lineage TEXT,payload BLOB);
- CREATE TABLE IF NOT EXISTS reviews(module_id TEXT,reviewer TEXT,status TEXT,payload BLOB,PRIMARY KEY(module_id,reviewer));''');return db
+ """Open the runtime Atlas DB (atlas.sqlite), ensuring schema v1 objects exist."""
+ DATA.mkdir(exist_ok=True)
+ return connect_path(DATA/'atlas.sqlite')
 
 @functools.lru_cache(maxsize=1)
-def _modules_cached():
- """Cached inner call (immutable result during one process)."""
+def _core_modules_cached():
+ """Cached open-core modules (immutable during one process)."""
  db=connect();out=tuple(unpack(r[0]) for r in db.execute('SELECT payload FROM modules ORDER BY id'));db.close();return out
 
-def modules():
- """Return all modules from the database (cached in memory after first call)."""
- return list(_modules_cached())
+def modules(include_brenda=True, include_human_maps=True, include_wikipathways_geometry=True, include_metabolismregulation=True, include_panther=True):
+ """Open-core modules from atlas.sqlite, plus default extensions when present.
+
+ WikiPathways geometry-only windows ship as an extension (size) and load by default.
+ Metabolism Regulation gallery SBGN-ML and PANTHER CellDesigner maps ship as extensions and load by default.
+ """
+ out=list(_core_modules_cached())
+ for flag, rel in (
+  (include_brenda,'extensions/brenda/modules.json.gz'),
+  (include_human_maps,'extensions/human_maps/modules.json.gz'),
+  (include_wikipathways_geometry,'extensions/wikipathways_geometry/modules.json.gz'),
+  (include_metabolismregulation,'extensions/metabolismregulation/modules.json.gz'),
+  (include_panther,'extensions/panther/modules.json.gz'),
+ ):
+  path=DATA/rel
+  if flag and path.exists():
+   with gzip.open(path,'rt') as f: out.extend(json.load(f))
+ return out
 
 def graph(m):
  g=nx.Graph()
@@ -64,7 +75,7 @@ def from_legacy(m):
   rx={str(r['key']):r for r in m['reactions']};entities={n['key']:n.get('entity') for n in core}
   for a,b in m.get('core_edges',[]):
    rk=a if a.startswith('r:') else b;mk=b if rk==a else a;c=rx[rk[2:]]['coefficients'].get(entities[mk],0);edges.append(dict(a=a,b=b,flow='substrate' if c<0 else 'product',coefficient=c))
-  reactions=[dict(r,key='r:'+str(r['key']),references={'bigg.reaction':[r['id']]} if m['source']=='community' else {'reactome':[r['id']]}) for r in m['reactions']];size=m['size']
+  reactions=[dict(r,key='r:'+str(r['key']),references={'bigg.reaction':[r['id']]} if m['source']=='escher' else {'reactome':[r['id']]}) for r in m['reactions']];size=m['size']
  return dict(id=m['id'],source=m['source'],species=m['species'],lineage=m['lineage'],map_id=m['map_id'],name=m['name'],license=m['license'],quality=m['quality'],size=size,nodes=nodes,edges=edges,reactions=reactions,attachments=m['attachments'],ports=m.get('all_participant_ports',m['ports']),legacy_id=m['id'],source_sha256=m['source_sha256'],review_status='not_required',original_instance='data/source_inputs/module_observations.json.gz')
 
 def diagram_modules(d,max_roots=24):
@@ -139,6 +150,50 @@ def reactome_diagram(path):
    p=e.get('position',{});events.append(dict(key='r:'+str(e['id']),id=event.get('stId',str(e['reactomeId'])),references={'reactome':[event.get('stId',str(e['reactomeId']))]},coefficients={k:v for k,v in coeff.items() if v},visible=visible,xy=[p.get('x',0),p.get('y',0)],position_origin='observed',reversible=False,paths=e.get('segments',[])))
  rid=path.stem
  return dict(id=uid([rid,sha(path.read_bytes())]),source='reactome',species='Homo sapiens',lineage='reactome:'+rid,map_id=rid,name=a.get('displayName',rid),license='CC0-1.0-data',glyphs=glyphs,events=events,source_sha256=sha(path.read_bytes()),path=str(path.relative_to(BASE)))
+
+
+def escher_diagram(path, source='escher', license='CC0-1.0', species='unspecified', reaction_namespace='bigg.reaction', **meta):
+ """Parse an official Escher JSON map ([metadata, content]) into the diagram form used by diagram_modules.
+
+ Generic for any GEM-aligned Escher map: reaction and metabolite ids are taken from the map's bigg_id fields
+ (which may hold BiGG, Human-GEM MAR ids, or other namespaces) and recorded under reaction_namespace.
+ """
+ path=Path(path); raw=json.loads(path.read_bytes())
+ if not isinstance(raw,list) or len(raw)<2: raise ValueError('Escher map must be a [metadata, content] list: '+str(path))
+ header,content=raw[0],raw[1]; nodes=content.get('nodes') or {}; reactions=content.get('reactions') or {}; glyphs={}
+ for nid,n in nodes.items():
+  kind=n.get('node_type')
+  if kind=='metabolite':
+   entity=n.get('bigg_id') or n.get('name') or str(nid)
+   glyphs[str(nid)]=dict(entity=entity,xy=[n.get('x',0),n.get('y',0)],label=n.get('name') or entity,primary=bool(n.get('node_is_primary')),kind='metabolite')
+  elif kind in ('midmarker','multimarker'):
+   glyphs[str(nid)]=dict(entity=None,xy=[n.get('x',0),n.get('y',0)],label='',kind=kind)
+ events=[]; skipped=Counter()
+ for rid,r in reactions.items():
+  mets=r.get('metabolites') or []
+  if not mets: skipped['no_metabolites']+=1; continue
+  coeff={m['bigg_id']:float(m['coefficient']) for m in mets if m.get('bigg_id') is not None}
+  if not coeff: skipped['no_id_coeff']+=1; continue
+  segs=r.get('segments') or {}; used={str(s.get('from_node_id')) for s in segs.values()}|{str(s.get('to_node_id')) for s in segs.values()}
+  visible={}
+  for nid in used:
+   g=glyphs.get(nid)
+   if g and g.get('kind')=='metabolite' and g['entity'] in coeff: visible[nid]=coeff[g['entity']]
+  if not visible:
+   for nid,g in glyphs.items():
+    if g.get('kind')=='metabolite' and g['entity'] in coeff: visible[nid]=coeff[g['entity']]
+  if not visible: skipped['no_visible_glyphs']+=1; continue
+  mids=[nid for nid in used if glyphs.get(nid,{}).get('kind')=='midmarker']
+  if mids: xy=glyphs[mids[0]]['xy']
+  elif r.get('label_x') is not None: xy=[r['label_x'],r.get('label_y',0)]
+  else:
+   pts=[glyphs[n]['xy'] for n in visible]; xy=[sum(p[0] for p in pts)/len(pts),sum(p[1] for p in pts)/len(pts)]
+  rid_s=str(rid); rx_id=r.get('bigg_id') or r.get('name') or rid_s
+  events.append(dict(key='r:'+rid_s,id=rx_id,references={reaction_namespace:[rx_id]},coefficients=coeff,visible=visible,xy=xy,position_origin='observed',reversible=bool(r.get('reversibility')),core=list(visible)))
+ digest=sha(path.read_bytes()); name=header.get('map_name') or path.stem
+ out=dict(id=uid([source,digest]),source=source,species=species,lineage=source+':'+digest,map_id=header.get('map_id') or digest[:24],name=name,license=license,glyphs=glyphs,events=events,source_sha256=digest,path=str(path),format='escher',audit=dict(skipped))
+ out.update(meta); return out
+
 
 def build():
  rhea=rhea_index();mods=[];original_maps=source_maps();bysha={d['source_sha256']:d for d in original_maps if d['source']=='wikipathways'};maps=[{k:d.get(k) for k in ('id','source','source_id','species','lineage','name','license','source_sha256','provenance_status')} for d in original_maps];binding_audit=[]
