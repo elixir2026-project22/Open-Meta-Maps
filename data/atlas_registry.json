@@ -3,7 +3,7 @@
   "generated": "2026-11-11",
   "open_core": {
     "path": "data/open_core.sqlite",
-    "sha256": "6955b18dbc834b180a447ebe676f54e8574ab4bdb7559e476a033389f0445c21",
+    "sha256": "79c55382ac4af8b745596c9d0575c8fc1d0f88760eb1abdef17459bdff4ea681",
     "bytes": 67805184,
     "maps": {
       "escher": 22,
@@ -23,13 +23,15 @@
       "human_maps": 8540,
       "wikipathways_geometry": 29673,
       "metabolismregulation": 423,
-      "panther": 238
+      "panther": 238,
+      "ich360": 858
     },
     "reactions": 89598,
     "licences": {
       "CC0-1.0": 43965,
       "CC0-1.0-data": 3405,
-      "CC-BY-4.0": 20904
+      "CC-BY-4.0": 20904,
+      "MIT": 858
     }
   },
   "extensions": {
@@ -595,16 +597,237 @@
         "modules": 238,
         "atlas_schema_version": 1
       }
+    },
+    "ich360": {
+      "source": "ich360",
+      "url": "https://github.com/marco-corrao/iCH360/tree/main/Visualisation",
+      "repository": "https://github.com/marco-corrao/iCH360",
+      "license": "MIT",
+      "license_uri": "https://opensource.org/licenses/MIT",
+      "version": "08dd4388096dcf0c88f36d7229c0b06688582744",
+      "access_date": "2026-11-11",
+      "maps": 10,
+      "modules": 858,
+      "families": 341,
+      "admitted_to_open_core": true,
+      "partition": "open_core",
+      "import_policy": "custom Escher JSON via database.escher_diagram + diagram_modules; compressed_map.json excluded (CP pseudo-reactions)",
+      "dedupe_note": "Include full_map + pathway_maps + pathways_not_in_model (10 maps). Exclude compressed_map (pseudo-reactions). Pathway maps are reaction-subsets of full_map but keep independent curated geometry; Atlas already retains overlapping drawings from one source (e.g. Human-maps compartment vs subsystem) and retrieval ranks them.",
+      "attribution": "iCH360 Visualisation Escher maps (https://github.com/marco-corrao/iCH360), MIT License; Corrao et al., PLOS Computational Biology (doi:10.1371/journal.pcbi.1013564).",
+      "layout_origin": {
+        "status": "curated_hand_drawn",
+        "counted_as_expert_design": true,
+        "reason": "source_map_curated_layout"
+      },
+      "files": [
+        {
+          "id": "full_map",
+          "source": "ich360",
+          "path": "data/source_inputs/raw/ich360/model_map/full_map.json",
+          "repo_path": "Visualisation/model_map/full_map.json",
+          "sha256": "071232f8c77e0842b4ef27f40e3f607502558debbe7e38add79a14bd74b7945d",
+          "bytes": 847260,
+          "license": "MIT",
+          "license_uri": "https://opensource.org/licenses/MIT",
+          "version": "08dd4388096dcf0c88f36d7229c0b06688582744",
+          "url": "https://raw.githubusercontent.com/marco-corrao/iCH360/08dd4388096dcf0c88f36d7229c0b06688582744/Visualisation/model_map/full_map.json",
+          "format": "escher",
+          "access_date": "2026-11-11",
+          "use": "core",
+          "family": "ecoli",
+          "species": "Escherichia coli"
+        },
+        {
+          "id": "aminoacids_biosynthesis",
+          "source": "ich360",
+          "path": "data/source_inputs/raw/ich360/pathway_maps/aminoacids_biosynthesis.json",
+          "repo_path": "Visualisation/pathway_maps/aminoacids_biosynthesis.json",
+          "sha256": "d33812270f230d3519da63595ccdd423ec5a8ef04dfbdfec68f4ae1ecd715e56",
+          "bytes": 239413,
+          "license": "MIT",
+          "license_uri": "https://opensource.org/licenses/MIT",
+          "version": "08dd4388096dcf0c88f36d7229c0b06688582744",
+          "url": "https://raw.githubusercontent.com/marco-corrao/iCH360/08dd4388096dcf0c88f36d7229c0b06688582744/Visualisation/pathway_maps/aminoacids_biosynthesis.json",
+          "format": "escher",
+          "access_date": "2026-11-11",
+          "use": "core",
+          "family": "ecoli",
+          "species": "Escherichia coli"
+        },
+        {
+          "id": "c1_pool",
+          "source": "ich360",
+          "path": "data/source_inputs/raw/ich360/pathway_maps/c1_pool.json",
+          "repo_path": "Visualisation/pathway_maps/c1_pool.json",
+          "sha256": "24112984da7a78944da8daf3f54fb0062ccafce05ae1f0ed0a1ab5be39688f59",
+          "bytes": 17555,
+          "license": "MIT",
+          "license_uri": "https://opensource.org/licenses/MIT",
+          "version": "08dd4388096dcf0c88f36d7229c0b06688582744",
+          "url": "https://raw.githubusercontent.com/marco-corrao/iCH360/08dd4388096dcf0c88f36d7229c0b06688582744/Visualisation/pathway_maps/c1_pool.json",
+          "format": "escher",
+          "access_date": "2026-11-11",
+          "use": "core",
+          "family": "ecoli",
+          "species": "Escherichia coli"
+        },
+        {
+          "id": "fatty_acids_biosynthesis",
+          "source": "ich360",
+          "path": "data/source_inputs/raw/ich360/pathway_maps/fatty_acids_biosynthesis.json",
+          "repo_path": "Visualisation/pathway_maps/fatty_acids_biosynthesis.json",
+          "sha256": "28babdb8351367f7d637e1da9d54bf4fe56c86f752abc43e85c4fe4670034052",
+          "bytes": 172087,
+          "license": "MIT",
+          "license_uri": "https://opensource.org/licenses/MIT",
+          "version": "08dd4388096dcf0c88f36d7229c0b06688582744",
+          "url": "https://raw.githubusercontent.com/marco-corrao/iCH360/08dd4388096dcf0c88f36d7229c0b06688582744/Visualisation/pathway_maps/fatty_acids_biosynthesis.json",
+          "format": "escher",
+          "access_date": "2026-11-11",
+          "use": "core",
+          "family": "ecoli",
+          "species": "Escherichia coli"
+        },
+        {
+          "id": "nucleotides_biosynthesis",
+          "source": "ich360",
+          "path": "data/source_inputs/raw/ich360/pathway_maps/nucleotides_biosynthesis.json",
+          "repo_path": "Visualisation/pathway_maps/nucleotides_biosynthesis.json",
+          "sha256": "6673791af9a5154282bd59b5b8239cae360285e0f7a218fff43e4078b68f1a64",
+          "bytes": 128807,
+          "license": "MIT",
+          "license_uri": "https://opensource.org/licenses/MIT",
+          "version": "08dd4388096dcf0c88f36d7229c0b06688582744",
+          "url": "https://raw.githubusercontent.com/marco-corrao/iCH360/08dd4388096dcf0c88f36d7229c0b06688582744/Visualisation/pathway_maps/nucleotides_biosynthesis.json",
+          "format": "escher",
+          "access_date": "2026-11-11",
+          "use": "core",
+          "family": "ecoli",
+          "species": "Escherichia coli"
+        },
+        {
+          "id": "cofactors_de_novo_biosynthesis",
+          "source": "ich360",
+          "path": "data/source_inputs/raw/ich360/pathways_not_in_model/cofactors_de_novo_biosynthesis.json",
+          "repo_path": "Visualisation/pathways_not_in_model/cofactors_de_novo_biosynthesis.json",
+          "sha256": "c8788438fd930f423872bdff5f6bd63ae843c47afe1b409ddab8c411a766540b",
+          "bytes": 67493,
+          "license": "MIT",
+          "license_uri": "https://opensource.org/licenses/MIT",
+          "version": "08dd4388096dcf0c88f36d7229c0b06688582744",
+          "url": "https://raw.githubusercontent.com/marco-corrao/iCH360/08dd4388096dcf0c88f36d7229c0b06688582744/Visualisation/pathways_not_in_model/cofactors_de_novo_biosynthesis.json",
+          "format": "escher",
+          "access_date": "2026-11-11",
+          "use": "core",
+          "family": "ecoli",
+          "species": "Escherichia coli"
+        },
+        {
+          "id": "ions_metals_uptake",
+          "source": "ich360",
+          "path": "data/source_inputs/raw/ich360/pathways_not_in_model/ions_metals_uptake.json",
+          "repo_path": "Visualisation/pathways_not_in_model/ions_metals_uptake.json",
+          "sha256": "90462aadb6f89385df5dd923546f476ac4d052bc55260ca400be59d4e7f2802b",
+          "bytes": 68748,
+          "license": "MIT",
+          "license_uri": "https://opensource.org/licenses/MIT",
+          "version": "08dd4388096dcf0c88f36d7229c0b06688582744",
+          "url": "https://raw.githubusercontent.com/marco-corrao/iCH360/08dd4388096dcf0c88f36d7229c0b06688582744/Visualisation/pathways_not_in_model/ions_metals_uptake.json",
+          "format": "escher",
+          "access_date": "2026-11-11",
+          "use": "core",
+          "family": "ecoli",
+          "species": "Escherichia coli"
+        },
+        {
+          "id": "kdo_biosynthesis",
+          "source": "ich360",
+          "path": "data/source_inputs/raw/ich360/pathways_not_in_model/kdo_biosynthesis.json",
+          "repo_path": "Visualisation/pathways_not_in_model/kdo_biosynthesis.json",
+          "sha256": "9419669cc7e51774d22d391fc3ff540d8472309a9139f91c1477196e1441dca0",
+          "bytes": 51660,
+          "license": "MIT",
+          "license_uri": "https://opensource.org/licenses/MIT",
+          "version": "08dd4388096dcf0c88f36d7229c0b06688582744",
+          "url": "https://raw.githubusercontent.com/marco-corrao/iCH360/08dd4388096dcf0c88f36d7229c0b06688582744/Visualisation/pathways_not_in_model/kdo_biosynthesis.json",
+          "format": "escher",
+          "access_date": "2026-11-11",
+          "use": "core",
+          "family": "ecoli",
+          "species": "Escherichia coli"
+        },
+        {
+          "id": "murein_biosynthesis",
+          "source": "ich360",
+          "path": "data/source_inputs/raw/ich360/pathways_not_in_model/murein_biosynthesis.json",
+          "repo_path": "Visualisation/pathways_not_in_model/murein_biosynthesis.json",
+          "sha256": "d11444b3cd53a7667621e83c6f6caf4736d4c7c45136410f2915d86b1c0e2145",
+          "bytes": 239823,
+          "license": "MIT",
+          "license_uri": "https://opensource.org/licenses/MIT",
+          "version": "08dd4388096dcf0c88f36d7229c0b06688582744",
+          "url": "https://raw.githubusercontent.com/marco-corrao/iCH360/08dd4388096dcf0c88f36d7229c0b06688582744/Visualisation/pathways_not_in_model/murein_biosynthesis.json",
+          "format": "escher",
+          "access_date": "2026-11-11",
+          "use": "core",
+          "family": "ecoli",
+          "species": "Escherichia coli"
+        },
+        {
+          "id": "phospholipids_biosynthesis",
+          "source": "ich360",
+          "path": "data/source_inputs/raw/ich360/pathways_not_in_model/phospholipids_biosynthesis.json",
+          "repo_path": "Visualisation/pathways_not_in_model/phospholipids_biosynthesis.json",
+          "sha256": "cdb6fe8851aa5d006c065e4116db3df24e65b758617e32164ba48eb97696e252",
+          "bytes": 97011,
+          "license": "MIT",
+          "license_uri": "https://opensource.org/licenses/MIT",
+          "version": "08dd4388096dcf0c88f36d7229c0b06688582744",
+          "url": "https://raw.githubusercontent.com/marco-corrao/iCH360/08dd4388096dcf0c88f36d7229c0b06688582744/Visualisation/pathways_not_in_model/phospholipids_biosynthesis.json",
+          "format": "escher",
+          "access_date": "2026-11-11",
+          "use": "core",
+          "family": "ecoli",
+          "species": "Escherichia coli"
+        }
+      ],
+      "licence_evidence": [
+        {
+          "path": "data/terms/ich360_LICENSE.txt",
+          "sha256": "3a0ff51471adaecefbd4d92e42bbe73b340028920915882a5f25a2735e66c921",
+          "bytes": 1069,
+          "url": "https://raw.githubusercontent.com/marco-corrao/iCH360/08dd4388096dcf0c88f36d7229c0b06688582744/LICENSE",
+          "kind": "repo_LICENSE_MIT"
+        },
+        {
+          "path": "data/terms/ich360_zenodo_15048160.html",
+          "sha256": "db3f0a830619e91e3eea6ae2b1be42f9383704a9ca2ddefba09ed98bc71e2f76",
+          "bytes": 125948,
+          "url": "https://doi.org/10.5281/zenodo.15048160",
+          "kind": "zenodo_CC-BY-4.0_corroboration"
+        }
+      ],
+      "decode_failures": [],
+      "excluded_modules": 0,
+      "paper_doi": "10.1371/journal.pcbi.1013564",
+      "zenodo_doi": "10.5281/zenodo.15048160",
+      "extraction": {
+        "methods": {
+          "diagram_modules": 858
+        },
+        "modules": 858,
+        "atlas_schema_version": 1
+      }
     }
   },
   "input_manifest": {
     "version": "0.3-source-inputs",
-    "files": 2367,
-    "sha256": "d373e2daa694dc57d72c0b03fec1eab01ab47b57a98b81af93be19c163ea5fb2"
+    "files": 2380,
+    "sha256": "bdbdf3f5a04d613f8c472dc9ab3b321964aedeed8f5f79780e4c653581824ce8"
   },
   "source_registry": {
     "path": "data/source_inputs/source_registry.json",
-    "sha256": "38266bb3c5ff3934b890ae7c3651cf46d78c68e620a2c7e2680495430061018a",
+    "sha256": "b6dc13d93459bfeba4fca0c762ad0903fe1efee886b6d2e650e6cc6a537e8bba",
     "wikipathways_release": "20261110"
   },
   "extraction": {
@@ -690,6 +913,28 @@
         "maps": 130,
         "modules": 8540,
         "reactions_covered": 3938
+      },
+      "ich360": {
+        "method": "diagram_modules",
+        "methods": {
+          "diagram_modules": 858
+        },
+        "parameters": {
+          "max_roots": 24,
+          "window_sizes": [
+            1,
+            2,
+            4,
+            8,
+            12,
+            24
+          ]
+        },
+        "version": "atlas-extraction-1",
+        "inferred": false,
+        "maps": 10,
+        "modules": 858,
+        "reactions_covered": 382
       },
       "metabolismregulation": {
         "method": "diagram_modules",

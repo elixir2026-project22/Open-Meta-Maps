@@ -27,6 +27,13 @@ LAYOUT_ORIGIN_EXPERT = {
     'reason': 'source_map_expert_layout',
 }
 
+# Prefer this for new curated sources (user-facing wording: curated, not "expert").
+LAYOUT_ORIGIN_CURATED = {
+    'status': 'curated_hand_drawn',
+    'counted_as_expert_design': True,
+    'reason': 'source_map_curated_layout',
+}
+
 ATTRIBUTION = {
     'escher': 'Escher community-maps (CC0); https://github.com/escher/community-maps',
     'wikipathways': 'WikiPathways (CC0); https://www.wikipathways.org',
@@ -41,6 +48,11 @@ ATTRIBUTION = {
         'PANTHER Pathway CellDesigner maps (CC BY 4.0); '
         'https://data.pantherdb.org/ftp/pathway/3.4/CD4.1/'
     ),
+    'ich360': (
+        'iCH360 Visualisation Escher maps (MIT); '
+        'https://github.com/marco-corrao/iCH360; '
+        'Corrao et al. doi:10.1371/journal.pcbi.1013564'
+    ),
 }
 
 DEFAULT_EXTENSIONS = (
@@ -49,6 +61,7 @@ DEFAULT_EXTENSIONS = (
     'wikipathways_geometry',
     'metabolismregulation',
     'panther',
+    'ich360',
 )
 
 # Default cutter parameters used when backfilling extraction onto existing records.

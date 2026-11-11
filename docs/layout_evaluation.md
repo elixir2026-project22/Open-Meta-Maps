@@ -35,35 +35,21 @@ and should be read from compose’s `layout_issues.json` / `report.json`.
 Maps composed with `--source-paths` (Bézier / curated layout default). Geometry columns come from
 `layout_quality` on the final `map.json`.
 
-| metric | e_coli_core | iIT341 |
-|---|---:|---:|
-| runtime_s | 66.9 | 121.0 |
-| geom_crossings (algo×algo + algo×curated) | 47 | 337 |
-| … main-metabolite / currency-involved | 5 / 42 | 194 / 143 |
-| overlapping_pairs (geom nodes+labels) | 7 | 22 |
-| long lines p90 (reaction spacings) | see report | see report |
-| edge_len_max_rel | 15.91 | 15.86 |
-| inout_opposite_share (≥120°, all / core) | 0.813 / 0.794 | 0.820 / 0.691 |
-| participant_consistency (>90°, CLI) | 0.422 | 0.434 |
-| currency_hub_violations | 0 | 3 |
-| currency_long_arc_share | 0.000 | 0.002 |
-| structure_continuity | 0.856 | 0.947 |
-| split_structures | 0 | 3 |
-| cycle_circularity | 0.289 | 0.377 |
-| cycle_direction_consistency | 0.575 | 0.600 |
-| cycle_order_consistency | 1.000 | 1.000 |
-| flow_main_dir_share | 0.302 | 0.273 |
-| bends_per_arc | 0.089 | 0.172 |
-| exchange_periphery_share | 0.417 | 0.633 |
-| blank_space_share | 0.546 | 0.842 |
-| space_utilisation (= 1 − blank) | 0.454 | 0.158 |
-| largest_empty_rect_share | 0.240 | 0.260 |
-| unrelated_overlaps_total | 4 | 17 |
-| aspect_ratio (W/H, content bbox) | 0.677 | 0.477 |
-| species_in_other_compartment | 0.583 | 0.862 |
-| overlapping_pairs (benchmark boxes) | 198 | 1381 |
-| overlap_area_share | 0.322 | 0.296 |
-| long_edge_share (>3× median) | 0.211 | 0.232 |
+Stage A main vs this branch (`--source-paths`):
+
+| metric | e_coli_core main | e_coli_core +iCH360 | iIT341 main | iIT341 +iCH360 |
+|---|---:|---:|---:|---:|
+| curated_coverage_share | 0.7368 | 0.7368 | 0.3069 | 0.2924 |
+| crossings (counted) | 46 | 46 | 299 | 239 |
+| overlapping_pairs | 5 | 5 | 18 | 16 |
+| unrelated_overlaps_total | 5 | 5 | 17 | 8 |
+| blank_space_share | 0.5826 | 0.5826 | 0.9401 | 0.8605 |
+| edge_len_max_rel | 12.187 | 12.187 | 27.975 | 27.871 |
+| aspect_ratio (W/H) | 1.1726 | 1.1726 | 0.5394 | 0.8079 |
+| runtime_s | 77.9 | 74.7 | 457.3 | 454.2 |
+| iCH360 modules used | — | 0 | — | 7 |
+
+Refresh notes (2026-11-11): rebased iCH360 onto Stage A (extraction provenance + compactness-aware select) and re-composed e_coli_core / iIT341. e_coli_core unchanged with iCH360 loaded. iIT341 selects 4×`full_map` + 3×`ions_metals_uptake` size-2 geometry windows; crossings/blank/aspect improve vs Stage A main while coverage dips slightly. Older benchmark-aligned rows remain in [`docs/evaluation/summary.csv`](evaluation/summary.csv).
 
 Machine-readable copy: [`docs/evaluation/summary.csv`](evaluation/summary.csv).
 
@@ -116,7 +102,7 @@ space-utilisation row.
 | model | contiguous_pair_share | structures | split_structures | pairs |
 |---|---:|---:|---:|---:|
 | e_coli_core | 0.856 | 11 | 0 | 146 |
-| iIT341 | 0.947 | (see report) | 3 | (see report) |
+| iIT341 | 0.950 | 90 | 3 | 238 |
 
 ## Reproducibility / stability
 

@@ -1,0 +1,73 @@
+{
+  "repository": "https://github.com/marco-corrao/iCH360",
+  "commit": "08dd4388096dcf0c88f36d7229c0b06688582744",
+  "access_date": "2026-11-11",
+  "included": [
+    {
+      "path": "model_map/full_map.json",
+      "sha256": "071232f8c77e0842b4ef27f40e3f607502558debbe7e38add79a14bd74b7945d",
+      "bytes": 847260,
+      "url": "https://raw.githubusercontent.com/marco-corrao/iCH360/08dd4388096dcf0c88f36d7229c0b06688582744/Visualisation/model_map/full_map.json"
+    },
+    {
+      "path": "pathway_maps/aminoacids_biosynthesis.json",
+      "sha256": "d33812270f230d3519da63595ccdd423ec5a8ef04dfbdfec68f4ae1ecd715e56",
+      "bytes": 239413,
+      "url": "https://raw.githubusercontent.com/marco-corrao/iCH360/08dd4388096dcf0c88f36d7229c0b06688582744/Visualisation/pathway_maps/aminoacids_biosynthesis.json"
+    },
+    {
+      "path": "pathway_maps/c1_pool.json",
+      "sha256": "24112984da7a78944da8daf3f54fb0062ccafce05ae1f0ed0a1ab5be39688f59",
+      "bytes": 17555,
+      "url": "https://raw.githubusercontent.com/marco-corrao/iCH360/08dd4388096dcf0c88f36d7229c0b06688582744/Visualisation/pathway_maps/c1_pool.json"
+    },
+    {
+      "path": "pathway_maps/fatty_acids_biosynthesis.json",
+      "sha256": "28babdb8351367f7d637e1da9d54bf4fe56c86f752abc43e85c4fe4670034052",
+      "bytes": 172087,
+      "url": "https://raw.githubusercontent.com/marco-corrao/iCH360/08dd4388096dcf0c88f36d7229c0b06688582744/Visualisation/pathway_maps/fatty_acids_biosynthesis.json"
+    },
+    {
+      "path": "pathway_maps/nucleotides_biosynthesis.json",
+      "sha256": "6673791af9a5154282bd59b5b8239cae360285e0f7a218fff43e4078b68f1a64",
+      "bytes": 128807,
+      "url": "https://raw.githubusercontent.com/marco-corrao/iCH360/08dd4388096dcf0c88f36d7229c0b06688582744/Visualisation/pathway_maps/nucleotides_biosynthesis.json"
+    },
+    {
+      "path": "pathways_not_in_model/cofactors_de_novo_biosynthesis.json",
+      "sha256": "c8788438fd930f423872bdff5f6bd63ae843c47afe1b409ddab8c411a766540b",
+      "bytes": 67493,
+      "url": "https://raw.githubusercontent.com/marco-corrao/iCH360/08dd4388096dcf0c88f36d7229c0b06688582744/Visualisation/pathways_not_in_model/cofactors_de_novo_biosynthesis.json"
+    },
+    {
+      "path": "pathways_not_in_model/ions_metals_uptake.json",
+      "sha256": "90462aadb6f89385df5dd923546f476ac4d052bc55260ca400be59d4e7f2802b",
+      "bytes": 68748,
+      "url": "https://raw.githubusercontent.com/marco-corrao/iCH360/08dd4388096dcf0c88f36d7229c0b06688582744/Visualisation/pathways_not_in_model/ions_metals_uptake.json"
+    },
+    {
+      "path": "pathways_not_in_model/kdo_biosynthesis.json",
+      "sha256": "9419669cc7e51774d22d391fc3ff540d8472309a9139f91c1477196e1441dca0",
+      "bytes": 51660,
+      "url": "https://raw.githubusercontent.com/marco-corrao/iCH360/08dd4388096dcf0c88f36d7229c0b06688582744/Visualisation/pathways_not_in_model/kdo_biosynthesis.json"
+    },
+    {
+      "path": "pathways_not_in_model/murein_biosynthesis.json",
+      "sha256": "d11444b3cd53a7667621e83c6f6caf4736d4c7c45136410f2915d86b1c0e2145",
+      "bytes": 239823,
+      "url": "https://raw.githubusercontent.com/marco-corrao/iCH360/08dd4388096dcf0c88f36d7229c0b06688582744/Visualisation/pathways_not_in_model/murein_biosynthesis.json"
+    },
+    {
+      "path": "pathways_not_in_model/phospholipids_biosynthesis.json",
+      "sha256": "cdb6fe8851aa5d006c065e4116db3df24e65b758617e32164ba48eb97696e252",
+      "bytes": 97011,
+      "url": "https://raw.githubusercontent.com/marco-corrao/iCH360/08dd4388096dcf0c88f36d7229c0b06688582744/Visualisation/pathways_not_in_model/phospholipids_biosynthesis.json"
+    }
+  ],
+  "excluded": [
+    {
+      "path": "model_map/compressed_map.json",
+      "reason": "CP pseudo-reactions; upstream Visualisation/readme.md says the compressed map cannot be used directly with iCH360"
+    }
+  ]
+}

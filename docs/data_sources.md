@@ -10,6 +10,7 @@ The default Atlas is `data/open_core.sqlite` plus the in-tree extensions under `
 | BRENDA pathway maps | CC BY 4.0 | `data/extensions/brenda/`; layout possibly automatic |
 | Metabolism Regulation gallery | CC BY 4.0 | hand-drawn SBGN-ML via `layout_atlas/sbgn.py` (`data/extensions/metabolismregulation/`); see [metabolismregulation_import.md](metabolismregulation_import.md) |
 | PANTHER Pathway | CC BY 4.0 | CellDesigner CD4.1 via `celldesigner.py` + `identity_labels.py` (`data/extensions/panther/`); see [panther_pilot.md](panther_pilot.md) |
+| iCH360 Visualisation | MIT | custom Escher JSON via `database.escher_diagram` (`data/extensions/ich360/`); `compressed_map.json` excluded; see [ich360_import.md](ich360_import.md) |
 | Reactome | CC0 data; some illustrations CC BY 4.0 (terms snapshot in `source_inputs/terms/`) | pinned release archive members |
 
 Source versions, SHA-256 hashes, retrieval dates and extraction methods: `data/source_inputs/source_registry.json` and `data/input_manifest.json`. Every Atlas structure carries its source and licence; each generated map lists the structures it used in `licenses.json`.

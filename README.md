@@ -110,23 +110,24 @@ Default Atlas (`data/open_core.sqlite` plus default extensions). Counts from [`d
 
 | Source | Modules | Licence |
 |---|---:|---|
-| Escher (22 community maps) | 9,098 | CC0-1.0 |
+| Escher (22 community maps) | 13,047 | CC0-1.0 |
 | Reactome (release 97, 86 diagrams) | 3,405 | CC0 (data) |
 | WikiPathways (20261110; 1,245 semantic + 29,673 geometry-only) | 30,918 | CC0-1.0 |
 | Human-maps (130 official Escher JSON) | 8,540 | CC BY 4.0 |
 | BRENDA (194 pathway maps; layout possibly automatic) | 11,703 | CC BY 4.0 |
 | Metabolism Regulation (22 SBGN-ML maps) | 423 | CC BY 4.0 |
 | PANTHER (3.4/CD4.1, 8 maps) | 238 | CC BY 4.0 |
-| **Total (default load)** | **64,325** | |
+| iCH360 (10 custom Escher maps; MIT) | 858 | MIT |
+| **Total (default load)** | **69,132** | |
 
-Not included: MicroMap, Yeast-maps, KEGG. Attribution: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Audit notes: [docs/licensing_audit.md](docs/licensing_audit.md).
+Not included: MicroMap, Yeast-maps, KEGG; iCH360 `compressed_map.json` (CP pseudo-reactions). Attribution: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Audit notes: [docs/licensing_audit.md](docs/licensing_audit.md).
 
-**Code** is [MIT](LICENSE). **Atlas data and generated maps** are **CC BY 4.0** (mixed CC0 + CC BY 4.0 sources); keep the attributions in THIRD_PARTY_NOTICES.md.
+**Code** is [MIT](LICENSE). **Atlas data and generated maps** mix CC0, CC BY 4.0 and MIT sources; keep the attributions in THIRD_PARTY_NOTICES.md.
 
 ## Documentation
 
 - [Installation](docs/installation.md)
-- [Data sources](docs/data_sources.md) · [Optional packages](docs/data_packages.md) · [Atlas layout](data/README.md)
+- [Data sources](docs/data_sources.md) · [iCH360 import](docs/ich360_import.md) · [Optional packages](docs/data_packages.md) · [Atlas layout](data/README.md)
 - [Reaction–map matching](docs/reaction_map_matching.md) · [EC extension](docs/ec_extension_recommendation.md)
 - [Methodology](docs/methodology.md) · [Limitations](docs/limitations.md)
 - [Layout evaluation](docs/layout_evaluation.md)
