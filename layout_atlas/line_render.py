@@ -3,6 +3,7 @@
 Expert maps (Escher, WikiPathways, Reactome) show metabolites as the nodes and reactions as curves/lines between them, with the reaction
 name written beside the line.  The Escher mid-marker is only an anchor for the label and the branch point; it is not drawn here.
 Exported reaction lines and arrowheads are a single dark stroke (#222); main vs currency width and opacity are unchanged.
+Currency / cofactor nodes, labels and their spoke paths carry data-currency so the tool viewer can hide them without a re-layout.
 The tool viewer may recolour those paths from the `data-kind` provenance attribute.
 
 Input is the Escher JSON written by the drawing pipeline (map.json); nothing about the chemistry is changed, only how it is displayed.
@@ -68,6 +69,11 @@ def _curved_path(reaction, path, nodes):
 EDGE = '#222'  # exported stroke / arrowhead; the tool viewer may override via data-kind
 
 
+def _currency_attr(node):
+    """Mark currency / cofactor metabolites using the pipeline's node_is_primary flag."""
+    return ' data-currency="1"' if node.get('node_type') == 'metabolite' and not node.get('node_is_primary', True) else ''
+
+
 def render(data, kinds=None):
     """SVG text of the map in line style.  `kinds` maps reaction id -> provenance kind.
 
@@ -107,12 +113,12 @@ def render(data, kinds=None):
                 curves_drawn += 1
                 status = (entry or {}).get('status', 'preserved')
                 title = f'<title>{escape(rid)} {escape(r.get("name") or "")} - {escape(epv.LABELS[kind]) if kind in epv.LABELS else "unclassified"} (expert {"curve" if curved else "line"}{", adjusted" if status == "adjusted" else ""})</title>'
-                top_lines.append(f'<path data-rx="{escape(rid)}" data-met="{escape(end.get("bigg_id") or "")}"{kind_attr} d="{d_curve}" stroke="{EDGE}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" fill="none"{(" marker-end=" + chr(34) + mark + chr(34)) if (product or reversible) else ""}>{title}</path>')
+                top_lines.append(f'<path data-rx="{escape(rid)}" data-met="{escape(end.get("bigg_id") or "")}"{kind_attr}{_currency_attr(end)} d="{d_curve}" stroke="{EDGE}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" fill="none"{(" marker-end=" + chr(34) + mark + chr(34)) if (product or reversible) else ""}>{title}</path>')
                 continue
             if (rid, end.get('bigg_id')) in routed_edges:  # an algorithm-routed detour with rounded corners: the same segments as in map.json
                 arrows = f' marker-end="{mark}"' if (product or reversible) else ''
                 title = f'<title>{escape(rid)} {escape(r.get("name") or "")} - {escape(epv.LABELS[kind]) if kind in epv.LABELS else "unclassified"} (routed around obstacles)</title>'
-                lines.append(f'<path data-rx="{escape(rid)}" data-met="{escape(end.get("bigg_id") or "")}"{kind_attr} d="{d_curve}" stroke="{EDGE}" stroke-width="1.3" stroke-opacity=".7" stroke-linejoin="round" stroke-linecap="round" fill="none"{arrows}>{title}</path>')
+                lines.append(f'<path data-rx="{escape(rid)}" data-met="{escape(end.get("bigg_id") or "")}"{kind_attr}{_currency_attr(end)} d="{d_curve}" stroke="{EDGE}" stroke-width="1.3" stroke-opacity=".7" stroke-linejoin="round" stroke-linecap="round" fill="none"{arrows}>{title}</path>')
                 continue
             if keep:
                 path = [path[0], path[-1]]  # edge of an expert structure: keep the structure's own straight connection, not the routed detour
@@ -120,7 +126,7 @@ def render(data, kinds=None):
             product = coefficient.get(end.get('bigg_id'), 1) > 0
             arrows = f' marker-end="{mark}"' if (product or reversible) else ''
             title = f'<title>{escape(rid)} {escape(r.get("name") or "")} - {escape(epv.LABELS[kind]) if kind in epv.LABELS else "unclassified"}</title>'
-            (top_lines if keep else lines).append(f'<path data-rx="{escape(rid)}" data-met="{escape(end.get("bigg_id") or "")}"{kind_attr} d="M{pts}" stroke="{EDGE}" stroke-width="{2.4 if keep else 1.3}"{"" if keep else " stroke-opacity=\".7\""} stroke-linejoin="round" stroke-linecap="round" fill="none"{arrows}>{title}</path>')
+            (top_lines if keep else lines).append(f'<path data-rx="{escape(rid)}" data-met="{escape(end.get("bigg_id") or "")}"{kind_attr}{_currency_attr(end)} d="M{pts}" stroke="{EDGE}" stroke-width="{2.4 if keep else 1.3}"{"" if keep else " stroke-opacity=\".7\""} stroke-linejoin="round" stroke-linecap="round" fill="none"{arrows}>{title}</path>')
         labels.append(f'<text data-rk="{escape(rk)}" data-rl="{escape(rid)}" x="{r["label_x"]:.1f}" y="{r["label_y"]:.1f}" font-family="{FONT}" font-size="12" fill="#17323d" font-weight="600" stroke="#fff" stroke-width="3" paint-order="stroke">{escape(rid)}</text>')
     svg += lines + top_lines  # routed connections first, the expert structures' own edges on top
     hidden = set((data[0].get('metadata') or {}).get('hidden_metabolite_labels') or [])
@@ -130,10 +136,10 @@ def render(data, kinds=None):
         primary = n.get('node_is_primary', True)
         radius = PRIMARY_R if primary else SECONDARY_R
         fill, stroke = ('#dcebdf', '#5d7480') if primary else ('#ffffff', '#8a9ca5')
-        svg.append(f'<circle data-n="{escape(nid)}" data-m="{escape(n.get("bigg_id", ""))}" cx="{n["x"]:.1f}" cy="{n["y"]:.1f}" r="{radius}" fill="{fill}" stroke="{stroke}" stroke-width="1.2"/>')
+        svg.append(f'<circle data-n="{escape(nid)}" data-m="{escape(n.get("bigg_id", ""))}"{_currency_attr(n)} cx="{n["x"]:.1f}" cy="{n["y"]:.1f}" r="{radius}" fill="{fill}" stroke="{stroke}" stroke-width="1.2"/>')
         if n.get('label_hidden') or nid in hidden:
             continue  # dense-region currency hide
-        labels.append(f'<text data-nl="{escape(nid)}" x="{n["label_x"]:.1f}" y="{n["label_y"]:.1f}" font-family="{FONT}" font-size="{12 if primary else 10.5}" fill="{"#17323d" if primary else "#6b7f88"}" stroke="#fff" stroke-width="3" paint-order="stroke">{escape(n.get("bigg_id", ""))}</text>')
+        labels.append(f'<text data-nl="{escape(nid)}"{_currency_attr(n)} x="{n["label_x"]:.1f}" y="{n["label_y"]:.1f}" font-family="{FONT}" font-size="{12 if primary else 10.5}" fill="{"#17323d" if primary else "#6b7f88"}" stroke="#fff" stroke-width="3" paint-order="stroke">{escape(n.get("bigg_id", ""))}</text>')
     svg += labels
     svg.append('</svg>')
     return ''.join(svg)
