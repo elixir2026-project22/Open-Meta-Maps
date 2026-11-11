@@ -127,17 +127,28 @@ def crossings(xy,segments):
  return total
 
 def display_scene(model,corexy,blocks=()):
- cur=currency(model);positions={};participants={};rlookup={r['id']:r for r in model['reactions']};labels={};copies={};byreaction={rid:b for b in blocks for rid in b['reaction_ids']};metlookup={m['id']:m for m in model['metabolites']}
+ cur=currency(model);positions={};participants={};labels={};copies={};byreaction={rid:b for b in blocks for rid in b['reaction_ids']}
+ import orientation as orientation_module
+ # Build keys first, then seed currency stubs with the adaptive spoke scale (median over reactions) so
+ # display_scene / sides / separate share one rule while the pre-relax prior stays spatially coherent.
  for r in model['reactions']:
-  rk='r:'+r['id'];positions[rk]=corexy[rk];labels[rk]=r['id'];b=byreaction.get(r['id']);sidecount=0
+  rk='r:'+r['id'];positions[rk]=corexy[rk];labels[rk]=r['id'];b=byreaction.get(r['id'])
   for mid,coeff in r['metabolites'].items():
    mk='m:'+mid
    if mid in cur:
-    key='side:'+r['id']+':'+mid;xy=(np.array(corexy[rk])+[35*(sidecount%3-1),45+28*(sidecount//3)]).tolist();sidecount+=1
+    key='side:'+r['id']+':'+mid;xy=list(corexy[rk])
    elif b and mk in b['positions']:
     key='copy:'+b['id']+':'+mid;xy=b['positions'][mk]
    else:key=mk;xy=corexy.get(mk,(np.array(corexy[rk])+[0,80]).tolist())
    positions[key]=xy;labels[key]=mid;participants[r['id'],mid]=key;copies[key]=mid
+ params=orientation_module.reaction_spoke_params(model,dict(positions=positions,participants=participants),cur)
+ for r in model['reactions']:
+  scale=params[r['id']]['distance']/orientation_module.SIDE_MAX;i=0
+  here=np.array(corexy['r:'+r['id']],float)
+  for mid in r['metabolites']:
+   key=participants[r['id'],mid]
+   if key.startswith('side:'):
+    positions[key]=(here+[35*scale*(i%3-1),(45+28*(i//3))*scale]).tolist();i+=1
  return dict(positions=positions,labels=labels,copies=copies,participants=participants)
 
 def export(model,corexy,folder,name,blocks=(),full_model=None,route=False,scene=None,label_obstacles=False):

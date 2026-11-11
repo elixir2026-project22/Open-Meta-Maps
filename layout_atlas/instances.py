@@ -319,10 +319,14 @@ def overlap_breakdown(scene, radius=10.0):
     return dict(out)
 
 
-def separate(model, scene, blocks, metabolite_gap=88.0, reaction_gap=70.0, passes=80, side_gap=26.0):
+def separate(model, scene, blocks, metabolite_gap=88.0, reaction_gap=70.0, passes=80, side_gap=None):
     """Keep the instances this module placed (`inst:`) and the shared nodes (`m:`) from landing on other glyphs: labels are 60-80 px wide, so
     two metabolite glyphs closer than `metabolite_gap`, or a metabolite glyph and a reaction it is not connected to closer than `reaction_gap`,
-    have overlapping labels.  Only `inst:` and `m:` glyphs move (never expert copies or reactions)."""
+    have overlapping labels.  Only `inst:` and `m:` glyphs move (never expert copies or reactions).
+
+    Currency ``side:`` glyphs use the same adaptive local-clearance rule as ``orientation.sides`` unless ``side_gap`` is given explicitly.
+    """
+    import orientation as orientation_module
     scene = dict(scene, positions={k: list(v) for k, v in scene['positions'].items()})
     pos = scene['positions']
     keys = sorted(pos)
@@ -331,21 +335,30 @@ def separate(model, scene, blocks, metabolite_gap=88.0, reaction_gap=70.0, passe
     movable = np.array([k.startswith(('inst:', 'm:', 'side:')) for k in keys])
     is_side = np.array([k.startswith('side:') for k in keys])
     is_rx = np.array([k.startswith('r:') for k in keys])
+    if side_gap is None:
+        params = scene.get('orientation_spoke_params') or orientation_module.reaction_spoke_params(model, scene)
+        side_need = np.array([
+            float(params.get(k.split(':', 2)[1], {}).get('gap', orientation_module.side_gap_for(orientation_module.SIDE_MAX)))
+            if k.startswith('side:') else 0.0 for k in keys
+        ])
+    else:
+        side_need = np.full(len(keys), float(side_gap))
     linked = defaultdict(set)
     for (rid, mid), key in scene['participants'].items():
         a, b = index['r:' + rid], index[key]
         linked[a].add(b)
         linked[b].add(a)
     start = xy.copy()
+    query_r = max(metabolite_gap, reaction_gap, float(side_need.max()) if len(side_need) else 0.0)
     for _ in range(passes):
-        pairs = cKDTree(xy).query_pairs(max(metabolite_gap, reaction_gap), output_type='ndarray')
+        pairs = cKDTree(xy).query_pairs(query_r, output_type='ndarray')
         push = np.zeros_like(xy)
         hit = False
         for i, j in pairs:
             if not (movable[i] or movable[j]) or (is_rx[i] and is_rx[j]):
                 continue
             if is_side[i] or is_side[j]:
-                need = side_gap  # a per-reaction currency glyph only has to stay off the other glyphs, not 88 px away from them
+                need = min(side_need[i] or side_need[j], side_need[j] or side_need[i])
                 if is_rx[i] != is_rx[j]:
                     a, b = (i, j) if is_rx[i] else (j, i)
                     if b in linked[a]:
