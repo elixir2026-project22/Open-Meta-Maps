@@ -99,16 +99,12 @@ def score_escher_map(
     benchmark = metrics.all_benchmark_metrics(sub_pathway, pos_metric, reference=ref_pos)
     geom_summary, geom_issues = (None, None)
     structures = _structures_near_map(Path(map_path) if map_path else None, escher_map)
-    # Continuity is cheap; always attach it even when the heavy curve geometry block is skipped.
-    try:
-        from evaluation.continuity import structure_continuity
-
-        continuity = structure_continuity(escher_map, structures=structures)
-    except Exception as ex:  # noqa: BLE001
-        continuity = dict(error=f"{type(ex).__name__}: {ex}")
-    # Final-geometry (curve sampling) is O(segments²); skip automatically on large GEMs unless forced.
+    # Final-geometry (curve sampling) is O(segments²); skip automatically on large GEMs.
+    # Continuity lives in layout_quality.evaluate — call it once there, or alone when geometry is skipped.
     n_rxn = len(pathway.reactions)
+    continuity = None
     if include_geometry and n_rxn > 800:
+        continuity = _structure_continuity_only(escher_map, structures)
         cont_core = None
         if isinstance(continuity, dict) and "error" not in continuity:
             cont_core = {k: continuity.get(k) for k in (
@@ -116,11 +112,18 @@ def score_escher_map(
                 "split_structure_share", "reaction_spacing_px", "adjacency_factor", "note")}
         geom_summary = dict(
             skipped=True,
-            reason=f"{n_rxn} reactions: use layout_issues.json from compose, or --force-geometry",
+            reason=f"{n_rxn} reactions: use layout_issues.json from compose, or run evaluate without skipping geometry on a smaller map",
             core=dict(structure_continuity=cont_core),
         )
     elif include_geometry:
         geom_summary, geom_issues = _optional_layout_quality(escher_map, structures=structures)
+        if isinstance(geom_summary, dict) and "error" not in geom_summary:
+            continuity = ((geom_summary.get("details") or {}).get("structure_continuity")
+                          or (geom_summary.get("core") or {}).get("structure_continuity"))
+        else:
+            continuity = _structure_continuity_only(escher_map, structures)
+    else:
+        continuity = _structure_continuity_only(escher_map, structures)
 
     examples = findings.weak_spots(sub_pathway, pos_metric, issues=geom_issues)
     cov = escher_bridge.coverage(pathway, pos)
@@ -159,6 +162,16 @@ def score_escher_map(
             "gdMetriX is optional (GPL-3.0)."
         ),
     )
+
+
+def _structure_continuity_only(escher_map, structures=None):
+    """Continuity without the heavy curve-geometry pass (single implementation in evaluation.continuity)."""
+    try:
+        from evaluation.continuity import structure_continuity
+
+        return structure_continuity(escher_map, structures=structures)
+    except Exception as ex:  # noqa: BLE001
+        return dict(error=f"{type(ex).__name__}: {ex}")
 
 
 def score_paths(

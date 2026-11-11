@@ -5,8 +5,6 @@ from __future__ import annotations
 from collections import defaultdict
 from typing import Any
 
-import numpy as np
-
 from .metrics import long_edge_details, participant_consistency_details
 from .pathway import Pathway
 
@@ -45,39 +43,9 @@ def weak_spots(pathway: Pathway, pos: Positions, issues: dict | None = None, lim
                 ends.append(n)
         e["reaction_ends"] = ends
     hot = crossing_hotspots_from_issues(issues, limit=limit)
-    # Dense windows from node coordinates (400-unit style, independent of issues)
-    windows = densest_windows(pos, pathway, limit=5)
+    # Crossing windows come only from layout_quality.worst_regions (no second window metric here).
     return dict(
         inconsistent_reactions=inconsistent,
         long_edges=long_edges,
         crossing_hotspots=hot,
-        dense_windows=windows,
     )
-
-
-def densest_windows(pos: Positions, pathway: Pathway, cell: float = 400.0, limit: int = 5) -> list[dict]:
-    if len(pos) < 4:
-        return []
-    xy = np.array(list(pos.values()), float)
-    keys = list(pos)
-    x0, y0 = float(xy[:, 0].min()), float(xy[:, 1].min())
-    cells = defaultdict(list)
-    for n, (x, y) in pos.items():
-        cells[(int((x - x0) // cell), int((y - y0) // cell))].append(n)
-    ranked = sorted(cells.items(), key=lambda kv: -len(kv[1]))
-    out = []
-    for (gx, gy), members in ranked:
-        reactions = [n for n in members if pathway.graph.nodes.get(n, {}).get("kind") == "reaction"]
-        out.append(
-            dict(
-                x=round(x0 + gx * cell, 1),
-                y=round(y0 + gy * cell, 1),
-                w=cell,
-                h=cell,
-                nodes=len(members),
-                reactions=sorted(reactions)[:12],
-            )
-        )
-        if len(out) >= limit:
-            break
-    return out

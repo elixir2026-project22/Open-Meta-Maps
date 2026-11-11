@@ -44,8 +44,10 @@ Maps composed with `--source-paths --layout-style expert` (2026-11-11). `geom_*`
 `evaluate` (auto-skipped above 800 reactions).
 
 **data_shared note:** `https://github.com/elixir2026-project22/data_shared` returned 404 here.
-Public stand-ins are under `examples/eval_models/` (iCH360, Mycoplasma iPS189, Reactome pathways,
-metabolismregulation glycolysis + SBGN reference). Human2 / full Human-GEM was not run (size).
+Public stand-ins are listed in `examples/eval_models/manifest.json` (licences verified) and fetched
+on demand into gitignored `examples/eval_models/downloaded/` via
+`python3 examples/eval_models/fetch_eval_models.py` (iCH360 MIT, BioModels iPS189 CC0, Reactome
+SBML CC0, gallery F001 CC BY 4.0). Human2 / full Human-GEM was not run (size).
 Private BRENDA `brenda_*.xml` files were not available; re-run with a local clone when you have it.
 `iML1515` was skipped by design.
 
