@@ -135,14 +135,24 @@ class Mapper:
             for mid in r['metabolites']:self.uses[mid].add(r['id'])
         self.cache={};self.entity_cache={};self.audit=Counter();self.mapping_rows={}
 
-    def candidates(self,entity):
-        if entity in self.entity_cache:return self.entity_cache[entity]
-        token,role=entity_parts(entity);out=set(self.inverted.get(token,set()))
+    def candidates(self,entity,label=None):
+        cache_key=(entity,label)
+        if cache_key in self.entity_cache:return self.entity_cache[cache_key]
+        if entity in self.entity_cache and label is None:return self.entity_cache[entity]
+        token,role=entity_parts(entity) if isinstance(entity,str) else (None,'unknown');out=set(self.inverted.get(token,set())) if token else set()
         if token and token.startswith('bigg:'):
             for ns,values in self.bridge['links'].get(token[5:],{}).items():
                 for v in values:out.update(self.inverted.get(ns+':'+v,set()))
+        # Name-only Atlas nodes (BRENDA ligands, some CellDesigner species): normalised name match.
+        if not out and label:
+            import identifier_bridge as ib
+            want=ib.name_keys(label)
+            if want:
+                out={mid for mid,m in self.met.items() if ib.name_keys(m.get('name') or '') & want}
         # Keep all compartments until reaction-level role consistency is checked.
-        answer=sorted(out);self.entity_cache[entity]=answer;return answer
+        answer=sorted(out);self.entity_cache[cache_key]=answer
+        if label is None:self.entity_cache[entity]=answer
+        return answer
 
     def match_reaction(self,record):
         coefficients=record.get('coefficients',{})

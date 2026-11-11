@@ -12,7 +12,9 @@ def main():
     bridge = tp.load_bridge()
     em = ec.ECMapper(model, bridge)
     core = database.modules()
-    source = next(r for m in core if m['source'] == 'escher' for r in m['reactions'] if r['id'] == 'PGI' and r.get('coefficients'))
+    # Open-core Escher windows are labelled `community` in the Atlas payload (registry still says escher).
+    _ESCHER = {'escher', 'community'}
+    source = next(r for m in core if m['source'] in _ESCHER for r in m['reactions'] if r['id'] == 'PGI' and r.get('coefficients'))
     target = {r['id']: r for r in model['reactions']}
     cases = []
     cases.append(('same reaction, equation maps', ep.classify_pair(source, em.reactions['PGI'], em)[0], 'verified_equivalent'))
@@ -39,7 +41,7 @@ def main():
         ok &= got == want
     # --- chemical compatibility of two equations (identity / compatibility / layout are separate judgements) ---------------------------------
     import copy as _copy
-    mdh = next(r for m in core if m['source'] == 'escher' for r in m['reactions'] if r['id'] == 'MDH' and r.get('coefficients'))
+    mdh = next(r for m in core if m['source'] in _ESCHER for r in m['reactions'] if r['id'] == 'MDH' and r.get('coefficients'))
     def cmp(src, tid, mutate=None):
         tgt = _copy.deepcopy(em.reactions[tid])
         if mutate:
