@@ -37,3 +37,6 @@
 /data/references/yeast_original
 /data/references/yeast_maps
 
+# optional evaluation models (fetched on demand; see examples/eval_models/manifest.json)
+/examples/eval_models/downloaded/
+

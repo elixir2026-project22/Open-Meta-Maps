@@ -51,6 +51,8 @@ python3 project.py compose --gem examples/e_coli_core.xml --out results/e_coli_c
 ```
 
 
+Layout evaluation (development aid, Project 22 metrics): `pip install -r layout_atlas/requirements-eval.txt`, then `python3 project.py evaluate --gem MODEL.xml --map DIR/map.json`. See [docs/layout_evaluation.md](docs/layout_evaluation.md).
+
 ## How it works
 
 - **Atlas**: a knowledge base of reusable pathway structures extracted from expert-drawn maps. It records network topology, reaction identity, geometry, source information and licensing metadata.

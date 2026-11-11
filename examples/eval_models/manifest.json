@@ -1,0 +1,82 @@
+{
+  "description": "Optional extra models for layout evaluation generality checks. Not Atlas sources; Atlas is never excluded for eval overlap. Download on demand with fetch_eval_models.py into the gitignored downloaded/ folder.",
+  "download_dir": "downloaded",
+  "files": [
+    {
+      "id": "e_coli_iCH360",
+      "path": "e_coli_iCH360.xml",
+      "url": "https://raw.githubusercontent.com/marco-corrao/iCH360/main/Model/iCH360/Escherichia_coli_iCH360.xml",
+      "sha256": "caa700e6e92704d462ad2fabde52f8b6eb9fb41f921688cf9559e20fc25c5da7",
+      "licence": "MIT",
+      "licence_url": "https://github.com/marco-corrao/iCH360/blob/main/LICENSE",
+      "source": "https://github.com/marco-corrao/iCH360",
+      "role": "Compact E. coli GEM"
+    },
+    {
+      "id": "Mycoplasma_iPS189",
+      "path": "Mycoplasma_iPS189.xml",
+      "url": "https://www.ebi.ac.uk/biomodels/model/download/MODEL1507180052?filename=MODEL1507180052_url.xml",
+      "sha256": "41bdac6ae7c0d02a05e1e6a92a8828008ac04a1f10669a8f6b71852052265288",
+      "licence": "CC0-1.0",
+      "licence_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "source": "https://www.ebi.ac.uk/biomodels/MODEL1507180052",
+      "role": "Small bacterial GEM (M. genitalium iPS189)"
+    },
+    {
+      "id": "R-HSA-70171",
+      "path": "R-HSA-70171.sbml",
+      "url": "https://reactome.org/ContentService/exporter/event/R-HSA-70171.sbml",
+      "sha256": "b02f72509185506253928f88bd406d92949b063a7b4146b524715c6e1da2d6ec",
+      "licence": "CC0-1.0",
+      "licence_note": "Reactome data (including Content Service SBML exports) are under CC0; diagrams/materials are CC BY 4.0.",
+      "licence_url": "https://reactome.org/license",
+      "source": "https://reactome.org/content/detail/R-HSA-70171",
+      "role": "Human glycolysis pathway (Reactome)"
+    },
+    {
+      "id": "R-HSA-77289",
+      "path": "R-HSA-77289.sbml",
+      "url": "https://reactome.org/ContentService/exporter/event/R-HSA-77289.sbml",
+      "sha256": "ed65a7db7a7eae9e7d1d8009b50e98244f784203eb89f35e0a2aa3221c09a2ab",
+      "licence": "CC0-1.0",
+      "licence_note": "Reactome data (including Content Service SBML exports) are under CC0; diagrams/materials are CC BY 4.0.",
+      "licence_url": "https://reactome.org/license",
+      "source": "https://reactome.org/content/detail/R-HSA-77289",
+      "role": "Reactome pathway SBML (benchmark-style sample)"
+    },
+    {
+      "id": "F001-glycolysis",
+      "path": "F001-glycolysis.xml",
+      "url": "https://raw.githubusercontent.com/metabolismregulation/metabolismregulation.github.io/main/atlas-downloads/F001-glycolysis.xml",
+      "sha256": "8bb684015b50d9f46471ca455beccd6e364f7ea1f5a48eb9b87e06ff80eacfe9",
+      "licence": "CC-BY-4.0",
+      "licence_url": "https://creativecommons.org/licenses/by/4.0/",
+      "source": "https://metabolismregulation.github.io/gallery/",
+      "role": "Pathway SBML with hand-drawn reference"
+    },
+    {
+      "id": "F001-glycolysis-sbgn",
+      "path": "F001-glycolysis.sbgn",
+      "url": "https://raw.githubusercontent.com/metabolismregulation/metabolismregulation.github.io/main/atlas-downloads/F001-glycolysis.sbgn",
+      "sha256": "2ff88a02665adff8b65e117968dcce608c24bd527e45dcc0f22a7495062ad151",
+      "licence": "CC-BY-4.0",
+      "licence_url": "https://creativecommons.org/licenses/by/4.0/",
+      "source": "https://metabolismregulation.github.io/gallery/",
+      "role": "Hand-drawn SBGN reference for F001-glycolysis"
+    }
+  ],
+  "skipped": [
+    {
+      "id": "iML1515",
+      "reason": "Skipped by design for this evaluation pass"
+    },
+    {
+      "id": "Human-GEM",
+      "reason": "Size not feasible in this pass"
+    },
+    {
+      "id": "data_shared_BRENDA",
+      "reason": "elixir2026-project22/data_shared returned 404; re-run with a local clone when available"
+    }
+  ]
+}
