@@ -24,7 +24,7 @@ A run writes `map.json` (Escher), `map.svg`, `report.json`, `reaction_provenance
 | Context and anchors for unmatched reactions | `context.py`, `completion_context.py`, `instances.py` (metabolite instances and protected shared connections), `orientation.py` |
 | Whole-map composition | `composition.py` (recovers stray components, arranges independent modules in rows), `peripheral.py` (exchange and transport modules), `block_relocation.py` (moves curated blocks that sit far from the reactions they connect to) |
 | Connections and labels | `edge_style.py` (Bézier connections from curated templates, joint routing per reaction), `reaction_templates.py`, `label_placement.py`, `line_render.py`, `routing.py` (libavoid) |
-| Local repair | `hotspot_repair.py` (post-layout pass: top-k crossing windows from `layout_quality`, cheap flips / side-glyph moves / nudges / Bezier re-routes; default on) |
+| Local repair | `hotspot_repair.py` (post-layout pass: top-k crossing windows via shared `CrossingIndex`, incremental delta recount + window-scaled search budget; default on) |
 | Quality | `layout_quality.py` (final-geometry for the quality gate: curve crossings, collisions, …), `quality_gate.py` (accepts a change only if the final geometry is not worse), `evaluation/` (unified development scoring: Project 22 layout-benchmark metrics + the same final-geometry block; CLI `python3 project.py evaluate`) |
 | Pages | `ui.py`, `navigation.py`, `gallery*.py` (tool UI is the committed `results/tool/index.html`) |
 

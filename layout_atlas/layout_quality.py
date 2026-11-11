@@ -701,28 +701,53 @@ def _orthogonal(pts):
     return corners >= 1
 
 
-def build_edges(data, skip_edges=None):
-    """Edge records used by ``evaluate`` for curve crossings (shared with hotspot repair)."""
-    import edge_routing as er
-    import line_render
+def _skip_edge_set(data, skip_edges=None):
     meta = data[0].get('metadata', {})
     skip = {tuple(e) for e in (skip_edges if skip_edges is not None else meta.get('preserved_edges') or [])}
     skip |= {(p['reaction'], p['metabolite']) for p in (meta.get('source_paths') or [])}
+    return skip
+
+
+def _edge_records_for_reaction(rx, nodes, skip):
+    """One edge record per mid→metabolite terminal path (same geometry as ``evaluate``)."""
+    import edge_routing as er
+    import line_render
+    out = []
+    for path in line_render._terminals(rx, nodes):
+        if nodes[path[-1]].get('node_type') != 'metabolite':
+            continue
+        pts = np.array(er._path_points(rx, path, nodes), float)
+        segs = [s for s in rx['segments'].values() if s['from_node_id'] in path and s['to_node_id'] in path]
+        curved = [bool(s.get('b1') and s.get('b2')) for s in segs]
+        met = nodes[path[-1]].get('bigg_id')
+        curated = (rx['bigg_id'], met) in skip
+        currency = _is_currency_met(met) or (nodes[path[-1]].get('node_is_primary') is False)
+        out.append(dict(rid=rx['bigg_id'], met=met, path=path, pts=pts, curated=curated, expert=curated,
+                        currency=currency, curved=curved, ends=(path[0], path[-1])))
+    return out
+
+
+def build_edges(data, skip_edges=None):
+    """Edge records used by ``evaluate`` for curve crossings (shared with hotspot repair)."""
+    skip = _skip_edge_set(data, skip_edges)
     body = data[1]
     nodes, reactions = body['nodes'], body['reactions']
     edges = []
     for rx in reactions.values():
-        for path in line_render._terminals(rx, nodes):
-            if nodes[path[-1]].get('node_type') != 'metabolite':
-                continue
-            pts = np.array(er._path_points(rx, path, nodes), float)
-            segs = [s for s in rx['segments'].values() if s['from_node_id'] in path and s['to_node_id'] in path]
-            curved = [bool(s.get('b1') and s.get('b2')) for s in segs]
-            met = nodes[path[-1]].get('bigg_id')
-            curated = (rx['bigg_id'], met) in skip
-            currency = _is_currency_met(met) or (nodes[path[-1]].get('node_is_primary') is False)
-            edges.append(dict(rid=rx['bigg_id'], met=met, path=path, pts=pts, curated=curated, expert=curated,
-                              currency=currency, curved=curved, ends=(path[0], path[-1])))
+        edges.extend(_edge_records_for_reaction(rx, nodes, skip))
+    return edges, nodes
+
+
+def build_edges_for_rids(data, rids, skip_edges=None):
+    """Rebuild edge records only for the given reaction bigg_ids (incremental repair)."""
+    skip = _skip_edge_set(data, skip_edges)
+    body = data[1]
+    nodes = body['nodes']
+    want = set(rids)
+    edges = []
+    for rx in body['reactions'].values():
+        if rx['bigg_id'] in want:
+            edges.extend(_edge_records_for_reaction(rx, nodes, skip))
     return edges, nodes
 
 
@@ -976,62 +1001,125 @@ class CrossingIndex:
         return count, pairs
 
     def delta_after_replace(self, data, changed_rids):
-        """Rebuild geometry for ``changed_rids`` in-place on a copy of the index state.
+        """Recount crossings after local geometry edits to ``changed_rids``.
 
-        Returns (new_total, delta) without mutating this index until ``commit`` is called.
-        For speed the caller should pass the already-modified ``data``.
+        Only rebuilds edge polylines for those reactions and queries them against
+        the existing segment grid (skipping stale segments of the moved edges).
+        Returns ``(new_total, delta, payload)``; call ``commit(payload)`` to keep.
         """
-        new_edges, new_nodes = build_edges(data, self.skip_edges)
-        # Map old edge key -> index
-        def key(e):
-            return (e['rid'], e['met'], e['ends'][0], e['ends'][-1])
-        old_by = {key(e): i for i, e in enumerate(self.edges)}
-        new_by = {key(e): i for i, e in enumerate(new_edges)}
-        # Edges that belong to changed reactions (old and new)
-        changed_old = []
+        changed_rids = set(changed_rids)
+        if not changed_rids:
+            return int(self.total), 0, None
+        old_ids = []
         for rid in changed_rids:
-            changed_old.extend(self.by_rid.get(rid, ()))
-        changed_old = sorted(set(changed_old))
-        old_involving, _ = self._crossings_of_edges(changed_old)
-        # Build a temporary index for just recounting: use full new edges but only
-        # query crossings of the changed reaction's new edges.
-        tmp = CrossingIndex.__new__(CrossingIndex)
-        tmp.skip_edges = self.skip_edges
-        tmp.edges = new_edges
-        tmp.nodes = new_nodes
-        tmp.by_rid = _dd(list)
-        for i, e in enumerate(new_edges):
-            tmp.by_rid[e['rid']].append(i)
-        tmp.seg_a, tmp.seg_b, tmp.seg_edge = [], [], []
-        for i, e in enumerate(new_edges):
-            for a, b in zip(e['pts'][:-1], e['pts'][1:]):
-                tmp.seg_a.append(a); tmp.seg_b.append(b); tmp.seg_edge.append(i)
-        tmp.S = np.array([[a[0], a[1], b[0], b[1]] for a, b in zip(tmp.seg_a, tmp.seg_b)], float).reshape(-1, 4)
-        tmp.seg_edge = np.array(tmp.seg_edge, dtype=int) if tmp.seg_edge else np.zeros(0, dtype=int)
-        tmp.grid = _dd(list)
-        for k, (a, b) in enumerate(zip(tmp.seg_a, tmp.seg_b)):
-            _grid_add(tmp.grid, k, np.minimum(a, b), np.maximum(a, b))
-        changed_new = []
-        for rid in changed_rids:
-            changed_new.extend(tmp.by_rid.get(rid, ()))
-        changed_new = sorted(set(changed_new))
-        new_involving, _ = tmp._crossings_of_edges(changed_new)
-        new_total = self.total - old_involving + new_involving
-        return int(new_total), int(new_involving - old_involving), tmp
+            old_ids.extend(self.by_rid.get(rid, ()))
+        old_ids = sorted(set(old_ids))
+        old_set = set(old_ids)
+        # Cheap: reuse stored events instead of re-querying old geometry.
+        old_involving = sum(1 for i, j, _x, _y, _c in self.events if i in old_set or j in old_set)
 
-    def commit(self, other):
-        """Replace this index with a temporary one from ``delta_after_replace``."""
-        self.edges = other.edges
-        self.nodes = other.nodes
-        self.by_rid = other.by_rid
-        self.seg_a = other.seg_a
-        self.seg_b = other.seg_b
-        self.seg_edge = other.seg_edge
-        self.S = other.S
-        self.grid = other.grid
-        # Full recount of events/total for correctness after commit (still cheaper than evaluate).
+        new_partial, new_nodes = build_edges_for_rids(data, changed_rids, self.skip_edges)
+        # Crossings among the new partial edges themselves.
+        new_involving = 0
+        new_events = []  # (local_a, local_b, x, y, currency) among partial, plus (None, global_j, ...)
+        partial_segs = []  # (local_edge_idx, a, b)
+        for li, e in enumerate(new_partial):
+            for a, b in zip(e['pts'][:-1], e['pts'][1:]):
+                partial_segs.append((li, a, b))
+        # partial × partial (each segment–segment hit counts once, matching detect_crossings)
+        for si, (li, a, b) in enumerate(partial_segs):
+            others = [t for t in range(si + 1, len(partial_segs)) if partial_segs[t][0] != li]
+            if not others:
+                continue
+            S = np.array([[partial_segs[t][1][0], partial_segs[t][1][1],
+                           partial_segs[t][2][0], partial_segs[t][2][1]] for t in others], float).reshape(-1, 4)
+            idx, pts = _seg_hits(a, b, S)
+            for t_i, pt in zip(idx, pts):
+                lj = partial_segs[others[t_i]][0]
+                if li > lj:
+                    continue  # unordered pair once
+                if not _pair_is_headline(new_partial[li], new_partial[lj]):
+                    continue
+                new_involving += 1
+                new_events.append(('partial', li, lj, float(pt[0]), float(pt[1]),
+                                   bool(new_partial[li]['currency'] or new_partial[lj]['currency'])))
+        # partial × unchanged (via existing grid; skip stale changed-edge segments)
+        if len(self.S) and partial_segs:
+            for li, a, b in partial_segs:
+                cand = list(_grid_query(self.grid, np.minimum(a, b), np.maximum(a, b)))
+                if not cand:
+                    continue
+                keep = np.array(sorted({c for c in cand if int(self.seg_edge[c]) not in old_set}), dtype=int)
+                if not len(keep):
+                    continue
+                idx, pts = _seg_hits(a, b, self.S[keep])
+                for c, pt in zip(keep[idx], pts):
+                    j = int(self.seg_edge[c])
+                    if not _pair_is_headline(new_partial[li], self.edges[j]):
+                        continue
+                    new_involving += 1
+                    new_events.append(('vs', li, j, float(pt[0]), float(pt[1]),
+                                       bool(new_partial[li]['currency'] or self.edges[j]['currency'])))
+        new_total = self.total - old_involving + new_involving
+        payload = dict(
+            changed_rids=changed_rids,
+            old_ids=old_ids,
+            new_partial=new_partial,
+            new_nodes=new_nodes,
+            new_involving=new_involving,
+            new_events=new_events,
+            new_total=int(new_total),
+        )
+        return int(new_total), int(new_involving - old_involving), payload
+
+    def commit(self, payload):
+        """Apply a successful ``delta_after_replace`` payload (splice edges + refresh segments)."""
+        if not payload:
+            return
+        old_set = set(payload['old_ids'])
+        # Drop events that touched the old changed edges.
+        kept_events = [(i, j, x, y, c) for i, j, x, y, c in self.events if i not in old_set and j not in old_set]
+        # Build new edge list: keep unchanged, append new partial.
+        new_edges = [e for i, e in enumerate(self.edges) if i not in old_set]
+        base = len(new_edges)
+        new_edges.extend(payload['new_partial'])
+        # Remap kept event indices: old index -> new index for unchanged edges.
+        remap = {}
+        ni = 0
+        for oi in range(len(self.edges)):
+            if oi in old_set:
+                continue
+            remap[oi] = ni
+            ni += 1
+        remapped = []
+        for i, j, x, y, c in kept_events:
+            remapped.append((remap[i], remap[j], x, y, c))
+        # Append new events with remapped / new indices.
+        for kind, a, b, x, y, cur in payload['new_events']:
+            if kind == 'partial':
+                remapped.append((base + a, base + b, x, y, cur))
+            else:  # vs partial×global
+                remapped.append((base + a, remap[b], x, y, cur))
+        self.edges = new_edges
+        self.nodes = payload['new_nodes']
+        self.by_rid = _dd(list)
+        for i, e in enumerate(self.edges):
+            self.by_rid[e['rid']].append(i)
+        self.seg_a, self.seg_b, self.seg_edge = [], [], []
+        for i, e in enumerate(self.edges):
+            for a, b in zip(e['pts'][:-1], e['pts'][1:]):
+                self.seg_a.append(a); self.seg_b.append(b); self.seg_edge.append(i)
+        self.S = np.array([[a[0], a[1], b[0], b[1]] for a, b in zip(self.seg_a, self.seg_b)], float).reshape(-1, 4)
+        self.seg_edge = np.array(self.seg_edge, dtype=int) if self.seg_edge else np.zeros(0, dtype=int)
+        self.grid = _dd(list)
+        for k, (a, b) in enumerate(zip(self.seg_a, self.seg_b)):
+            _grid_add(self.grid, k, np.minimum(a, b), np.maximum(a, b))
+        self.events = remapped
+        self.total = len(self.events)
         self.edge_cross = np.zeros(len(self.edges), dtype=int)
-        self._recompute_all_pairs()
+        for i, j, _x, _y, _c in self.events:
+            self.edge_cross[i] += 1
+            self.edge_cross[j] += 1
 
 
 def metric_details(path):

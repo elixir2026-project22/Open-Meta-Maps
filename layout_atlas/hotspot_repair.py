@@ -23,7 +23,6 @@ from collections import defaultdict
 import numpy as np
 
 import edge_style
-import label_placement
 import layout_quality as lq
 from core import CURRENCY, chem
 
@@ -32,10 +31,10 @@ MAX_ROUNDS = 4
 MAX_ACCEPTS = 20
 WINDOW_PAD = 40.0
 # Budget scales with window mass: seconds ≈ α·crossings + β·edges, summed over top-k.
-BUDGET_CROSS = 0.12   # seconds per crossing in the window
-BUDGET_EDGE = 0.004   # seconds per edge touching the window
-BUDGET_FLOOR = 1.5    # never shorter than this (covers index build)
-BUDGET_CAP = 45.0     # absolute safety cap (still << previous 180 s)
+BUDGET_CROSS = 0.05   # search-seconds per crossing in the top-k windows
+BUDGET_EDGE = 0.002   # search-seconds per edge touching those windows
+BUDGET_FLOOR = 0.8    # search floor (index build is timed separately)
+BUDGET_CAP = 12.0     # absolute search cap
 TRIES_PER_CROSS = 1.5 # evaluation tries scale with window crossings
 
 
@@ -85,6 +84,14 @@ def _window_budget(windows, k=DEFAULT_K):
     seconds = min(BUDGET_CAP, max(BUDGET_FLOOR, BUDGET_CROSS * mass_c + BUDGET_EDGE * mass_e))
     tries = max(8, int(TRIES_PER_CROSS * max(mass_c, 1)))
     return seconds, tries, dict(window_crossings=mass_c, window_edges=mass_e)
+
+
+def _spacing_from_nodes(nodes):
+    from scipy.spatial import cKDTree
+    mids = np.array([[n['x'], n['y']] for n in nodes.values() if n.get('node_type') == 'midmarker'], float)
+    if len(mids) > 2:
+        return float(np.median(cKDTree(mids).query(mids, k=2)[0][:, 1])) or 60.0
+    return 60.0
 
 
 def _expert_reaction_ids(blocks, data):
@@ -307,6 +314,18 @@ def _candidate_moves(data, scene, blocks, win, skip, expert, spacing, cross_rids
     step = 0.35 * spacing
     focus_rids = set(cross_rids) or set(win.get('reactions') or [])
     focus_nids = set(cross_nids)
+    # Ensure currency side glyphs of focus reactions are considered even when
+    # the crossing event list did not name their node ids.
+    for rid in focus_rids:
+        if rid not in rx_index:
+            continue
+        rx, mid = rx_index[rid]
+        focus_nids.add(mid)
+        for s in rx['segments'].values():
+            for nid in (s['from_node_id'], s['to_node_id']):
+                n = nodes.get(nid)
+                if n and n.get('node_type') == 'metabolite' and _is_currency(n.get('bigg_id', '')):
+                    focus_nids.add(nid)
 
     # Currency side glyphs of crossing reactions: flip / quarter-turn.
     for nid in sorted(focus_nids):
@@ -316,7 +335,7 @@ def _candidate_moves(data, scene, blocks, win, skip, expert, spacing, cross_rids
         if len(holders.get(nid, ())) != 1:
             continue
         rid = next(iter(holders[nid]))
-        if rid not in rx_index or (rid, n['bigg_id']) in skip:
+        if rid not in focus_rids or rid not in rx_index or (rid, n['bigg_id']) in skip:
             continue
         mid = rx_index[rid][1]
         P = np.array([nodes[mid]['x'], nodes[mid]['y']], float)
@@ -557,17 +576,37 @@ def _apply_move_inplace(data, scene, blocks, move, skip, expert):
     return undo, changed, moved
 
 
+def _metrics_from_index(index, windows, node_ov, lab_ov, continuity, length_p90, spacing):
+    cur_n = sum(1 for _i, _j, _x, _y, c in index.events if c)
+    main_n = len(index.events) - cur_n
+    return dict(
+        crossings=index.headline(),
+        top_window_crossings=[int(w.get('crossings') or 0) for w in windows[:DEFAULT_K]],
+        worst_window=int(windows[0]['crossings']) if windows else 0,
+        node_overlaps=node_ov,
+        label_overlaps=lab_ov,
+        continuity_share=float(continuity.get('contiguous_pair_share') or 0.0),
+        split_structures=int(continuity.get('split_structures') or 0),
+        length_p90=length_p90,
+        spacing=spacing,
+        currency_involved=cur_n,
+        main_metabolite=main_n,
+        windows=windows,
+    )
+
+
 def diagnose_windows(data, skip_edges=None, k=DEFAULT_K):
     """Explain what kinds of crossings dominate the top-k windows (for reporting)."""
     idx = lq.CrossingIndex(data, skip_edges)
-    score = _score(data, skip_edges)
+    windows = _windows_from_index(idx, k)
+    cur_n = sum(1 for _i, _j, _x, _y, c in idx.events if c)
     rows = []
-    for win in score['windows'][:k]:
+    for win in windows[:k]:
         br = idx.window_breakdown(win)
         rows.append(dict(window=[win['x'], win['y']], crossings=win['crossings'], **br,
                          reactions=win.get('reactions')))
-    return dict(headline=score['crossings'], currency_involved=score['currency_involved'],
-                main_metabolite=score['main_metabolite'], windows=rows)
+    return dict(headline=idx.headline(), currency_involved=cur_n,
+                main_metabolite=len(idx.events) - cur_n, windows=rows)
 
 
 def repair(data, model=None, scene=None, blocks=None, skip_edges=(), k=DEFAULT_K,
@@ -578,67 +617,63 @@ def repair(data, model=None, scene=None, blocks=None, skip_edges=(), k=DEFAULT_K
     skip = _skip_set(data, skip_edges)
     expert = _expert_reaction_ids(blocks, data)
     structures = structures or (data[0].get('metadata') or {}).get('expert_structures')
-    before = _score(data, skip_edges, structures=structures)
-    spacing = max(before['spacing'], 1.0)
-    auto_budget, auto_tries, mass = _window_budget(before['windows'], k)
+
+    # Setup (not charged to the search budget): shared index + light metrics (no full evaluate).
+    index = lq.CrossingIndex(data, skip_edges)
+    node_ov0, lab_ov0 = lq.overlap_counts(data)
+    windows = _windows_from_index(index, k)
+    spacing = _spacing_from_nodes(index.nodes)
+    lengths = [float(np.sum(np.hypot(*np.diff(e['pts'], axis=0).T))) for e in index.edges if len(e['pts']) > 1]
+    length_p90 = float(np.percentile(lengths, 90)) if lengths else 0.0
+    from evaluation.continuity import structure_continuity as _structure_continuity
+    cont = _structure_continuity(data, structures=structures)
+    before = _metrics_from_index(index, windows, node_ov0, lab_ov0, cont, length_p90, spacing)
+    auto_budget, auto_tries, mass = _window_budget(windows, k)
     if budget_s is None:
         budget_s = auto_budget
     max_tries = auto_tries
-
-    index = lq.CrossingIndex(data, skip_edges)
-    current_cross = index.headline()
-    # Align headline with evaluator (should match).
-    if abs(current_cross - before['crossings']) > 0:
-        current_cross = before['crossings']
+    setup_s = round(time.time() - t0, 2)
 
     report = dict(
-        enabled=True, k=k, before=dict(
-            crossings=before['crossings'],
-            top_window_crossings=before['top_window_crossings'],
-            worst_window=before['worst_window'],
-            node_overlaps=before['node_overlaps'],
-            label_overlaps=before['label_overlaps'],
-            continuity_share=before['continuity_share'],
-            split_structures=before['split_structures'],
-            length_p90=before['length_p90'],
-            currency_involved=before['currency_involved'],
-            main_metabolite=before['main_metabolite'],
-        ),
+        enabled=True, k=k, before={kk: before[kk] for kk in (
+            'crossings', 'top_window_crossings', 'worst_window', 'node_overlaps', 'label_overlaps',
+            'continuity_share', 'split_structures', 'length_p90', 'currency_involved', 'main_metabolite')},
         accepted=[], rejected=0, tries=0, rounds=0, reject_reasons={},
-        budget_s=round(budget_s, 2), budget_mass=mass, diagnosis=[],
+        budget_s=round(budget_s, 2), budget_mass=mass, setup_s=setup_s, diagnosis=[],
     )
-    # Snapshot window composition once for the report (why local moves may not help).
-    for win in before['windows'][:k]:
-        report['diagnosis'].append(index.window_breakdown(win) | dict(window=[win['x'], win['y']],
-                                                                       listed_crossings=win['crossings'],
-                                                                       reactions=win.get('reactions')))
+    for win in windows[:k]:
+        report['diagnosis'].append(index.window_breakdown(win) | dict(
+            window=[win['x'], win['y']], listed_crossings=win.get('crossings'),
+            reactions=win.get('reactions')))
 
-    node_ov0, lab_ov0 = before['node_overlaps'], before['label_overlaps']
     accepts = 0
+    current_cross = index.headline()
     if log:
-        log(f"  hotspot repair: start crossings={before['crossings']} worst_window={before['worst_window']} "
-            f"budget={budget_s:.1f}s tries≤{max_tries} spacing={spacing:.1f}")
+        log(f"  hotspot repair: start crossings={before['crossings']} worst_window={report['before']['worst_window']} "
+            f"search_budget={budget_s:.1f}s tries≤{max_tries} setup={setup_s}s spacing={spacing:.1f}")
 
-    windows = list(before['windows'][:k])
+    t_search = time.time()
     for rnd in range(max_rounds):
-        if time.time() - t0 > budget_s or accepts >= max_accepts or report['tries'] >= max_tries:
+        if time.time() - t_search > budget_s or accepts >= max_accepts or report['tries'] >= max_tries:
             break
         report['rounds'] = rnd + 1
         if not windows or all(w.get('crossings', 0) <= 0 for w in windows):
             break
         progressed = False
         for win in windows:
-            if time.time() - t0 > budget_s or accepts >= max_accepts or report['tries'] >= max_tries:
+            if time.time() - t_search > budget_s or accepts >= max_accepts or report['tries'] >= max_tries:
                 break
             cross_rids, cross_nids = index.participants_in_window(win)
+            if not cross_rids:
+                # Fall back to the window's listed reactions so we still try side flips.
+                cross_rids = set(win.get('reactions') or [])
             moves = _candidate_moves(data, scene, blocks, win, skip, expert, spacing, cross_rids, cross_nids)
-            # Per-window try allotment proportional to its crossings share.
             win_share = max(1, int(win.get('crossings') or 1))
-            win_try_cap = max(4, int(max_tries * win_share / max(mass['window_crossings'], 1)))
+            win_try_cap = max(6, int(max_tries * win_share / max(mass['window_crossings'], 1)))
             tried_here = 0
             mi = 0
             while mi < len(moves):
-                if time.time() - t0 > budget_s or accepts >= max_accepts or report['tries'] >= max_tries:
+                if time.time() - t_search > budget_s or accepts >= max_accepts or report['tries'] >= max_tries:
                     break
                 if tried_here >= win_try_cap:
                     break
@@ -658,15 +693,23 @@ def repair(data, model=None, scene=None, blocks=None, skip_edges=(), k=DEFAULT_K
                     report['rejected'] += 1
                     report['reject_reasons']['node_overlap'] = report['reject_reasons'].get('node_overlap', 0) + 1
                     continue
-                new_total, delta, tmp_idx = index.delta_after_replace(data, changed)
+                new_total, delta, payload = index.delta_after_replace(data, changed)
                 if delta >= 0:
                     undo()
                     report['rejected'] += 1
                     report['reject_reasons']['no_crossing_drop'] = report['reject_reasons'].get('no_crossing_drop', 0) + 1
                     continue
-                # Accept: commit index, keep geometry.
-                index.commit(tmp_idx)
+                # Overlap check only for promising (crossing-reducing) moves.
+                n_ov, l_ov = lq.overlap_counts(data)
+                if n_ov > node_ov0 or l_ov > lab_ov0:
+                    undo()
+                    report['rejected'] += 1
+                    why = 'node_overlap' if n_ov > node_ov0 else 'label_overlap'
+                    report['reject_reasons'][why] = report['reject_reasons'].get(why, 0) + 1
+                    continue
+                index.commit(payload)
                 current_cross = index.headline()
+                node_ov0, lab_ov0 = n_ov, l_ov
                 row = dict(
                     kind=move['kind'], order=list(move.get('order') or ()),
                     window=[win['x'], win['y']],
@@ -680,8 +723,9 @@ def repair(data, model=None, scene=None, blocks=None, skip_edges=(), k=DEFAULT_K
                 progressed = True
                 if log:
                     log(f"  hotspot repair: accepted {move['kind']} Δ={delta} crossings→{current_cross}")
-                # Refresh participants after accept.
                 cross_rids, cross_nids = index.participants_in_window(win)
+                if not cross_rids:
+                    cross_rids = set(win.get('reactions') or [])
                 moves = _candidate_moves(data, scene, blocks, win, skip, expert, spacing, cross_rids, cross_nids)
                 mi = 0
                 tried_here = 0
@@ -689,46 +733,27 @@ def repair(data, model=None, scene=None, blocks=None, skip_edges=(), k=DEFAULT_K
                 break
         if not progressed:
             break
-        # Recompute window ranking cheaply from index events (no full evaluate).
         windows = _windows_from_index(index, k)
 
-    # One proper restyle + label pass for reactions we touched, then final score.
-    touched = {a.get('reaction') for a in report['accepted'] if a.get('reaction')}
-    if touched:
-        try:
-            # Straighten touched algo edges then edge_style once.
-            for rid in list(touched):
-                pass
-            edge_style.apply(data, list(skip), only=touched)
-            label_placement.optimize(data, passes=3, hide_currency=False)
-            index.rebuild(data)
-            current_cross = index.headline()
-        except Exception:
-            pass
-
-    after = _score(data, skip_edges, structures=structures)
-    # Guard: if full score somehow regressed overlaps/continuity, we still report truth;
-    # acceptance already forbade node overlaps locally. Continuity should be unchanged
-    # for side/reroute moves.
-    report['after'] = dict(
-        crossings=after['crossings'],
-        top_window_crossings=after['top_window_crossings'],
-        worst_window=after['worst_window'],
-        node_overlaps=after['node_overlaps'],
-        label_overlaps=after['label_overlaps'],
-        continuity_share=after['continuity_share'],
-        split_structures=after['split_structures'],
-        length_p90=after['length_p90'],
-        currency_involved=after['currency_involved'],
-        main_metabolite=after['main_metabolite'],
-    )
+    search_s = round(time.time() - t_search, 2)
+    # Light after-metrics from the live index (no full evaluate).
+    windows = _windows_from_index(index, k)
+    lengths = [float(np.sum(np.hypot(*np.diff(e['pts'], axis=0).T))) for e in index.edges if len(e['pts']) > 1]
+    length_p90 = float(np.percentile(lengths, 90)) if lengths else length_p90
+    node_ov1, lab_ov1 = lq.overlap_counts(data)
+    after = _metrics_from_index(index, windows, node_ov1, lab_ov1, cont, length_p90, spacing)
+    report['after'] = {kk: after[kk] for kk in (
+        'crossings', 'top_window_crossings', 'worst_window', 'node_overlaps', 'label_overlaps',
+        'continuity_share', 'split_structures', 'length_p90', 'currency_involved', 'main_metabolite')}
     report['accepted_count'] = len(report['accepted'])
+    report['search_s'] = search_s
     report['seconds'] = round(time.time() - t0, 2)
     report['improved'] = report['after']['crossings'] < report['before']['crossings']
     report['index_headline'] = current_cross
     if log:
         log(f"  hotspot repair: done accepted={report['accepted_count']} "
-            f"crossings {report['before']['crossings']}->{report['after']['crossings']} ({report['seconds']}s)")
+            f"crossings {report['before']['crossings']}->{report['after']['crossings']} "
+            f"(search {search_s}s / total {report['seconds']}s)")
     return report
 
 
