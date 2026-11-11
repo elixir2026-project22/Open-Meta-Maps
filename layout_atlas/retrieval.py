@@ -35,7 +35,7 @@ def target_info(model):
   if base and base!=mid:refs['bigg.metabolite']=sorted(set(refs['bigg.metabolite'])|{base})
   cands=set(refs.get('chebi',[]))
   for alias in refs['bigg.metabolite']:cands.update(public_metabolite_links().get(alias,set()))
-  refs['compartment']=m.get('compartment','unknown')
+  refs['compartment']=m.get('compartment','unknown');refs['name']=m.get('name','')
   refs['chebi_candidate_evidence']='target annotations and explicit public model cross-references; ambiguous sets retained'
   refs['chebi_ph73']=sorted(cands|{ri['ph73'][v]['id'] for v in cands if v in ri['ph73']});metrefs[mid]=refs
  rxrefs={}
@@ -45,15 +45,29 @@ def target_info(model):
   rxrefs[r['id']]=refs
  return meta,metrefs,rxrefs
 
-def binding_candidates(entity,target_mids,metrefs):
- if not isinstance(entity,str):return []
- if entity.startswith('chebi:'):
+def binding_candidates(entity,target_mids,metrefs,label=None):
+ """Target metabolites that can bind a source entity (ChEBI / BiGG / normalised name).
+
+ `label` is used for name-only Atlas nodes (BRENDA ligands, some CellDesigner species) when
+ `entity` is not a ChEBI or BiGG id.
+ """
+ if not isinstance(entity,str) and not label:return []
+ if isinstance(entity,str) and entity.startswith('chebi:'):
   c=entity.split('@')[0].split(':')[1];ri=rhea_index();candidates={c,ri['ph73'].get(c,{}).get('id',c)}
   return [mid for mid in target_mids if candidates & set(metrefs[mid].get('chebi_ph73',[]))]
- if entity in target_mids and chem(entity) in metrefs[entity].get('bigg.metabolite',[]):return [entity]
- options=[mid for mid in target_mids if chem(entity) in metrefs[mid].get('bigg.metabolite',[])]
- matching_comp=[mid for mid in options if comp(entity) not in ('unknown','local') and metrefs[mid].get('compartment')==comp(entity)]
- return matching_comp or options
+ if isinstance(entity,str):
+  if entity in target_mids and chem(entity) in metrefs[entity].get('bigg.metabolite',[]):return [entity]
+  options=[mid for mid in target_mids if chem(entity) in metrefs[mid].get('bigg.metabolite',[])]
+  matching_comp=[mid for mid in options if comp(entity) not in ('unknown','local') and metrefs[mid].get('compartment')==comp(entity)]
+  if matching_comp or options:return matching_comp or options
+ # name-only fallback (BRENDA / CellDesigner): compare normalised metabolite names
+ name=label or (entity if isinstance(entity,str) and not str(entity).startswith(('lid','r:','m:','chebi:')) else None)
+ if name:
+  import identifier_bridge as ib
+  want=ib.name_keys(name)
+  if want:
+   return [mid for mid in target_mids if ib.name_keys(metrefs[mid].get('name') or '') & want]
+ return []
 
 def windows(g,max_roots=120,sizes=(2,4,8)):
  rs=sorted(k for k in g if g.nodes[k]['role']=='reaction');seen=set();step=max(1,len(rs)//max_roots)
@@ -151,7 +165,7 @@ class Library:
      if valid:
       for node in m['nodes']:
        if node['role']=='reaction':continue
-       choices=binding_candidates(node.get('entity'),[k[2:] for k in tg if tg.nodes[k]['role']=='metabolite'],info[1])
+       choices=binding_candidates(node.get('entity'),[k[2:] for k in tg if tg.nodes[k]['role']=='metabolite'],info[1],label=node.get('label'))
        if len(choices)!=1 or 'm:'+choices[0] in occupied:valid=False;break
        mm[node['key']]='m:'+choices[0];occupied.add('m:'+choices[0])
      if valid and all(tg.has_edge(mm[e['a']],mm[e['b']]) for e in m['edges']):direct=mm

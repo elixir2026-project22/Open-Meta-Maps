@@ -367,6 +367,265 @@ def load():
         return json.load(f)
 
 
+# --- reaction ↔ BRENDA enzyme-node matching (name-only metabolites) ------------------------------
+# Ideas from ecmapper's BRENDA map matcher (GPL-3.0; independent rewrite).  Thresholds:
+# identifier_bridge.THRESHOLDS (cross-model defaults, not tuned to one GEM).
+
+
+def enzyme_nodes(modules=None):
+    """Deduplicated enzyme nodes from BRENDA modules: {node_key: record} with EC and metabolite keys."""
+    import identifier_bridge as ib
+    import ec_channel as ec
+    modules = modules if modules is not None else load()
+    # database.modules() now includes BRENDA by default along with other extensions; keep matching BRENDA-only.
+    modules = [m for m in modules if m.get('source', 'brenda') == 'brenda']
+    nodes = {}
+    for m in modules:
+        labels = {n['key']: (n.get('label') or n.get('name') or '') for n in m['nodes']}
+        pathway = m.get('pathway_slug') or m.get('name')
+        for r in m['reactions']:
+            key = r['key']
+            if key in nodes:
+                # merge metabolite names seen in another window of the same node
+                prev = nodes[key]
+            else:
+                prev = None
+            mains, cofactors = [], []
+            for mk in r.get('core', []):
+                if labels.get(mk):
+                    mains.append(labels[mk])
+            for a in m.get('attachments', []):
+                if not isinstance(a, dict):
+                    continue
+                if a.get('reaction') == key and a.get('name'):
+                    cofactors.append(a['name'])
+            keys = []
+            for name in mains + cofactors:
+                k = ib.metabolite_keys(names=[name])
+                if k and k not in keys:
+                    keys.append(k)
+            main_keys = []
+            for name in mains:
+                k = ib.metabolite_keys(names=[name])
+                if k and not ib.is_currency_keys(k) and k not in main_keys:
+                    main_keys.append(k)
+            ecs = set(ec.current_ecs([r['ec']] if r.get('ec') else []))
+            if prev is None:
+                nodes[key] = dict(
+                    key=key, id=r.get('id'), ec=r.get('ec'), ecs=ecs, enzyme_name=r.get('enzyme_name') or '',
+                    pathway=pathway, metabolite_keys=keys, main_keys=main_keys,
+                    metabolite_names=dict(main=mains, cofactor=cofactors),
+                    neighbours=set(),  # filled below from shared main metabolites within a pathway module
+                )
+            else:
+                for k in keys:
+                    if k not in prev['metabolite_keys']:
+                        prev['metabolite_keys'].append(k)
+                for k in main_keys:
+                    if k not in prev['main_keys']:
+                        prev['main_keys'].append(k)
+                prev['ecs'] |= ecs
+        # neighbours: enzyme nodes that share a non-currency main metabolite in this module
+        rx_keys = [r['key'] for r in m['reactions'] if r['key'] in nodes]
+        place = defaultdict(set)  # main-metabolite key token -> enzyme keys
+        for rk in rx_keys:
+            for k in nodes[rk]['main_keys']:
+                for token in k:
+                    place[token].add(rk)
+        for token, group in place.items():
+            if len(group) < 2:
+                continue
+            for a in group:
+                nodes[a]['neighbours'] |= group - {a}
+    for n in nodes.values():
+        n['neighbours'] = sorted(n['neighbours'])
+    return nodes
+
+
+def match_model(model, modules=None, vicinity='propagate'):
+    """Match GEM reactions to BRENDA enzyme nodes.  Returns {reaction_id: match_dict}.
+
+    Status: `on map` / `related` / `not on map` / `boundary`.  Vicinity modes: None,
+    `neighbours`, `propagate` (default).  Open-data path only (names + current EC; no KEGG).
+    """
+    import identifier_bridge as ib
+    import ec_channel as ec
+    nodes = enzyme_nodes(modules)
+    by_ec, by_partial, by_main = defaultdict(set), defaultdict(set), defaultdict(set)
+    for key, n in nodes.items():
+        for e in n['ecs']:
+            if ec.is_complete(e):
+                by_ec[e].add(key)
+            else:
+                by_partial[e].add(key)
+        for k in n['main_keys']:
+            for token in k:
+                by_main[token].add(key)
+
+    met_keys = ec.model_metabolite_keys(model)
+    target_ec = ec.target_ecs(model)
+    boundary = {r['id'] for r in model['reactions']
+                if len(r['metabolites']) <= 1 or r['id'].startswith(('EX_', 'DM_', 'SK_', 'sink_'))}
+
+    matches = {}
+    for r in model['reactions']:
+        rid = r['id']
+        if rid in boundary:
+            matches[rid] = dict(reaction_id=rid, name=r.get('name', ''), status='boundary', candidates=[])
+            continue
+        via = defaultdict(set)
+        for e in target_ec.get(rid, ()):
+            for key in by_ec.get(e, ()):
+                via[key].add('ec')
+            for partial, keys in by_partial.items():
+                if ec.covers(partial, e):
+                    for key in keys:
+                        via[key].add('ec')
+        keys = met_keys.get(rid) or []
+        transport = any(v > 1 and not ib.is_currency_keys(k) for k, v in Counter(keys).items())
+        if not transport:
+            shared = Counter()
+            for k in keys:
+                if ib.is_currency_keys(k):
+                    continue
+                hit = set().union(*(by_main.get(token, ()) for token in k))
+                for key in hit:
+                    shared[key] += 1
+            for key, n in shared.items():
+                if n >= 2:
+                    via[key].add('metabolites')
+        candidates = []
+        for key, how in via.items():
+            score = ib.weighted_jaccard(keys, nodes[key]['metabolite_keys'])
+            linked = bool(how & {'ec'})
+            candidates.append(dict(node_id=key, score=score, via=sorted(how), accepted=False,
+                                   ec=nodes[key].get('ec'), enzyme_name=nodes[key].get('enzyme_name'),
+                                   pathway=nodes[key].get('pathway')))
+        best = max((c['score'] for c in candidates), default=None)
+        for c in candidates:
+            c['accepted'] = ib.accept_score(c['score'], linked='ec' in c['via'], best=best)
+        candidates.sort(key=lambda c: (-c['accepted'], -c['score'], c['node_id']))
+        if any(c['accepted'] for c in candidates):
+            status = 'on map'
+        elif any('ec' in c['via'] for c in candidates):
+            status = 'related'
+        else:
+            status = 'not on map'
+        matches[rid] = dict(reaction_id=rid, name=r.get('name', ''), status=status, candidates=candidates)
+
+    if vicinity:
+        search_vicinity(model, matches, nodes, met_keys, target_ec, mode=vicinity)
+    return matches
+
+
+def search_vicinity(model, matches, nodes, met_keys, target_ec, mode='propagate'):
+    """Accept further enzyme nodes next to found matches through shared non-currency metabolites."""
+    import identifier_bridge as ib
+    import ec_channel as ec
+    t = ib.THRESHOLDS
+    reactions = {r['id']: r for r in model['reactions'] if matches.get(r['id'], {}).get('status') != 'boundary'}
+    by_key = defaultdict(set)
+    for rid in reactions:
+        if any(v > 1 and not ib.is_currency_keys(k) for k, v in Counter(met_keys.get(rid) or []).items()):
+            continue  # transporters
+        for k in met_keys.get(rid) or []:
+            if not ib.is_currency_keys(k):
+                for token in k:
+                    by_key[token].add(rid)
+
+    def accepted_pairs():
+        return {(rid, c['node_id']) for rid, m in matches.items() for c in m['candidates'] if c['accepted']}
+
+    accepted = accepted_pairs()
+    if mode == 'propagate':
+        n_nodes = Counter(rid for rid, _ in accepted)
+        anchors = {(rid, c['node_id']) for rid, m in matches.items() for c in m['candidates']
+                   if c['accepted'] and n_nodes[rid] == 1 and 'ec' in c['via']}
+    else:
+        anchors = set(accepted)
+    identified = {n for _, n in accepted}
+    frontier, newly = set(anchors), []
+    while frontier:
+        candidates = {}
+        for rid, node_id in sorted(frontier):
+            for other in nodes[node_id]['neighbours']:
+                if mode == 'neighbours' and other in identified:
+                    continue
+                tokens_a = set().union(*(k for k in nodes[node_id]['main_keys'])) if nodes[node_id]['main_keys'] else set()
+                tokens_b = set().union(*(k for k in nodes[other]['main_keys'])) if nodes[other]['main_keys'] else set()
+                shared_tokens = tokens_a & tokens_b
+                if not shared_tokens or not any(shared_tokens & k for k in met_keys.get(rid) or []):
+                    continue
+                for rid2 in sorted(set().union(*(by_key.get(tok, set()) for tok in shared_tokens))):
+                    candidates.setdefault((rid2, other), (rid, node_id))
+        reached = {p for p in candidates if p in accepted}
+        eligible = {}
+        for rid, node_id in candidates:
+            if (rid, node_id) in accepted:
+                continue
+            existing = next((c for c in matches[rid]['candidates'] if c['node_id'] == node_id), None)
+            if existing is not None:
+                score, linked = existing['score'], 'ec' in existing['via']
+            else:
+                score = ib.weighted_jaccard(met_keys.get(rid) or [], nodes[node_id]['metabolite_keys'])
+                linked = bool(set(target_ec.get(rid, ())) & nodes[node_id]['ecs'])
+            if linked:
+                ok = score >= t['min_score_vicinity']
+            else:
+                # reject contradictory EC at the first three levels
+                ok = score >= t['min_score_vicinity_unlinked'] and _compatible_ecs(target_ec.get(rid, ()), nodes[node_id]['ecs'])
+            if ok:
+                eligible[(rid, node_id)] = score
+        best_node, best_reaction = {}, {}
+        for rid, c in ((rid, c) for rid, m in matches.items() for c in m['candidates'] if c['accepted']):
+            best_node[c['node_id']] = max(best_node.get(c['node_id'], 0.0), c['score'])
+            best_reaction[rid] = max(best_reaction.get(rid, 0.0), c['score'])
+        for (rid, node_id), score in eligible.items():
+            best_node[node_id] = max(best_node.get(node_id, 0.0), score)
+            best_reaction[rid] = max(best_reaction.get(rid, 0.0), score)
+        chosen = {(rid, node_id): score for (rid, node_id), score in eligible.items()
+                  if score >= best_node[node_id] - t['max_gap'] and score >= best_reaction[rid] - t['max_gap']}
+        for (rid, node_id), score in chosen.items():
+            match = matches[rid]
+            cand = next((c for c in match['candidates'] if c['node_id'] == node_id), None)
+            if cand is None:
+                cand = dict(node_id=node_id, score=score, via=[], accepted=False,
+                            ec=nodes[node_id].get('ec'), enzyme_name=nodes[node_id].get('enzyme_name'),
+                            pathway=nodes[node_id].get('pathway'))
+                match['candidates'].append(cand)
+            cand['accepted'] = True
+            if 'vicinity' not in cand['via']:
+                cand['via'] = list(cand['via']) + ['vicinity']
+            src_r, src_n = candidates[(rid, node_id)]
+            cand['vicinity_of'] = f'{src_r}@{src_n}'
+            match['status'] = 'on map'
+            newly.append((rid, node_id))
+            identified.add(node_id)
+        accepted |= chosen.keys()
+        if mode == 'neighbours':
+            break
+        frontier = (reached | chosen.keys()) - anchors
+        anchors |= frontier
+    return newly
+
+
+def _compatible_ecs(reaction_ecs, node_ecs):
+    complete = [ec.split('.')[:3] for ec in reaction_ecs if len(ec.split('.')) == 4 and ec.split('.')[3].isdigit()]
+    node = [ec.split('.')[:3] for ec in node_ecs]
+    if not complete or not node:
+        return True
+    return any(all(b == '-' or a == b for a, b in zip(r, n)) for r in complete for n in node)
+
+
+def match_summary(matches):
+    status = Counter(m['status'] for m in matches.values())
+    on = [m for m in matches.values() if m['status'] == 'on map']
+    nodes = {c['node_id'] for m in on for c in m['candidates'] if c['accepted']}
+    vicinity = sum(1 for m in on if m['candidates'] and all('vicinity' in c['via'] for c in m['candidates'] if c['accepted']))
+    return dict(reactions=len(matches), status=dict(status), nodes_with_model_reactions=len(nodes),
+                vicinity_only_reactions=vicinity)
+
+
 if __name__ == '__main__':
     # Variant grouping takes the first 4 isomorphisms found by database.mappings; their order depends on set iteration,
     # so the build re-executes itself with a fixed hash seed to be reproducible.

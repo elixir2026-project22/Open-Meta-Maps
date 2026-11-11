@@ -14,6 +14,9 @@
 /layout_atlas/build/
 /layout_atlas/build_native/
 
+# runtime downloads (ExPASy ENZYME enzyme.dat, etc.)
+/layout_atlas/runtime/
+
 # optional / large local data (not redistributed with the open-core checkout); the real files may live outside this repository (../LocalData)
 /data/atlas.sqlite
 # Derived Mapper crosswalk (built from identifier_bridge + available models); do not track

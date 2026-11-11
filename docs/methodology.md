@@ -7,3 +7,20 @@
 5. **Routing and evaluation**: edges are routed with libavoid and layout issues are reported.
 
 Every reaction is labelled in `reaction_provenance.json` as expert-derived, topology-only suggestion, functional (EC) suggestion, bridge or generated. Coverage numbers describe geometry reuse, not readability.
+
+## Reaction–map matching (EC and name-only nodes)
+
+Matching of model reactions to Atlas enzyme nodes — especially BRENDA (metabolites as names only) and CellDesigner drawings with sparse identifiers — uses the following open-data path (Rhea, ExPASy ENZYME, BiGG / identifier bridge, ChEBI). KEGG is academic-only and is not used by default.
+
+| Step | Rule | Default thresholds |
+|---|---|---|
+| EC currentisation | Transferred EC numbers → successors; deleted dropped (ExPASy `enzyme.dat`) | — |
+| EC disambiguation | Among several candidates, score metabolites against Rhea reactions of each EC (weighted Jaccard); keep the clear best | `ec_min_score=0.6`, `ec_min_margin=0.1` |
+| Name normalisation | Case, punctuation, membrane sides; stereo / anomer descriptors ignored for matching but kept as a second key; `NAD(P)H` expanded; generic quinones grouped | — |
+| Node scoring | Weighted Jaccard of metabolite keys; cofactors / currency at half weight; one-to-one matching | `currency_weight=0.5` |
+| Acceptance | EC-linked vs metabolites-only floors; keep nodes within a gap of the best | `min_score=0.6`, `min_score_unlinked=0.8`, `max_gap=0.1` |
+| Vicinity | From unambiguous EC matches, propagate through shared non-currency main metabolites | `min_score_vicinity=0.4`, `min_score_vicinity_unlinked=0.6` |
+
+Thresholds are the cross-model defaults validated on eleven curated prokaryote BiGG models in the ecmapper BRENDA-map evaluation; they are not tuned to a single OpenMetaMaps example.
+
+**Method attribution:** the matching *ideas* (EC currentisation, metabolite-weighted EC selection, name keys, weighted Jaccard with half-weight cofactors and one-to-one matching, score/margin acceptance, vicinity propagation) follow [ecmapper](https://github.com/elixir2026-project22/ecmapper) (GPL-3.0). OpenMetaMaps reimplements them independently under its own licence; no ecmapper code is copied, vendored or depended on.

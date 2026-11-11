@@ -62,6 +62,8 @@ The build prefers `g++` when available, falling back to `clang++`.
 cd layout_atlas
 python3 test_orientation.py
 python3 test_ec_provenance.py
+python3 test_reaction_map_matching.py
+python3 map_matching_eval.py          # BRENDA / Atlas match rates for e_coli_core, iIT341, iMM904
 ```
 
 
