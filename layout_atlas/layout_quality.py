@@ -148,7 +148,6 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, str
     When omitted, ``metadata.expert_structures`` is used, else a fallback from curated-derived connectivity.
     """
     import edge_routing as er
-    import line_render
     import orientation as orientation_module
     from evaluation.continuity import structure_continuity as _structure_continuity
     from evaluation.map_rules import collect_map_rule_details
@@ -163,72 +162,10 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, str
     grid_r = _dd(list)
     for i, r in enumerate(rects):
         _grid_add(grid_r, i, r[:2], r[2:])
-    edges = []
-    for rx in reactions.values():
-        for path in line_render._terminals(rx, nodes):
-            if nodes[path[-1]].get('node_type') != 'metabolite':
-                continue
-            pts = np.array(er._path_points(rx, path, nodes), float)
-            segs = [s for s in rx['segments'].values() if s['from_node_id'] in path and s['to_node_id'] in path]
-            curved = [bool(s.get('b1') and s.get('b2')) for s in segs]
-            met = nodes[path[-1]].get('bigg_id')
-            curated = (rx['bigg_id'], met) in skip
-            currency = _is_currency_met(met) or (nodes[path[-1]].get('node_is_primary') is False)
-            edges.append(dict(rid=rx['bigg_id'], met=met, path=path, pts=pts, curated=curated, expert=curated,
-                              currency=currency, curved=curved, ends=(path[0], path[-1])))
+    edges, nodes = build_edges(data, skip_edges)
     algo = [e for e in edges if not e['curated']]
-    # ---- crossings on the sampled final curves
-    seg_a, seg_b, seg_edge = [], [], []
-    for i, e in enumerate(edges):
-        for a, b in zip(e['pts'][:-1], e['pts'][1:]):
-            seg_a.append(a); seg_b.append(b); seg_edge.append(i)
-    S = np.array([[a[0], a[1], b[0], b[1]] for a, b in zip(seg_a, seg_b)], float).reshape(-1, 4)
-    seg_edge = np.array(seg_edge)
-    grid_s = _dd(list)
-    for k, (a, b) in enumerate(zip(seg_a, seg_b)):
-        _grid_add(grid_s, k, np.minimum(a, b), np.maximum(a, b))
-    cross = dict(algorithm_algorithm=0, algorithm_curated=0, curated_curated=0, same_reaction=0, same_reaction_curated=0,
-                 main_metabolite=0, currency_involved=0)
-    # ``cross_points`` is capped for the issues payload; ``all_cross_events`` keeps every location for region windows.
-    cross_points, all_cross_events, per_edge_cross = [], [], _dd(int)
-    for k, (a, b) in enumerate(zip(seg_a, seg_b)):
-        i = seg_edge[k]
-        cand = np.array(sorted(c for c in _grid_query(grid_s, np.minimum(a, b), np.maximum(a, b)) if seg_edge[c] > i), dtype=int)
-        if not len(cand):
-            continue
-        idx, pts = _seg_hits(a, b, S[cand])
-        for c, pt in zip(cand[idx], pts):
-            j = seg_edge[c]
-            if edges[i]['rid'] == edges[j]['rid']:      # curves of one reaction meet at the reaction point; a crossing elsewhere is a defect
-                centre = nodes[edges[i]['ends'][0]]
-                if float(np.hypot(pt[0] - centre['x'], pt[1] - centre['y'])) > 14.0:
-                    both_curated = edges[i]['curated'] and edges[j]['curated']
-                    cross['same_reaction_curated' if both_curated else 'same_reaction'] += 1
-                    per_edge_cross[i] += 1; per_edge_cross[j] += 1
-                    ev = dict(kind='same_reaction_curated' if both_curated else 'same_reaction', reactions=[edges[i]['rid']], metabolites=[edges[i]['met'], edges[j]['met']], x=round(float(pt[0]), 1), y=round(float(pt[1]), 1))
-                    all_cross_events.append(ev)
-                    if len(cross_points) < max_issues:
-                        cross_points.append(ev)
-                continue
-            if set(edges[i]['ends']) & set(edges[j]['ends']):
-                continue
-            ei, ej = edges[i]['curated'], edges[j]['curated']
-            kindc = 'curated_curated' if ei and ej else ('algorithm_algorithm' if not ei and not ej else 'algorithm_curated')
-            cross[kindc] += 1
-            # Role split only for the headline set (algorithm×algorithm + algorithm×curated).
-            if kindc != 'curated_curated':
-                if edges[i]['currency'] or edges[j]['currency']:
-                    cross['currency_involved'] += 1
-                else:
-                    cross['main_metabolite'] += 1
-            per_edge_cross[i] += 1; per_edge_cross[j] += 1
-            # Keep legacy kind aliases so older consumers / region filters still match.
-            legacy = {'algorithm_curated': 'algorithm_expert', 'curated_curated': 'expert_expert'}.get(kindc, kindc)
-            ev = dict(kind=kindc, kind_legacy=legacy, reactions=[edges[i]['rid'], edges[j]['rid']], x=round(float(pt[0]), 1), y=round(float(pt[1]), 1),
-                      currency_involved=bool(edges[i]['currency'] or edges[j]['currency']))
-            all_cross_events.append(ev)
-            if len(cross_points) < max_issues:
-                cross_points.append(ev)
+    # ---- crossings on the sampled final curves (shared detector; also used by hotspot repair)
+    cross, all_cross_events, cross_points, per_edge_cross = detect_crossings(edges, nodes, max_issues=max_issues)
     # ---- obstacles on the final curves (algorithm connections only)
     node_hits, label_hits, hit_points = 0, 0, []
     for e in algo:
@@ -762,6 +699,339 @@ def _orthogonal(pts):
                 return False
             corners += 1
     return corners >= 1
+
+
+def build_edges(data, skip_edges=None):
+    """Edge records used by ``evaluate`` for curve crossings (shared with hotspot repair)."""
+    import edge_routing as er
+    import line_render
+    meta = data[0].get('metadata', {})
+    skip = {tuple(e) for e in (skip_edges if skip_edges is not None else meta.get('preserved_edges') or [])}
+    skip |= {(p['reaction'], p['metabolite']) for p in (meta.get('source_paths') or [])}
+    body = data[1]
+    nodes, reactions = body['nodes'], body['reactions']
+    edges = []
+    for rx in reactions.values():
+        for path in line_render._terminals(rx, nodes):
+            if nodes[path[-1]].get('node_type') != 'metabolite':
+                continue
+            pts = np.array(er._path_points(rx, path, nodes), float)
+            segs = [s for s in rx['segments'].values() if s['from_node_id'] in path and s['to_node_id'] in path]
+            curved = [bool(s.get('b1') and s.get('b2')) for s in segs]
+            met = nodes[path[-1]].get('bigg_id')
+            curated = (rx['bigg_id'], met) in skip
+            currency = _is_currency_met(met) or (nodes[path[-1]].get('node_is_primary') is False)
+            edges.append(dict(rid=rx['bigg_id'], met=met, path=path, pts=pts, curated=curated, expert=curated,
+                              currency=currency, curved=curved, ends=(path[0], path[-1])))
+    return edges, nodes
+
+
+def detect_crossings(edges, nodes, max_issues=4000):
+    """Same segment-crossing detector as ``evaluate`` (algorithm/curated split, shared-node rule)."""
+    seg_a, seg_b, seg_edge = [], [], []
+    for i, e in enumerate(edges):
+        for a, b in zip(e['pts'][:-1], e['pts'][1:]):
+            seg_a.append(a); seg_b.append(b); seg_edge.append(i)
+    S = np.array([[a[0], a[1], b[0], b[1]] for a, b in zip(seg_a, seg_b)], float).reshape(-1, 4)
+    seg_edge = np.array(seg_edge)
+    grid_s = _dd(list)
+    for k, (a, b) in enumerate(zip(seg_a, seg_b)):
+        _grid_add(grid_s, k, np.minimum(a, b), np.maximum(a, b))
+    cross = dict(algorithm_algorithm=0, algorithm_curated=0, curated_curated=0, same_reaction=0, same_reaction_curated=0,
+                 main_metabolite=0, currency_involved=0)
+    cross_points, all_cross_events, per_edge_cross = [], [], _dd(int)
+    for k, (a, b) in enumerate(zip(seg_a, seg_b)):
+        i = seg_edge[k]
+        cand = np.array(sorted(c for c in _grid_query(grid_s, np.minimum(a, b), np.maximum(a, b)) if seg_edge[c] > i), dtype=int)
+        if not len(cand):
+            continue
+        idx, pts = _seg_hits(a, b, S[cand])
+        for c, pt in zip(cand[idx], pts):
+            j = seg_edge[c]
+            if edges[i]['rid'] == edges[j]['rid']:
+                centre = nodes[edges[i]['ends'][0]]
+                if float(np.hypot(pt[0] - centre['x'], pt[1] - centre['y'])) > 14.0:
+                    both_curated = edges[i]['curated'] and edges[j]['curated']
+                    cross['same_reaction_curated' if both_curated else 'same_reaction'] += 1
+                    per_edge_cross[i] += 1; per_edge_cross[j] += 1
+                    ev = dict(kind='same_reaction_curated' if both_curated else 'same_reaction',
+                              reactions=[edges[i]['rid']], metabolites=[edges[i]['met'], edges[j]['met']],
+                              x=round(float(pt[0]), 1), y=round(float(pt[1]), 1))
+                    all_cross_events.append(ev)
+                    if len(cross_points) < max_issues:
+                        cross_points.append(ev)
+                continue
+            if set(edges[i]['ends']) & set(edges[j]['ends']):
+                continue
+            ei, ej = edges[i]['curated'], edges[j]['curated']
+            kindc = 'curated_curated' if ei and ej else ('algorithm_algorithm' if not ei and not ej else 'algorithm_curated')
+            cross[kindc] += 1
+            if kindc != 'curated_curated':
+                if edges[i]['currency'] or edges[j]['currency']:
+                    cross['currency_involved'] += 1
+                else:
+                    cross['main_metabolite'] += 1
+            per_edge_cross[i] += 1; per_edge_cross[j] += 1
+            legacy = {'algorithm_curated': 'algorithm_expert', 'curated_curated': 'expert_expert'}.get(kindc, kindc)
+            ev = dict(kind=kindc, kind_legacy=legacy, reactions=[edges[i]['rid'], edges[j]['rid']],
+                      x=round(float(pt[0]), 1), y=round(float(pt[1]), 1),
+                      currency_involved=bool(edges[i]['currency'] or edges[j]['currency']))
+            all_cross_events.append(ev)
+            if len(cross_points) < max_issues:
+                cross_points.append(ev)
+    return cross, all_cross_events, cross_points, per_edge_cross
+
+
+def algorithm_crossings(data, skip_edges=None):
+    """Headline crossing count (algo×algo + algo×curated)."""
+    edges, nodes = build_edges(data, skip_edges)
+    cross, events, _, _ = detect_crossings(edges, nodes, max_issues=0)
+    return int(cross['algorithm_algorithm'] + cross['algorithm_curated']), cross, events
+
+
+def overlap_counts(data):
+    """Node and label overlap pair counts (same geometry as ``evaluate``)."""
+    from scipy.spatial import cKDTree
+    body = data[1]
+    nodes = body['nodes']
+    centres = np.array([[n['x'], n['y']] for n in nodes.values() if n.get('node_type') in ('metabolite', 'midmarker')], float)
+    node_overlap = list(cKDTree(centres).query_pairs(10)) if len(centres) > 1 else []
+    rects, owner, kind, label_of = _final_obstacles(data)
+    grid_r = _dd(list)
+    for i, r in enumerate(rects):
+        _grid_add(grid_r, i, r[:2], r[2:])
+    lab_idx = [i for i, k in enumerate(kind) if k == 'label']
+    label_overlap = 0
+    for i in lab_idx:
+        for j in _grid_query(grid_r, rects[i][:2], rects[i][2:]):
+            if j > i and kind[j] == 'label' and rects[j][0] < rects[i][2] and rects[i][0] < rects[j][2] and rects[j][1] < rects[i][3] and rects[i][1] < rects[j][3]:
+                label_overlap += 1
+    return len(node_overlap), label_overlap
+
+
+def _pair_is_headline(ei, ej):
+    """True if the pair contributes to the Connection-crossings / window headline."""
+    if ei['rid'] == ej['rid']:
+        return False
+    if set(ei['ends']) & set(ej['ends']):
+        return False
+    return not (ei['curated'] and ej['curated'])
+
+
+def _count_pair_crossings(pts_i, ends_i, rid_i, pts_j, ends_j, rid_j, nodes):
+    """How many proper crossings between two sampled polylines (same geometry as detect_crossings)."""
+    if rid_i == rid_j:
+        return 0
+    if set(ends_i) & set(ends_j):
+        return 0
+    n = 0
+    for a, b in zip(pts_i[:-1], pts_i[1:]):
+        S = np.array([[c[0], c[1], d[0], d[1]] for c, d in zip(pts_j[:-1], pts_j[1:])], float).reshape(-1, 4)
+        if not len(S):
+            continue
+        idx, _pts = _seg_hits(a, b, S)
+        n += len(idx)
+    return n
+
+
+class CrossingIndex:
+    """Reusable spatial index over sampled edge segments for incremental hotspot repair.
+
+    Built once from ``build_edges`` / the same ``_seg_hits`` geometry as ``evaluate``.
+    After a local move, recount only edges whose geometry changed (and their neighbours
+    in the segment grid) and apply a delta to the headline crossing total.
+    """
+
+    def __init__(self, data, skip_edges=None):
+        self.skip_edges = skip_edges
+        self.rebuild(data)
+
+    def rebuild(self, data):
+        self.data = data
+        self.edges, self.nodes = build_edges(data, self.skip_edges)
+        self.by_rid = _dd(list)
+        for i, e in enumerate(self.edges):
+            self.by_rid[e['rid']].append(i)
+        self.seg_a, self.seg_b, self.seg_edge = [], [], []
+        for i, e in enumerate(self.edges):
+            for a, b in zip(e['pts'][:-1], e['pts'][1:]):
+                self.seg_a.append(a); self.seg_b.append(b); self.seg_edge.append(i)
+        self.S = np.array([[a[0], a[1], b[0], b[1]] for a, b in zip(self.seg_a, self.seg_b)], float).reshape(-1, 4)
+        self.seg_edge = np.array(self.seg_edge, dtype=int) if self.seg_edge else np.zeros(0, dtype=int)
+        self.grid = _dd(list)
+        for k, (a, b) in enumerate(zip(self.seg_a, self.seg_b)):
+            _grid_add(self.grid, k, np.minimum(a, b), np.maximum(a, b))
+        # Per-edge headline crossing counts (each pair counted once on the lower index).
+        self.edge_cross = np.zeros(len(self.edges), dtype=int)
+        self.total = 0
+        self.events = []  # (i, j, x, y, currency)
+        self._recompute_all_pairs()
+
+    def _recompute_all_pairs(self):
+        self.edge_cross[:] = 0
+        self.total = 0
+        self.events = []
+        if not len(self.S):
+            return
+        for k, (a, b) in enumerate(zip(self.seg_a, self.seg_b)):
+            i = int(self.seg_edge[k])
+            cand = [c for c in _grid_query(self.grid, np.minimum(a, b), np.maximum(a, b)) if self.seg_edge[c] > i]
+            if not cand:
+                continue
+            cand = np.array(sorted(cand), dtype=int)
+            idx, pts = _seg_hits(a, b, self.S[cand])
+            for c, pt in zip(cand[idx], pts):
+                j = int(self.seg_edge[c])
+                if not _pair_is_headline(self.edges[i], self.edges[j]):
+                    continue
+                self.edge_cross[i] += 1
+                self.edge_cross[j] += 1
+                self.total += 1
+                self.events.append((i, j, float(pt[0]), float(pt[1]),
+                                    bool(self.edges[i]['currency'] or self.edges[j]['currency'])))
+
+    def headline(self):
+        return int(self.total)
+
+    def edge_indices_for_reactions(self, rids):
+        out = []
+        for rid in rids:
+            out.extend(self.by_rid.get(rid, ()))
+        return sorted(set(out))
+
+    def participants_in_window(self, win):
+        """Reaction ids and node ids that participate in a headline crossing inside ``win``."""
+        rids, nids = set(), set()
+        x0, y0, w, h = win['x'], win['y'], win['w'], win['h']
+        for i, j, x, y, _cur in self.events:
+            if not (x0 <= x < x0 + w and y0 <= y < y0 + h):
+                continue
+            for e in (self.edges[i], self.edges[j]):
+                rids.add(e['rid'])
+                nids.update(e['ends'])
+        return rids, nids
+
+    def window_breakdown(self, win):
+        """Classify headline crossings inside the window (currency vs main; long vs short)."""
+        x0, y0, w, h = win['x'], win['y'], win['w'], win['h']
+        cur = main = long_edge = 0
+        spacing = 60.0
+        mids = np.array([[n['x'], n['y']] for n in self.nodes.values() if n.get('node_type') == 'midmarker'], float)
+        if len(mids) > 2:
+            from scipy.spatial import cKDTree
+            spacing = float(np.median(cKDTree(mids).query(mids, k=2)[0][:, 1])) or 60.0
+        long_thresh = 3.0 * spacing
+        for i, j, x, y, currency in self.events:
+            if not (x0 <= x < x0 + w and y0 <= y < y0 + h):
+                continue
+            if currency:
+                cur += 1
+            else:
+                main += 1
+            for e in (self.edges[i], self.edges[j]):
+                d = e['pts']
+                L = float(np.sum(np.hypot(*np.diff(d, axis=0).T))) if len(d) > 1 else 0.0
+                if L >= long_thresh:
+                    long_edge += 1
+                    break
+        return dict(total=cur + main, currency_involved=cur, main_metabolite=main,
+                    involves_long_edge=long_edge, spacing_px=round(spacing, 1))
+
+    def _crossings_of_edges(self, edge_ids, against_all=True):
+        """Headline crossings involving any edge in ``edge_ids`` (each pair once)."""
+        if not edge_ids or not len(self.S):
+            return 0, []
+        focus = set(edge_ids)
+        # segments belonging to focus edges
+        focus_segs = [k for k, ei in enumerate(self.seg_edge) if int(ei) in focus]
+        count = 0
+        pairs = []
+        seen = set()
+        for k in focus_segs:
+            a, b = self.seg_a[k], self.seg_b[k]
+            i = int(self.seg_edge[k])
+            cand = list(_grid_query(self.grid, np.minimum(a, b), np.maximum(a, b)))
+            if not cand:
+                continue
+            cand = np.array(sorted(set(cand)), dtype=int)
+            idx, pts = _seg_hits(a, b, self.S[cand])
+            for c, pt in zip(cand[idx], pts):
+                j = int(self.seg_edge[c])
+                if j == i:
+                    continue
+                if not against_all and j not in focus:
+                    continue
+                # count each unordered pair once
+                key = (i, j) if i < j else (j, i)
+                if key in seen:
+                    continue
+                if not _pair_is_headline(self.edges[i], self.edges[j]):
+                    continue
+                # Avoid double-count when both edges are in focus: only emit when
+                # the other segment is not also being scanned as a focus seg with higher k,
+                # or simply always use seen.
+                seen.add(key)
+                count += 1
+                pairs.append(key)
+        return count, pairs
+
+    def delta_after_replace(self, data, changed_rids):
+        """Rebuild geometry for ``changed_rids`` in-place on a copy of the index state.
+
+        Returns (new_total, delta) without mutating this index until ``commit`` is called.
+        For speed the caller should pass the already-modified ``data``.
+        """
+        new_edges, new_nodes = build_edges(data, self.skip_edges)
+        # Map old edge key -> index
+        def key(e):
+            return (e['rid'], e['met'], e['ends'][0], e['ends'][-1])
+        old_by = {key(e): i for i, e in enumerate(self.edges)}
+        new_by = {key(e): i for i, e in enumerate(new_edges)}
+        # Edges that belong to changed reactions (old and new)
+        changed_old = []
+        for rid in changed_rids:
+            changed_old.extend(self.by_rid.get(rid, ()))
+        changed_old = sorted(set(changed_old))
+        old_involving, _ = self._crossings_of_edges(changed_old)
+        # Build a temporary index for just recounting: use full new edges but only
+        # query crossings of the changed reaction's new edges.
+        tmp = CrossingIndex.__new__(CrossingIndex)
+        tmp.skip_edges = self.skip_edges
+        tmp.edges = new_edges
+        tmp.nodes = new_nodes
+        tmp.by_rid = _dd(list)
+        for i, e in enumerate(new_edges):
+            tmp.by_rid[e['rid']].append(i)
+        tmp.seg_a, tmp.seg_b, tmp.seg_edge = [], [], []
+        for i, e in enumerate(new_edges):
+            for a, b in zip(e['pts'][:-1], e['pts'][1:]):
+                tmp.seg_a.append(a); tmp.seg_b.append(b); tmp.seg_edge.append(i)
+        tmp.S = np.array([[a[0], a[1], b[0], b[1]] for a, b in zip(tmp.seg_a, tmp.seg_b)], float).reshape(-1, 4)
+        tmp.seg_edge = np.array(tmp.seg_edge, dtype=int) if tmp.seg_edge else np.zeros(0, dtype=int)
+        tmp.grid = _dd(list)
+        for k, (a, b) in enumerate(zip(tmp.seg_a, tmp.seg_b)):
+            _grid_add(tmp.grid, k, np.minimum(a, b), np.maximum(a, b))
+        changed_new = []
+        for rid in changed_rids:
+            changed_new.extend(tmp.by_rid.get(rid, ()))
+        changed_new = sorted(set(changed_new))
+        new_involving, _ = tmp._crossings_of_edges(changed_new)
+        new_total = self.total - old_involving + new_involving
+        return int(new_total), int(new_involving - old_involving), tmp
+
+    def commit(self, other):
+        """Replace this index with a temporary one from ``delta_after_replace``."""
+        self.edges = other.edges
+        self.nodes = other.nodes
+        self.by_rid = other.by_rid
+        self.seg_a = other.seg_a
+        self.seg_b = other.seg_b
+        self.seg_edge = other.seg_edge
+        self.S = other.S
+        self.grid = other.grid
+        # Full recount of events/total for correctness after commit (still cheaper than evaluate).
+        self.edge_cross = np.zeros(len(self.edges), dtype=int)
+        self._recompute_all_pairs()
 
 
 def metric_details(path):

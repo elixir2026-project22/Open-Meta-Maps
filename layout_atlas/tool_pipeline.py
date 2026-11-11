@@ -662,6 +662,19 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             if log:
                 log('  region placement: ' + str({k: v for k, v in rp.items() if k != 'rows'}))
             dump(folder / 'map.json', data)
+        if os.environ.get('OPM_HOTSPOT_REPAIR', 'on') != 'off':   # local crossing-hotspot repair (default on)
+            import hotspot_repair
+            codes_early = module_codes(blocks) if blocks else {}
+            expert_structures_early = [dict(id=b.get('id') or b.get('template_id'), code=codes_early.get(b.get('id')), reactions=list(b['reaction_ids']))
+                                       for b in blocks if len(b.get('reaction_ids') or []) >= 2]
+            data[0].setdefault('metadata', {})['expert_structures'] = expert_structures_early
+            metric['hotspot_repair'] = hotspot_repair.repair(
+                data, model=model, scene=scene, blocks=blocks, skip_edges=skip_edges, log=log,
+                structures=expert_structures_early)
+            if log:
+                hr = metric['hotspot_repair']
+                log('  hotspot repair: ' + str({k: hr.get(k) for k in ('accepted_count', 'tries', 'rounds', 'seconds', 'improved')}))
+            dump(folder / 'map.json', data)
     elif not scalable and len(model['reactions']) <= 400:
         import edge_routing
         er = dict(mode=EDGE_ROUTING, before=edge_routing.measure(data, skip_edges))
@@ -937,7 +950,7 @@ def draw_global_map(job, model, selected, folder, prov_kinds, n_reactions, plan=
     job.save()
     return dict(kind='global_degraded', requested_layout='global', degraded=['routing: none (straight connections)'], seconds=round(time.time() - t0, 1), network=network,
                 metrics={k: metric.get(k) for k in ('node_overlap_pairs', 'label_overlap_pairs', 'straight_crossings')}, source_paths=metric.get('source_paths'),
-                instances=metric.get('instances'), global_layout=metric.get('global'), completion=metric.get('completion'), expert_geometry=metric.get('expert_geometry'), instance_optimization=metric.get('instance_optimization'), context_placement=metric.get('context_placement'), completion_context=metric.get('completion_context'), layout_quality_final=metric.get('layout_quality_final'), edge_style=metric.get('edge_style'), peripheral=metric.get('peripheral'), block_relocation=metric.get('block_relocation'), region_placement=metric.get('region_placement'), regions=metric.get('regions'), expert_submodule=metric.get('expert_submodule'), label_placement=metric.get('label_placement'), protected=metric.get('protected'), node_overlap_kinds=metric.get('node_overlap_kinds'), edge_routing=metric.get('edge_routing'))
+                instances=metric.get('instances'), global_layout=metric.get('global'), completion=metric.get('completion'), expert_geometry=metric.get('expert_geometry'), instance_optimization=metric.get('instance_optimization'), context_placement=metric.get('context_placement'), completion_context=metric.get('completion_context'), layout_quality_final=metric.get('layout_quality_final'), edge_style=metric.get('edge_style'), peripheral=metric.get('peripheral'), block_relocation=metric.get('block_relocation'), region_placement=metric.get('region_placement'), regions=metric.get('regions'), expert_submodule=metric.get('expert_submodule'), label_placement=metric.get('label_placement'), hotspot_repair=metric.get('hotspot_repair'), protected=metric.get('protected'), node_overlap_kinds=metric.get('node_overlap_kinds'), edge_routing=metric.get('edge_routing'))
 
 
 def run_job(folder):
@@ -1166,7 +1179,7 @@ def run_job(folder):
             else:
                 (folder / 'map.svg').write_text(epv.recolor_svg((folder / 'map.svg').read_text(), prov_kinds))
             map_note = dict(kind='routed_full', routing=(metric.get('routing') or {}).get('status'), routing_attempts=metric.get('routing_attempts'),
-                            metrics={k: metric.get(k) for k in ('node_overlap_pairs', 'label_overlap_pairs', 'straight_crossings')}, source_paths=metric.get('source_paths'), expert_geometry=metric.get('expert_geometry'), instance_optimization=metric.get('instance_optimization'), context_placement=metric.get('context_placement'), completion_context=metric.get('completion_context'), layout_quality_final=metric.get('layout_quality_final'), edge_style=metric.get('edge_style'), peripheral=metric.get('peripheral'), block_relocation=metric.get('block_relocation'), region_placement=metric.get('region_placement'), regions=metric.get('regions'), expert_submodule=metric.get('expert_submodule'), label_placement=metric.get('label_placement'), protected=metric.get('protected'), node_overlap_kinds=metric.get('node_overlap_kinds'), edge_routing=metric.get('edge_routing'))
+                            metrics={k: metric.get(k) for k in ('node_overlap_pairs', 'label_overlap_pairs', 'straight_crossings')}, source_paths=metric.get('source_paths'), expert_geometry=metric.get('expert_geometry'), instance_optimization=metric.get('instance_optimization'), context_placement=metric.get('context_placement'), completion_context=metric.get('completion_context'), layout_quality_final=metric.get('layout_quality_final'), edge_style=metric.get('edge_style'), peripheral=metric.get('peripheral'), block_relocation=metric.get('block_relocation'), region_placement=metric.get('region_placement'), regions=metric.get('regions'), expert_submodule=metric.get('expert_submodule'), label_placement=metric.get('label_placement'), hotspot_repair=metric.get('hotspot_repair'), protected=metric.get('protected'), node_overlap_kinds=metric.get('node_overlap_kinds'), edge_routing=metric.get('edge_routing'))
         elif len(allids) <= LIMITS['whole_map_max_reactions']:
             global_note = None
             if LAYOUT == 'global':
