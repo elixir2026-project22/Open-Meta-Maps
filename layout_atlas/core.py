@@ -15,6 +15,10 @@ sys.dont_write_bytecode=True
 from model_io import load_model
 SEEDS=[20261105,20261106,20261107]
 CURRENCY={e['id'] for e in json.loads((DATA/'currency_metabolites.json').read_text())['currency']}  # BiGG ids of currency / cofactor metabolites (see the file for provenance)
+# Shared example GEM list for bridge rebuilds / experiments (not model-specific layout rules)
+EXAMPLE_MODELS=[('e_coli_core',EXAMPLES/'e_coli_core.xml','Escherichia coli'),('iML1515',EXAMPLES/'iML1515.xml','Escherichia coli'),
+                ('iMM904',EXAMPLES/'iMM904.xml','Saccharomyces cerevisiae'),('Human-GEM',HUMAN_GEM,'Homo sapiens'),
+                ('iYO844',DATA/'models/iYO844.xml','Bacillus subtilis'),('AraCore_v2_1',DATA/'models/AraCore_v2_1.xml','Arabidopsis thaliana')]
 def read(p):return json.loads(Path(p).read_text())
 def dump(p,v):
  p=Path(p);p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(v,ensure_ascii=False,indent=2,allow_nan=False)+'\n')

@@ -1,4 +1,13 @@
 """Source-isolated geometric ranking and same-range whole-model application ablations."""
+
+import sys as _sys
+from pathlib import Path as _Path
+_ROOT = _Path(__file__).resolve().parents[1]
+if str(_ROOT / 'layout_atlas') not in _sys.path:
+    _sys.path.insert(0, str(_ROOT / 'layout_atlas'))
+if str(_ROOT) not in _sys.path:
+    _sys.path.insert(0, str(_ROOT))
+
 import gzip,time,pickle,html
 from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.linear_model import LogisticRegression

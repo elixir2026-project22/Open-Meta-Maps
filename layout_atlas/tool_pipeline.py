@@ -28,7 +28,7 @@ from core import *
 LIMITS = dict(max_bytes=25 * 1024 * 1024, max_reactions=20000, full_routed_max_reactions=150, whole_map_max_reactions=3000, view_size=50)
 SOURCE_PATHS = False  # reuse the expert's original curves (Escher Bezier chains) for the edges of matched structures
 ORIENTATION = 'full'  # 'off' | 'sides' (currency copies on the substrate / product side) | 'full' (also reactions outside the expert structures between their substrates and products)
-LAYOUT_STYLE = 'legacy'  # 'legacy' | 'expert' (V7: every algorithm-placed connection is a Bezier curve solved from expert-map constraints; no orthogonal polylines)
+LAYOUT_STYLE = 'expert'  # 'legacy' | 'expert' (V7: every algorithm-placed connection is a Bezier curve solved from expert-map constraints; no orthogonal polylines)
 COMPLETION_CONTEXT = 'auto'  # 'auto' (V6: uncovered reactions are placed beside the glyphs of their own metabolites) | 'off'
 EDGE_ROUTING = 'libavoid'  # 'libavoid' (orthogonal, all edges) | 'hybrid' (routes only blocked algorithm-placed edges) | 'none' (straight lines)
 # Routing behavior by layout style and model size:
@@ -237,12 +237,11 @@ def load_bridge():
     if cache.exists():
         return read(cache)
     import semantic_transfer as st
-    import ec_experiment
-    missing = [str(p) for _, p, _ in ec_experiment.MODELS if not p.exists()]
+    missing = [str(p) for _, p, _ in EXAMPLE_MODELS if not p.exists()]
     if missing:
         raise FileNotFoundError('annotation_bridge.json is missing and the models needed to rebuild it are not available: ' + ', '.join(missing) +
                                 ' (BiGG models are in examples/; point OPM_HUMAN_GEM to Human-GEM.xml)')
-    return st.annotation_bridge(ec_experiment.MODELS)
+    return st.annotation_bridge(EXAMPLE_MODELS)
 
 
 def save_gz(path, obj):
@@ -485,8 +484,10 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         if log:
             log(f"  metabolite instances: +{instance_report['added']}, merged {instance_report['shared_nodes_merged']}, reattached {instance_report['reactions_reattached']}; edges >250: {instance_report['edges_over_250']}, >1000: {instance_report['edges_over_1000']}")
     regions_report = None
-    if LAYOUT_STYLE == 'expert' and os.environ.get('OPM_REGIONS', 'off') == 'on':    # pathway-level organisation of the rigid modules (V7.3 P0); A/B switch
-        import regions as regions_module
+    if LAYOUT_STYLE == 'expert' and os.environ.get('OPM_REGIONS', 'off') == 'on':    # opt-in experimental pass (lives under experiments/optional)
+        import sys
+        sys.path.insert(0, str(ROOT))
+        from experiments.optional import regions as regions_module
         scene, regions_report = regions_module.organize(model, scene, blocks, currency(model))
         if log:
             log('  regions: ' + str(regions_report))
@@ -636,8 +637,10 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             if log:
                 log('  expert sub-module relocation: ' + str({k: v for k, v in sub.items() if k not in ('rows', 'regenerated_expert_edges')}))
             dump(folder / 'map.json', data)
-        if os.environ.get('OPM_REGION_PLACE', 'off') == 'on':     # experimental: pathway-aware placement of whole regions next to their strongest neighbour (V7.3 P4)
-            import region_placement
+        if os.environ.get('OPM_REGION_PLACE', 'off') == 'on':     # opt-in experimental pass (lives under experiments/optional)
+            import sys
+            sys.path.insert(0, str(ROOT))
+            from experiments.optional import region_placement
             data, rp = region_placement.place(data, model, scene, blocks, currency(model), skip_edges, log=log)
             metric['region_placement'] = rp
             data[0].setdefault('metadata', {}).setdefault('regenerated_expert_edges', [])
@@ -718,9 +721,9 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
 def draw_one_view(model, selected, views, view_id, folder):
     """One fixed view with the P0-compatible pipeline; returns the metrics dict."""
     import drawing
-    import micromap_experiment as me
+    import retrieval
     sub = drawing.subset(model, views[view_id]['reaction_ids'])
-    clipped = me.clip_proposals(selected, sub)
+    clipped = retrieval.clip_proposals(selected, sub)
     out = folder / 'views' / view_id
     metric = draw_map(sub, clipped, out, full_model=model)
     for ext in ('svg', 'json'):
@@ -931,7 +934,7 @@ def run_job(folder):
     LAYOUT = options.get('layout') if options.get('layout') in ('global', 'tiled') else 'global'
     import global_layout as _gl
     _gl.BACKBONE = (LAYOUT_STYLE == 'expert')
-        _gl.BLOCK_LAYOUT = options.get('block_layout') if options.get('block_layout') in ('auto', 'single') else 'auto'
+    _gl.BLOCK_LAYOUT = options.get('block_layout') if options.get('block_layout') in ('auto', 'single') else 'auto'
     REACTION_STYLE = options.get('reaction_style') if options.get('reaction_style') in ('line', 'marker') else 'line'
     COMPLETION = options.get('completion') if options.get('completion') in ('spaced', 'classic') else 'spaced'
     library_kind = options.get('library', 'windows')  # module-candidate source; 'windows' (default, Atlas v0.3) | 'units_sub' (structure units + derived sub-windows)
@@ -1065,8 +1068,10 @@ def run_job(folder):
             selected = [p for p in selected if p not in _drop]
             job.log(f'Dropped {len(_drop)} topology-only structure(s) that covered very large reactions: {sorted(_big & {r for p in _drop for r in p["reaction_ids"]})}')
         lowconf_report = None
-        if LAYOUT_STYLE == 'expert' and os.environ.get('OPM_LOWCONF', 'off') == 'on':    # experimental switch: decompose low-confidence (topology-only) structures
-            import lowconf
+        if LAYOUT_STYLE == 'expert' and os.environ.get('OPM_LOWCONF', 'off') == 'on':    # opt-in experimental pass (lives under experiments/optional)
+            import sys
+            sys.path.insert(0, str(ROOT))
+            from experiments.optional import lowconf
             selected, lowconf_report = lowconf.split(model, currency(model), selected)
             job.log(f"Low-confidence decomposition: {len(lowconf_report['split'])} structure(s) split, {lowconf_report['kept']} kept, of {lowconf_report['checked']} topology-only: {lowconf_report['split']}")
         used = {r for p in selected for r in p['reaction_ids']}

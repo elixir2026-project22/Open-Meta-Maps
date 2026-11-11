@@ -1,7 +1,9 @@
 """Pinned libavoid build and a narrow numeric stdin bridge; no shell interpolation."""
-import subprocess,zipfile,io,urllib.request
+import subprocess,zipfile,io,urllib.request,sys
 from core import *
-from acquire import fetch
+# fetch lives in tools/ (build/acquisition); keep setup working without a runtime acquire module
+sys.path.insert(0, str(ROOT))
+from tools.acquire import fetch
 
 def build():
  folder=BASE/'build';binary=folder/'avoid_router'

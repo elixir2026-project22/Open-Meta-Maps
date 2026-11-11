@@ -32,7 +32,7 @@ import os
 LONG = os.environ.get('OPM_COMPOSE_LONG', 'on') == 'on'
 CLEAR = 110.0
 SHELF_GAP = 120.0
-ROW_WIDTH_MIN = 4000.0
+ROW_WIDTH_MIN = 2000.0  # floor only; actual row width follows main-network size and target aspect
 TARGET_ASPECT = 1.4    # target width/height ratio for the independent shelf block (slightly wider than tall)
 
 
