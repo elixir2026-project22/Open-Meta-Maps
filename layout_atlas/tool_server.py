@@ -10,9 +10,11 @@
 * POST /api/jobs/<id>/views/<view_id>  draw one view (queued behind running jobs)
 * DELETE /api/jobs/<id>      cancel a running job and delete its folder
 
-Lifetime: the page pings /api/ping every few seconds; when every page has been closed (no ping for ~10 s) and no job is running or
-queued, the server stops itself (disable with --keep-running).  If the port is taken by an older instance of this same tool, that
-instance is stopped and replaced; any other program on the port is left alone and the next free port is used.
+Lifetime: each open tab pings /api/ping every few seconds and sends /api/bye on pagehide. When the last tab is gone
+(and none ping within a short grace, ~8 s, so reloads survive) and no job is running or queued, the server stops itself
+(disable with --keep-running). If a job is still running when the last tab closes, the server exits after that job finishes
+unless a tab reconnects. If the port is taken by an older instance of this same tool, that instance is stopped and replaced;
+any other program on the port is left alone and the next free port is used.
 
 Jobs run one at a time in a separate process (tool_pipeline.py).  The server only listens on 127.0.0.1, checks the Host
 header (DNS-rebinding guard), limits uploads to 25 MB, never executes uploaded content and never serves job inputs back.
@@ -148,6 +150,7 @@ def worker():
         finally:
             with lock:
                 processes.pop(job_dir.name, None)
+            WAKE.set()
 
 
 def parse_multipart(content_type, body):
@@ -225,13 +228,17 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return self.send_json(404, error('not_found', 'Unknown endpoint.', '没有这个接口。'))
         return self.static(path)
 
-    HEARTBEAT = (b"<script>(function(){var id=Math.random().toString(36).slice(2,10);function ping(){fetch('/api/ping?c='+id,{method:'POST',keepalive:true}).catch(function(){})}"
-                 b"ping();setInterval(ping,4000);window.addEventListener('pagehide',function(){try{navigator.sendBeacon('/api/bye?c='+id)}catch(e){}})})();</script>")
+    HEARTBEAT = (b"<script>(function(){if(window.__opmHB)return;window.__opmHB=1;"
+                 b"var id=Math.random().toString(36).slice(2,10);"
+                 b"function ping(){fetch('/api/ping?c='+id,{method:'POST',keepalive:true}).catch(function(){})}"
+                 b"function bye(){try{navigator.sendBeacon('/api/bye?c='+encodeURIComponent(id),'')}catch(e){}}"
+                 b"ping();setInterval(ping,4000);"
+                 b"window.addEventListener('pagehide',bye);window.addEventListener('unload',bye)})();</script>")
 
     def html_bytes(self, data):
         """Every HTML page this server hands out keeps the server alive while it is open (the catalog and home pages have no script of their own; without
-        this the server stopped 10 s after the tool page was left for another page)."""
-        if b'/api/ping' in data:
+        this the server stopped shortly after the tool page was left for another page)."""
+        if b'__opmHB' in data or b"/api/ping?c=" in data:
             return data
         i = data.rfind(b'</body>')
         return data[:i] + self.HEARTBEAT + data[i:] if i >= 0 else data + self.HEARTBEAT
@@ -264,6 +271,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return self.send_json(403, error('bad_host', 'Forbidden host.', '不允许的主机名。'))
         path = urlparse(self.path).path
         if path in ('/api/ping', '/api/bye'):
+            length = int(self.headers.get('Content-Length') or 0)
+            if length > 0:
+                self.rfile.read(min(length, 4096))  # drain beacon/keepalive body
             cid = (parse_qs(urlparse(self.path).query).get('c') or ['page'])[0][:40]
             (client_touch if path == '/api/ping' else client_bye)(cid)
             return self.send_json(200, dict(ok=True))
@@ -342,35 +352,50 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
 
 CLIENTS = {}  # open page id -> last time it pinged
-LIFE = dict(ever=False, empty_since=None)
-GRACE = 10.0   # seconds without any open page before the server stops
-STALE = 180.0  # a page that has not pinged for this long counts as closed (hidden tabs ping about once a minute)
+LIFE = dict(ever=False, empty_since=None, keep=False, pending_exit=False)
+GRACE = 8.0    # seconds with no open tab before stop (covers reload/navigation gaps)
+STALE = 45.0   # a page that has not pinged for this long counts as closed
+WAKE = threading.Event()
 
 
 def client_touch(cid):
     with lock:
         CLIENTS[cid] = time.time()
-        LIFE['ever'], LIFE['empty_since'] = True, None
+        LIFE['ever'], LIFE['empty_since'], LIFE['pending_exit'] = True, None, False
+    WAKE.set()
 
 
 def client_bye(cid):
     with lock:
         CLIENTS.pop(cid, None)
+        if LIFE['ever'] and not CLIENTS:
+            LIFE['pending_exit'] = True
+    WAKE.set()
+
+
+def _busy():
+    return bool(processes) or not tasks.empty()
 
 
 def idle_watch(httpd):
-    """Stop the server once all pages are gone and nothing is running (only after at least one page has connected)."""
+    """Stop once every tab has gone (bye or stale) and nothing is running; wait out GRACE so reloads survive."""
     while True:
-        time.sleep(2)
+        WAKE.wait(timeout=1.0)
+        WAKE.clear()
         with lock:
+            if LIFE.get('keep'):
+                continue
             now = time.time()
             for cid in [c for c, t in CLIENTS.items() if now - t > STALE]:
                 CLIENTS.pop(cid, None)
-            busy = bool(processes) or not tasks.empty()
+            busy = _busy()
             if LIFE['ever'] and not CLIENTS and not busy:
                 LIFE['empty_since'] = LIFE['empty_since'] or now
                 done = now - LIFE['empty_since'] >= GRACE
             else:
+                # Job still running after the last tab closed: wait, then take the grace once it finishes.
+                if LIFE['ever'] and not CLIENTS and busy:
+                    LIFE['pending_exit'] = True
                 LIFE['empty_since'], done = None, False
         if done:
             print('All pages are closed and no job is running: stopping the tool server.', flush=True)
@@ -430,6 +455,7 @@ def main(port=8765, keep_running=False):
     if problems:
         print('The tool cannot start:\n  - ' + '\n  - '.join(problems), file=sys.stderr)
         raise SystemExit(1)
+    LIFE['keep'] = bool(keep_running)
     threading.Thread(target=worker, daemon=True).start()
     httpd, port = bind(port)
     if not keep_running:
