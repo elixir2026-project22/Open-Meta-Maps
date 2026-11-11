@@ -210,5 +210,12 @@
   "decode_failures": [],
   "excluded_modules": 0,
   "paper_doi": "10.1371/journal.pcbi.1013564",
-  "zenodo_doi": "10.5281/zenodo.15048160"
+  "zenodo_doi": "10.5281/zenodo.15048160",
+  "extraction": {
+    "methods": {
+      "diagram_modules": 858
+    },
+    "modules": 858,
+    "atlas_schema_version": 1
+  }
 }

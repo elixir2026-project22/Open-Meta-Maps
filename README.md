@@ -110,7 +110,7 @@ Default Atlas (`data/open_core.sqlite` plus default extensions). Counts from [`d
 
 | Source | Modules | Licence |
 |---|---:|---|
-| Escher (22 community maps) | 9,098 | CC0-1.0 |
+| Escher (22 community maps) | 13,047 | CC0-1.0 |
 | Reactome (release 97, 86 diagrams) | 3,405 | CC0 (data) |
 | WikiPathways (20261110; 1,245 semantic + 29,673 geometry-only) | 30,918 | CC0-1.0 |
 | Human-maps (130 official Escher JSON) | 8,540 | CC BY 4.0 |
@@ -118,7 +118,7 @@ Default Atlas (`data/open_core.sqlite` plus default extensions). Counts from [`d
 | Metabolism Regulation (22 SBGN-ML maps) | 423 | CC BY 4.0 |
 | PANTHER (3.4/CD4.1, 8 maps) | 238 | CC BY 4.0 |
 | iCH360 (10 custom Escher maps; MIT) | 858 | MIT |
-| **Total (default load)** | **65,183** | |
+| **Total (default load)** | **69,132** | |
 
 Not included: MicroMap, Yeast-maps, KEGG; iCH360 `compressed_map.json` (CP pseudo-reactions). Attribution: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Audit notes: [docs/licensing_audit.md](docs/licensing_audit.md).
 
