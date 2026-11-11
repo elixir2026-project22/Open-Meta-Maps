@@ -676,6 +676,12 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     metric['node_overlap_kinds'] = node_overlap_kinds
     if protected_report is not None:
         data[0]['metadata']['protected_connections'] = [dict(r) for r in scene.get('protected', [])]
+    # Node-level label_hidden is not in the Escher schema; keep ids under metadata (allowed).
+    hidden_labels = [nid for nid, n in data[1]['nodes'].items() if n.pop('label_hidden', None)]
+    for rx in data[1]['reactions'].values():
+        rx.pop('label_hidden', None)
+    if hidden_labels:
+        data[0].setdefault('metadata', {})['hidden_metabolite_labels'] = hidden_labels
     try:
         Draft4Validator(read(ESCHER_SCHEMA)).validate(data)
     except Exception:

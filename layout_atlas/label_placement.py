@@ -208,14 +208,18 @@ def optimize(data, passes=10, hide_currency=True):
             cx, cy = L['cx'], L['cy']
             cell = (int(cx // CELL), int(cy // CELL))
             if cell in dense_cells:
-                # Hide without stacking at one sentinel point (that inflated overlap metrics)
+                # Park on the glyph (schema requires label_x/y). label_hidden is
+                # stripped before Escher export; SVG skips co-located currency text.
                 drop(i, current[i])
-                L['box'].pop('label_x', None)
-                L['box'].pop('label_y', None)
+                L['box']['label_x'] = round(float(L['cx']), 2)
+                L['box']['label_y'] = round(float(L['cy']), 2)
                 L['box']['label_hidden'] = True
                 current[i] = (0.0, 0.0, 0.0, 0.0)
                 hidden += 1
-        after = sum(1 for i in range(len(labels)) if 'label_x' in labels[i]['box'] and cost(i, current[i]) > 0)
+        after = sum(
+            1 for i in range(len(labels))
+            if not labels[i]['box'].get('label_hidden') and cost(i, current[i]) > 0
+        )
     
     return dict(labels=len(labels), with_conflict_before=before, with_conflict_after=after, 
                 moves=moved, hidden_currency=hidden, dense_cells=len(dense_cells))
