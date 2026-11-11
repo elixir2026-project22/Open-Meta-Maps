@@ -15,6 +15,7 @@ Core SQLite modules (checked by reading the module payloads), plus default exten
 | Escher maps | 9,098 | CC0-1.0 | Escher community-maps repository `LICENSE` is CC0 | OK |
 | BRENDA pathway maps | 11,703 | CC BY 4.0 | https://www.brenda.dsmz.de/license.php; doi:10.1093/nar/gkaf1113 | OK (layout possibly automatic; retrieval deprioritises vs expert maps) |
 | Human-maps | 8,540 | CC BY 4.0 | official `escher/` JSON only | OK (SVGs with embedded BY-SA are not imported) |
+| Metabolism Regulation gallery | 423 | CC BY 4.0 | https://metabolismregulation.github.io/about/; SBGN-ML under `source_inputs/raw/metabolismregulation/` | OK (hand-drawn; attribution required) |
 
 ### Escher maps
 
@@ -36,6 +37,7 @@ The 22 maps come from the Escher community-maps repository (BiGG-based maps for 
 | `data/routing/source.zip` (adaptagrams, libavoid) | adaptagrams is LGPL; exact terms not re-checked | **Open**: confirm and add the LGPL notice |
 | Yeast-maps / original yeast map | GPL-3.0 (Yeast-maps) | **Removed** from packages, acquisition and docs. Not redistributed. |
 | Human-maps (official `escher/` JSON) | CC BY 4.0 | **Included** (8,540 modules via `database.escher_diagram`). Companion SVG exports embed BY-SA metadata and are **not** imported; the Escher JSON files have no BY-SA marks. |
+| Metabolism Regulation gallery SBGN-ML | CC BY 4.0 | **Included** via generic `layout_atlas/sbgn.py` (`data/extensions/metabolismregulation/`). See [metabolismregulation_import.md](metabolismregulation_import.md). |
 | `data/extensions/{units,source_paths,reaction_geometry_templates}` | derived from the open-core maps | inherits the Escher-map status above |
 | `data/annotation_bridge.json` | derived from model annotations (identifier links) | inherits the model licences above |
 

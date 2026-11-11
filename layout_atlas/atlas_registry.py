@@ -32,7 +32,13 @@ ATTRIBUTION = {
     'reactome': 'Reactome pathway data (CC0); https://reactome.org',
     'brenda': 'BRENDA; Chang et al. NAR 2026 doi:10.1093/nar/gkaf1113',
     'human_maps': 'Human-maps (CC BY 4.0); https://github.com/SysBioChalmers/Human-maps',
+    'metabolismregulation': (
+        'Metabolism Regulation gallery (CC BY 4.0); '
+        'https://metabolismregulation.github.io/gallery/'
+    ),
 }
+
+DEFAULT_EXTENSIONS = ('brenda', 'human_maps', 'wikipathways_geometry', 'metabolismregulation')
 
 DDL = '''
 CREATE TABLE IF NOT EXISTS modules(
@@ -274,7 +280,7 @@ def write_registry(db=None, manifest=None, path=None):
     for blob, in db.execute('SELECT payload FROM modules'):
         p = unpack(blob)
         licences[p.get('license') or p.get('licence') or '?'] += 1
-    for name in ('brenda', 'human_maps', 'wikipathways_geometry'):
+    for name in DEFAULT_EXTENSIONS:
         ext = DATA / 'extensions' / name / 'modules.json.gz'
         if ext.exists():
             with gzip.open(ext, 'rt') as f:
@@ -283,7 +289,7 @@ def write_registry(db=None, manifest=None, path=None):
                 licences[m.get('license') or m.get('licence') or '?'] += 1
             mods[name] = mods.get(name, 0) + len(items)
     ext_meta = {}
-    for name in ('brenda', 'human_maps', 'wikipathways_geometry'):
+    for name in DEFAULT_EXTENSIONS:
         src = DATA / 'extensions' / name / 'SOURCE.json'
         if src.exists():
             ext_meta[name] = read(src)
@@ -371,7 +377,7 @@ def validate(path=None, include_extensions=True):
         db.close()
 
     if include_extensions:
-        for name in ('brenda', 'human_maps', 'wikipathways_geometry'):
+        for name in DEFAULT_EXTENSIONS:
             ext = DATA / 'extensions' / name / 'modules.json.gz'
             if not ext.exists():
                 continue
@@ -384,6 +390,12 @@ def validate(path=None, include_extensions=True):
                     errors.append(f'extension {name}[{i}]: missing layout_origin')
                 if not m.get('source'):
                     errors.append(f'extension {name}[{i}]: missing source')
+                if name == 'metabolismregulation':
+                    if not m.get('source_sha256'):
+                        errors.append(f'extension {name}[{i}]: missing source_sha256')
+                    cite = m.get('source_citation') or {}
+                    if not (cite.get('attribution') or m.get('attribution')):
+                        errors.append(f'extension {name}[{i}]: missing attribution')
 
     if not REGISTRY_PATH.exists():
         errors.append('missing data/atlas_registry.json')

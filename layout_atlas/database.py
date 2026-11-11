@@ -16,22 +16,18 @@ def _core_modules_cached():
  """Cached open-core modules (immutable during one process)."""
  db=connect();out=tuple(unpack(r[0]) for r in db.execute('SELECT payload FROM modules ORDER BY id'));db.close();return out
 
-def modules(include_brenda=True, include_human_maps=True, include_wikipathways_geometry=True):
+def modules(include_brenda=True, include_human_maps=True, include_wikipathways_geometry=True, include_metabolismregulation=True):
  """Open-core modules from atlas.sqlite, plus default extensions when present.
 
  WikiPathways geometry-only windows ship as an extension (size) and load by default.
+ Metabolism Regulation gallery SBGN-ML maps ship as an extension and load by default.
  """
  out=list(_core_modules_cached())
  for flag, rel in (
   (include_brenda,'extensions/brenda/modules.json.gz'),
   (include_human_maps,'extensions/human_maps/modules.json.gz'),
   (include_wikipathways_geometry,'extensions/wikipathways_geometry/modules.json.gz'),
- ):
-  path=DATA/rel
-  if flag and path.exists():
-   with gzip.open(path,'rt') as f: out.extend(json.load(f))
- return out
-
+  (include_metabolismregulation,'extensions/metabolismregulation/modules.json.gz'),
  ):
   path=DATA/rel
   if flag and path.exists():

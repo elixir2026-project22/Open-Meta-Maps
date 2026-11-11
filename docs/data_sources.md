@@ -8,6 +8,7 @@ The default Atlas is `data/open_core.sqlite`. Its layouts come only from:
 | WikiPathways | CC0 (terms snapshot in `data/source_inputs/terms/`) | pinned GPML in `source_inputs/raw/wp/` (snapshot 20261110) |
 | Human-maps | CC BY 4.0 | official `escher/` JSON only (`data/extensions/human_maps/`); SVGs with embedded BY-SA are not imported |
 | BRENDA pathway maps | CC BY 4.0 | `data/extensions/brenda/`; layout possibly automatic |
+| Metabolism Regulation gallery | CC BY 4.0 | hand-drawn SBGN-ML via `layout_atlas/sbgn.py` (`data/extensions/metabolismregulation/`); see [metabolismregulation_import.md](metabolismregulation_import.md) |
 | Reactome | CC0 data; some illustrations CC BY 4.0 (terms snapshot in `source_inputs/terms/`) | pinned release archive members |
 
 Source versions, SHA-256 hashes and access dates: `data/source_inputs/source_registry.json`, `origin.json` and `data/input_manifest.json`. Every Atlas structure carries its source and licence; each generated map lists the structures it used in `licenses.json`.

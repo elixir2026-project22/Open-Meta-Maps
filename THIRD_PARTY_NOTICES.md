@@ -7,6 +7,7 @@ Open Meta Maps publishes **processed structures**: the module graphs, reaction i
 | Source | What is used | Where it comes from | Licence as recorded |
 |---|---|---|---|
 | **Human-maps** | modules in `data/extensions/human_maps/` from official `escher/` JSON | <https://github.com/SysBioChalmers/Human-maps> | CC BY 4.0 (SVG companions embed BY-SA and are not imported) |
+| **Metabolism Regulation gallery** | SBGN-ML modules in `data/extensions/metabolismregulation/`; raw `.sbgn` in `data/source_inputs/raw/metabolismregulation/` | <https://metabolismregulation.github.io/gallery/>; about/licence <https://metabolismregulation.github.io/about/> | CC BY 4.0 (hand-drawn layouts; attribution required) |
 | **BRENDA pathway maps** | pathway modules in `data/extensions/brenda/` | <https://www.brenda.dsmz.de/>; Chang et al. NAR 2026 doi:10.1093/nar/gkaf1113 | CC BY 4.0; layout possibly automatic |
 | **Escher maps** (RECON1, e_coli_core, iAF1260, iJO1366, iMM904; 22 maps) | module structures and layouts extracted from the maps; the original map files are kept as input in `data/source_inputs/raw/escher/` | <https://github.com/escher/community-maps> (commit `6aa92abded6d0f9c4502ff681e14e40c5c00d61f`); repository `LICENSE` is CC0 | CC0-1.0 (Atlas source label `escher`) |
 | **WikiPathways** | GPML pathway maps and structures extracted from them | <https://www.wikipathways.org>; terms snapshot `data/source_inputs/terms/wikipathways.html` (accessed 2026-11-05) | CC0 |
