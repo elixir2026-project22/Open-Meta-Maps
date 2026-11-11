@@ -3,20 +3,20 @@
   "generated": "2026-11-11",
   "open_core": {
     "path": "data/open_core.sqlite",
-    "sha256": "97f9b706a61caa52044700635b0236b7fd9caacbe7d518e2752a87762cd1e54f",
-    "bytes": 58302464,
+    "sha256": "d31a9785b1538fed2001b5a30e0441a5a23809359c6cca7606d3c632a51c185c",
+    "bytes": 66555904,
     "maps": {
       "escher": 22,
       "reactome": 86,
       "wikipathways": 2215
     },
     "modules": {
-      "escher": 9098,
+      "escher": 13047,
       "reactome": 3405,
       "wikipathways": 1245
     },
     "modules_with_extensions": {
-      "escher": 9098,
+      "escher": 13047,
       "reactome": 3405,
       "wikipathways": 1245,
       "brenda": 11703,
@@ -25,9 +25,9 @@
       "metabolismregulation": 423,
       "panther": 238
     },
-    "reactions": 63274,
+    "reactions": 89598,
     "licences": {
-      "CC0-1.0": 40016,
+      "CC0-1.0": 43965,
       "CC0-1.0-data": 3405,
       "CC-BY-4.0": 20904
     }
@@ -570,7 +570,8 @@
     "wikipathways_release": "20261110"
   },
   "extraction": {
-    "pipeline": "database.build / diagram_modules / from_legacy",
-    "atlas_schema_version": 1
+    "pipeline": "database.build / escher_cutter / diagram_modules / from_legacy",
+    "atlas_schema_version": 1,
+    "escher": "escher_community_windows (atlas-extraction-1)"
   }
 }
