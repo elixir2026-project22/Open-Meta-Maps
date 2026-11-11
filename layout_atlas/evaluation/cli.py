@@ -70,6 +70,10 @@ def _flat_row(report: dict) -> dict:
         "cycle_circularity": (d.get("cycles") or {}).get("cycle_circularity"),
         "cycle_direction_consistency": (d.get("cycles") or {}).get("cycle_direction_consistency"),
         "cycle_order_consistency": (d.get("cycles") or {}).get("cycle_order_consistency"),
+        "main_segment_axis_share": d.get("main_segment_axis_share") or (d.get("orderliness") or {}).get("main_segment_axis_share"),
+        "reaction_axis_share": d.get("reaction_axis_share") or (d.get("orderliness") or {}).get("reaction_axis_share"),
+        "chain_turn_median_deg": d.get("chain_turn_median_deg") or (d.get("orderliness") or {}).get("chain_turn_median_deg"),
+        "metabolite_grid_share": d.get("metabolite_grid_share") or (d.get("orderliness") or {}).get("metabolite_grid_share"),
         "flow_main_dir_share": d.get("flow_main_dir_share"),
         "exchange_periphery_share": d.get("exchange_periphery_share"),
         "largest_empty_rect_share": (

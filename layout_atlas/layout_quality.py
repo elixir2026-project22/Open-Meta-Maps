@@ -356,6 +356,17 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, str
                   cycle_direction_consistency=rules.get('cycle_direction_consistency'),
                   cycle_order_consistency=rules.get('cycle_order_consistency'),
                   cycles=rules.get('cycles'), cycle_len=rules.get('cycle_len'))
+    orderliness = dict(
+        main_segment_axis_share=rules.get('main_segment_axis_share'),
+        reaction_axis_share=rules.get('reaction_axis_share'),
+        chain_turn_median_deg=rules.get('chain_turn_median_deg'),
+        metabolite_grid_share=rules.get('metabolite_grid_share'),
+        segments=rules.get('orderliness_segments'),
+        reactions=rules.get('orderliness_reactions'),
+        chain_turns=rules.get('orderliness_chain_turns'),
+        metabolites=rules.get('orderliness_metabolites'),
+        grid_tol_px=rules.get('orderliness_grid_tol_px'),
+    )
     unrelated = dict(
         node_overlaps=rules.get('unrelated_node_overlaps'),
         edge_through_node=rules.get('unrelated_edge_through_node'),
@@ -366,6 +377,11 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, str
     details = dict(
         line_shape=line_shape,
         cycles=cycles,
+        orderliness=orderliness,
+        main_segment_axis_share=orderliness.get('main_segment_axis_share'),
+        reaction_axis_share=orderliness.get('reaction_axis_share'),
+        chain_turn_median_deg=orderliness.get('chain_turn_median_deg'),
+        metabolite_grid_share=orderliness.get('metabolite_grid_share'),
         flow_main_dir=rules.get('flow_main_dir'),
         flow_main_dir_share=rules.get('flow_main_dir_share'),
         exchange_periphery_share=rules.get('exchange_periphery_share'),
@@ -465,9 +481,10 @@ def _na(v):
 def _detailed_metrics_panel(details, *, line_shape, cycles, unrelated, crossing_density, composition):
     """Grouped rows for the Layout quality → Detailed metrics panel.
 
-    Selection rule: only metrics the layout optimises or should optimise. Pipeline
-    diagnostics (composition_pass / peripheral) are attached later by the tool UI
-    when those keys exist on ``details``.
+    Show a metric on the main table only when it is a layout target (including
+    backlog / not-yet-optimised targets). Non-target diagnostics go under Debug.
+    Pipeline diagnostics (composition_pass / peripheral) are attached later by
+    the tool UI when those keys exist on ``details``.
     """
     ls, cy, uo, cd, comp = line_shape, cycles, unrelated, crossing_density, composition or {}
     worst = (cd or {}).get('worst_window_crossings')
@@ -480,6 +497,10 @@ def _detailed_metrics_panel(details, *, line_shape, cycles, unrelated, crossing_
     exch = details.get('exchange_periphery_share')
     circ = cy.get('cycle_circularity')
     flow = details.get('flow_main_dir_share')
+    seg_axis = details.get('main_segment_axis_share')
+    rx_axis = details.get('reaction_axis_share')
+    chain_turn = details.get('chain_turn_median_deg')
+    grid = details.get('metabolite_grid_share')
     species = details.get('species_in_other_compartment')
     blank = details.get('blank_space_share')
     util = details.get('space_utilisation')
@@ -492,6 +513,77 @@ def _detailed_metrics_panel(details, *, line_shape, cycles, unrelated, crossing_
     isolated = comp.get('isolated_reactions')
     densest = comp.get('max_reactions_in_one_cell')
     canvas = comp.get('canvas')
+
+    # Targets currently measured but not yet optimised (待优化).
+    cycle_is_target = True
+    flow_is_target = False  # global reading direction fights curated orientations
+
+    structure_rows = [
+        _row(
+            'Exchange reactions on the periphery',
+            _pct(exch),
+            code='exchange_periphery_share',
+            tip='Share of exchange/demand reactions that sit in the outer band of their component. Higher is better; target most exchanges outside the core.',
+            better='higher', target='≥ 50%',
+            stage='composition & peripherals',
+            miss=(exch is not None and exch < 0.5),
+        ),
+        _row(
+            'Axis-aligned main segments',
+            _pct(seg_axis),
+            code='main_segment_axis_share',
+            tip='Share of drawn main (non-cofactor) segment pieces within ±10° of horizontal or vertical. Higher is better; target at least half. Not yet optimised.',
+            better='higher', target='≥ 50%',
+            stage=STAGE_NOT_YET,
+            miss=(seg_axis is not None and seg_axis < 0.5),
+        ),
+        _row(
+            'Axis-aligned reaction axes',
+            _pct(rx_axis),
+            code='reaction_axis_share',
+            tip='Share of reactions whose substrate→product axis (non-cofactor) is within ±10° of horizontal or vertical. Higher is better; target at least half. Not yet optimised.',
+            better='higher', target='≥ 50%',
+            stage=STAGE_NOT_YET,
+            miss=(rx_axis is not None and rx_axis < 0.5),
+        ),
+        _row(
+            'Grid-aligned metabolites',
+            _pct(grid),
+            code='metabolite_grid_share',
+            tip='Share of main metabolite glyphs that share an x or y with another nearby main glyph (tolerance 0.05 × median main-edge length). Higher is better; target at least half. Not yet optimised.',
+            better='higher', target='≥ 50%',
+            stage=STAGE_NOT_YET,
+            miss=(grid is not None and grid < 0.5),
+        ),
+        _row(
+            'Median chain turn angle',
+            '—' if chain_turn is None else f'{chain_turn}°',
+            code='chain_turn_median_deg',
+            tip='Median turn at a main metabolite shared by exactly two reactions (0° = the two midmarkers sit on opposite sides of the metabolite). Lower is better; target ≤ 20°. Not yet optimised.',
+            better='lower', target='≤ 20°',
+            stage=STAGE_NOT_YET,
+            miss=(chain_turn is not None and chain_turn > 20.0),
+        ),
+    ]
+    if cycle_is_target:
+        structure_rows.append(_row(
+            'Cycle circularity / direction / order',
+            f"{_na(circ)} / {_na(cy.get('cycle_direction_consistency'))} ({_na(cy.get('cycle_direction'))}) / {_na(cy.get('cycle_order_consistency'))}",
+            code='cycle_circularity',
+            tip='How round and consistently oriented drawn cycles are (isoperimetric quotient and neighbour order). Higher is better. Backlog: ring/cycle placement for algorithm-placed cycles.',
+            better='higher', target='higher circularity & consistency',
+            stage=STAGE_NOT_YET,
+            miss=(circ is not None and circ < 0.35),
+        ))
+    structure_rows.append(_row(
+        'Species in another compartment',
+        _na(species) if species is None else f'{round(float(species), 3)}',
+        code='species_in_other_compartment',
+        tip='Share of metabolite glyphs that fall inside another compartment hull. Lower is better; target 0. Compartment packing is not yet optimised.',
+        better='lower', target='0',
+        stage=STAGE_NOT_YET,
+        miss=(species is not None and float(species) > 0.05),
+    ))
 
     groups = [
         dict(id='connections', label='Connections', collapsed=False, rows=[
@@ -543,35 +635,7 @@ def _detailed_metrics_panel(details, *, line_shape, cycles, unrelated, crossing_
                 miss=(bends is not None and bends > 0.5),
             ),
         ]),
-        dict(id='structure_flow', label='Structure & flow', collapsed=False, rows=[
-            _row(
-                'Exchange reactions on the periphery',
-                _pct(exch),
-                code='exchange_periphery_share',
-                tip='Share of exchange/demand reactions that sit in the outer band of their component. Higher is better; target most exchanges outside the core.',
-                better='higher', target='≥ 50%',
-                stage='composition & peripherals',
-                miss=(exch is not None and exch < 0.5),
-            ),
-            _row(
-                'Cycle circularity / direction / order',
-                f"{_na(circ)} / {_na(cy.get('cycle_direction_consistency'))} ({_na(cy.get('cycle_direction'))}) / {_na(cy.get('cycle_order_consistency'))}",
-                code='cycle_circularity',
-                tip='How round and consistently oriented drawn cycles are (isoperimetric quotient and neighbour order). Higher is better. Backlog: ring/cycle placement for algorithm-placed cycles.',
-                better='higher', target='higher circularity & consistency',
-                stage=STAGE_NOT_YET,
-                miss=(circ is not None and circ < 0.35),
-            ),
-            _row(
-                'Species in another compartment',
-                _na(species) if species is None else f'{round(float(species), 3)}',
-                code='species_in_other_compartment',
-                tip='Share of metabolite glyphs that fall inside another compartment hull. Lower is better; target 0. Compartment packing is not yet optimised.',
-                better='lower', target='0',
-                stage=STAGE_NOT_YET,
-                miss=(species is not None and float(species) > 0.05),
-            ),
-        ]),
+        dict(id='structure_flow', label='Structure & flow', collapsed=False, rows=structure_rows),
         dict(id='space_shape', label='Space & shape', collapsed=False, rows=[
             _row(
                 'Map size',
@@ -643,19 +707,29 @@ def _detailed_metrics_panel(details, *, line_shape, cycles, unrelated, crossing_
                 miss=False,
             ),
         ]))
-    # Debug-only: global flow fights curated orientations — keep off the main table.
-    if flow is not None or details.get('flow_main_dir'):
-        groups.append(dict(id='debug', label='Debug diagnostics', collapsed=True, debug=True, rows=[
-            _row(
-                'Main flow-direction share',
-                _pct(flow) + (f" ({details.get('flow_main_dir')})" if details.get('flow_main_dir') else ''),
-                code='flow_main_dir_share',
-                tip='Share of reactant→product axes aligned with the dominant reading direction. Debug only — not an optimisation target (would fight curated orientations).',
-                better=None, target='n/a (debug)',
-                stage='debug only',
-                miss=False,
-            ),
-        ]))
+    debug_rows = []
+    if not flow_is_target and (flow is not None or details.get('flow_main_dir')):
+        debug_rows.append(_row(
+            'Main flow-direction share',
+            _pct(flow) + (f" ({details.get('flow_main_dir')})" if details.get('flow_main_dir') else ''),
+            code='flow_main_dir_share',
+            tip='Share of reactant→product axes aligned with the dominant reading direction. Debug only — not an optimisation target (would fight curated orientations).',
+            better=None, target='n/a (debug)',
+            stage='debug only',
+            miss=False,
+        ))
+    if not cycle_is_target and circ is not None:
+        debug_rows.append(_row(
+            'Cycle circularity / direction / order',
+            f"{_na(circ)} / {_na(cy.get('cycle_direction_consistency'))} ({_na(cy.get('cycle_direction'))}) / {_na(cy.get('cycle_order_consistency'))}",
+            code='cycle_circularity',
+            tip='Cycle shape diagnostics kept as debug when cycle layout is not a target.',
+            better=None, target='n/a (debug)',
+            stage='debug only',
+            miss=False,
+        ))
+    if debug_rows:
+        groups.append(dict(id='debug', label='Debug diagnostics', collapsed=True, debug=True, rows=debug_rows))
     return dict(groups=groups, stage_not_yet=STAGE_NOT_YET)
 
 
