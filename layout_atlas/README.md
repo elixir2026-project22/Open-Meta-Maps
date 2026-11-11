@@ -9,7 +9,7 @@ This directory is the Python package behind Open Meta Maps. It builds a metaboli
 | `python3 project.py tool` | local web tool (`tool_server.py`, page in `results/tool/index.html`): upload a model, run the pipeline, preview, download |
 | `python3 project.py compose --gem MODEL.xml --out DIR --source-paths --layout-style expert` | the same pipeline from the command line (`compose_cli.py` → `tool_pipeline.py`) |
 | `python3 project.py data list` / `fetch` | optional data packages, see [docs/data_packages.md](../docs/data_packages.md) |
-| `python3 project.py setup` | one-time build of the edge routers (needs `clang++`) |
+| `python3 project.py setup` | one-time build of the edge routers (needs `g++` or `clang++`, see below) |
 | `python3 project.py catalog` | rebuild the module catalog pages from the Atlas |
 
 A run writes `map.json` (Escher), `map.svg`, `report.json`, `reaction_provenance.json`, `layout_issues.json`, `licenses.json`, `skeleton.json` and `modules.json` into the output folder. `reaction_provenance.json` labels every reaction as expert-derived, topology-only suggestion, functional (EC) suggestion, bridge or generated; these are reported separately and never merged into one reuse rate.
@@ -43,6 +43,18 @@ The tool and `compose` expose the layout style (`--layout-style legacy|expert`, 
 | `OPM_LOWCONF` | off | experimental: split topology-only structures whose reactions have unrelated neighbourhoods |
 | `OPM_REGIONS`, `OPM_REGION_PLACE` | off | experimental region-level arrangement (did not improve the example maps) |
 | `OPM_DROP_TOPO_BIG`, `OPM_SUMMARY_LAYOUT` | off, `ring` | experimental handling of very large reactions (biomass) |
+
+## System Requirements
+
+### C++ Compiler for libavoid Router
+
+The edge router (`routing.py`) compiles a native libavoid binary. A C++11-capable compiler is required:
+
+- **Linux**: Install `g++` (usually via `build-essential` on Debian/Ubuntu: `sudo apt-get install build-essential`)
+- **macOS**: Install Xcode command-line tools: `xcode-select --install` (provides `clang++`)
+- **Windows**: Not tested; consider WSL with Linux tools
+
+The build prefers `g++` when available, falling back to `clang++`.
 
 ## Tests
 

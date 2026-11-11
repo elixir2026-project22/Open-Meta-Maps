@@ -356,48 +356,6 @@ def _separate(xy, half, passes=3):
     return xy
 
 
-def pack_global(model, selected, bridges, g):
-    """`drawing.pack_modules` followed by a 2-D re-layout of the blocks.
-
-    pack_modules (ELK) keeps each block's internal geometry and gives the shared metabolites a junction, but it lays compartment groups out
-    one under the other, which for a whole large model is a column tens of thousands of pixels tall.  Here every block stays rigid and only
-    its position changes: weights come from the shared metabolites, so connected structures end up next to each other.
-    Returns the same (anchors, blocks, containers, routes) as pack_modules.
-    """
-    anchors, blocks, containers, routes = drawing.pack_modules(model, copy.deepcopy(selected), bridges, physical_scale=True)
-    if len(blocks) < 2:
-        return anchors, blocks, containers, routes
-    cur = currency(model)
-    corners, sizes = [], []
-    for b in blocks:
-        pts = np.array(list(b['positions'].values()), float)
-        lo, hi = pts.min(0), pts.max(0)
-        corners.append(lo)
-        sizes.append(hi - lo + 80)
-    weights = block_weights(model, blocks, g, cur)
-    centres = layout_blocks(sizes, weights)
-    new_anchor = {}
-    for b, lo, size, centre in zip(blocks, corners, sizes, centres):
-        delta = centre - size / 2 + 40 - lo
-        b['positions'] = {k: (np.array(v) + delta).tolist() for k, v in b['positions'].items()}
-        for k, v in b['positions'].items():
-            if k.startswith('r:'):
-                anchors[k] = v
-            else:
-                new_anchor.setdefault(k, []).append(v)
-    for k, vals in new_anchor.items():
-        anchors[k] = np.mean(vals, axis=0).tolist()  # a shared metabolite sits at the centre of its copies
-    by = defaultdict(list)
-    for b in blocks:
-        pts = np.array(list(b['positions'].values()), float)
-        by[b['container']].append((pts.min(0) - 30, pts.max(0) + 30))
-    roles = {c['id']: c['roles'] for c in containers}
-    containers = [dict(id=cid, roles=roles.get(cid, []), x=float(min(lo[0] for lo, _ in boxes)), y=float(min(lo[1] for lo, _ in boxes)),
-                       width=float(max(hi[0] for _, hi in boxes) - min(lo[0] for lo, _ in boxes)), height=float(max(hi[1] for _, hi in boxes) - min(lo[1] for lo, _ in boxes)))
-                  for cid, boxes in by.items()]
-    return anchors, blocks, containers, routes
-
-
 # ------------------------------------------------------------------------------------------------ G1.5: automatic modules for reactions no expert structure covers
 MAX_AUTO = 90        # soft size limit of an automatic module (reactions); larger communities are split
 MIN_AUTO = 4         # communities smaller than this are merged into their best neighbour

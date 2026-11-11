@@ -392,13 +392,13 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     import geometry
     import interfaces
     import retrieval
-    import micromap_experiment as me
-    from geometry_experiment import metric_details, assert_chemistry
+    from layout_quality import metric_details, assert_chemistry
+    from core import CanonicalGraph
     from jsonschema import Draft4Validator
     from xml.sax.saxutils import escape
     full_model = full_model or model
     original = uid(model)
-    g = me.CanonicalGraph(model_graph(model))
+    g = CanonicalGraph(model_graph(model))
     bridges = retrieval.bridges(model, selected)
     if scalable:
         import global_layout as gl_pack
@@ -1136,7 +1136,6 @@ def run_job(folder):
         job.save()
         map_note = None
         if len(allids) <= LIMITS['full_routed_max_reactions']:
-            import micromap_experiment as me
             metric = draw_map(model, selected, folder / 'full', full_model=model)
             for name, kind, en, zh in (('map.svg', 'svg', 'Completed map (routed)', '补全图（已布线）'), ('map.json', 'json', 'Completed map, Escher JSON', '补全图（Escher JSON）'), ('layout_issues.json', 'json', 'Layout issues (where the problems are)', '绘图问题位置清单')):
                 (folder / name).write_bytes((folder / 'full' / name).read_bytes())
@@ -1269,7 +1268,6 @@ def draw_view(folder, view_id):
     folder = job.folder
     install_tool_environment()
     import drawing
-    import micromap_experiment as me
     options = read(folder / 'options.json') if (folder / 'options.json').exists() else {}
     global REACTION_STYLE, COMPLETION, SOURCE_PATHS
     SOURCE_PATHS = bool(options.get('source_paths'))

@@ -31,9 +31,9 @@ MAX_BLOCK_REACTIONS = 25
 # Weights are a stated judgement of how bad each problem is (a long cross-module connection is the worst readability defect), not an automatic truth.
 import os as _os
 ACCEPT = _os.environ.get('OPM_RELOC_ACCEPT', 'balanced')
-W_CROSS, W_COLL, W_LONG = 1.0, 1.5, 4.0
-MIN_GAIN = 1.0
-MAX_COLL_RISE, MAX_CROSS_RISE = 3, 6
+W_CROSS, W_COLL, W_LONG = 1.0, 1.5, 5.0    # increased W_LONG from 4.0 to 5.0 to favor shortening long edges
+MIN_GAIN = 0.5                              # relaxed from 1.0 to accept smaller improvements
+MAX_COLL_RISE, MAX_CROSS_RISE = 5, 10       # relaxed limits to allow more trade-offs
 
 
 def _accept(old, new):

@@ -56,6 +56,17 @@ def model_graph(model):
    mk='m:'+mid;g.add_node(mk,role='metabolite',compartment=met[mid].get('compartment','unknown'));g.add_edge(rk,mk,coefficient=float(c),role='substrate' if c<0 else 'product')
  return g
 
+class CanonicalGraph(nx.Graph):
+    """Keep seeded fallback layouts independent of Python set iteration order."""
+    def subgraph(self, nodes):
+        keys = set(nodes) & set(self)
+        out = CanonicalGraph()
+        out.add_nodes_from((k, dict(self.nodes[k])) for k in sorted(keys))
+        edges = sorted(tuple(sorted((a, b))) for a, b in self.edges() if a in keys and b in keys)
+        out.add_edges_from((a, b, dict(self.edges[a, b])) for a, b in edges)
+        return out
+
+
 def normalize(xy):
  arr=np.array(list(xy.values()),float);center=arr.mean(0);sc=max(float(np.sqrt(np.mean(np.sum((arr-center)**2,1)))),1e-8);return {k:((np.array(v)-center)/sc).tolist() for k,v in xy.items()}
 def fit_frame(source,target):

@@ -1,4 +1,5 @@
 """Dual indexes: biochemical observations and core-shape templates with provenance."""
+import functools
 import zlib,itertools,xml.etree.ElementTree as ET
 from core import *
 from semantics import rhea_index,parse_gpml
@@ -14,8 +15,14 @@ def connect():
  CREATE TABLE IF NOT EXISTS maps(id TEXT PRIMARY KEY,source TEXT,species TEXT,lineage TEXT,payload BLOB);
  CREATE TABLE IF NOT EXISTS reviews(module_id TEXT,reviewer TEXT,status TEXT,payload BLOB,PRIMARY KEY(module_id,reviewer));''');return db
 
+@functools.lru_cache(maxsize=1)
+def _modules_cached():
+ """Cached inner call (immutable result during one process)."""
+ db=connect();out=tuple(unpack(r[0]) for r in db.execute('SELECT payload FROM modules ORDER BY id'));db.close();return out
+
 def modules():
- db=connect();out=[unpack(r[0]) for r in db.execute('SELECT payload FROM modules ORDER BY id')];db.close();return out
+ """Return all modules from the database (cached in memory after first call)."""
+ return list(_modules_cached())
 
 def graph(m):
  g=nx.Graph()

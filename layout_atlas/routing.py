@@ -17,7 +17,7 @@ def build():
 #include "libavoid/libavoid.h"
 int main(){int n,m;std::cin>>n>>m;Avoid::Router router(Avoid::OrthogonalRouting);std::vector<Avoid::ShapeRef*> shapes;for(int i=0;i<n;++i){double x,y;std::cin>>x>>y;Avoid::Rectangle rectangle(Avoid::Point(x-6,y-6),Avoid::Point(x+6,y+6));auto s=new Avoid::ShapeRef(&router,rectangle,i+1);auto pin=new Avoid::ShapeConnectionPin(s,1,.5,.5,true,0,Avoid::ConnDirAll);pin->setExclusive(false);shapes.push_back(s);}std::vector<Avoid::ConnRef*> connections;for(int i=0;i<m;++i){int a,b;std::cin>>a>>b;auto c=new Avoid::ConnRef(&router,Avoid::ConnEnd(shapes[a],1),Avoid::ConnEnd(shapes[b],1),n+i+1);c->setRoutingType(Avoid::ConnType_Orthogonal);connections.push_back(c);}router.processTransaction();for(int i=0;i<m;++i){const auto &p=connections[i]->displayRoute();std::cout<<i<<" "<<p.size();for(unsigned j=0;j<p.size();++j)std::cout<<" "<<p.ps[j].x<<" "<<p.ps[j].y;std::cout<<"\\n";}return 0;}
 ''')
- sources=sorted((folder/'source/cola/libavoid').glob('*.cpp'));cmd=['clang++','-std=c++11','-O1','-DNDEBUG','-I'+str(folder/'source/cola'),str(cpp),*map(str,sources),'-o',str(binary)];result=subprocess.run(cmd,text=True,capture_output=True,timeout=180);dump(OUT/'routing_build.json',dict(commit=commit,command=cmd,exit_code=result.returncode,stderr=result.stderr[-12000:],source_license='See source/cola/libavoid/COPYING; no relicensing',status='built' if result.returncode==0 else 'failed'))
+ sources=sorted((folder/'source/cola/libavoid').glob('*.cpp'));compiler='g++' if subprocess.run(['which','g++'],capture_output=True).returncode==0 else 'clang++';cmd=[compiler,'-std=c++11','-O1','-DNDEBUG','-I'+str(folder/'source/cola'),str(cpp),*map(str,sources),'-o',str(binary)];result=subprocess.run(cmd,text=True,capture_output=True,timeout=180);dump(OUT/'routing_build.json',dict(commit=commit,command=cmd,exit_code=result.returncode,stderr=result.stderr[-12000:],source_license='See source/cola/libavoid/COPYING; no relicensing',status='built' if result.returncode==0 else 'failed'))
  if result.returncode:raise RuntimeError(result.stderr[-1500:])
  return binary
 
@@ -43,7 +43,8 @@ def build_labels():
  if binary.exists() and cpp.exists() and cpp.read_text()==source:return binary
  cpp.write_text(source)
  sources=sorted((folder/'source/cola/libavoid').glob('*.cpp'))
- cmd=['clang++','-std=c++11','-O1','-DNDEBUG','-I'+str(folder/'source/cola'),str(cpp),*map(str,sources),'-o',str(binary)]
+ compiler='g++' if subprocess.run(['which','g++'],capture_output=True).returncode==0 else 'clang++'
+ cmd=[compiler,'-std=c++11','-O1','-DNDEBUG','-I'+str(folder/'source/cola'),str(cpp),*map(str,sources),'-o',str(binary)]
  result=subprocess.run(cmd,text=True,capture_output=True,timeout=180)
  dump(OUT/'routing_labels_build.json',dict(source_commit=read(OUT/'routing_build.json')['commit'],command=cmd,exit_code=result.returncode,stderr=result.stderr[-12000:],source_sha256=sha(source.encode()),binary_sha256=sha(binary.read_bytes()) if binary.exists() and result.returncode==0 else None))
  if result.returncode:raise RuntimeError(result.stderr[-1500:])

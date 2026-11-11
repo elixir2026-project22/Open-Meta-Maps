@@ -1,5 +1,8 @@
 """Layout quality measures that feed layout decisions (grown version by version; see Proposal/14).
 
+Also contains metric_details and assert_chemistry, moved from geometry_experiment to avoid
+loading experiment/UI modules during compose.
+
 V1 (reaction orientation) needs:
   orientation   share of reactions with substrates and products on opposite sides of the reaction point (orientation.summary)
   label overlap pairs / node overlaps (drawing.export / geometry_experiment.metric_details, already in the map metric)
@@ -355,3 +358,72 @@ def _orthogonal(pts):
                 return False
             corners += 1
     return corners >= 1
+
+
+def metric_details(path):
+    """Actual exported glyphs/labels, excluding routing control points (moved from geometry_experiment)."""
+    import drawing
+    from core import read
+    data = read(path)
+    content = data[1]
+    nodes = {k: v for k, v in content['nodes'].items() if v['node_type'] != 'multimarker'}
+    xy = {k: [v['x'], v['y']] for k, v in nodes.items()}
+    boxes = {}
+    for key, v in nodes.items():
+        if v['node_type'] == 'metabolite':
+            label = v['bigg_id']
+            x = v['label_x']
+            y = v['label_y']
+        else:
+            rx = next(r for r in content['reactions'].values() if any(s['from_node_id'] == key or s['to_node_id'] == key for s in r['segments'].values()))
+            label = rx['bigg_id']
+            x = rx['label_x']
+            y = rx['label_y']
+        b = drawing.FONT.getbbox(label)
+        boxes[key] = [x, y - (b[3] - b[1]), x + drawing.FONT.getlength(label), y]
+    node_label = sum(b[0] < v[0] + 4 and b[2] > v[0] - 4 and b[1] < v[1] + 4 and b[3] > v[1] - 4
+                     for b in boxes.values() for v in xy.values())
+    canvas = content['canvas']
+    values = np.array(list(xy.values()))
+    segments = []
+    for r in content['reactions'].values():
+        segments.extend((s['from_node_id'], s['to_node_id']) for s in r['segments'].values())
+    intersections = 0
+    for a, b in segments:
+        av = np.array([content['nodes'][a]['x'], content['nodes'][a]['y']])
+        bv = np.array([content['nodes'][b]['x'], content['nodes'][b]['y']])
+        delta = bv - av
+        for k, box in boxes.items():
+            if k in (a, b):
+                continue
+            lower = 0.
+            upper = 1.
+            for axis in (0, 1):
+                if abs(delta[axis]) < 1e-9:
+                    if av[axis] <= box[axis] or av[axis] >= box[axis + 2]:
+                        upper = -1
+                        break
+                else:
+                    lo = (box[axis] - av[axis]) / delta[axis]
+                    hi = (box[axis + 2] - av[axis]) / delta[axis]
+                    lower = max(lower, min(lo, hi))
+                    upper = min(upper, max(lo, hi))
+            intersections += int(lower < upper - 1e-8)
+    return dict(visible_nodes=len(nodes), label_node_intersections=int(node_label),
+                segment_label_intersections=intersections,
+                canvas_width=canvas['width'], canvas_height=canvas['height'],
+                canvas_area_per_reaction=canvas['width'] * canvas['height'] / len(content['reactions']),
+                node_coordinate_extent=np.ptp(values, axis=0).tolist())
+
+
+def assert_chemistry(model, path):
+    """Validate that the exported map matches the model chemistry (moved from geometry_experiment)."""
+    from core import read, uid
+    data = read(path)
+    lookup = {r['bigg_id']: r for r in data[1]['reactions'].values()}
+    assert set(lookup) == {r['id'] for r in model['reactions']}
+    for r in model['reactions']:
+        sign = -1 if r['upper_bound'] <= 0 and r['lower_bound'] < 0 else 1
+        assert {m['bigg_id']: m['coefficient'] for m in lookup[r['id']]['metabolites']} == {k: sign * v for k, v in r['metabolites'].items()}
+        assert data[0]['metadata']['source_reactions'][r['id']]['stoichiometry'] == r['metabolites']
+    assert data[0]['metadata']['model_hash'] == uid(model)

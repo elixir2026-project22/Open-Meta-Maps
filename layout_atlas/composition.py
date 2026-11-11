@@ -33,6 +33,7 @@ LONG = os.environ.get('OPM_COMPOSE_LONG', 'on') == 'on'
 CLEAR = 110.0
 SHELF_GAP = 120.0
 ROW_WIDTH_MIN = 4000.0
+TARGET_ASPECT = 1.4    # target width/height ratio for the independent shelf block (slightly wider than tall)
 
 
 def components(model, scene, cur):
@@ -212,10 +213,10 @@ def compose(model, scene, blocks, cur):
             lw = min(max([text_w(str(labels.get(k, ''))) for k in ks] + [0.0]), 220.0)
             pads[i] = lw
             boxes.append((i, arr.min(0), arr.max(0) - arr.min(0) + np.array([60.0 + lw, 60.0])))
-        # row width: aim for a block about as wide as the main network, never one endless row
+        # row width: aim for a TARGET_ASPECT block (wider than tall), not limited by main network width
         total_area = sum(b[2][0] * b[2][1] for b in boxes)
-        row_w = max(np.sqrt(total_area * 2.2), max(b[2][0] for b in boxes) + SHELF_GAP, ROW_WIDTH_MIN * 0.5)
-        row_w = min(row_w, W)
+        # solve for row_w such that area / row_w * row_w ~ TARGET_ASPECT -> row_w ~ sqrt(area * TARGET_ASPECT)
+        row_w = max(np.sqrt(total_area * TARGET_ASPECT), max(b[2][0] for b in boxes) + SHELF_GAP, ROW_WIDTH_MIN * 0.5)
         x = y = 0.0
         row_h = 0.0
         layout = []
@@ -229,13 +230,15 @@ def compose(model, scene, blocks, cur):
             row_h = max(row_h, size[1])
             prev_group = g
         block_w, block_h = row_w, y + row_h
-        # side with the least aspect distortion that still has room: below / above / right / left of the main network
+        # side with combined aspect ratio closest to 1:1 (square-ish canvas)
         main_w, main_h = float(hi[0] - lo[0]), float(hi[1] - lo[1])
-        options = {'below': (lo[0], hi[1] + 400.0, (main_w) / max(main_h + block_h + 400.0, 1.0)),
-                   'above': (lo[0], lo[1] - 400.0 - block_h, (main_w) / max(main_h + block_h + 400.0, 1.0)),
-                   'right': (hi[0] + 400.0, lo[1], (main_w + block_w + 400.0) / max(main_h, 1.0)),
-                   'left': (lo[0] - 400.0 - block_w, lo[1], (main_w + block_w + 400.0) / max(main_h, 1.0))}
-        side = min(options, key=lambda s: abs(np.log(max(options[s][2], 1e-6) / 1.0)))
+        # each option: (x_origin, y_origin, combined_aspect_ratio)
+        options = {'below': (lo[0], hi[1] + 400.0, max(main_w, block_w) / max(main_h + block_h + 400.0, 1.0)),
+                   'above': (lo[0], lo[1] - 400.0 - block_h, max(main_w, block_w) / max(main_h + block_h + 400.0, 1.0)),
+                   'right': (hi[0] + 400.0, lo[1], (main_w + block_w + 400.0) / max(main_h, block_h, 1.0)),
+                   'left': (lo[0] - 400.0 - block_w, lo[1], (main_w + block_w + 400.0) / max(main_h, block_h, 1.0))}
+        # prefer aspect ratio closest to 1.0; favor horizontal placements (right/left) when main is already tall
+        side = min(options, key=lambda s: abs(np.log(max(options[s][2], 1e-6))))
         ox, oy = options[side][0], options[side][1]
         for i, bmin, off in layout:
             ks = [k for k in cur_keys_of[i] if k in pos]

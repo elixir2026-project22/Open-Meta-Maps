@@ -29,7 +29,8 @@ def use_native_binaries():
     for binary, cpp in (('avoid_router', 'route.cpp'), ('avoid_labels_router', 'route_labels.cpp')):
         if (build / binary).exists():
             continue
-        cmd = ['clang++', '-std=c++11', '-O1', '-DNDEBUG', '-I' + str(BASE / 'build/source/cola'), str(build / cpp), *map(str, sources), '-o', str(build / binary)]
+        compiler = 'g++' if subprocess.run(['which', 'g++'], capture_output=True).returncode == 0 else 'clang++'
+        cmd = [compiler, '-std=c++11', '-O1', '-DNDEBUG', '-I' + str(BASE / 'build/source/cola'), str(build / cpp), *map(str, sources), '-o', str(build / binary)]
         result = subprocess.run(cmd, text=True, capture_output=True, timeout=900)
         dump(root / (binary + '.build.json'), dict(architecture=arch, command=cmd, exit_code=result.returncode, stderr=result.stderr[-4000:],
                                                     source_commit=read(OUT / 'routing_build.json')['commit']))
