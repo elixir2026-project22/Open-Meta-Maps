@@ -3,8 +3,8 @@
   "generated": "2026-11-11",
   "open_core": {
     "path": "data/open_core.sqlite",
-    "sha256": "b4d665337cacfd22a486831642e93b5a4961064b377a36847a3ded09e9924800",
-    "bytes": 68161536,
+    "sha256": "97f9b706a61caa52044700635b0236b7fd9caacbe7d518e2752a87762cd1e54f",
+    "bytes": 58302464,
     "maps": {
       "escher": 22,
       "reactome": 86,
@@ -13,18 +13,19 @@
     "modules": {
       "escher": 9098,
       "reactome": 3405,
-      "wikipathways": 4696
+      "wikipathways": 1245
     },
     "modules_with_extensions": {
       "escher": 9098,
       "reactome": 3405,
-      "wikipathways": 4696,
+      "wikipathways": 1245,
       "brenda": 11703,
-      "human_maps": 8540
+      "human_maps": 8540,
+      "wikipathways_geometry": 29673
     },
     "reactions": 63274,
     "licences": {
-      "CC0-1.0": 13794,
+      "CC0-1.0": 40016,
       "CC0-1.0-data": 3405,
       "CC-BY-4.0": 20243
     }
@@ -56,16 +57,29 @@
       "import_policy": "official escher/ JSON only via database.escher_diagram + diagram_modules",
       "by_sa_note": "Companion SVG exports embed BY-SA metadata; they are not imported. Escher JSON files contain no BY-SA marks.",
       "access_date": "2026-11-11"
+    },
+    "wikipathways_geometry": {
+      "source": "wikipathways",
+      "release": "20261110",
+      "license": "CC0-1.0",
+      "license_url": "https://www.wikipathways.org/terms.html",
+      "modules": 29673,
+      "quality": "geometry_only",
+      "extraction": "diagram_modules BFS windows over metabolite–metabolite GPML edges",
+      "admitted_to_open_core": true,
+      "partition": "open_core",
+      "note": "Stored as extension to keep open_core.sqlite under GitHub size limits; loaded by default with database.modules()",
+      "date": "2026-11-11"
     }
   },
   "input_manifest": {
     "version": "0.3-source-inputs",
     "files": 2330,
-    "sha256": "bc4da2fb5517795cd7f6b6dac90adfe55b2414fe82905114c3130801e08c9e44"
+    "sha256": "186533fe88cf2cdf4782ea73fa97676eeff3d8c79f1bf8b925b1e21b8394e384"
   },
   "source_registry": {
     "path": "data/source_inputs/source_registry.json",
-    "sha256": "11fb0425370197a5bc21c5fdc8ac1cff44011eb4ac1be138c0576a842af2ff01",
+    "sha256": "a7a8b9f1dd8b1c07540423ba06c6c7b15fffd79dd755c613640d29e0ab14e16a",
     "wikipathways_release": "20261110"
   },
   "extraction": {

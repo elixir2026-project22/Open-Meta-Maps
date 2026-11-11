@@ -1,39 +1,84 @@
 {
   "from_version": "20261010",
   "to_version": "20261110",
+  "complete_rebuild": true,
   "gpml_files": 2215,
-  "semantic_modules": 1245,
-  "kept_modules": 4696,
-  "geometry_only_retained": 3451,
-  "geometry_only_dropped": 22,
-  "geometry_only_dropped_reason": "source_sha256 absent from 20261110 GPML set; not re-extracted",
-  "maps_before": 934,
-  "maps_after": 2215,
-  "map_sha_unchanged": 929,
-  "map_sha_removed": 5,
-  "map_sha_new": 1286,
-  "maps_without_modules": 1286,
-  "semantic_source_sha_unchanged": 65,
-  "reactions_total_unchanged": 63274,
-  "wp_reaction_rows_reindexed": 4879,
-  "wp_reaction_id_pairs_unchanged": 338,
-  "partial_rebuild": true,
-  "map_observations_still_version": "20261010",
-  "geometry_only_map_id_remap": {
-    "date": "2026-11-11",
-    "updated_modules": 3451,
-    "lineage_aligned_to_WP_id": 3451,
-    "orphans_before": 3451,
-    "orphans_after": 0,
-    "missing_sha": 0
-  },
-  "failures": [],
-  "binding_status": {
+  "extract_stats": {
+    "gpml_files": 2215,
     "reaction_id_only": 1008,
     "validated_visible_participants": 499,
+    "semantic_modules": 1245,
+    "semantic_maps": 65,
+    "geometry_modules": 29673,
+    "maps_without_modules": 1281,
+    "geometry_maps_with_modules": 869,
     "reference_direction_disagrees": 8,
     "visual_direction_unresolved": 3,
     "obsolete_reference_not_promoted": 3,
-    "unresolved": 1
+    "unresolved": 1,
+    "maps": 2215
+  },
+  "maps_by_source": {
+    "escher": 22,
+    "reactome": 86,
+    "wikipathways": 2215
+  },
+  "modules_by_source": {
+    "escher": 9098,
+    "reactome": 3405,
+    "wikipathways": 1245
+  },
+  "wikipathways_quality": {
+    "geometry_only": 29673,
+    "semantic_transfer": 1245
+  },
+  "reactions_total": 63274,
+  "wikipathways_reactions": 4879,
+  "index": {
+    "excluded": [],
+    "families": 5361,
+    "variants": 12879
+  },
+  "module_observations": {
+    "kept": 12025,
+    "wikipathways": 30918,
+    "total": 42943
+  },
+  "map_observations": {
+    "kept": 24,
+    "wikipathways": 2215,
+    "total": 2239
+  },
+  "source_registry_files": 2239,
+  "normalize": {
+    "schema_version": 1,
+    "map_stats": {
+      "maps_updated": 2323
+    },
+    "mod_stats": {
+      "modules_updated": 43421
+    },
+    "dangling_map_id": 0,
+    "escher_registry_paths_fixed": 0,
+    "registry": "/agent/repos/OpenMetaMaps/data/atlas_registry.json",
+    "manifest_files": 2330
+  },
+  "licence": "CC0-1.0 (WikiPathways content; GPML files have no per-file License attribute; project terms CC0)",
+  "date": "2026-11-11",
+  "binding_status": {
+    "validated_visible_participants": 499,
+    "reaction_id_only": 1008,
+    "reference_direction_disagrees": 8,
+    "visual_direction_unresolved": 3,
+    "obsolete_reference_not_promoted": 3,
+    "unresolved": 1,
+    "aggregate_not_promoted": 0
+  },
+  "wikipathways_quality_in_open_core": {
+    "semantic_transfer": 1245
+  },
+  "wikipathways_geometry_extension": {
+    "modules": 29673,
+    "path": "data/extensions/wikipathways_geometry/modules.json.gz"
   }
 }

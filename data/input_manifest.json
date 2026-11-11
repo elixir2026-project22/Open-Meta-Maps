@@ -86,8 +86,8 @@
     "archives/wp-Zea_mays.zip.provenance.json": "02c156773527e8bfd63f00e37e8e7a3a3938b4cc7406ceb6c336333da16d8400",
     "archives/wp_listing.html": "24fef5dbf6b82bbe54ef0d20e7ebf52b7be3994d57cd7c9c0401a3d5d38c5066",
     "archives/wp_listing.html.provenance.json": "45e5b83b9a6dfd5962ca4ec3c093ea50ea7a4b12453e055b6a242270cba87593",
-    "map_observations.json.gz": "1b1a6ceb5caf1b86a5df3e121fbb19be8e34f803530da419d75e0699c762ce0a",
-    "module_observations.json.gz": "7d94b0db945a3a43083bcaa413f9a98e05e1eed805e271db308b7bee33fd556b",
+    "map_observations.json.gz": "595dad5ec004512d94c9a81b6566f74d9fa5d7d73a0887ce9e6c90d198ccf44f",
+    "module_observations.json.gz": "85b051a859ef86750d016f788baa71d739b47ddb8ef58adba4a2633a1be8e45c",
     "origin.json": "5e5ae764406b78705f58867e2e4a0868dde534ea47677a537416a26ed4d9fa04",
     "raw/escher/RECON1/RECON1.Amino acid metabolism (partial).json": "e7e6cd3b2ea8acf064f721eb4c6c6b080f268c6f475558c379762a63e22dab11",
     "raw/escher/RECON1/RECON1.CARBOHYDRATE_METABOLISM.json": "240e70ca3f1e41ff4713092fc2b5b50bb5b23e618bd0aa1efeb9c4349a9d4d44",
@@ -2326,11 +2326,11 @@
     "raw/wp/Zea_mays/Zm_Carotenoid_biosynthesis_WP2205_20210521.gpml": "da35252bef07b45c927490f9ef1c18c4b805d21045ef356488f7b743b88e8ad0",
     "raw/wp/Zea_mays/Zm_Lycopene_biosynthesis_WP2204_20190917.gpml": "2f02f7601f281f9f44e2b602f9111ca8f483b190baddebb2d540de4ed87a3042",
     "raw/wp/Zea_mays/Zm_Vitamin_B9_(folate)_biosynthesis_pathway_WP2353_20250612.gpml": "d6ab3ea1ed102ed246f6cfa6ed5e877834dc4a40f0586c19d4328ee2c9bcbb70",
-    "source_registry.json": "11fb0425370197a5bc21c5fdc8ac1cff44011eb4ac1be138c0576a842af2ff01",
+    "source_registry.json": "a7a8b9f1dd8b1c07540423ba06c6c7b15fffd79dd755c613640d29e0ab14e16a",
     "terms/reactome.html": "799de2b67c7ce220d349f57df4ae878e66266bdbe14cc0dedba4133e7d5858df",
     "terms/reactome.html.provenance.json": "cf8755c836ed244553a330b41d2db4a6eec72ccac064b923953b3fbdedb1485a",
     "terms/wikipathways.html": "92b9b4359adf755ae4520167b3b108dcaf99b1961f819dad868c1633b11ed95a",
     "terms/wikipathways.html.provenance.json": "dd8004ce1b2c25e696f081aa4fd542627fa26a5babaae00e9241ba1e1c43e4a5",
-    "wikipathways_refresh.json": "593707c9aff621b7aa112990e601637570379b22fd09f64105278b29c3fe9c57"
+    "wikipathways_refresh.json": "d3fa58d1e57a4d2916bf8462ab06bfe817e755cd156a87386627798e990b8293"
   }
 }
