@@ -29,7 +29,8 @@ PERIPHERY_BAND = 0.2  # outer 20% of component hull radius
 ASPECT_RATIO_TARGET = 1.0
 BEND_TURN_DEG = 20.0
 AXIS_ALIGN_DEG = 10.0  # ±10° of horizontal or vertical
-GRID_TOL_EDGE_FRAC = 0.05  # share of median edge length for grid snap
+GRID_TOL_NN_FRAC = 0.05  # share of median nearest-neighbour main-metabolite distance
+GRID_TOL_FLOOR_PX = 1.0  # fixed floor so tiny maps still snap
 
 
 def _is_currency_id(mid: str | None) -> bool:
@@ -184,27 +185,36 @@ def _reaction_axis(rx: dict, nodes: dict) -> np.ndarray | None:
 def orderliness_metrics(body: dict, edges: list[dict], spacing: float) -> dict[str, Any]:
     """Axis alignment, chain turns and metabolite grid share (cofactors excluded).
 
+    ``main_segment_axis_share`` is length-weighted over drawn polyline pieces, so
+    subdividing/resampling a curve cannot change the score. Grid tolerance uses
+    median nearest-neighbour distance among main metabolite nodes (not curve
+    sample lengths), with a fixed pixel floor.
+
     Not yet optimised by the pipeline; exposed so orderliness can become a gate.
     """
+    del spacing  # kept for call-site compatibility; grid tol is node-spacing based
     nodes = body["nodes"]
-    # --- segment axis share (main / non-cofactor drawn segments)
-    main_segs = 0
-    axis_segs = 0
-    edge_lens = []
+    # --- segment axis share: length-weighted (sampling-invariant under subdivision)
+    total_len = 0.0
+    axis_len = 0.0
+    main_edges = 0
     for e in edges:
         if e.get("currency"):
             continue
         pts = e["pts"]
+        edge_len = 0.0
         for a, b in zip(pts[:-1], pts[1:]):
             dx, dy = float(b[0] - a[0]), float(b[1] - a[1])
             L = math.hypot(dx, dy)
             if L < 1e-6:
                 continue
-            main_segs += 1
-            edge_lens.append(L)
+            edge_len += L
+            total_len += L
             if _axis_aligned(dx, dy):
-                axis_segs += 1
-    seg_axis = round(axis_segs / main_segs, 4) if main_segs else None
+                axis_len += L
+        if edge_len > 0:
+            main_edges += 1
+    seg_axis = round(axis_len / total_len, 4) if total_len > 0 else None
 
     # --- reaction axis share
     scored = aligned = 0
@@ -247,7 +257,7 @@ def orderliness_metrics(body: dict, edges: list[dict], spacing: float) -> dict[s
         turns.append(math.degrees(math.acos(cos)))
     chain_turn = round(float(np.median(turns)), 2) if turns else None
 
-    # --- grid alignment of main metabolite glyphs
+    # --- grid alignment of main metabolite glyphs (tol from node spacing, not curves)
     mains = [
         (float(n["x"]), float(n["y"]))
         for n in nodes.values()
@@ -255,8 +265,13 @@ def orderliness_metrics(body: dict, edges: list[dict], spacing: float) -> dict[s
         and not _is_currency_id(n.get("bigg_id"))
         and n.get("node_is_primary") is not False
     ]
-    med_edge = float(np.median(edge_lens)) if edge_lens else float(spacing or 60.0)
-    tol = max(GRID_TOL_EDGE_FRAC * med_edge, 1.0)
+    if len(mains) >= 2:
+        pts = np.array(mains, float)
+        nn = cKDTree(pts).query(pts, k=2)[0][:, 1]
+        med_nn = float(np.median(nn))
+    else:
+        med_nn = 0.0
+    tol = max(GRID_TOL_NN_FRAC * med_nn, GRID_TOL_FLOOR_PX)
     grid_hits = 0
     if len(mains) >= 2:
         xs = np.array([p[0] for p in mains], float)
@@ -273,7 +288,7 @@ def orderliness_metrics(body: dict, edges: list[dict], spacing: float) -> dict[s
         reaction_axis_share=rx_axis,
         chain_turn_median_deg=chain_turn,
         metabolite_grid_share=grid,
-        orderliness_segments=main_segs,
+        orderliness_segments=main_edges,
         orderliness_reactions=scored,
         orderliness_chain_turns=len(turns),
         orderliness_metabolites=len(mains),
@@ -737,7 +752,8 @@ def collect_map_rule_details(
         "hub/long currency thresholds are relative to median reaction spacing; "
         "blank_space / unrelated_overlaps follow MetaCarto ideas (CC BY 4.0; reimplemented, not copied); "
         "map size, aspect W/H and blank/utilisation share one content-node bbox; "
-        f"orderliness axis tolerance ±{AXIS_ALIGN_DEG:g}°; "
-        f"grid tolerance {GRID_TOL_EDGE_FRAC:g} × median main-edge length"
+        f"orderliness axis tolerance ±{AXIS_ALIGN_DEG:g}° (length-weighted); "
+        f"grid tolerance {GRID_TOL_NN_FRAC:g} × median nearest-neighbour "
+        f"main-metabolite distance (floor {GRID_TOL_FLOOR_PX:g} px)"
     )
     return out

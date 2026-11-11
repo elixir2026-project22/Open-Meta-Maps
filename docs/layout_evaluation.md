@@ -86,9 +86,10 @@ amber highlight.
 | Debug diagnostics (hidden by default) | Main flow-direction share | debug only — not an optimisation target (would fight curated orientations) |
 | Pipeline diagnostics (collapsed) | Composition-pass counts; Peripheral-module counts | composition & peripherals |
 
-**Orderliness (待优化):** main-segment and reaction-axis shares within ±10° of horizontal/vertical
-(cofactors excluded); metabolite grid share (tolerance 0.05 × median main-edge length); median
-turn angle at degree-2 main metabolites along linear chains.
+**Orderliness (待优化):** length-weighted main-segment and reaction-axis shares within ±10° of
+horizontal/vertical (cofactors excluded; resampling a curve does not change the segment score);
+metabolite grid share (tolerance 0.05 × median nearest-neighbour main-metabolite distance, floor
+1 px); median turn angle at degree-2 main metabolites along linear chains.
 
 Not added from layout-transfer-check: raw density, straight-line crossing counts, catalyst-beside, arrow-weight.
 

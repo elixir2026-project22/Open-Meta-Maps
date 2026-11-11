@@ -204,7 +204,7 @@ def test_orderliness_metrics_axis_chain_and_grid():
     assert m["reaction_axis_share"] == 1.0
     assert m["chain_turn_median_deg"] == 0.0
     assert m["metabolite_grid_share"] == 1.0
-    assert m["orderliness_segments"] == 6  # cofactor spoke excluded
+    assert m["orderliness_segments"] == 6  # cofactor spoke excluded (one edge per spoke)
     assert m["orderliness_reactions"] == 3
     assert m["orderliness_chain_turns"] == 1
     # Evaluate must surface the same numbers on the panel as not-yet-optimised targets.
@@ -218,6 +218,73 @@ def test_orderliness_metrics_axis_chain_and_grid():
     for code in ("main_segment_axis_share", "reaction_axis_share", "metabolite_grid_share", "chain_turn_median_deg"):
         assert rows[code]["stage"] == lq.STAGE_NOT_YET
         assert rows[code]["miss"] is False
+
+
+def test_orderliness_metrics_invariant_to_resampling():
+    """Length-weighted axis share and node-spacing grid tol ignore polyline subdivision."""
+    import numpy as np
+    from evaluation.map_rules import orderliness_metrics
+
+    # Diagonal + horizontal main edges so axis share is neither 0 nor 1.
+    nodes = {
+        "m1": {"node_type": "midmarker", "x": 0.0, "y": 0.0},
+        "a": {"node_type": "metabolite", "x": 100.0, "y": 0.0, "bigg_id": "A_c", "node_is_primary": True},
+        "b": {"node_type": "metabolite", "x": 100.0, "y": 100.0, "bigg_id": "B_c", "node_is_primary": True},
+        "m2": {"node_type": "midmarker", "x": 200.0, "y": 100.0},
+        "c": {"node_type": "metabolite", "x": 300.0, "y": 100.0, "bigg_id": "C_c", "node_is_primary": True},
+    }
+    reactions = {
+        "1": {
+            "bigg_id": "R1", "name": "R1", "label_x": 0, "label_y": -10,
+            "metabolites": [
+                {"bigg_id": "A_c", "coefficient": -1},
+                {"bigg_id": "B_c", "coefficient": 1},
+            ],
+            "segments": {
+                "0": {"from_node_id": "m1", "to_node_id": "a"},
+                "1": {"from_node_id": "m1", "to_node_id": "b"},
+            },
+        },
+        "2": {
+            "bigg_id": "R2", "name": "R2", "label_x": 200, "label_y": 90,
+            "metabolites": [
+                {"bigg_id": "B_c", "coefficient": -1},
+                {"bigg_id": "C_c", "coefficient": 1},
+            ],
+            "segments": {
+                "0": {"from_node_id": "m2", "to_node_id": "b"},
+                "1": {"from_node_id": "m2", "to_node_id": "c"},
+            },
+        },
+    }
+    data = [
+        {"map_name": "toy-resample", "map_id": "toy-resample", "schema": "1.0.0", "metadata": {}},
+        {"nodes": nodes, "reactions": reactions, "canvas": {"x": 0, "y": 0, "width": 400, "height": 200}},
+    ]
+    edges, _ = lq.build_edges(data)
+    base = orderliness_metrics(data[1], edges, spacing=60.0)
+    assert base["main_segment_axis_share"] is not None
+    assert base["metabolite_grid_share"] is not None
+
+    def _subdivide(edge_list, factor=2):
+        out = []
+        for e in edge_list:
+            pts = np.asarray(e["pts"], float)
+            new = [pts[0]]
+            for a, b in zip(pts[:-1], pts[1:]):
+                for k in range(1, factor):
+                    t = k / factor
+                    new.append((1.0 - t) * a + t * b)
+                new.append(b)
+            out.append(dict(e, pts=np.asarray(new, float)))
+        return out
+
+    for factor in (2, 4):
+        dense = orderliness_metrics(data[1], _subdivide(edges, factor), spacing=60.0)
+        assert dense["main_segment_axis_share"] == base["main_segment_axis_share"], factor
+        assert dense["metabolite_grid_share"] == base["metabolite_grid_share"], factor
+        assert dense["orderliness_grid_tol_px"] == base["orderliness_grid_tol_px"], factor
+        assert dense["orderliness_segments"] == base["orderliness_segments"], factor
 
 
 def test_content_bbox_shared():
@@ -291,6 +358,7 @@ if __name__ == "__main__":
     test_window_uses_uncapped_crossings()
     test_detailed_panel_keeps_goals_only()
     test_orderliness_metrics_axis_chain_and_grid()
+    test_orderliness_metrics_invariant_to_resampling()
     test_content_bbox_shared()
     test_svg_has_no_provenance_legend()
     test_currency_spokes_marked()
