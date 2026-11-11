@@ -15,13 +15,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'docs' / 'images' / 'workflow.svg'
 
-W, H = 1000, 400
 CARD_W, CARD_H = 268, 150
 GAP = 24
 LEFT = 22
 ATLAS_W, ATLAS_H = 300, 112
-IN_W, IN_H = 170, 124
-OUT_W, OUT_H = 184, 124
+IN_W = OUT_W = 184  # side boxes share one size
+IN_H = OUT_H = 124
 
 ATLAS_Y = 30
 ROW_Y = 178
@@ -39,6 +38,9 @@ IN_X = LEFT
 IN_Y = CARD1_Y + (CARD_H - IN_H) // 2
 OUT_Y = IN_Y
 ATLAS_X = CARD1_X + (CARD_W - ATLAS_W) // 2
+# Canvas is derived from the content so nothing can be clipped.
+W = OUT_X + OUT_W + LEFT
+H = COMP_Y + COMP_H + ATLAS_Y
 
 
 def esc(s: str) -> str:
