@@ -220,6 +220,40 @@ def test_orderliness_metrics_axis_chain_and_grid():
         assert rows[code]["miss"] is False
 
 
+def test_orderliness_goals_match_curated_ecoli_core():
+    """Panel goals are the curated BiGG e_coli_core scores (and beat our compose)."""
+    import json
+    from pathlib import Path
+    from evaluation.map_rules import ORDERLINESS_GOALS, orderliness_metrics
+
+    curated = Path(__file__).resolve().parents[1] / (
+        "data/source_inputs/raw/escher/e_coli_core/e_coli_core.Core metabolism.json"
+    )
+    assert curated.is_file(), curated
+    data = json.loads(curated.read_text())
+    edges, _ = lq.build_edges(data)
+    m = orderliness_metrics(data[1], edges, spacing=60.0)
+    for key, goal in ORDERLINESS_GOALS.items():
+        assert abs(float(m[key]) - float(goal)) < 1e-3, (key, m[key], goal)
+    # Goals must sit on the panel as miss thresholds.
+    summary, _ = lq.evaluate(data, max_issues=10)
+    rows = {r["code"]: r for r in next(g for g in summary["details"]["panel"]["groups"] if g["id"] == "structure_flow")["rows"]}
+    assert rows["main_segment_axis_share"]["miss"] is False
+    assert rows["reaction_axis_share"]["miss"] is False
+    assert rows["metabolite_grid_share"]["miss"] is False
+    assert rows["chain_turn_median_deg"]["miss"] is False
+    assert "curated e_coli_core" in rows["metabolite_grid_share"]["target"]
+    # Curated grid must clearly beat a typical algorithmic layout (gate output if present).
+    ours = Path("/tmp/omm-gate4/ecoli-after/map.json")
+    if ours.is_file():
+        od = json.loads(ours.read_text())
+        om = orderliness_metrics(od[1], lq.build_edges(od)[0], spacing=60.0)
+        assert m["metabolite_grid_share"] > om["metabolite_grid_share"] + 0.4
+        assert m["main_segment_axis_share"] > om["main_segment_axis_share"]
+        assert m["reaction_axis_share"] > om["reaction_axis_share"]
+        assert m["chain_turn_median_deg"] < om["chain_turn_median_deg"]
+
+
 def test_orderliness_metrics_invariant_to_resampling():
     """Length-weighted axis share and node-spacing grid tol ignore polyline subdivision."""
     import numpy as np
@@ -358,6 +392,7 @@ if __name__ == "__main__":
     test_window_uses_uncapped_crossings()
     test_detailed_panel_keeps_goals_only()
     test_orderliness_metrics_axis_chain_and_grid()
+    test_orderliness_goals_match_curated_ecoli_core()
     test_orderliness_metrics_invariant_to_resampling()
     test_content_bbox_shared()
     test_svg_has_no_provenance_legend()

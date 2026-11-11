@@ -88,8 +88,10 @@ amber highlight.
 
 **Orderliness (待优化):** length-weighted main-segment and reaction-axis shares within ±10° of
 horizontal/vertical (cofactors excluded; resampling a curve does not change the segment score);
-metabolite grid share (tolerance 0.05 × median nearest-neighbour main-metabolite distance, floor
-1 px); median turn angle at degree-2 main metabolites along linear chains.
+metabolite grid share (tolerance 0.02 × median nearest-neighbour main-metabolite distance, floor
+1 px — small enough that the curated BiGG e_coli_core map stays clearly above our compose);
+median turn angle at degree-2 main metabolites along linear chains. Panel goals cite the curated
+BiGG e_coli_core ("Core metabolism") scores for these four metrics.
 
 Not added from layout-transfer-check: raw density, straight-line crossing counts, catalyst-beside, arrow-weight.
 

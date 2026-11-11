@@ -29,8 +29,21 @@ PERIPHERY_BAND = 0.2  # outer 20% of component hull radius
 ASPECT_RATIO_TARGET = 1.0
 BEND_TURN_DEG = 20.0
 AXIS_ALIGN_DEG = 10.0  # ±10° of horizontal or vertical
-GRID_TOL_NN_FRAC = 0.05  # share of median nearest-neighbour main-metabolite distance
+# Small fraction of median nearest-neighbour main-metabolite distance (not the full
+# NN length — that makes almost every point "aligned"). Calibrated so the curated
+# BiGG e_coli_core Escher map scores clearly above our compose (~0.85 vs ~0.16).
+GRID_TOL_NN_FRAC = 0.02
 GRID_TOL_FLOOR_PX = 1.0  # fixed floor so tiny maps still snap
+
+# Goal reference: curated BiGG e_coli_core ("Core metabolism") under the definitions
+# above (length-weighted axis share; grid tol = GRID_TOL_NN_FRAC × median NN).
+# Source: data/source_inputs/raw/escher/e_coli_core/e_coli_core.Core metabolism.json
+ORDERLINESS_GOALS = dict(
+    main_segment_axis_share=0.5732,
+    reaction_axis_share=0.7097,
+    chain_turn_median_deg=0.0,
+    metabolite_grid_share=0.8462,
+)
 
 
 def _is_currency_id(mid: str | None) -> bool:

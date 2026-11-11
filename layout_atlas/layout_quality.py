@@ -517,6 +517,8 @@ def _detailed_metrics_panel(details, *, line_shape, cycles, unrelated, crossing_
     # Targets currently measured but not yet optimised (待优化).
     cycle_is_target = True
     flow_is_target = False  # global reading direction fights curated orientations
+    from evaluation.map_rules import GRID_TOL_FLOOR_PX, GRID_TOL_NN_FRAC, ORDERLINESS_GOALS
+    og = ORDERLINESS_GOALS
 
     structure_rows = [
         _row(
@@ -532,37 +534,41 @@ def _detailed_metrics_panel(details, *, line_shape, cycles, unrelated, crossing_
             'Axis-aligned main segments',
             _pct(seg_axis),
             code='main_segment_axis_share',
-            tip='Share of drawn main (non-cofactor) path length within ±10° of horizontal or vertical (length-weighted; resampling a curve does not change the score). Higher is better; target at least half. Not yet optimised.',
-            better='higher', target='≥ 50%',
+            tip=f'Share of drawn main (non-cofactor) path length within ±10° of horizontal or vertical (length-weighted; resampling a curve does not change the score). Higher is better; goal {round(100 * og["main_segment_axis_share"])}% on curated BiGG e_coli_core. Not yet optimised.',
+            better='higher',
+            target=f'≥ {round(100 * og["main_segment_axis_share"])}% (curated e_coli_core)',
             stage=STAGE_NOT_YET,
-            miss=(seg_axis is not None and seg_axis < 0.5),
+            miss=(seg_axis is not None and seg_axis < og['main_segment_axis_share']),
         ),
         _row(
             'Axis-aligned reaction axes',
             _pct(rx_axis),
             code='reaction_axis_share',
-            tip='Share of reactions whose substrate→product axis (non-cofactor) is within ±10° of horizontal or vertical. Higher is better; target at least half. Not yet optimised.',
-            better='higher', target='≥ 50%',
+            tip=f'Share of reactions whose substrate→product axis (non-cofactor) is within ±10° of horizontal or vertical. Higher is better; goal {round(100 * og["reaction_axis_share"])}% on curated BiGG e_coli_core. Not yet optimised.',
+            better='higher',
+            target=f'≥ {round(100 * og["reaction_axis_share"])}% (curated e_coli_core)',
             stage=STAGE_NOT_YET,
-            miss=(rx_axis is not None and rx_axis < 0.5),
+            miss=(rx_axis is not None and rx_axis < og['reaction_axis_share']),
         ),
         _row(
             'Grid-aligned metabolites',
             _pct(grid),
             code='metabolite_grid_share',
-            tip='Share of main metabolite glyphs that share an x or y with another nearby main glyph (tolerance 0.05 × median nearest-neighbour main-metabolite distance, floor 1 px). Higher is better; target at least half. Not yet optimised.',
-            better='higher', target='≥ 50%',
+            tip=f'Share of main metabolite glyphs that share an x or y with another nearby main glyph (tolerance {GRID_TOL_NN_FRAC:g} × median nearest-neighbour main-metabolite distance, floor {GRID_TOL_FLOOR_PX:g} px). Higher is better; goal {round(100 * og["metabolite_grid_share"])}% on curated BiGG e_coli_core. Not yet optimised.',
+            better='higher',
+            target=f'≥ {round(100 * og["metabolite_grid_share"])}% (curated e_coli_core)',
             stage=STAGE_NOT_YET,
-            miss=(grid is not None and grid < 0.5),
+            miss=(grid is not None and grid < og['metabolite_grid_share']),
         ),
         _row(
             'Median chain turn angle',
             '—' if chain_turn is None else f'{chain_turn}°',
             code='chain_turn_median_deg',
-            tip='Median turn at a main metabolite shared by exactly two reactions (0° = the two midmarkers sit on opposite sides of the metabolite). Lower is better; target ≤ 20°. Not yet optimised.',
-            better='lower', target='≤ 20°',
+            tip=f'Median turn at a main metabolite shared by exactly two reactions (0° = the two midmarkers sit on opposite sides of the metabolite). Lower is better; goal {og["chain_turn_median_deg"]:g}° on curated BiGG e_coli_core. Not yet optimised.',
+            better='lower',
+            target=f'{og["chain_turn_median_deg"]:g}° (curated e_coli_core)',
             stage=STAGE_NOT_YET,
-            miss=(chain_turn is not None and chain_turn > 20.0),
+            miss=(chain_turn is not None and chain_turn > og['chain_turn_median_deg']),
         ),
     ]
     if cycle_is_target:
