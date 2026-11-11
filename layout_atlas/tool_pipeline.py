@@ -28,9 +28,17 @@ from core import *
 LIMITS = dict(max_bytes=25 * 1024 * 1024, max_reactions=20000, full_routed_max_reactions=150, whole_map_max_reactions=3000, view_size=50)
 SOURCE_PATHS = False  # reuse the expert's original curves (Escher Bezier chains) for the edges of matched structures
 ORIENTATION = 'full'  # 'off' | 'sides' (currency copies on the substrate / product side) | 'full' (also reactions outside the expert structures between their substrates and products)
-LAYOUT_STYLE = 'legacy'  # 'legacy' | 'expert' (V7: every algorithm-placed connection is a Bezier curve solved from expert-map constraints; no orthogonal polylines)
+LAYOUT_STYLE = 'expert'  # 'legacy' | 'expert' (V7: every algorithm-placed connection is a Bezier curve solved from expert-map constraints; no orthogonal polylines)
 COMPLETION_CONTEXT = 'auto'  # 'auto' (V6: uncovered reactions are placed beside the glyphs of their own metabolites) | 'off'
-EDGE_ROUTING = 'libavoid'  # 'libavoid' (orthogonal, all edges: the earlier behaviour) | 'hybrid' (routes only blocked algorithm-placed edges, smooths corners) | 'none' (straight lines)
+EDGE_ROUTING = 'libavoid'  # 'libavoid' (orthogonal, all edges) | 'hybrid' (routes only blocked algorithm-placed edges) | 'none' (straight lines)
+# Routing behavior by layout style and model size:
+#   - layout_style='expert': Uses Bezier curve fitting (edge_style.apply) for all algorithm-placed edges.
+#     Expert-style curves are smoother and follow expert-derived templates. No libavoid routing is used
+#     because the Bezier curves already avoid obstacles via iterative candidate selection.
+#   - layout_style='legacy' with <= ROUTING_THRESHOLD reactions: Uses libavoid orthogonal routing.
+#   - layout_style='legacy' with > ROUTING_THRESHOLD reactions: Routing is deferred (edge_routing.measure only).
+# For scalable=True (large models), straight connections are used initially; edge_style is applied separately.
+ROUTING_THRESHOLD = 500  # reactions; above this, routing is deferred for legacy style
 CONTEXT = 'auto'  # 'auto' (reactions without non-currency participants share nodes and sit next to related reactions) | 'off'
 INSTANCES = 'auto'  # 'auto' (V3: decide how many visual instances each metabolite gets) | 'off'
 LAYOUT = 'global'  # 'global' (one map for the whole model, <=3,000 reactions) | 'tiled' (50-reaction views tiled on a grid; also the automatic fallback)
@@ -229,12 +237,11 @@ def load_bridge():
     if cache.exists():
         return read(cache)
     import semantic_transfer as st
-    import ec_experiment
-    missing = [str(p) for _, p, _ in ec_experiment.MODELS if not p.exists()]
+    missing = [str(p) for _, p, _ in EXAMPLE_MODELS if not p.exists()]
     if missing:
         raise FileNotFoundError('annotation_bridge.json is missing and the models needed to rebuild it are not available: ' + ', '.join(missing) +
                                 ' (BiGG models are in examples/; point OPM_HUMAN_GEM to Human-GEM.xml)')
-    return st.annotation_bridge(ec_experiment.MODELS)
+    return st.annotation_bridge(EXAMPLE_MODELS)
 
 
 def save_gz(path, obj):
@@ -392,13 +399,13 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     import geometry
     import interfaces
     import retrieval
-    import micromap_experiment as me
-    from geometry_experiment import metric_details, assert_chemistry
+    from layout_quality import metric_details, assert_chemistry
+    from core import CanonicalGraph
     from jsonschema import Draft4Validator
     from xml.sax.saxutils import escape
     full_model = full_model or model
     original = uid(model)
-    g = me.CanonicalGraph(model_graph(model))
+    g = CanonicalGraph(model_graph(model))
     bridges = retrieval.bridges(model, selected)
     if scalable:
         import global_layout as gl_pack
@@ -477,7 +484,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         if log:
             log(f"  metabolite instances: +{instance_report['added']}, merged {instance_report['shared_nodes_merged']}, reattached {instance_report['reactions_reattached']}; edges >250: {instance_report['edges_over_250']}, >1000: {instance_report['edges_over_1000']}")
     regions_report = None
-    if LAYOUT_STYLE == 'expert' and os.environ.get('OPM_REGIONS', 'off') == 'on':    # pathway-level organisation of the rigid modules (V7.3 P0); A/B switch
+    if LAYOUT_STYLE == 'expert' and os.environ.get('OPM_REGIONS', 'off') == 'on':    # opt-in pathway-region organisation
         import regions as regions_module
         scene, regions_report = regions_module.organize(model, scene, blocks, currency(model))
         if log:
@@ -516,7 +523,13 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         completion_report['attachment_rate_final'] = completion_context_module.attachment_rate(model, scene, currency(model), {rid for b in blocks for rid in b['reaction_ids']}, completion_skip)
     expert_geometry = layout_quality.expert_geometry(blocks, scene)
     attempts = []
-    for route, labels in (((False, False),) if scalable or EDGE_ROUTING in ('hybrid', 'none') or LAYOUT_STYLE == 'expert' else ((True, True), (True, False), (False, False))):
+    # Routing decision: expert style uses Bezier curves (edge_style), legacy uses libavoid
+    # For large models (> ROUTING_THRESHOLD reactions), defer routing to avoid long build times
+    skip_libavoid = (scalable or 
+                     EDGE_ROUTING in ('hybrid', 'none') or 
+                     LAYOUT_STYLE == 'expert' or
+                     len(model['reactions']) > ROUTING_THRESHOLD)
+    for route, labels in (((False, False),) if skip_libavoid else ((True, True), (True, False), (False, False))):
         metric = drawing.export(model, core, folder, 'map', blocks=blocks, full_model=full_model, route=route, scene=scene, label_obstacles=labels)
         status = (metric.get('routing') or {}).get('status')
         attempts.append(dict(route=route, label_obstacles=labels, status=status if route else 'not_requested'))
@@ -607,7 +620,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             if log:
                 log('  peripheral modules: ' + str({k: v for k, v in peripheral_report.items() if k not in ('details', 'gate_rows')}))
             dump(folder / 'map.json', data)
-        if os.environ.get('OPM_BLOCK_RELOC', 'on') != 'off':     # long cross-block connections: move the whole expert block next to what it connects to, kept only if the gate accepts
+        if os.environ.get('OPM_BLOCK_RELOC', 'off') == 'on':     # demoted: stress packing should place blocks; enable with OPM_BLOCK_RELOC=on for A/B
             import block_relocation
             data, reloc = block_relocation.relocate(data, model, scene, blocks, currency(model), skip_edges, log=log)
             metric['block_relocation'] = reloc
@@ -622,7 +635,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             if log:
                 log('  expert sub-module relocation: ' + str({k: v for k, v in sub.items() if k not in ('rows', 'regenerated_expert_edges')}))
             dump(folder / 'map.json', data)
-        if os.environ.get('OPM_REGION_PLACE', 'off') == 'on':     # experimental: pathway-aware placement of whole regions next to their strongest neighbour (V7.3 P4)
+        if os.environ.get('OPM_REGION_PLACE', 'off') == 'on':     # opt-in pathway-aware region placement
             import region_placement
             data, rp = region_placement.place(data, model, scene, blocks, currency(model), skip_edges, log=log)
             metric['region_placement'] = rp
@@ -663,6 +676,12 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     metric['node_overlap_kinds'] = node_overlap_kinds
     if protected_report is not None:
         data[0]['metadata']['protected_connections'] = [dict(r) for r in scene.get('protected', [])]
+    # Node-level label_hidden is not in the Escher schema; keep ids under metadata (allowed).
+    hidden_labels = [nid for nid, n in data[1]['nodes'].items() if n.pop('label_hidden', None)]
+    for rx in data[1]['reactions'].values():
+        rx.pop('label_hidden', None)
+    if hidden_labels:
+        data[0].setdefault('metadata', {})['hidden_metabolite_labels'] = hidden_labels
     try:
         Draft4Validator(read(ESCHER_SCHEMA)).validate(data)
     except Exception:
@@ -704,9 +723,9 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
 def draw_one_view(model, selected, views, view_id, folder):
     """One fixed view with the P0-compatible pipeline; returns the metrics dict."""
     import drawing
-    import micromap_experiment as me
+    import retrieval
     sub = drawing.subset(model, views[view_id]['reaction_ids'])
-    clipped = me.clip_proposals(selected, sub)
+    clipped = retrieval.clip_proposals(selected, sub)
     out = folder / 'views' / view_id
     metric = draw_map(sub, clipped, out, full_model=model)
     for ext in ('svg', 'json'):
@@ -917,7 +936,7 @@ def run_job(folder):
     LAYOUT = options.get('layout') if options.get('layout') in ('global', 'tiled') else 'global'
     import global_layout as _gl
     _gl.BACKBONE = (LAYOUT_STYLE == 'expert')
-    _gl.BLOCK_LAYOUT = options.get('block_layout') if options.get('block_layout') in ('auto', 'single') else 'single'
+    _gl.BLOCK_LAYOUT = options.get('block_layout') if options.get('block_layout') in ('auto', 'single') else 'auto'
     REACTION_STYLE = options.get('reaction_style') if options.get('reaction_style') in ('line', 'marker') else 'line'
     COMPLETION = options.get('completion') if options.get('completion') in ('spaced', 'classic') else 'spaced'
     library_kind = options.get('library', 'windows')  # module-candidate source; 'windows' (default, Atlas v0.3) | 'units_sub' (structure units + derived sub-windows)
@@ -969,7 +988,10 @@ def run_job(folder):
         mapper = st.Mapper(model, bridge)
         if core:
             library = retrieval.Library(core)
-            ps, audit = library.candidates(g, model=model, max_roots=120)
+            # Scale retrieval roots with model size: small models stay thorough; large ones cap VF2 work
+            n_rx = len(model['reactions'])
+            max_roots = 120 if n_rx <= 200 else (80 if n_rx <= 800 else 48)
+            ps, audit = library.candidates(g, model=model, max_roots=max_roots)
             strong, sinfo = mapper.proposals(core, 'open_core')
         else:
             ps, audit, strong, sinfo = [], dict(levels={}), [], dict(candidate_chemical_reactions=0)
@@ -1048,7 +1070,7 @@ def run_job(folder):
             selected = [p for p in selected if p not in _drop]
             job.log(f'Dropped {len(_drop)} topology-only structure(s) that covered very large reactions: {sorted(_big & {r for p in _drop for r in p["reaction_ids"]})}')
         lowconf_report = None
-        if LAYOUT_STYLE == 'expert' and os.environ.get('OPM_LOWCONF', 'off') == 'on':    # experimental switch: decompose low-confidence (topology-only) structures
+        if LAYOUT_STYLE == 'expert' and os.environ.get('OPM_LOWCONF', 'off') == 'on':    # opt-in low-confidence structure decomposition
             import lowconf
             selected, lowconf_report = lowconf.split(model, currency(model), selected)
             job.log(f"Low-confidence decomposition: {len(lowconf_report['split'])} structure(s) split, {lowconf_report['kept']} kept, of {lowconf_report['checked']} topology-only: {lowconf_report['split']}")
@@ -1136,7 +1158,6 @@ def run_job(folder):
         job.save()
         map_note = None
         if len(allids) <= LIMITS['full_routed_max_reactions']:
-            import micromap_experiment as me
             metric = draw_map(model, selected, folder / 'full', full_model=model)
             for name, kind, en, zh in (('map.svg', 'svg', 'Completed map (routed)', '补全图（已布线）'), ('map.json', 'json', 'Completed map, Escher JSON', '补全图（Escher JSON）'), ('layout_issues.json', 'json', 'Layout issues (where the problems are)', '绘图问题位置清单')):
                 (folder / name).write_bytes((folder / 'full' / name).read_bytes())
@@ -1269,7 +1290,6 @@ def draw_view(folder, view_id):
     folder = job.folder
     install_tool_environment()
     import drawing
-    import micromap_experiment as me
     options = read(folder / 'options.json') if (folder / 'options.json').exists() else {}
     global REACTION_STYLE, COMPLETION, SOURCE_PATHS
     SOURCE_PATHS = bool(options.get('source_paths'))

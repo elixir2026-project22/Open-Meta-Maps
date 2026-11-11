@@ -18,9 +18,3 @@ def annotate(model,skeleton):
   elif len(bs)>1 and key.startswith('m:'):a.update(confidence=.4,origin='derived_shared_identity_junction',copy_modules=[b['id'] for b in bs])
   else:a.update(confidence=max(b['anchor_confidence'] for b in bs),origin='template_arrangement')
  skeleton['target_interface_scope']='All source-model participants including side species; unmatched chemistry remains target-owned';return skeleton
-
-def update_all():
- for row in read(OUT/'model_summary.json'):
-  if row.get('status')!='ok':continue
-  folder=OUT/'models'/row['model']/row['condition'];path=folder/'skeleton.json';state=read(path);model=load_model(ROOT/state['target_file']);dump(path,annotate(model,state))
-if __name__=='__main__':update_all()

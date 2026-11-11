@@ -12,6 +12,8 @@ What this does (after `select`, before the skeleton; evidence, not layout, is wh
   everything else (exact / adapted structures, confirmed chemistry) is left exactly as selected.
 The decision is judged on the finished map like every other change (A/B switch OPM_LOWCONF=on|off).
 """
+
+
 import copy
 from collections import defaultdict
 
@@ -40,7 +42,7 @@ def external_neighbours(model, cur, rids, members):
 
 def split(model, cur, selected):
     """-> (new selected list, report)."""
-    import micromap_experiment as me
+    import retrieval as me  # clip_proposals lives in retrieval (production)
     g = me.model_graph(model)
     rids_all = {r['id'] for r in model['reactions']}
     report = dict(checked=0, split=[], kept=0)

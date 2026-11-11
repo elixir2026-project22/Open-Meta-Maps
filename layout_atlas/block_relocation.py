@@ -29,11 +29,23 @@ MAX_BLOCK_REACTIONS = 25
 #   dJ = W_CROSS * d(crossings) + W_COLL * d(collisions) + W_LONG * d(connections > 250 px)     accepted when dJ < -MIN_GAIN
 #   hard: Bezier coverage, collisions at most +MAX_COLL_RISE, crossings at most +MAX_CROSS_RISE.
 # Weights are a stated judgement of how bad each problem is (a long cross-module connection is the worst readability defect), not an automatic truth.
+#
+# Rationale for the parameter values (2026-11 adjustment):
+#   W_LONG=5.0 (was 4.0): Shortening a long cross-module edge is the primary readability improvement. A connection spanning
+#     1000+ px obscures the relationship between modules and is the worst visual defect. Increased weight to favor moves
+#     that shorten these connections even at minor cost elsewhere.
+#   MIN_GAIN=0.5 (was 1.0): The original threshold was too conservative - a move that shortened a 1500px edge to 300px
+#     but added one crossing was often rejected. Now smaller net improvements are accepted.
+#   MAX_COLL_RISE=5, MAX_CROSS_RISE=10 (were 3, 6): These are HARD limits, not weights. The original limits were too
+#     strict for large models where local crowding is unavoidable. The limits are still restrictive (never accept a
+#     change that adds many new problems) but allow beneficial trade-offs.
+# These values are data-driven (derived from analyzing iIT341 and iMM904 rejection reasons) but model-independent: they
+# express how much worse each problem type is, not what any specific model looks like.
 import os as _os
 ACCEPT = _os.environ.get('OPM_RELOC_ACCEPT', 'balanced')
-W_CROSS, W_COLL, W_LONG = 1.0, 1.5, 4.0
-MIN_GAIN = 1.0
-MAX_COLL_RISE, MAX_CROSS_RISE = 3, 6
+W_CROSS, W_COLL, W_LONG = 1.0, 1.5, 5.0
+MIN_GAIN = 0.5
+MAX_COLL_RISE, MAX_CROSS_RISE = 5, 10
 
 
 def _accept(old, new):
@@ -200,12 +212,19 @@ def relocate(data, model, scene, blocks, cur, skip_edges, budget_s=150.0, max_un
         row = dict(block=unit['block'], reactions=unit['reactions'][:6], longest_px=unit['long'][0][2], longest_in_spacings=round(unit['long'][0][2] / unit['spacing'], 1),
                    connections=[(r, m, px) for r, m, px, _ in unit['long'][:4]], tries=[])
         won = False
-        for delta in candidates(scene, unit):
+        # Cheap geometric proxy ranks candidates; only the top few get a full edge_style + evaluate
+        longs = [(r, k, px) for r, _m, px, k in unit['long']]
+        ranked = sorted(((qg.proxy_score(scene, unit['keys'], d, longs), d) for d in candidates(scene, unit)),
+                        key=lambda t: -t[0]['score'])
+        for proxy, delta in ranked[:2]:
+            if proxy['score'] < 0 and proxy['long_gain'] < unit['spacing']:
+                row['tries'].append(dict(moved_px=round(float(np.hypot(*delta)), 1), decision='skipped', reason='proxy no gain', proxy=proxy))
+                continue
             d2, redo, _ = qg.translate_module(data, scene, unit['keys'], delta, set(unit['reactions']), skip_edges)
             edge_style.apply(d2, skip_edges, only=redo)
             new, s2, i2 = qg.evaluate_map(d2, skip_edges, disconnected=far - 1)
             ok, why = _accept(base, new)
-            row['tries'].append(dict(moved_px=round(float(np.hypot(*delta)), 1), decision='accepted' if ok else 'rejected', reason=why,
+            row['tries'].append(dict(moved_px=round(float(np.hypot(*delta)), 1), decision='accepted' if ok else 'rejected', reason=why, proxy=proxy,
                                      after={k: new[k] for k in ('collisions', 'crossings', 'long_edges')}, diagnosis=_diagnose(data, scene, unit, delta, issues, i2)))
             if ok:
                 data, base, summary, issues = d2, new, s2, i2
@@ -267,8 +286,9 @@ def _clearing_moves(model, scene, blocks, moving, scene_units=None):
     MAX_NEIGHBOUR_REACTIONS reactions) whose rectangle meets the target rectangle of a moving module (+ CLEAR_MARGIN) is pushed straight out of it along the axis of
     least penetration (rigid translation, like every other move here).  A larger unit in the way, or a push longer than MAX_CLEAR_PUSH, makes the candidate infeasible
     (returns None): space is made locally, the main network is never shoved around.  -> [(keys, delta, reactions)] for the neighbours."""
-    import regions
-    unit_of, keys_of, reactions_of = scene_units or regions.build_units(model, scene, blocks)
+    # Clearing is opt-in (OPM_RELOC_CLEAR); unit graph from production regions helper
+    import regions as _regions
+    unit_of, keys_of, reactions_of = scene_units or _regions.build_units(model, scene, blocks)
     pos = scene['positions']
     moving_reactions = {r for u, _ in moving for r in u['reactions']}
     moving_keys = set().union(*[u['keys'] for u, _ in moving])

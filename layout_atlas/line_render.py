@@ -117,13 +117,16 @@ def render(data, kinds=None, legend=None):
             (top_lines if keep else lines).append(f'<path d="M{pts}" stroke="{color}" stroke-width="{2.4 if keep else 1.3}"{"" if keep else " stroke-opacity=\".7\""} stroke-linejoin="round" stroke-linecap="round" fill="none"{arrows}>{title}</path>')
         labels.append(f'<text x="{r["label_x"]:.1f}" y="{r["label_y"]:.1f}" font-family="{FONT}" font-size="12" fill="#17323d" font-weight="600" stroke="#fff" stroke-width="3" paint-order="stroke">{escape(rid)}</text>')
     svg += lines + top_lines  # routed connections first, the expert structures' own edges on top
-    for n in nodes.values():
+    hidden = set((data[0].get('metadata') or {}).get('hidden_metabolite_labels') or [])
+    for nid, n in nodes.items():
         if n.get('node_type') != 'metabolite':
             continue
         primary = n.get('node_is_primary', True)
         radius = PRIMARY_R if primary else SECONDARY_R
         fill, stroke = ('#dcebdf', '#5d7480') if primary else ('#ffffff', '#8a9ca5')
         svg.append(f'<circle data-m="{escape(n.get("bigg_id", ""))}" cx="{n["x"]:.1f}" cy="{n["y"]:.1f}" r="{radius}" fill="{fill}" stroke="{stroke}" stroke-width="1.2"/>')
+        if n.get('label_hidden') or nid in hidden:
+            continue  # dense-region currency hide
         labels.append(f'<text x="{n["label_x"]:.1f}" y="{n["label_y"]:.1f}" font-family="{FONT}" font-size="{12 if primary else 10.5}" fill="{"#17323d" if primary else "#6b7f88"}" stroke="#fff" stroke-width="3" paint-order="stroke">{escape(n.get("bigg_id", ""))}</text>')
     svg += labels
     if legend:

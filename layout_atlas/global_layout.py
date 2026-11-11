@@ -318,10 +318,12 @@ def layout_blocks(sizes, weights, seed=SEEDS[0], iterations=500, aspect=1.4, ini
             np.add.at(push, ea[:, 1], -direction * pull[:, None])
         push /= (wsum[:, None] + 1.0)  # weighted-mean step: stable however many neighbours a hub block has
         centre = xy.mean(0)
-        push -= (xy - centre) * np.array([.01 / aspect ** .5, .01 * aspect ** .5])
+        push -= (xy - centre) * np.array([.015 / aspect ** .5, .015 * aspect ** .5])  # stronger gravity
         xy += push * min(1.0, step * 2)
         xy = _separate(xy, half, passes=3)
     xy = _separate(xy, half, passes=400)
+    # Final compaction pass to squeeze out empty space
+    xy = _compact(xy, half, weights, iterations=40)
     return xy
 
 
@@ -356,46 +358,35 @@ def _separate(xy, half, passes=3):
     return xy
 
 
-def pack_global(model, selected, bridges, g):
-    """`drawing.pack_modules` followed by a 2-D re-layout of the blocks.
-
-    pack_modules (ELK) keeps each block's internal geometry and gives the shared metabolites a junction, but it lays compartment groups out
-    one under the other, which for a whole large model is a column tens of thousands of pixels tall.  Here every block stays rigid and only
-    its position changes: weights come from the shared metabolites, so connected structures end up next to each other.
-    Returns the same (anchors, blocks, containers, routes) as pack_modules.
-    """
-    anchors, blocks, containers, routes = drawing.pack_modules(model, copy.deepcopy(selected), bridges, physical_scale=True)
-    if len(blocks) < 2:
-        return anchors, blocks, containers, routes
-    cur = currency(model)
-    corners, sizes = [], []
-    for b in blocks:
-        pts = np.array(list(b['positions'].values()), float)
-        lo, hi = pts.min(0), pts.max(0)
-        corners.append(lo)
-        sizes.append(hi - lo + 80)
-    weights = block_weights(model, blocks, g, cur)
-    centres = layout_blocks(sizes, weights)
-    new_anchor = {}
-    for b, lo, size, centre in zip(blocks, corners, sizes, centres):
-        delta = centre - size / 2 + 40 - lo
-        b['positions'] = {k: (np.array(v) + delta).tolist() for k, v in b['positions'].items()}
-        for k, v in b['positions'].items():
-            if k.startswith('r:'):
-                anchors[k] = v
-            else:
-                new_anchor.setdefault(k, []).append(v)
-    for k, vals in new_anchor.items():
-        anchors[k] = np.mean(vals, axis=0).tolist()  # a shared metabolite sits at the centre of its copies
-    by = defaultdict(list)
-    for b in blocks:
-        pts = np.array(list(b['positions'].values()), float)
-        by[b['container']].append((pts.min(0) - 30, pts.max(0) + 30))
-    roles = {c['id']: c['roles'] for c in containers}
-    containers = [dict(id=cid, roles=roles.get(cid, []), x=float(min(lo[0] for lo, _ in boxes)), y=float(min(lo[1] for lo, _ in boxes)),
-                       width=float(max(hi[0] for _, hi in boxes) - min(lo[0] for lo, _ in boxes)), height=float(max(hi[1] for _, hi in boxes) - min(lo[1] for lo, _ in boxes)))
-                  for cid, boxes in by.items()]
-    return anchors, blocks, containers, routes
+def _compact(xy, half, weights, iterations=50):
+    """Pull blocks toward centre while respecting overlaps, weighted by connectivity.
+    Blocks with more connections have more pull toward the dense core."""
+    n = len(xy)
+    if n < 2:
+        return xy
+    xy = xy.copy()
+    # Compute weight sum for each block (how connected it is)
+    wsum = np.zeros(n)
+    for (a, b), w in weights.items():
+        wsum[a] += w
+        wsum[b] += w
+    wsum = np.maximum(wsum, 0.1)
+    
+    for it in range(iterations):
+        # Weighted centre (more connected blocks pull harder)
+        weighted_centre = np.average(xy, axis=0, weights=wsum)
+        # Pull toward centre, stronger for less connected blocks (they should move more)
+        strength = 0.15 * (1.0 - it / iterations)
+        for i in range(n):
+            direction = weighted_centre - xy[i]
+            dist = np.linalg.norm(direction)
+            if dist > 1.0:
+                # Less connected blocks move more
+                move = direction / dist * min(dist * strength / (wsum[i] + 0.1), 20.0)
+                xy[i] += move
+        # Resolve overlaps
+        xy = _separate(xy, half, passes=3)
+    return xy
 
 
 # ------------------------------------------------------------------------------------------------ G1.5: automatic modules for reactions no expert structure covers
@@ -404,7 +395,7 @@ MIN_AUTO = 4         # communities smaller than this are merged into their best 
 LOCAL_SPACING = (110.0, 75.0, 60.0)  # minimum centre distances inside automatic modules (reaction-reaction, metabolite-metabolite, reaction-metabolite)
 BACKBONE = False        # V7: fixed backbone chain inside automatic modules (set by tool_pipeline for --layout-style expert)
 backbone_stats = {}
-BLOCK_LAYOUT = 'single'  # default stays V1 until V2 improves the long edges. 'auto' (V2: several module arrangements, best chosen by module metrics) | 'single' (V1: one spring arrangement)
+BLOCK_LAYOUT = 'auto'  # 'auto' (stress/spring candidates scored for compactness + long links) | 'single' (one spring arrangement)
 HUB = 30             # a metabolite that touches more modules than this does not glue modules together
 
 

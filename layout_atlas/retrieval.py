@@ -22,7 +22,9 @@ def target_info(model):
  ri=rhea_index();meta={m['id']:m for m in model['metabolites']};metrefs={}
  for mid,m in meta.items():
   refs=xrefs(m.get('annotations',[]));refs.setdefault('bigg.metabolite',[])
-  if model['id'] in ('e_coli_core','iML1515','iMM904','iYO844'):refs['bigg.metabolite']=sorted(set(refs['bigg.metabolite'])|{chem(mid)})
+  # BiGG-style ids end with _<compartment>; always treat the chemical base as a BiGG alias (generic, not model-list gated)
+  base=chem(mid)
+  if base and base!=mid:refs['bigg.metabolite']=sorted(set(refs['bigg.metabolite'])|{base})
   cands=set(refs.get('chebi',[]))
   for alias in refs['bigg.metabolite']:cands.update(public_metabolite_links().get(alias,set()))
   refs['compartment']=m.get('compartment','unknown')
@@ -147,9 +149,12 @@ class Library:
      if valid and all(tg.has_edge(mm[e['a']],mm[e['b']]) for e in m['edges']):direct=mm
     if direct is not None:maps=[direct];partial_mode=True
     elif partial_mode:
-     try:maps=[{v:k for k,v in mp.items()} for mp in itertools.islice(database.Matcher(tg,sg,node_match=lambda a,b:a['role']==b['role']).subgraph_isomorphisms_iter(),4)]
-     except TimeoutError:maps=[]
-    else:maps=database.mappings(sg,tg,4)
+     # Skip VF2 when template is much larger than the query window (no useful subgraph match expected)
+     if len(sg)>len(tg)*2+2:maps=[]
+     else:
+      try:maps=[{v:k for k,v in mp.items()} for mp in itertools.islice(database.Matcher(tg,sg,node_match=lambda a,b:a['role']==b['role'],budget=database._iso_budget(tg,sg)).subgraph_isomorphisms_iter(),3)]
+      except TimeoutError:maps=[]
+    else:maps=database.mappings(sg,tg,3)
     for mp in maps:
      # Align to an algorithmic start only, never the query's expert coordinates.
      source={n['key']:n for n in m['nodes']};ks=sorted(mp);frame=fit_frame([source[k]['xy'] for k in ks],[generic[mp[k]] for k in ks]);positions=transform({mp[k]:source[k]['xy'] for k in ks},frame);rmap={r['key']:mp[r['key']][2:] for r in m['reactions'] if r['key'] in mp};biol=0;mapping_checks=[]
@@ -228,3 +233,29 @@ def bridges(model,chosen,max_new=4):
   if uf[a]==uf[b] or set(p['reaction_ids'])&added:continue
   uf.union(a,b);added.update(p['reaction_ids']);out.append(p)
  return out
+
+
+def clip_proposals(selected, sub):
+    """Clip expert proposals to a reaction subset (fixed views). Moved from micromap_experiment."""
+    import copy
+    ids = {r['id'] for r in sub['reactions']}
+    g = model_graph(sub)
+    out = []
+    for p in selected:
+        rids = sorted(set(p['reaction_ids']) & ids)
+        if len(rids) < 2:
+            continue
+        keys = {'r:' + r for r in rids}
+        for r in rids:
+            keys.update(g['r:' + r])
+        q = copy.deepcopy(p)
+        q['reaction_ids'] = rids
+        q['positions'] = {k: v for k, v in p['positions'].items() if k in keys}
+        q['node_mapping'] = {k: v for k, v in p['node_mapping'].items() if v in q['positions']}
+        q['reaction_mapping'] = {k: v for k, v in p['reaction_mapping'].items() if v in rids}
+        q['mapping_evidence'] = [e for e in p.get('mapping_evidence', []) if e.get('target_reaction') in rids or e.get('target_reaction') is None]
+        q['source_glyph_mapping'] = {k: v for k, v in p.get('source_glyph_mapping', {}).items() if 'm:' + v in q['positions']}
+        q['view_clipping'] = dict(original_proposal=p['id'], full_reaction_ids=p['reaction_ids'], visible_reaction_ids=rids)
+        q['id'] = uid([p['id'], 'fixed-view', rids])
+        out.append(q)
+    return out

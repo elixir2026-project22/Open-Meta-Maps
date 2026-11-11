@@ -142,7 +142,10 @@ def _corridor(p, q, rects, mine, step_cost=35.0):
 
 
 def apply(data, skip_edges=(), only=None):
-    """Turn every algorithm-placed connection of `data` ([header, body], exported without routing) into Bezier segments, in place.  Returns a report."""
+    """Turn every algorithm-placed connection of `data` ([header, body], exported without routing) into Bezier segments, in place.  Returns a report.
+
+    When `only` is a set of reaction ids, only those reactions are restyled (incremental path used by relocation/peripheral).
+    """
     import line_render
     body = data[1]
     nodes, reactions = body['nodes'], body['reactions']
@@ -152,6 +155,7 @@ def apply(data, skip_edges=(), only=None):
     rects, owner_arr = all_rects[is_node], np.array(all_owner, dtype=object)[is_node]
     label_rects, label_owner = all_rects[~is_node], np.array(all_owner, dtype=object)[~is_node]
     skip = {tuple(e) for e in skip_edges}
+    only_set = set(only) if only is not None else None
     # all current segments, by reaction (the crossing term sees what is already drawn)
     seg_rows, seg_owner = [], []
     for rx in reactions.values():
@@ -165,7 +169,10 @@ def apply(data, skip_edges=(), only=None):
     S_all = np.array(seg_rows, float).reshape(-1, 4)
     S_owner = np.array(seg_owner, dtype=object)
     # spatial indexes: a connection is only checked against what lies near it (iMM904 has thousands of connections)
-    CELL = 150.0
+    # Larger cells on huge canvases keep neighbour lists short
+    canvas = body.get('canvas') or {}
+    extent = max(float(canvas.get('width', 0) or 0), float(canvas.get('height', 0) or 0), 1.0)
+    CELL = 150.0 if extent < 20000 else (250.0 if extent < 80000 else 400.0)
 
     def cells(lo, hi):
         for gx in range(int(lo[0] // CELL), int(hi[0] // CELL) + 1):
@@ -193,11 +200,22 @@ def apply(data, skip_edges=(), only=None):
             seg_grid[c].append(k)
     cur_edge = {}
 
+    def _gather(grid, lo, hi):
+        # Order does not matter for hit tests; skip sorted() on the hot path
+        seen = set()
+        out = []
+        for c in cells(lo, hi):
+            for i in grid.get(c, ()):
+                if i not in seen:
+                    seen.add(i)
+                    out.append(i)
+        return np.fromiter(out, dtype=int, count=len(out)) if out else np.zeros(0, dtype=int)
+
     def ev(smp):
         lo, hi = smp.min(axis=0) - 8, smp.max(axis=0) + 8
-        ni = np.array(sorted({i for c in cells(lo, hi) for i in rect_grid.get(c, ())}), dtype=int)
-        li = np.array(sorted({i for c in cells(lo, hi) for i in label_grid.get(c, ())}), dtype=int)
-        si = np.array(sorted({i for c in cells(lo, hi) for i in seg_grid.get(c, ())}), dtype=int)
+        ni = _gather(rect_grid, lo, hi)
+        li = _gather(label_grid, lo, hi)
+        si = _gather(seg_grid, lo, hi)
         own = cur_edge['own']
         r_sub, l_sub = (rects[ni] if len(ni) else rects[:0]), (label_rects[li] if len(li) else label_rects[:0])
         s_sub = seg_arr[si][seg_own[si] != cur_edge['rid']] if len(si) else np.zeros((0, 4))
@@ -305,7 +323,9 @@ def apply(data, skip_edges=(), only=None):
                                                        own=list(cur_edge['own']), rid_i=cur_edge['rid'], tname=t['bigg_id']))
             chain = None
             degraded = False
-            if best[5] > 0:   # every candidate touches an obstacle: find a corridor and fit a smooth multi-segment Bezier through it
+            # Corridor search is expensive; skip it on incremental restyles when a light hit is acceptable, or when the best candidate is already clean
+            do_corridor = best[5] > 0 and (only_set is None or best[5] >= 2)
+            if do_corridor:   # every candidate touches an obstacle: find a corridor and fit a smooth multi-segment Bezier through it
                 for path in _corridor(P, q, rects, mine):
                     t_start = _rot(chord / L, s0 * side)
                     t_end = _rot(chord / L, e0 * side)
@@ -397,7 +417,8 @@ def apply(data, skip_edges=(), only=None):
                 seg_n[0] += 1
                 for c in cells(np.minimum(a, b), np.maximum(a, b)):
                     seg_grid[c].append(k)
-    report.update(joint_route(data, joint_store, ev, cur_edge, rects, owner_arr, label_rects, label_owner, skip))
+    # Incremental restyles only joint-route the reactions that were redrawn
+    report.update(joint_route(data, joint_store, ev, cur_edge, rects, owner_arr, label_rects, label_owner, skip, only=only_set))
     data[0].setdefault('metadata', {})['routed_edges'] = routed
     return report
 
@@ -426,16 +447,21 @@ def _own_crossings(curves, skip_head=3, movable=None):
     return n
 
 
-def joint_route(data, store, ev, cur_edge, rects, owner_arr, label_rects, label_owner, skip):
+def joint_route(data, store, ev, cur_edge, rects, owner_arr, label_rects, label_owner, skip, only=None):
     """Reaction-level joint choice: the curves of one reaction are not independent.  For every reaction whose curves cross each other away from the reaction point,
     the candidate of each curve is re-chosen jointly (coordinate descent over the stored candidates, a few rounds), scored as
     (curves through glyphs, crossings among the reaction's own curves, crossings with other connections, anomalies, labels hit, detour).  Only a strictly better
-    combination replaces the current one.  A crossing that no candidate combination can remove stays and is counted."""
+    combination replaces the current one.  A crossing that no candidate combination can remove stays and is counted.
+
+    When `only` is a set of reaction ids (incremental restyle), other reactions are left untouched.
+    """
     import line_render
     rep = dict(joint_reactions_with_own_crossings=0, joint_fixed=0, joint_own_crossings_before=0, joint_own_crossings_after=0)
     body = data[1]
     by_id = {r['bigg_id']: r for r in body['reactions'].values()}
     for rid, items in store.items():
+        if only is not None and rid not in only:
+            continue
         movable = [it for it in items if not it.get('fixed') and not str(it['key']).startswith('spseg')]
         if not movable or len(movable) > JOINT_MAX_BIG:
             continue

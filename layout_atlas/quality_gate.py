@@ -21,6 +21,43 @@ TOL_CROSS = 2
 TOL_LONG = 0.05
 
 
+def proxy_score(scene, keys, delta, long_connections, clear=85.0):
+    """Cheap geometric proxy for a rigid module move: no Bezier restyle, no full evaluate.
+
+    Returns dict(long_gain, collision_est, score).  Used to rank candidates before one full restyle.
+    long_connections: [(reaction_id, outside_key, px), ...] in scene units.
+    Generic: operates on positions and distances only.
+    """
+    pos = scene['positions']
+    dxy = np.asarray(delta, float)
+    # Predicted shortening of the triggering long connections
+    long_gain = 0.0
+    for rid, outside, px in long_connections:
+        rk = 'r:' + rid
+        if rk not in pos or outside not in pos:
+            continue
+        before = float(px)
+        after = float(np.hypot(*(np.array(pos[rk], float) + dxy - np.array(pos[outside], float))))
+        long_gain += max(0.0, before - after)
+    # Rough collision estimate: how many foreign glyphs fall inside the moved AABB (+clear)
+    local = np.array([pos[k] for k in keys if k in pos], float)
+    if not len(local):
+        return dict(long_gain=0.0, collision_est=0, score=0.0)
+    moved = local + dxy
+    lo, hi = moved.min(0) - clear, moved.max(0) + clear
+    keyset = set(keys)
+    collision_est = 0
+    for k, v in pos.items():
+        if k in keyset or k.startswith('side:'):
+            continue
+        x, y = v
+        if lo[0] <= x <= hi[0] and lo[1] <= y <= hi[1]:
+            collision_est += 1
+    # Prefer large shortening with few new overlaps
+    score = long_gain - 40.0 * collision_est
+    return dict(long_gain=round(long_gain, 1), collision_est=collision_est, score=round(score, 1))
+
+
 def evaluate_map(data, skip_edges, disconnected=0):
     s, issues = layout_quality.evaluate(data, skip_edges)
     c = s['core']
