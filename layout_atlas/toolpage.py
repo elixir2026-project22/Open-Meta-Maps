@@ -30,7 +30,7 @@ function esc(x){return String(x).replace(/[&<>"]/g,function(c){return {'&':'&amp
 function zh(){return window.isZh&&window.isZh()}
 function L(o,k){return (zh()&&o[k+'_zh'])||o[k+'_en']||o[k]||''}
 function hb(n){return n>1048576?(n/1048576).toFixed(1)+' MB':n>1024?(n/1024).toFixed(0)+' KB':n+' B'}
-var MAX=25*1048576,file=null,job=null,timer=null,tab='overview',sort={k:'code',d:1},mods=null,PAL={community:'#2d8f6f',reactome:'#a8559a',wikipathways:'#3b77b8',micromap:'#c58a1c',ec:'#7a5fc0',brenda:'#b0603a'};
+var MAX=25*1048576,file=null,job=null,timer=null,tab='overview',sort={k:'code',d:1},mods=null,PAL={escher:'#2d8f6f',reactome:'#a8559a',wikipathways:'#3b77b8',micromap:'#c58a1c',ec:'#7a5fc0',brenda:'#b0603a'};
 function url(name){return MOCK?'mock/'+name:'/api/jobs/'+job.id+'/files/'+name}
 var lastErr=null;function showErr(o){lastErr=o||null;var e=$('err');if(!o){e.style.display='none';return}e.style.display='';e.innerHTML='<b>'+tr('Error')+'</b>: '+esc(typeof o==='string'?tr(o):L(o,'message'))}
 /* ---- file picking ---- */
@@ -155,19 +155,19 @@ def mock(dest):
     job=dict(id='j_mock',status='done',progress=1,steps=[dict(key=k,label_en=e,label_zh=z,state='done',seconds=s) for k,e,z,s in steps],
      summary=dict(model=dict(id='e_coli_core',name='e_coli_core (mock)',reactions=95,metabolites=72),annotation_coverage=dict(bigg=1.0,rhea=.72,chebi=.64,ec=.41),provenance=dict(expert_derived=62,topology_layout_suggestion=6,functional_layout_suggestion=3,bridge=5,generated=19),ec_screening=dict(open_core=dict(proposals_kept=3,proposals_rejected_incompatible=2,reactions_verified_equivalent=1,reactions_insufficient_evidence=4)),
       covered=dict(expert_module_reactions=70,complete_equation=68,reference_supported=66,ec_topology=12,geometry_only=2,bridge_reactions=5,algorithm_completed=20,total=95),
-      modules=dict(count=11,by_source=dict(community=8,reactome=2,micromap=1)),seconds=11.9),
+      modules=dict(count=11,by_source=dict(escher=8,reactome=2,micromap=1)),seconds=11.9),
      warnings=[dict(code='mock',message_en='This is canned mock data, not a real run.',message_zh='这是预置的模拟数据，不是真实运行结果。'),dict(code='ec_extended',message_en='EC extended mode is on: functional suggestions are not verified equivalences.',message_zh='EC 扩展模式已开启：功能性建议不是已核实的等价关系。')],
      files=[dict(name='skeleton.svg',title_en='Skeleton (SVG)',title_zh='骨架（SVG）',kind='svg',bytes=2300),dict(name='map.svg',title_en='Completed map (SVG)',title_zh='补全地图（SVG）',kind='svg',bytes=2600),dict(name='modules.json',title_en='Modules used',title_zh='使用的模块',kind='json',bytes=900),dict(name='reaction_provenance.json',title_en='Reaction provenance',title_zh='反应来源依据',kind='json',bytes=5200),dict(name='report.json',title_en='Report',title_zh='报告',kind='json',bytes=700)],
      views=[dict(id='view-1',reactions=40,state='none'),dict(id='view-2',reactions=55,state='none')],log=[])
     (m/'job.json').write_text(json.dumps(job,ensure_ascii=False,indent=1))
-    mods=[dict(code='M03781',module_id='108ec78eb57ebc2a6863390f',source='community',map_name='iJO1366.Nucleotide and histidine biosynthesis',species='Escherichia coli',license='CC0-1.0',size=1,tier='micro',reactions=['GMPR'],match_level='equation'),
-          dict(code='M07702',module_id='843ef719e701a0628fcd4ad1',source='community',map_name='iAF1260.Amino_Acid_Metabolism',species='Escherichia coli',license='CC0-1.0',size=40,tier='structure',reactions=['METS','HCYSMT2','CYSTL'],match_level='equation'),
+    mods=[dict(code='M03781',module_id='108ec78eb57ebc2a6863390f',source='escher',map_name='iJO1366.Nucleotide and histidine biosynthesis',species='Escherichia coli',license='CC0-1.0',size=1,tier='micro',reactions=['GMPR'],match_level='equation'),
+          dict(code='M07702',module_id='843ef719e701a0628fcd4ad1',source='escher',map_name='iAF1260.Amino_Acid_Metabolism',species='Escherichia coli',license='CC0-1.0',size=40,tier='structure',reactions=['METS','HCYSMT2','CYSTL'],match_level='equation'),
           dict(code='M11795',module_id='',source='reactome',map_name='Selenoamino acid metabolism',species='Homo sapiens',license='CC0-1.0-data',size=8,tier='structure',reactions=['R-HSA-2408500','R-HSA-2408536'],match_level='geometry')]
     for x,p in zip(mods,[dict(expert_derived=1),dict(expert_derived=30,topology_layout_suggestion=4,bridge=3),dict(expert_derived=8,functional_layout_suggestion=3)]):x['provenance']=p
     (m/'modules.json').write_text(json.dumps(mods,ensure_ascii=False,indent=1))
     rp=[]
-    kinds=[('expert_derived',dict(kind='complete_equation',shared_ec=None,reason='all participants matched'),dict(structure_id='s1',code='M03781',source='community',match_level='equation',license='CC0-1.0',partition='core')),
-           ('topology_layout_suggestion',None,dict(structure_id='s2',code='M07702',source='community',match_level='topology',license='CC0-1.0',partition='core')),
+    kinds=[('expert_derived',dict(kind='complete_equation',shared_ec=None,reason='all participants matched'),dict(structure_id='s1',code='M03781',source='escher',match_level='equation',license='CC0-1.0',partition='core')),
+           ('topology_layout_suggestion',None,dict(structure_id='s2',code='M07702',source='escher',match_level='topology',license='CC0-1.0',partition='core')),
            ('functional_layout_suggestion',dict(kind='ec_only',shared_ec='2.7.1.1',reason='shares EC 2.7.1.1; equation not verified'),dict(structure_id='s3',code='M11795',source='reactome',match_level='ec',license='CC0-1.0-data',partition='ec')),
            ('bridge',None,None),('generated',None,None)]
     for i in range(24):

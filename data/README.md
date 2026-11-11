@@ -6,8 +6,8 @@ Everything in this directory is read by the tool at run time. The Atlas (the str
 
 | Path | Content |
 |---|---|
-| `open_core.sqlite` | the open-core Atlas: 17,221 modules and 63,274 reactions (WikiPathways, Reactome, Escher community maps). Modules store core nodes, appendages, coordinates, paths, reactions and ports as compressed JSON (read with `database.unpack`). On first run it is copied to `atlas.sqlite`, which is the file the tool reads |
-| `source_inputs/` | source data used to build the Atlas: `raw/community/` (original Escher community map JSON), `raw/wp/` (pinned WikiPathways GPML), `module_observations.json.gz` and `map_observations.json.gz` (observations with original identifiers, families, geometry and provenance chains), `archives/` and `terms/` (source packages and licence snapshots), `origin.json` and `source_registry.json` (versions and hashes) |
+| `open_core.sqlite` | the open-core Atlas: 17,221 modules and 63,274 reactions (WikiPathways, Reactome, Escher maps). Modules store core nodes, appendages, coordinates, paths, reactions and ports as compressed JSON (read with `database.unpack`). On first run it is copied to `atlas.sqlite`, which is the file the tool reads |
+| `source_inputs/` | source data used to build the Atlas: `raw/escher/` (original Escher map JSON), `raw/wp/` (pinned WikiPathways GPML), `module_observations.json.gz` and `map_observations.json.gz` (observations with original identifiers, families, geometry and provenance chains), `archives/` and `terms/` (source packages and licence snapshots), `origin.json` and `source_registry.json` (versions and hashes) |
 | `input_manifest.json`, `acquisition.json` | SHA-256 of the required inputs and how they were obtained |
 | `rhea/` | Rhea release 143 reactions, directions and identity mappings (CC BY 4.0, copyright statement kept) |
 | `reactome/` | Reactome v97 pathway diagrams and graphs |

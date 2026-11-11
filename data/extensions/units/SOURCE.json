@@ -20,9 +20,9 @@
   "admitted_to_open_core": false,
   "source_maps": 1075,
   "source_map_ids_by_source": {
-    "community": 22,
     "reactome": 115,
-    "wikipathways": 938
+    "wikipathways": 938,
+    "escher": 22
   },
   "licenses": {
     "CC0-1.0": 960,

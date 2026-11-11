@@ -10,9 +10,9 @@ All 17,221 modules in `open_core.sqlite` come from three sources (checked by rea
 |---|---|---|---|---|
 | WikiPathways | 4,718 | CC0 | `source_inputs/terms/wikipathways.html` (CC0 waiver for content) | OK |
 | Reactome | 3,405 | CC0 for data and derived files; CC BY 4.0 for pathway illustrations and artwork | `source_inputs/terms/reactome.html` | OK for layout data; if Reactome illustrations are ever added, CC BY 4.0 attribution is required |
-| Escher community maps | 9,098 | recorded in the Atlas as CC0-1.0 | none found | **Open**: see below |
+| Escher maps | 9,098 | recorded in the Atlas as CC0-1.0 | none found | **Open**: see below |
 
-### Escher community maps (open)
+### Escher maps (open)
 
 The 22 maps come from BiGG-based Escher maps (e_coli_core, iAF1260, iJO1366, iMM904, RECON1). The `CC0-1.0` label in the Atlas metadata is not backed by any licence text in the raw files or in the provenance records. Checked externally: the Escher software is MIT-licensed, but the Escher project page says nothing about the licence of published maps. The BiGG site states its data is available under the "BiGG License" (<https://bigg.ucsd.edu/license>), which allows copying and redistribution for educational, research and non-profit purposes and says commercial use is not covered. Whether the Escher maps fall under it is not stated.
 
@@ -46,7 +46,7 @@ Action: confirm the licence of each of the 22 maps with their authors or the Esc
 ## 4. Recommended actions, in order
 
 1. ~~Remove `human_maps.zip`, `yeast_maps.zip` and their derived observations~~ (done; repository history rewritten).
-2. Decide how to handle the BiGG-licensed example models and the Escher community maps: obtain written confirmation, replace them with permissively licensed equivalents, or state the non-commercial restriction in the README.
+2. Decide how to handle the BiGG-licensed example models and the Escher maps: obtain written confirmation, replace them with permissively licensed equivalents, or state the non-commercial restriction in the README.
 3. ~~Record the upstream licence of the `sbml2escher` files~~ (resolved: dependency removed); record the licence of adaptagrams/libavoid; `THIRD_PARTY_NOTICES.md` exists.
 4. Add Rhea and Human-GEM citations; keep every upstream `LICENSE` next to its data.
 5. Choose the software licence (not chosen yet) after step 2, since it determines what can be combined.

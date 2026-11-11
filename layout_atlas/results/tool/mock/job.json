@@ -87,7 +87,7 @@
   "modules": {
    "count": 11,
    "by_source": {
-    "community": 8,
+    "escher": 8,
     "reactome": 2,
     "micromap": 1
    }

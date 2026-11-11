@@ -1,6 +1,6 @@
 # Optional data packages
 
-The repository contains the **open-core Atlas** (`data/open_core.sqlite`: 17,221 modules and 63,274 reactions from WikiPathways, Reactome and the Escher community maps). The full structure database used during development contains a few more parts. They have their own licences and are therefore published as **separate downloads**, each with a notice inside:
+The repository contains the **open-core Atlas** (`data/open_core.sqlite`: 17,221 modules and 63,274 reactions from WikiPathways, Reactome and the Escher maps). The full structure database used during development contains a few more parts. They have their own licences and are therefore published as **separate downloads**, each with a notice inside:
 
 | Package | Content | Terms |
 |---|---|---|

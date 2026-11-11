@@ -23,7 +23,7 @@
   "access_date": "2026-11-05",
   "files": [
     {
-      "source": "community",
+      "source": "escher",
       "id": "RECON1/RECON1.Amino acid metabolism (partial).json",
       "format": "escher",
       "family": "human",
@@ -36,7 +36,7 @@
       "version": "6aa92abded6d0f9c4502ff681e14e40c5c00d61f"
     },
     {
-      "source": "community",
+      "source": "escher",
       "id": "RECON1/RECON1.CARBOHYDRATE_METABOLISM.json",
       "format": "escher",
       "family": "human",
@@ -49,7 +49,7 @@
       "version": "6aa92abded6d0f9c4502ff681e14e40c5c00d61f"
     },
     {
-      "source": "community",
+      "source": "escher",
       "id": "RECON1/RECON1.Carbohydrate metabolism.json",
       "format": "escher",
       "family": "human",
@@ -62,7 +62,7 @@
       "version": "6aa92abded6d0f9c4502ff681e14e40c5c00d61f"
     },
     {
-      "source": "community",
+      "source": "escher",
       "id": "RECON1/RECON1.Glycolysis TCA PPP.json",
       "format": "escher",
       "family": "human",
@@ -75,7 +75,7 @@
       "version": "6aa92abded6d0f9c4502ff681e14e40c5c00d61f"
     },
     {
-      "source": "community",
+      "source": "escher",
       "id": "RECON1/RECON1.Inositol retinol metabolism.json",
       "format": "escher",
       "family": "human",
@@ -88,7 +88,7 @@
       "version": "6aa92abded6d0f9c4502ff681e14e40c5c00d61f"
     },
     {
-      "source": "community",
+      "source": "escher",
       "id": "RECON1/RECON1.LIPID_METABOLISM.json",
       "format": "escher",
       "family": "human",
@@ -101,7 +101,7 @@
       "version": "6aa92abded6d0f9c4502ff681e14e40c5c00d61f"
     },
     {
-      "source": "community",
+      "source": "escher",
       "id": "RECON1/RECON1.Tryptophan metabolism.json",
       "format": "escher",
       "family": "human",
@@ -114,7 +114,7 @@
       "version": "6aa92abded6d0f9c4502ff681e14e40c5c00d61f"
     },
     {
-      "source": "community",
+      "source": "escher",
       "id": "e_coli_core/e_coli_core.Core metabolism.json",
       "format": "escher",
       "family": "ecoli",
@@ -127,7 +127,7 @@
       "version": "6aa92abded6d0f9c4502ff681e14e40c5c00d61f"
     },
     {
-      "source": "community",
+      "source": "escher",
       "id": "iAF1260/iAF1260.Alternate_Carbon_Sources.json",
       "format": "escher",
       "family": "ecoli",
@@ -140,7 +140,7 @@
       "version": "6aa92abded6d0f9c4502ff681e14e40c5c00d61f"
     },
     {
-      "source": "community",
+      "source": "escher",
       "id": "iAF1260/iAF1260.Amino_Acid_Metabolism.json",
       "format": "escher",
       "family": "ecoli",
@@ -153,7 +153,7 @@
       "version": "6aa92abded6d0f9c4502ff681e14e40c5c00d61f"
     },
     {
-      "source": "community",
+      "source": "escher",
       "id": "iAF1260/iAF1260.Central_Metabolism.json",
       "format": "escher",
       "family": "ecoli",
@@ -166,7 +166,7 @@
       "version": "6aa92abded6d0f9c4502ff681e14e40c5c00d61f"
     },
     {
-      "source": "community",
+      "source": "escher",
       "id": "iAF1260/iAF1260.Cofactor_Biosynthesis.json",
       "format": "escher",
       "family": "ecoli",
@@ -179,7 +179,7 @@
       "version": "6aa92abded6d0f9c4502ff681e14e40c5c00d61f"
     },
     {
-      "source": "community",
+      "source": "escher",
       "id": "iAF1260/iAF1260.Fatty_Acid_Biosynthesis.json",
       "format": "escher",
       "family": "ecoli",
@@ -192,7 +192,7 @@
       "version": "6aa92abded6d0f9c4502ff681e14e40c5c00d61f"
     },
     {
-      "source": "community",
+      "source": "escher",
       "id": "iAF1260/iAF1260.Lipopolysaccharide_(LPS)_Biosynthesis.json",
       "format": "escher",
       "family": "ecoli",
@@ -205,7 +205,7 @@
       "version": "6aa92abded6d0f9c4502ff681e14e40c5c00d61f"
     },
     {
-      "source": "community",
+      "source": "escher",
       "id": "iAF1260/iAF1260.Nucleotide_Metabolism.json",
       "format": "escher",
       "family": "ecoli",
@@ -218,7 +218,7 @@
       "version": "6aa92abded6d0f9c4502ff681e14e40c5c00d61f"
     },
     {
-      "source": "community",
+      "source": "escher",
       "id": "iAF1260/iAF1260.tRNA_Charging.json",
       "format": "escher",
       "family": "ecoli",
@@ -231,7 +231,7 @@
       "version": "6aa92abded6d0f9c4502ff681e14e40c5c00d61f"
     },
     {
-      "source": "community",
+      "source": "escher",
       "id": "iJO1366/iJO1366.Central metabolism.json",
       "format": "escher",
       "family": "ecoli",
@@ -244,7 +244,7 @@
       "version": "6aa92abded6d0f9c4502ff681e14e40c5c00d61f"
     },
     {
-      "source": "community",
+      "source": "escher",
       "id": "iJO1366/iJO1366.Fatty acid beta-oxidation.json",
       "format": "escher",
       "family": "ecoli",
@@ -257,7 +257,7 @@
       "version": "6aa92abded6d0f9c4502ff681e14e40c5c00d61f"
     },
     {
-      "source": "community",
+      "source": "escher",
       "id": "iJO1366/iJO1366.Fatty acid biosynthesis (saturated).json",
       "format": "escher",
       "family": "ecoli",
@@ -270,7 +270,7 @@
       "version": "6aa92abded6d0f9c4502ff681e14e40c5c00d61f"
     },
     {
-      "source": "community",
+      "source": "escher",
       "id": "iJO1366/iJO1366.Nucleotide and histidine biosynthesis.json",
       "format": "escher",
       "family": "ecoli",
@@ -283,7 +283,7 @@
       "version": "6aa92abded6d0f9c4502ff681e14e40c5c00d61f"
     },
     {
-      "source": "community",
+      "source": "escher",
       "id": "iJO1366/iJO1366.Nucleotide metabolism.json",
       "format": "escher",
       "family": "ecoli",
@@ -296,7 +296,7 @@
       "version": "6aa92abded6d0f9c4502ff681e14e40c5c00d61f"
     },
     {
-      "source": "community",
+      "source": "escher",
       "id": "iMM904/iMM904.Central carbon metabolism.json",
       "format": "escher",
       "family": "yeast",

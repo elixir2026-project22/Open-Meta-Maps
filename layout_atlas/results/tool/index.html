@@ -38,7 +38,7 @@ main>article{margin:18px 0}
 .card .meta{font-size:13px;color:var(--mute);margin:0 0 8px}
 .tags{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 8px}
 .tag{font-size:12px;padding:1px 9px;border-radius:999px;background:var(--soft);color:var(--ink);border:1px solid var(--line)}
-.tag.src-community{border-color:#2d8f6f}.tag.src-wikipathways{border-color:#3b77b8}.tag.src-reactome{border-color:#a8559a}
+.tag.src-escher{border-color:#2d8f6f}.tag.src-wikipathways{border-color:#3b77b8}.tag.src-reactome{border-color:#a8559a}
 .tag.lic{font-family:ui-monospace,Menlo,monospace;font-size:11px}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font-size:13px;margin:0}
 .kv dt{color:var(--mute)}.kv dd{margin:0;min-width:0;overflow-wrap:anywhere}
@@ -130,7 +130,7 @@ function esc(x){return String(x).replace(/[&<>"]/g,function(c){return {'&':'&amp
 function zh(){return window.isZh&&window.isZh()}
 function L(o,k){return (zh()&&o[k+'_zh'])||o[k+'_en']||o[k]||''}
 function hb(n){return n>1048576?(n/1048576).toFixed(1)+' MB':n>1024?(n/1024).toFixed(0)+' KB':n+' B'}
-var PX='';function PN(){return document.getElementById(tab==='map'?'pane':(tab==='dl0'?'dlmain':'pane2'))}var MAX=25*1048576,file=null,job=null,timer=null,tab='overview',sort={k:'code',d:1},mods=null,PAL={community:'#2d8f6f',reactome:'#a8559a',wikipathways:'#3b77b8',micromap:'#c58a1c',ec:'#7a5fc0',brenda:'#b0603a'};
+var PX='';function PN(){return document.getElementById(tab==='map'?'pane':(tab==='dl0'?'dlmain':'pane2'))}var MAX=25*1048576,file=null,job=null,timer=null,tab='overview',sort={k:'code',d:1},mods=null,PAL={escher:'#2d8f6f',reactome:'#a8559a',wikipathways:'#3b77b8',micromap:'#c58a1c',ec:'#7a5fc0',brenda:'#b0603a'};
 function url(name){return MOCK?'mock/'+name:'/api/jobs/'+job.id+'/files/'+name}
 var lastErr=null;function showErr(o){lastErr=o||null;var e=$('err');if(!o){e.style.display='none';return}e.style.display='';e.innerHTML='<b>'+tr('Error')+'</b>: '+esc(typeof o==='string'?tr(o):L(o,'message'))}
 /* ---- file picking ---- */
@@ -162,7 +162,7 @@ var MJ=null;function mockRun(){fetch('mock/job.json').then(function(r){return r.
 /* ---- job display ---- */
 var ICON={pending:'○',running:'◐',done:'●',failed:'✕'};
 var openSteps={},stepData={};
-function srcLabel(c){var n={community:'Escher maps',reactome:'Reactome',wikipathways:'WikiPathways',micromap:'MicroMap',brenda:'BRENDA'}[c]||c||'';return tr(n)}
+function srcLabel(c){var n={escher:'Escher maps',reactome:'Reactome',wikipathways:'WikiPathways',micromap:'MicroMap',brenda:'BRENDA'}[c]||c||'';return tr(n)}
 function cardHtml(c){var rx=(c.reactions||[]).map(function(r){return '<i>'+esc(r.id)+'</i>'+(r.name?' '+esc(r.name):'')}).join('; ');var more=(c.reaction_count||0)-(c.reactions||[]).length;
  var lines='<b>'+(c.code?esc(c.code)+' · ':'')+esc(srcLabel(c.source))+'</b><div>'+tr('Source model')+': '+esc(c.source_model||'—')+'</div><div>'+tr('Source map')+': '+esc(c.source_map||'—')+'</div><div>'+esc(c.species||'')+(c.license?' · '+esc(c.license):'')+'</div><div>'+(c.reaction_count||0)+' '+tr('reactions')+(c.match_level?' · '+esc(tr(c.match_level)):'')+'</div>';
  return '<div class="cd"><div class="pv">'+(c.svg||'')+'</div><div>'+lines+'</div><div class="rx">'+tr('Reactions')+': '+(rx||'—')+(more>0?' … +'+more:'')+'</div></div>'}

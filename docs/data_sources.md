@@ -4,7 +4,7 @@ The default Atlas is `data/open_core.sqlite`. Its layouts come only from:
 
 | Source | Licence as recorded in this repository | Notes |
 |---|---|---|
-| Escher community maps | recorded as CC0-1.0 in the Atlas metadata, **not verified** | no licence text found for the maps; BiGG-based, and the BiGG licence restricts commercial use. See [licensing_audit.md](licensing_audit.md) |
+| Escher maps | recorded as CC0-1.0 in the Atlas metadata, **not verified** | no licence text found for the maps; BiGG-based, and the BiGG licence restricts commercial use. See [licensing_audit.md](licensing_audit.md) |
 | WikiPathways | CC0 (terms snapshot in `data/source_inputs/terms/`) | pinned GPML in `source_inputs/raw/wp/` |
 | Reactome | CC0 data; some illustrations CC BY 4.0 (terms snapshot in `source_inputs/terms/`) | pinned release archive members |
 

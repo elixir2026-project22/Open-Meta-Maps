@@ -64,7 +64,7 @@ def from_legacy(m):
   rx={str(r['key']):r for r in m['reactions']};entities={n['key']:n.get('entity') for n in core}
   for a,b in m.get('core_edges',[]):
    rk=a if a.startswith('r:') else b;mk=b if rk==a else a;c=rx[rk[2:]]['coefficients'].get(entities[mk],0);edges.append(dict(a=a,b=b,flow='substrate' if c<0 else 'product',coefficient=c))
-  reactions=[dict(r,key='r:'+str(r['key']),references={'bigg.reaction':[r['id']]} if m['source']=='community' else {'reactome':[r['id']]}) for r in m['reactions']];size=m['size']
+  reactions=[dict(r,key='r:'+str(r['key']),references={'bigg.reaction':[r['id']]} if m['source']=='escher' else {'reactome':[r['id']]}) for r in m['reactions']];size=m['size']
  return dict(id=m['id'],source=m['source'],species=m['species'],lineage=m['lineage'],map_id=m['map_id'],name=m['name'],license=m['license'],quality=m['quality'],size=size,nodes=nodes,edges=edges,reactions=reactions,attachments=m['attachments'],ports=m.get('all_participant_ports',m['ports']),legacy_id=m['id'],source_sha256=m['source_sha256'],review_status='not_required',original_instance='data/source_inputs/module_observations.json.gz')
 
 def diagram_modules(d,max_roots=24):
