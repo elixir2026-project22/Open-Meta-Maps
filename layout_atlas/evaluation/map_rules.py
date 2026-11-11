@@ -28,6 +28,22 @@ PARTICIPANT_CONSISTENCY_DEG = 90.0  # layout-benchmark participant_consistency
 PERIPHERY_BAND = 0.2  # outer 20% of component hull radius
 ASPECT_RATIO_TARGET = 1.0
 BEND_TURN_DEG = 20.0
+AXIS_ALIGN_DEG = 10.0  # ±10° of horizontal or vertical
+# Small fraction of median nearest-neighbour main-metabolite distance (not the full
+# NN length — that makes almost every point "aligned"). Calibrated so the curated
+# BiGG e_coli_core Escher map scores clearly above our compose (~0.85 vs ~0.16).
+GRID_TOL_NN_FRAC = 0.02
+GRID_TOL_FLOOR_PX = 1.0  # fixed floor so tiny maps still snap
+
+# Goal reference: curated BiGG e_coli_core ("Core metabolism") under the definitions
+# above (length-weighted axis share; grid tol = GRID_TOL_NN_FRAC × median NN).
+# Source: data/source_inputs/raw/escher/e_coli_core/e_coli_core.Core metabolism.json
+ORDERLINESS_GOALS = dict(
+    main_segment_axis_share=0.5732,
+    reaction_axis_share=0.7097,
+    chain_turn_median_deg=0.0,
+    metabolite_grid_share=0.8462,
+)
 
 
 def _is_currency_id(mid: str | None) -> bool:
@@ -137,6 +153,160 @@ def edge_len_max_rel(lengths: np.ndarray) -> float | None:
     if med <= 1e-9:
         return None
     return round(float(np.max(lengths) / med), 3)
+
+
+def _axis_aligned(dx: float, dy: float, tol_deg: float = AXIS_ALIGN_DEG) -> bool:
+    """True when the vector is within ``tol_deg`` of horizontal or vertical."""
+    if abs(dx) < 1e-9 and abs(dy) < 1e-9:
+        return False
+    ang = abs(math.degrees(math.atan2(dy, dx))) % 180.0
+    return ang <= tol_deg or ang >= (180.0 - tol_deg) or abs(ang - 90.0) <= tol_deg
+
+
+def _reaction_axis(rx: dict, nodes: dict) -> np.ndarray | None:
+    """Substrate→product axis of non-currency metabolites around the midmarker."""
+    mid = None
+    for s in rx["segments"].values():
+        for nid in (s["from_node_id"], s["to_node_id"]):
+            if nodes.get(nid, {}).get("node_type") == "midmarker":
+                mid = nodes[nid]
+                break
+        if mid is not None:
+            break
+    if mid is None:
+        return None
+    coeff = {m["bigg_id"]: m["coefficient"] for m in rx.get("metabolites") or [] if isinstance(m, dict)}
+    subs, prods = [], []
+    for s in rx["segments"].values():
+        for nid in (s["from_node_id"], s["to_node_id"]):
+            n = nodes.get(nid) or {}
+            if n.get("node_type") != "metabolite":
+                continue
+            mid_id = n.get("bigg_id")
+            if _is_currency_id(mid_id) or n.get("node_is_primary") is False:
+                continue
+            v = np.array([n["x"] - mid["x"], n["y"] - mid["y"]], float)
+            (subs if coeff.get(mid_id, 0) < 0 else prods).append(v)
+    if not subs or not prods:
+        return None
+    axis = np.mean(prods, axis=0) - np.mean(subs, axis=0)
+    if float(np.hypot(*axis)) < 1e-9:
+        return None
+    return axis
+
+
+def orderliness_metrics(body: dict, edges: list[dict], spacing: float) -> dict[str, Any]:
+    """Axis alignment, chain turns and metabolite grid share (cofactors excluded).
+
+    ``main_segment_axis_share`` is length-weighted over drawn polyline pieces, so
+    subdividing/resampling a curve cannot change the score. Grid tolerance uses
+    median nearest-neighbour distance among main metabolite nodes (not curve
+    sample lengths), with a fixed pixel floor.
+
+    Not yet optimised by the pipeline; exposed so orderliness can become a gate.
+    """
+    del spacing  # kept for call-site compatibility; grid tol is node-spacing based
+    nodes = body["nodes"]
+    # --- segment axis share: length-weighted (sampling-invariant under subdivision)
+    total_len = 0.0
+    axis_len = 0.0
+    main_edges = 0
+    for e in edges:
+        if e.get("currency"):
+            continue
+        pts = e["pts"]
+        edge_len = 0.0
+        for a, b in zip(pts[:-1], pts[1:]):
+            dx, dy = float(b[0] - a[0]), float(b[1] - a[1])
+            L = math.hypot(dx, dy)
+            if L < 1e-6:
+                continue
+            edge_len += L
+            total_len += L
+            if _axis_aligned(dx, dy):
+                axis_len += L
+        if edge_len > 0:
+            main_edges += 1
+    seg_axis = round(axis_len / total_len, 4) if total_len > 0 else None
+
+    # --- reaction axis share
+    scored = aligned = 0
+    for rx in body["reactions"].values():
+        axis = _reaction_axis(rx, nodes)
+        if axis is None:
+            continue
+        scored += 1
+        if _axis_aligned(float(axis[0]), float(axis[1])):
+            aligned += 1
+    rx_axis = round(aligned / scored, 4) if scored else None
+
+    # --- median turn along linear chains (metabolite shared by exactly 2 reactions)
+    # Travel R1 → metabolite → R2: 0° means the two midmarkers sit on opposite sides (collinear).
+    mids = _midmarkers(body)
+    met_rx: dict[str, list[str]] = defaultdict(list)
+    for rx in body["reactions"].values():
+        rid = rx["bigg_id"]
+        for s in rx["segments"].values():
+            for nid in (s["from_node_id"], s["to_node_id"]):
+                n = nodes.get(nid) or {}
+                if n.get("node_type") != "metabolite":
+                    continue
+                if _is_currency_id(n.get("bigg_id")) or n.get("node_is_primary") is False:
+                    continue
+                met_rx[nid].append(rid)
+    turns = []
+    for nid, rids in met_rx.items():
+        uniq = [r for r in sorted(set(rids)) if r in mids]
+        if len(uniq) != 2:
+            continue
+        mx, my = float(nodes[nid]["x"]), float(nodes[nid]["y"])
+        a = np.array([mids[uniq[0]][0] - mx, mids[uniq[0]][1] - my], float)
+        b = np.array([mids[uniq[1]][0] - mx, mids[uniq[1]][1] - my], float)
+        na, nb = float(np.hypot(*a)), float(np.hypot(*b))
+        if na < 1e-9 or nb < 1e-9:
+            continue
+        u, v = -a / na, b / nb
+        cos = float(np.clip(u @ v, -1.0, 1.0))
+        turns.append(math.degrees(math.acos(cos)))
+    chain_turn = round(float(np.median(turns)), 2) if turns else None
+
+    # --- grid alignment of main metabolite glyphs (tol from node spacing, not curves)
+    mains = [
+        (float(n["x"]), float(n["y"]))
+        for n in nodes.values()
+        if n.get("node_type") == "metabolite"
+        and not _is_currency_id(n.get("bigg_id"))
+        and n.get("node_is_primary") is not False
+    ]
+    if len(mains) >= 2:
+        pts = np.array(mains, float)
+        nn = cKDTree(pts).query(pts, k=2)[0][:, 1]
+        med_nn = float(np.median(nn))
+    else:
+        med_nn = 0.0
+    tol = max(GRID_TOL_NN_FRAC * med_nn, GRID_TOL_FLOOR_PX)
+    grid_hits = 0
+    if len(mains) >= 2:
+        xs = np.array([p[0] for p in mains], float)
+        ys = np.array([p[1] for p in mains], float)
+        for i, (x, y) in enumerate(mains):
+            share_x = np.any(np.abs(xs[np.arange(len(mains)) != i] - x) <= tol)
+            share_y = np.any(np.abs(ys[np.arange(len(mains)) != i] - y) <= tol)
+            if share_x or share_y:
+                grid_hits += 1
+    grid = round(grid_hits / len(mains), 4) if mains else None
+
+    return dict(
+        main_segment_axis_share=seg_axis,
+        reaction_axis_share=rx_axis,
+        chain_turn_median_deg=chain_turn,
+        metabolite_grid_share=grid,
+        orderliness_segments=main_edges,
+        orderliness_reactions=scored,
+        orderliness_chain_turns=len(turns),
+        orderliness_metabolites=len(mains),
+        orderliness_grid_tol_px=round(tol, 2),
+    )
 
 
 def flow_direction_metrics(body: dict) -> dict[str, Any]:
@@ -577,6 +747,7 @@ def collect_map_rule_details(
     out["edge_len_max_rel"] = edge_len_max_rel(lengths)
     out.update(flow_direction_metrics(body))
     out.update(cycle_metrics(body))
+    out.update(orderliness_metrics(body, edges, spacing))
     out.update(exchange_periphery_share(body))
     blank = blank_space_from_escher(data, edges, spacing)
     out.update(blank)
@@ -593,6 +764,9 @@ def collect_map_rule_details(
         f"participant_consistency >{PARTICIPANT_CONSISTENCY_DEG}° stays on the evaluate CLI; "
         "hub/long currency thresholds are relative to median reaction spacing; "
         "blank_space / unrelated_overlaps follow MetaCarto ideas (CC BY 4.0; reimplemented, not copied); "
-        "map size, aspect W/H and blank/utilisation share one content-node bbox"
+        "map size, aspect W/H and blank/utilisation share one content-node bbox; "
+        f"orderliness axis tolerance ±{AXIS_ALIGN_DEG:g}° (length-weighted); "
+        f"grid tolerance {GRID_TOL_NN_FRAC:g} × median nearest-neighbour "
+        f"main-metabolite distance (floor {GRID_TOL_FLOOR_PX:g} px)"
     )
     return out

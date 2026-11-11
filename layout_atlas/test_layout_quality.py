@@ -107,10 +107,16 @@ def test_detailed_panel_keeps_goals_only():
     labels = [r["label"] for g in d["panel"]["groups"] for r in g["rows"]]
     assert "Local crossing hotspot" in labels
     assert "Blank space / space utilisation" in labels
-    # Cycle stays a detail row marked not yet optimised
+    # Cycle is a layout target → detail row marked not yet optimised
     cycle_rows = [r for r in groups["structure_flow"]["rows"] if r["code"] == "cycle_circularity"]
     assert cycle_rows and cycle_rows[0]["stage"] == lq.STAGE_NOT_YET
-    # Flow direction is debug-only (collapsed), never a main Structure & flow row
+    # Orderliness metrics are targets (not yet optimised)
+    for code in ("main_segment_axis_share", "reaction_axis_share", "metabolite_grid_share", "chain_turn_median_deg"):
+        rows = [r for r in groups["structure_flow"]["rows"] if r["code"] == code]
+        assert rows and rows[0]["stage"] == lq.STAGE_NOT_YET, code
+        assert rows[0].get("better") in ("higher", "lower")
+    assert d.get("main_segment_axis_share") is not None or d.get("orderliness")
+    # Flow direction is not a target → debug-only (collapsed), never a main Structure & flow row
     assert all(r["code"] != "flow_main_dir_share" for r in groups["structure_flow"]["rows"])
     if "debug" in groups:
         assert groups["debug"].get("debug") is True
@@ -130,6 +136,189 @@ def test_detailed_panel_keeps_goals_only():
         assert abs((d["blank_space_share"] + d["space_utilisation"]) - 1.0) < 1e-6
     if d.get("composition") and d.get("aspect_ratio") is not None:
         assert d["composition"]["aspect_ratio"] == d["aspect_ratio"]
+
+
+def test_orderliness_metrics_axis_chain_and_grid():
+    """Orderliness lives in map_rules and scores axis / chain / grid on final geometry."""
+    from evaluation.map_rules import orderliness_metrics
+
+    # Horizontal chain A -- R1 -- B -- R2 -- C, plus one vertical reaction D--R3--E.
+    # All main segments and reaction axes are axis-aligned; B is collinear (turn 0°);
+    # A/B/C share y and D/E share x with the spine → high grid share.
+    nodes = {
+        "m1": {"node_type": "midmarker", "x": 100.0, "y": 100.0},
+        "a": {"node_type": "metabolite", "x": 0.0, "y": 100.0, "bigg_id": "A_c", "node_is_primary": True},
+        "b": {"node_type": "metabolite", "x": 200.0, "y": 100.0, "bigg_id": "B_c", "node_is_primary": True},
+        "m2": {"node_type": "midmarker", "x": 300.0, "y": 100.0},
+        "c": {"node_type": "metabolite", "x": 400.0, "y": 100.0, "bigg_id": "C_c", "node_is_primary": True},
+        "m3": {"node_type": "midmarker", "x": 200.0, "y": 200.0},
+        "d": {"node_type": "metabolite", "x": 200.0, "y": 150.0, "bigg_id": "D_c", "node_is_primary": True},
+        "e": {"node_type": "metabolite", "x": 200.0, "y": 250.0, "bigg_id": "E_c", "node_is_primary": True},
+        # Cofactor spoke must be ignored for segment / axis / grid shares.
+        "cof": {"node_type": "metabolite", "x": 140.0, "y": 160.0, "bigg_id": "atp_c", "node_is_primary": False},
+    }
+    reactions = {
+        "1": {
+            "bigg_id": "R1", "name": "R1", "label_x": 100, "label_y": 90,
+            "metabolites": [
+                {"bigg_id": "A_c", "coefficient": -1},
+                {"bigg_id": "B_c", "coefficient": 1},
+                {"bigg_id": "atp_c", "coefficient": -1},
+            ],
+            "segments": {
+                "0": {"from_node_id": "m1", "to_node_id": "a"},
+                "1": {"from_node_id": "m1", "to_node_id": "b"},
+                "2": {"from_node_id": "m1", "to_node_id": "cof"},
+            },
+        },
+        "2": {
+            "bigg_id": "R2", "name": "R2", "label_x": 300, "label_y": 90,
+            "metabolites": [
+                {"bigg_id": "B_c", "coefficient": -1},
+                {"bigg_id": "C_c", "coefficient": 1},
+            ],
+            "segments": {
+                "0": {"from_node_id": "m2", "to_node_id": "b"},
+                "1": {"from_node_id": "m2", "to_node_id": "c"},
+            },
+        },
+        "3": {
+            "bigg_id": "R3", "name": "R3", "label_x": 210, "label_y": 200,
+            "metabolites": [
+                {"bigg_id": "D_c", "coefficient": -1},
+                {"bigg_id": "E_c", "coefficient": 1},
+            ],
+            "segments": {
+                "0": {"from_node_id": "m3", "to_node_id": "d"},
+                "1": {"from_node_id": "m3", "to_node_id": "e"},
+            },
+        },
+    }
+    data = [
+        {"map_name": "toy-ord", "map_id": "toy-ord", "schema": "1.0.0", "metadata": {}},
+        {"nodes": nodes, "reactions": reactions, "canvas": {"x": 0, "y": 0, "width": 500, "height": 300}},
+    ]
+    edges, _ = lq.build_edges(data)
+    m = orderliness_metrics(data[1], edges, spacing=60.0)
+    assert m["main_segment_axis_share"] == 1.0
+    assert m["reaction_axis_share"] == 1.0
+    assert m["chain_turn_median_deg"] == 0.0
+    assert m["metabolite_grid_share"] == 1.0
+    assert m["orderliness_segments"] == 6  # cofactor spoke excluded (one edge per spoke)
+    assert m["orderliness_reactions"] == 3
+    assert m["orderliness_chain_turns"] == 1
+    # Evaluate must surface the same numbers on the panel as not-yet-optimised targets.
+    summary, _ = lq.evaluate(data, max_issues=10)
+    d = summary["details"]
+    assert d["main_segment_axis_share"] == 1.0
+    assert d["reaction_axis_share"] == 1.0
+    assert d["chain_turn_median_deg"] == 0.0
+    assert d["metabolite_grid_share"] == 1.0
+    rows = {r["code"]: r for r in next(g for g in d["panel"]["groups"] if g["id"] == "structure_flow")["rows"]}
+    for code in ("main_segment_axis_share", "reaction_axis_share", "metabolite_grid_share", "chain_turn_median_deg"):
+        assert rows[code]["stage"] == lq.STAGE_NOT_YET
+        assert rows[code]["miss"] is False
+
+
+def test_orderliness_goals_match_curated_ecoli_core():
+    """Panel goals are the curated BiGG e_coli_core scores (and beat our compose)."""
+    import json
+    from pathlib import Path
+    from evaluation.map_rules import ORDERLINESS_GOALS, orderliness_metrics
+
+    curated = Path(__file__).resolve().parents[1] / (
+        "data/source_inputs/raw/escher/e_coli_core/e_coli_core.Core metabolism.json"
+    )
+    assert curated.is_file(), curated
+    data = json.loads(curated.read_text())
+    edges, _ = lq.build_edges(data)
+    m = orderliness_metrics(data[1], edges, spacing=60.0)
+    for key, goal in ORDERLINESS_GOALS.items():
+        assert abs(float(m[key]) - float(goal)) < 1e-3, (key, m[key], goal)
+    # Goals must sit on the panel as miss thresholds.
+    summary, _ = lq.evaluate(data, max_issues=10)
+    rows = {r["code"]: r for r in next(g for g in summary["details"]["panel"]["groups"] if g["id"] == "structure_flow")["rows"]}
+    assert rows["main_segment_axis_share"]["miss"] is False
+    assert rows["reaction_axis_share"]["miss"] is False
+    assert rows["metabolite_grid_share"]["miss"] is False
+    assert rows["chain_turn_median_deg"]["miss"] is False
+    assert "curated e_coli_core" in rows["metabolite_grid_share"]["target"]
+    # Curated grid must clearly beat a typical algorithmic layout (gate output if present).
+    ours = Path("/tmp/omm-gate4/ecoli-after/map.json")
+    if ours.is_file():
+        od = json.loads(ours.read_text())
+        om = orderliness_metrics(od[1], lq.build_edges(od)[0], spacing=60.0)
+        assert m["metabolite_grid_share"] > om["metabolite_grid_share"] + 0.4
+        assert m["main_segment_axis_share"] > om["main_segment_axis_share"]
+        assert m["reaction_axis_share"] > om["reaction_axis_share"]
+        assert m["chain_turn_median_deg"] < om["chain_turn_median_deg"]
+
+
+def test_orderliness_metrics_invariant_to_resampling():
+    """Length-weighted axis share and node-spacing grid tol ignore polyline subdivision."""
+    import numpy as np
+    from evaluation.map_rules import orderliness_metrics
+
+    # Diagonal + horizontal main edges so axis share is neither 0 nor 1.
+    nodes = {
+        "m1": {"node_type": "midmarker", "x": 0.0, "y": 0.0},
+        "a": {"node_type": "metabolite", "x": 100.0, "y": 0.0, "bigg_id": "A_c", "node_is_primary": True},
+        "b": {"node_type": "metabolite", "x": 100.0, "y": 100.0, "bigg_id": "B_c", "node_is_primary": True},
+        "m2": {"node_type": "midmarker", "x": 200.0, "y": 100.0},
+        "c": {"node_type": "metabolite", "x": 300.0, "y": 100.0, "bigg_id": "C_c", "node_is_primary": True},
+    }
+    reactions = {
+        "1": {
+            "bigg_id": "R1", "name": "R1", "label_x": 0, "label_y": -10,
+            "metabolites": [
+                {"bigg_id": "A_c", "coefficient": -1},
+                {"bigg_id": "B_c", "coefficient": 1},
+            ],
+            "segments": {
+                "0": {"from_node_id": "m1", "to_node_id": "a"},
+                "1": {"from_node_id": "m1", "to_node_id": "b"},
+            },
+        },
+        "2": {
+            "bigg_id": "R2", "name": "R2", "label_x": 200, "label_y": 90,
+            "metabolites": [
+                {"bigg_id": "B_c", "coefficient": -1},
+                {"bigg_id": "C_c", "coefficient": 1},
+            ],
+            "segments": {
+                "0": {"from_node_id": "m2", "to_node_id": "b"},
+                "1": {"from_node_id": "m2", "to_node_id": "c"},
+            },
+        },
+    }
+    data = [
+        {"map_name": "toy-resample", "map_id": "toy-resample", "schema": "1.0.0", "metadata": {}},
+        {"nodes": nodes, "reactions": reactions, "canvas": {"x": 0, "y": 0, "width": 400, "height": 200}},
+    ]
+    edges, _ = lq.build_edges(data)
+    base = orderliness_metrics(data[1], edges, spacing=60.0)
+    assert base["main_segment_axis_share"] is not None
+    assert base["metabolite_grid_share"] is not None
+
+    def _subdivide(edge_list, factor=2):
+        out = []
+        for e in edge_list:
+            pts = np.asarray(e["pts"], float)
+            new = [pts[0]]
+            for a, b in zip(pts[:-1], pts[1:]):
+                for k in range(1, factor):
+                    t = k / factor
+                    new.append((1.0 - t) * a + t * b)
+                new.append(b)
+            out.append(dict(e, pts=np.asarray(new, float)))
+        return out
+
+    for factor in (2, 4):
+        dense = orderliness_metrics(data[1], _subdivide(edges, factor), spacing=60.0)
+        assert dense["main_segment_axis_share"] == base["main_segment_axis_share"], factor
+        assert dense["metabolite_grid_share"] == base["metabolite_grid_share"], factor
+        assert dense["orderliness_grid_tol_px"] == base["orderliness_grid_tol_px"], factor
+        assert dense["orderliness_segments"] == base["orderliness_segments"], factor
 
 
 def test_content_bbox_shared():
@@ -202,6 +391,9 @@ if __name__ == "__main__":
     test_worst_region_count_matches_drawn_box()
     test_window_uses_uncapped_crossings()
     test_detailed_panel_keeps_goals_only()
+    test_orderliness_metrics_axis_chain_and_grid()
+    test_orderliness_goals_match_curated_ecoli_core()
+    test_orderliness_metrics_invariant_to_resampling()
     test_content_bbox_shared()
     test_svg_has_no_provenance_legend()
     test_currency_spokes_marked()

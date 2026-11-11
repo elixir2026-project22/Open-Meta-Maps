@@ -70,8 +70,9 @@ Bézier coverage is a **warning** when below 100% (still a quality-gate hard che
 
 ## Detailed metrics (panel)
 
-Only metrics the layout optimises or should optimise. Each row has a plain-language label
-(EN/ZH), a one-sentence tip (higher/lower + target), and the responsible pipeline stage
+Only metrics the layout optimises or should optimise (layout **targets**, including backlog).
+Non-target diagnostics are hidden under Debug. Each row has a plain-language English label,
+a one-sentence tip (higher/lower + target), and the responsible pipeline stage
 (or **not yet optimised** / **待优化**). Values that clearly miss the target use a subtle
 amber highlight.
 
@@ -79,11 +80,18 @@ amber highlight.
 |---|---|---|
 | Connections | Local crossing hotspot; Unrelated overlaps | Bézier routing · quality gate; spacing / relaxation · Bézier routing |
 | Line shape | Detour; Hooks / sharp turns / self-intersections; Bends per connection | Bézier routing |
-| Structure & flow | Exchange reactions on the periphery; Cycle circularity / direction / order; Species in another compartment | composition & peripherals; **not yet optimised** (ring/cycle placement for algorithm-placed cycles; compartment packing) |
+| Structure & flow | Exchange reactions on the periphery; Axis-aligned main segments; Axis-aligned reaction axes; Grid-aligned metabolites; Median chain turn angle; Cycle circularity / direction / order; Species in another compartment | composition & peripherals; **not yet optimised** (orderliness / octilinear snap; ring/cycle placement; compartment packing) |
 | Space & shape | Map size; Aspect ratio vs target; Blank space / space utilisation; Largest empty rectangle; Isolated reactions; Most reactions in one cell | composition & packing |
 | Reproducibility | Procrustes / mean displacement (when `evaluate --compare-map`) | **not yet optimised** (detail only, not a main card) |
 | Debug diagnostics (hidden by default) | Main flow-direction share | debug only — not an optimisation target (would fight curated orientations) |
 | Pipeline diagnostics (collapsed) | Composition-pass counts; Peripheral-module counts | composition & peripherals |
+
+**Orderliness (待优化):** length-weighted main-segment and reaction-axis shares within ±10° of
+horizontal/vertical (cofactors excluded; resampling a curve does not change the segment score);
+metabolite grid share (tolerance 0.02 × median nearest-neighbour main-metabolite distance, floor
+1 px — small enough that the curated BiGG e_coli_core map stays clearly above our compose);
+median turn angle at degree-2 main metabolites along linear chains. Panel goals cite the curated
+BiGG e_coli_core ("Core metabolism") scores for these four metrics.
 
 Not added from layout-transfer-check: raw density, straight-line crossing counts, catalyst-beside, arrow-weight.
 

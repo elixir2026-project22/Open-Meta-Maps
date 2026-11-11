@@ -202,6 +202,44 @@ def _apply(fit, p):
     return fit['scale'] * (fit['rot'] @ p) + fit['t']
 
 
+def _mapping_get(mapping, glyph_id):
+    """Resolve a source glyph id in ``node_mapping`` (bare id or ``g:<id>``).
+
+    Escher modules store bare glyph ids; some call sites historically used a ``g:``
+    prefix. Accept both so curve reuse does not depend on key spelling.
+    """
+    if glyph_id in mapping:
+        return mapping[glyph_id]
+    return mapping.get('g:' + glyph_id)
+
+
+def _source_key(tkey):
+    """Strip a leading ``r:`` / ``g:`` prefix when present; leave bare ids unchanged."""
+    if tkey.startswith(('r:', 'g:')):
+        return tkey[2:]
+    return tkey
+
+
+def _correspondences(block, data, *, reaction_xy):
+    """Unique 1:1 mapping keys → (source xy, dest xy) for a similarity fit."""
+    mapping = block['node_mapping']
+    targets = Counter(mapping.values())
+    src, dst = [], []
+    for tkey, target in mapping.items():
+        if targets[target] != 1 or target not in block['positions']:
+            continue
+        if tkey.startswith('r:'):
+            r = data['reactions'].get(tkey[2:])
+            xy = reaction_xy(r) if r else None
+        else:
+            g = data['glyphs'].get(_source_key(tkey))
+            xy = g['xy'] if g else None
+        if xy is not None:
+            src.append(xy)
+            dst.append(block['positions'][target])
+    return src, dst
+
+
 def paths_for_block(block, tolerance=3.0):
     """Source paths of one selected structure in the final frame, relative to each reaction's own midpoint.
 
@@ -215,23 +253,7 @@ def paths_for_block(block, tolerance=3.0):
         return {}, dict(info)
     if data.get('format') == 'gpml':
         return _paths_for_gpml_block(block, data, tolerance)
-    corr_src, corr_dst, keyed = [], [], {}
-    mapping = block['node_mapping']
-    targets = Counter(mapping.values())
-    for tkey, target in mapping.items():
-        if targets[target] != 1 or target not in block['positions']:
-            continue
-        if tkey.startswith('r:'):
-            r = data['reactions'].get(tkey[2:])
-            xy = r['xy'] if r else None
-        elif tkey.startswith('g:'):
-            g = data['glyphs'].get(tkey[2:])
-            xy = g['xy'] if g else None
-        else:
-            xy = None
-        if xy is not None:
-            corr_src.append(xy)
-            corr_dst.append(block['positions'][target])
+    corr_src, corr_dst = _correspondences(block, data, reaction_xy=lambda r: r['xy'])
     if len(corr_src) < 3:
         info['too_few_correspondences'] += 1
         return {}, dict(info)
@@ -242,21 +264,22 @@ def paths_for_block(block, tolerance=3.0):
         return {}, dict(info)
     info['fit_max_residual_px'] = round(fit['max'], 3)
     info['reflected'] = int(fit['reflect'])
+    mapping = block['node_mapping']
     out = {}
     for tkey, target_r in block['reaction_mapping'].items():
         target_r = target_r if str(target_r).startswith('r:') else 'r:' + str(target_r)  # reaction_mapping stores plain reaction ids
-        r = data['reactions'].get(tkey[2:] if tkey.startswith('r:') else tkey)
+        r = data['reactions'].get(_source_key(tkey))
         if not r:
             info['reaction_not_in_source'] += 1
             continue
         mid = _apply(fit, data['glyphs'][r['mid']]['xy'])
         for gid, chain in r['chains'].items():
-            tm = mapping.get('g:' + gid)
+            tm = _mapping_get(mapping, gid)
             if tm is None:
                 info['glyph_not_in_module'] += 1  # e.g. currency metabolites: drawn by the Composer, not part of the module
                 continue
             info['chains'] += 1
-            segs, ok = [], True
+            segs = []
             for st in chain['steps']:
                 end = _apply(fit, data['glyphs'][st['to']]['xy']) - mid
                 if st['controls']:
@@ -273,7 +296,7 @@ def paths_for_block(block, tolerance=3.0):
                 continue
             info['preserved'] += 1
             out[(target_r.split(':', 1)[1], tm.split(':', 1)[1])] = dict(status='preserved', segs=segs, deviation=round(deviation, 3),
-                                                                      source=dict(map=block['map_id'], reaction=tkey[2:], glyph=gid, segments=[s['segment'] for s in chain['steps']]))
+                                                                      source=dict(map=block['map_id'], reaction=_source_key(tkey), glyph=gid, segments=[s['segment'] for s in chain['steps']]))
     return out, dict(info)
 
 
@@ -281,20 +304,7 @@ def _paths_for_gpml_block(block, data, tolerance):
     """WikiPathways structure: polylines from the reaction's midpoint (middle of the original interaction line) to each glyph centre."""
     info = Counter()
     mapping = block['node_mapping']
-    targets = Counter(mapping.values())
-    src, dst = [], []
-    for tkey, target in mapping.items():
-        if targets[target] != 1 or target not in block['positions']:
-            continue
-        if tkey.startswith('r:'):
-            r = data['reactions'].get(tkey[2:])
-            xy = r['mid'] if r else None
-        else:
-            g = data['glyphs'].get(tkey[2:] if tkey.startswith('g:') else tkey)
-            xy = g['xy'] if g else None
-        if xy is not None:
-            src.append(xy)
-            dst.append(block['positions'][target])
+    src, dst = _correspondences(block, data, reaction_xy=lambda r: r['mid'])
     if len(src) < 3:
         info['too_few_correspondences'] += 1
         return {}, dict(info)
@@ -306,13 +316,13 @@ def _paths_for_gpml_block(block, data, tolerance):
     out = {}
     for tkey, target_r in block['reaction_mapping'].items():
         target_r = target_r if str(target_r).startswith('r:') else 'r:' + str(target_r)
-        r = data['reactions'].get(tkey[2:] if tkey.startswith('r:') else tkey)
+        r = data['reactions'].get(_source_key(tkey))
         if r is None:
             info['straight_or_unstored_edge'] += 1  # drawn as the exact straight line by the Composer
             continue
         mid = _apply(fit, r['mid'])
         for gid, chain in r['chains'].items():
-            tm = mapping.get(gid) or mapping.get('g:' + gid)
+            tm = _mapping_get(mapping, gid)
             if tm is None:
                 info['glyph_not_in_module'] += 1
                 continue
@@ -330,7 +340,7 @@ def _paths_for_gpml_block(block, data, tolerance):
             info['preserved'] += 1
             info['exact_polyline' if r['exact'] else 'waypoints_only'] += 1
             out[(target_r.split(':', 1)[1], tm.split(':', 1)[1])] = dict(status='preserved', segs=segs, deviation=round(deviation, 3), geometry_status='original' if r['exact'] else 'waypoints_only',
-                                                                      source=dict(map=block['map_id'], reaction=tkey[2:] if tkey.startswith('r:') else tkey, glyph=gid, connector=r['connector']))
+                                                                      source=dict(map=block['map_id'], reaction=_source_key(tkey), glyph=gid, connector=r['connector']))
     return out, dict(info)
 
 
@@ -363,12 +373,30 @@ def adjust_chain(segs, delta, max_shift=40.0, max_turn_deg=40.0):
     return segs[:-1] + [last], shift
 
 
+def _collapse_chain_segs(segs):
+    """One mid→metabolite segment that keeps source curve controls when possible.
+
+    Multi-step Escher chains would otherwise insert a multimarker per step and make
+    final-geometry evaluation scale poorly on GEMs. A single cubic (first-step b1,
+    last-step b2) or a straight chord stays lean while still carrying reused geometry.
+    """
+    if not segs:
+        return segs
+    if len(segs) == 1:
+        return segs
+    end = segs[-1][-2:]
+    curved = [s for s in segs if s[0] == 'C']
+    if not curved:
+        return [['L', *end]]
+    return [['C', *curved[0][1:3], *curved[-1][3:5], *end]]
+
+
 def write_curves_to_escher(data, found):
     """Write the reused curves into the Escher JSON itself, as standard segments (b1/b2 control points), so a downloaded map.json keeps them.
 
-    For every reused chain the routed segments from the reaction's midmarker to the metabolite node are replaced by the source chain: new
-    `multimarker` nodes for the chain's inner points and one segment per source segment (cubic Bezier with b1/b2 or a straight segment with
-    null controls), ending on the metabolite node the map drew.  Segment direction stays midmarker -> metabolite, as in the routed export.
+    For every reused chain the routed segments from the reaction's midmarker to the metabolite node are replaced by one source-derived
+    segment (straight or a single cubic). Multi-step source chains are collapsed first so GEM evaluation stays tractable.
+    Segment direction stays midmarker -> metabolite, as in the routed export.
     Returns the entries that were written (others keep their routed segments).
     """
     body = data[1]
@@ -384,7 +412,8 @@ def write_curves_to_escher(data, found):
         first = next(iter(segs.values()))
         mid_id = first['from_node_id']
         mx, my = nodes[mid_id]['x'], nodes[mid_id]['y']
-        ex, ey = mx + f['segs'][-1][-2], my + f['segs'][-1][-1]
+        chain_segs = _collapse_chain_segs(f['segs'])
+        ex, ey = mx + chain_segs[-1][-2], my + chain_segs[-1][-1]
         ends = [nid for nid, k in incoming.items() if nodes[nid].get('node_type') == 'metabolite' and nodes[nid].get('bigg_id') == f['metabolite']]
         if not ends:
             continue
@@ -406,22 +435,13 @@ def write_curves_to_escher(data, found):
         for b in bends:
             if not any(b in (s['from_node_id'], s['to_node_id']) for r2 in reactions.values() for s in r2['segments'].values()):
                 nodes.pop(b, None)
-        prev = mid_id
-        for i, seg in enumerate(f['segs']):
-            last = i == len(f['segs']) - 1
-            if last:
-                to = end_id
-            else:
-                counter += 1
-                to = f'sp{counter}'
-                nodes[to] = dict(node_type='multimarker', x=round(mx + seg[-2], 2), y=round(my + seg[-1], 2))
-            if seg[0] == 'C':
-                b1, b2 = dict(x=round(mx + seg[1], 2), y=round(my + seg[2], 2)), dict(x=round(mx + seg[3], 2), y=round(my + seg[4], 2))
-            else:
-                b1 = b2 = None
-            counter += 1
-            segs[f'spseg{counter}'] = dict(from_node_id=prev, to_node_id=to, b1=b1, b2=b2)
-            prev = to
+        seg = chain_segs[0]
+        if seg[0] == 'C':
+            b1, b2 = dict(x=round(mx + seg[1], 2), y=round(my + seg[2], 2)), dict(x=round(mx + seg[3], 2), y=round(my + seg[4], 2))
+        else:
+            b1 = b2 = None
+        counter += 1
+        segs[f'spseg{counter}'] = dict(from_node_id=mid_id, to_node_id=end_id, b1=b1, b2=b2)
         written.append(f)
     return written
 
