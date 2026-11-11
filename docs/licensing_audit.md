@@ -56,5 +56,5 @@ The 22 maps come from the Escher community-maps repository (BiGG-based maps for 
 2. Decide how to handle the BiGG-licensed example models: obtain written confirmation, replace them with permissively licensed equivalents, or state the non-commercial restriction in the README. (Escher community-maps layouts themselves are CC0 per upstream LICENSE.)
 3. ~~Record the upstream licence of the `sbml2escher` files~~ (resolved: dependency removed); record the licence of adaptagrams/libavoid; `THIRD_PARTY_NOTICES.md` exists.
 4. Add Rhea and Human-GEM citations; keep every upstream `LICENSE` next to its data.
-5. Choose the software licence (not chosen yet) after step 2, since it determines what can be combined.
+5. ~~Choose the software licence~~ (done: MIT for the code; Atlas data and generated maps under CC BY 4.0 with source attribution). The BiGG example models in step 2 are data and do not affect the code licence; adaptagrams/libavoid (LGPL, exact terms still to be confirmed) is built locally and linked, which is compatible with MIT.
 6. ~~Re-run the PANTHER CellDesigner pilot~~ (done via data.pantherdb.org; identity bridge + default extension).
