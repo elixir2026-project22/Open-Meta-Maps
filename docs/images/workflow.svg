@@ -1,54 +1,54 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 400" width="1000" height="400" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1056 402" width="1056" height="402" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
   <title>Open Meta Maps workflow</title>
   <desc>A genome-scale model is matched against the Atlas of curated pathway structures; the Layout Composer keeps a curated skeleton, completes the rest (orientation, arrangement, spacing, Bézier connections, labels), and reports layout quality.</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4b5563"/></marker>
   </defs>
-  <rect width="1000" height="400" rx="10" fill="#ffffff" stroke="#d0d7de"/>
+  <rect width="1056" height="402" rx="10" fill="#ffffff" stroke="#d0d7de"/>
 
   <!-- Atlas -->
-  <rect x="218" y="30" width="300" height="112" rx="10" fill="#e7f4ee" stroke="#3f8f6b" stroke-width="1.5"/>
-  <text x="368.0" y="58" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2937">Atlas</text>
-  <text x="368.0" y="84" text-anchor="middle" font-size="12" fill="#374151">curated pathway structures</text>
-<text x="368.0" y="101" text-anchor="middle" font-size="12" fill="#374151">Escher · WikiPathways · Reactome</text>
-<text x="368.0" y="118" text-anchor="middle" font-size="12" fill="#374151">identity · topology · geometry · licence</text>
+  <rect x="232" y="30" width="300" height="112" rx="10" fill="#e7f4ee" stroke="#3f8f6b" stroke-width="1.5"/>
+  <text x="382.0" y="58" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2937">Atlas</text>
+  <text x="382.0" y="84" text-anchor="middle" font-size="12" fill="#374151">curated pathway structures</text>
+<text x="382.0" y="101" text-anchor="middle" font-size="12" fill="#374151">Escher · WikiPathways · Reactome</text>
+<text x="382.0" y="118" text-anchor="middle" font-size="12" fill="#374151">identity · topology · geometry · licence</text>
 
   <!-- Layout Composer frame; title inside, left of the vertical retrieval arrow -->
-  <rect x="216" y="164" width="596" height="208" rx="12" fill="#fbf6ea" stroke="#b9852f" stroke-width="1.5" stroke-dasharray="6 4"/>
-  <text x="232" y="186" font-size="13" font-weight="700" fill="#1f2937">Layout Composer</text>
+  <rect x="230" y="164" width="596" height="208" rx="12" fill="#fbf6ea" stroke="#b9852f" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="246" y="186" font-size="13" font-weight="700" fill="#1f2937">Layout Composer</text>
 
   <!-- Input -->
-  <rect x="22" y="217" width="170" height="124" rx="10" fill="#eef3f8" stroke="#6b7f95" stroke-width="1.5"/>
-  <text x="107.0" y="245" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2937">Input model</text>
-  <text x="107.0" y="273" text-anchor="middle" font-size="12" fill="#374151">genome-scale</text>
-<text x="107.0" y="290" text-anchor="middle" font-size="12" fill="#374151">metabolic model</text>
-<text x="107.0" y="307" text-anchor="middle" font-size="12" fill="#374151">SBML · COBRA JSON</text>
+  <rect x="22" y="217" width="184" height="124" rx="10" fill="#eef3f8" stroke="#6b7f95" stroke-width="1.5"/>
+  <text x="114.0" y="245" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2937">Input model</text>
+  <text x="114.0" y="273" text-anchor="middle" font-size="12" fill="#374151">genome-scale</text>
+<text x="114.0" y="290" text-anchor="middle" font-size="12" fill="#374151">metabolic model</text>
+<text x="114.0" y="307" text-anchor="middle" font-size="12" fill="#374151">SBML · COBRA JSON</text>
 
   <!-- Uniform stage cards -->
-  <rect x="234" y="204" width="268" height="150" rx="10" fill="#ffffff" stroke="#3f8f6b" stroke-width="1.5"/>
-<text x="368.0" y="230" text-anchor="middle" font-size="14" font-weight="700" fill="#1f2937">1  Curated skeleton</text>
-<text x="368.0" y="254" text-anchor="middle" font-size="12" fill="#374151">match reactions to Atlas</text>
-<text x="368.0" y="272" text-anchor="middle" font-size="12" fill="#374151">select non-overlapping structures</text>
-<text x="368.0" y="290" text-anchor="middle" font-size="12" fill="#374151">curated geometry kept as drawn</text>
-<text x="368.0" y="338" text-anchor="middle" font-size="11" fill="#6b7280">(translated only)</text>
-  <rect x="526" y="204" width="268" height="150" rx="10" fill="#ffffff" stroke="#b9852f" stroke-width="1.5"/>
-<text x="660.0" y="230" text-anchor="middle" font-size="14" font-weight="700" fill="#1f2937">2  Algorithmic layout</text>
-<text x="660.0" y="254" text-anchor="middle" font-size="12" fill="#374151">completion · orientation</text>
-<text x="660.0" y="272" text-anchor="middle" font-size="12" fill="#374151">arrangement · spacing</text>
-<text x="660.0" y="290" text-anchor="middle" font-size="12" fill="#374151">Bézier connections · labels</text>
-<text x="660.0" y="338" text-anchor="middle" font-size="11" fill="#6b7280">every GEM reaction is drawn</text>
+  <rect x="248" y="204" width="268" height="150" rx="10" fill="#ffffff" stroke="#3f8f6b" stroke-width="1.5"/>
+<text x="382.0" y="230" text-anchor="middle" font-size="14" font-weight="700" fill="#1f2937">1  Curated skeleton</text>
+<text x="382.0" y="254" text-anchor="middle" font-size="12" fill="#374151">match reactions to Atlas</text>
+<text x="382.0" y="272" text-anchor="middle" font-size="12" fill="#374151">select non-overlapping structures</text>
+<text x="382.0" y="290" text-anchor="middle" font-size="12" fill="#374151">curated geometry kept as drawn</text>
+<text x="382.0" y="338" text-anchor="middle" font-size="11" fill="#6b7280">(translated only)</text>
+  <rect x="540" y="204" width="268" height="150" rx="10" fill="#ffffff" stroke="#b9852f" stroke-width="1.5"/>
+<text x="674.0" y="230" text-anchor="middle" font-size="14" font-weight="700" fill="#1f2937">2  Algorithmic layout</text>
+<text x="674.0" y="254" text-anchor="middle" font-size="12" fill="#374151">completion · orientation</text>
+<text x="674.0" y="272" text-anchor="middle" font-size="12" fill="#374151">arrangement · spacing</text>
+<text x="674.0" y="290" text-anchor="middle" font-size="12" fill="#374151">Bézier connections · labels</text>
+<text x="674.0" y="338" text-anchor="middle" font-size="11" fill="#6b7280">every GEM reaction is drawn</text>
 
   <!-- Output -->
-  <rect x="836" y="217" width="184" height="124" rx="10" fill="#eef3f8" stroke="#6b7f95" stroke-width="1.5"/>
-  <text x="928.0" y="245" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2937">Complete map</text>
-  <text x="928.0" y="273" text-anchor="middle" font-size="12" fill="#374151">Escher JSON · SVG</text>
-<text x="928.0" y="290" text-anchor="middle" font-size="12" fill="#374151">provenance per reaction</text>
-<text x="928.0" y="307" text-anchor="middle" font-size="12" fill="#374151">layout quality evaluation</text>
+  <rect x="850" y="217" width="184" height="124" rx="10" fill="#eef3f8" stroke="#6b7f95" stroke-width="1.5"/>
+  <text x="942.0" y="245" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2937">Complete map</text>
+  <text x="942.0" y="273" text-anchor="middle" font-size="12" fill="#374151">Escher JSON · SVG</text>
+<text x="942.0" y="290" text-anchor="middle" font-size="12" fill="#374151">provenance per reaction</text>
+<text x="942.0" y="307" text-anchor="middle" font-size="12" fill="#374151">layout quality evaluation</text>
 
   <!-- Arrows -->
-  <path d="M192,279.0 L234,279.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)"/>
-  <path d="M368.0,144 L368.0,204" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)"/>
-  <text x="390.0" y="178.0" font-size="11" fill="#4b5563">structure retrieval</text>
-  <path d="M502,279.0 L526,279.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)"/>
-  <path d="M794,279.0 L836,279.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)"/>
+  <path d="M206,279.0 L248,279.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)"/>
+  <path d="M382.0,144 L382.0,204" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)"/>
+  <text x="404.0" y="178.0" font-size="11" fill="#4b5563">structure retrieval</text>
+  <path d="M516,279.0 L540,279.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)"/>
+  <path d="M808,279.0 L850,279.0" fill="none" stroke="#4b5563" stroke-width="1.8" marker-end="url(#arrow)"/>
 </svg>
