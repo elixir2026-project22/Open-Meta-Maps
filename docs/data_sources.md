@@ -12,7 +12,7 @@ The default Atlas is `data/open_core.sqlite` plus the in-tree extensions under `
 | PANTHER Pathway | CC BY 4.0 | CellDesigner CD4.1 via `celldesigner.py` + `identity_labels.py` (`data/extensions/panther/`); see [panther_pilot.md](panther_pilot.md) |
 | Reactome | CC0 data; some illustrations CC BY 4.0 (terms snapshot in `source_inputs/terms/`) | pinned release archive members |
 
-Source versions, SHA-256 hashes and access dates: `data/source_inputs/source_registry.json`, `origin.json` and `data/input_manifest.json`. Every Atlas structure carries its source and licence; each generated map lists the structures it used in `licenses.json`.
+Source versions, SHA-256 hashes, retrieval dates and extraction methods: `data/source_inputs/source_registry.json` and `data/input_manifest.json`. Every Atlas structure carries its source and licence; each generated map lists the structures it used in `licenses.json`.
 
 Other bundled files: `data/rhea/` (Rhea reaction data); `data/identifier_bridge.json` (BiGG↔ChEBI and BiGG↔EC from e_coli_core, iML1515, iMM904 and Human-GEM — the single identifier store; Mapper crosswalk derived at load time, optional local `annotation_bridge.json.gz` cache); and `data/currency_metabolites.json`. The licences of the example models are to be confirmed.
 

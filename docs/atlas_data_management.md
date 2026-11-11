@@ -6,69 +6,74 @@ Status: 2026-11-11. How extracted layouts are stored and registered. Not legal a
 
 | Store | Role |
 |---|---|
-| `data/open_core.sqlite` | Redistributable Atlas (tracked). Tables: `maps`, `modules`, `reactions`, `reviews`, `retained_observations`. Open-core modules: Escher 9,098 + Reactome 3,405 + WikiPathways semantic 1,245 = **13,748**; reactions **63,274**. |
+| `data/open_core.sqlite` | Redistributable Atlas (tracked). Tables: `maps`, `modules`, `reactions`, `reviews`, `retained_observations`. Open-core modules: Escher (in-repo `escher_cutter`) + Reactome + WikiPathways semantic. |
 | `data/atlas.sqlite` | Runtime working copy (gitignored). Copied from `open_core.sqlite` on first run (`core.py`). |
-| `data/extensions/*/modules.json.gz` | Default extensions (BRENDA, Human-maps, WikiPathways geometry, Metabolism Regulation, PANTHER) loaded by `database.modules()`. With extensions the default load is **64,325** modules. |
+| `data/extensions/*/modules.json.gz` | Default extensions (BRENDA, Human-maps, WikiPathways geometry, Metabolism Regulation, PANTHER) loaded by `database.modules()`. |
 | `data/atlas_registry.json` | Machine-readable build/registry summary (counts, licences, input manifest and source-registry hashes). |
-| `data/source_inputs/` | Observations, raw inputs, `source_registry.json`, terms snapshots. |
+| `data/source_inputs/` | Observations, raw inputs, `source_registry.json`, crosswalks, terms snapshots. |
 | `data/input_manifest.json` | SHA-256 of files under `source_inputs/` (version label `0.3-source-inputs`). |
 | `data/acquisition.json` | Acquisition ledger (Reactome diagrams, reference paths, failures). |
 | `data/packages.json` | Optional release packages (`atlas-full` only). |
 
-`database.build()` rebuilds `atlas.sqlite` from observations + raw GPML/Reactome.
+`database.build()` rebuilds `atlas.sqlite` from the in-repo Escher cutter, WikiPathways GPML, Reactome archive, and non-Escher observations (geometry-only WikiPathways). `layout_atlas/escher_rebuild.py` surgically replaces open-core Escher rows.
 
-## Provenance completeness (open core)
+## Provenance on records
 
-### Maps (2,323 = 22 Escher + 86 Reactome + 2,215 WikiPathways)
+### Maps
 
-| Field | escher | reactome | wikipathways |
-|---|---|---|---|
-| `source` / `license` / `source_sha256` / `species` / `lineage` | present | present | present |
-| `source_id` | present | **missing** | present |
-| `url` / `version` / `date` / `taxon_id` / `attribution` | **missing** | **missing** | **missing** |
-| `provenance_status` | `manual_history_unverified` (22) | **missing** | **missing** |
-| `layout_origin` | **missing** | **missing** | **missing** |
-
-Registry rows in `source_registry.json` already hold `url`, `version`, `sha256`, `license` for most files; map payloads do not consistently copy them.
+Open-core and extension map payloads carry `source`, `license`, `source_sha256`, `species`, `lineage`, `name`, `provenance_status`, `attribution`, `layout_origin`, `version`, and `atlas_schema_version` when normalized. Escher and WikiPathways maps also carry `url` / `source_path` when the registry row is known. Reactome maps take URL/version from `acquisition.json` during normalization.
 
 ### Modules
 
-Payloads always duplicate the indexed columns (`id`, `source`, `species`, `lineage`, `quality`, `size`, `core_family`, `variant`) inside the zlib JSON blob. Every module has `license` and `source_sha256`. None of the open-core modules carry `layout_origin` or `provenance_status` (extensions do: BRENDA `possibly_automatic`, Human-maps / Metabolism Regulation hand-drawn).
+Every module payload duplicates the indexed columns and includes `license`, `source_sha256`, `original_instance`, `layout_origin`, `atlas_schema_version`, `core_family`, `variant`, and `geometry_fingerprint`.
 
-WikiPathways observations that still said `import_or_propagation_unresolved` / snapshot `20261010` were rebuilt for **20261110** with `resolved_pathway_id`. Escher maps use `manual_history_unverified` (22): upstream community-maps history was not independently re-verified map-by-map.
+**Extraction provenance** (Stage A/C schema) on cut modules:
+
+```json
+"extraction": {
+  "method": "escher_community_windows",
+  "version": "atlas-extraction-1",
+  "parameters": {"max_roots": "all", "window_sizes": [1, 2, 4, 8, 12, 24, 40]},
+  "counts": {"source_events": 95, "modules": 332, "coverage": 1.0}
+}
+```
+
+Community Escher modules use `method: escher_community_windows`. Extension SOURCE.json files record cutter / import policy strings for BRENDA, Human-maps, WikiPathways geometry, Metabolism Regulation, and PANTHER.
+
+### Reaction identifiers
+
+| Source | Native namespace | Canonical namespaces |
+|---|---|---|
+| Escher community | `bigg.reaction` (true BiGG) | already canonical |
+| Reactome | `reactome` | already canonical |
+| WikiPathways semantic | `rhea` | already canonical |
+| Human-maps | `human.gem` (MAR) | `bigg.reaction` / `metanetx.reaction` / `rhea` via Human-GEM `reactions.tsv` (CC BY 4.0) |
+| Metabolism Regulation | `sbgn.process` | `rhea` when participant ChEBI uniquely matches a Rhea equation |
+| PANTHER | `celldesigner.reaction` | none yet (no unique Rhea match without inventing ids) |
+| BRENDA | `ec-code` (+ svg token) | EC kept as-is |
+
+Remap tooling: `layout_atlas/canonical_ids.py`. Crosswalk: `data/source_inputs/crosswalks/`.
 
 ### Reactions / reviews / retained_observations
 
-- `reactions`: identifier index only (no licence). Healthy.
-- `reviews`: schema present, **0 rows** (unused).
+- `reactions`: identifier index (no licence).
+- `reviews`: schema present, unused (0 rows).
 - `retained_observations`: exclusion ledger (`disconnected_visible_core`, `outside_v03_size_bound`, `reactome_replaced_by_fixed_v97`).
 
-## Duplicates and copies
+## Source registry
 
-- **Lineage ≠ unique map key.** Related Escher pathway pairs can share lineage strings; modules intentionally share lineage within a family.
-- **`atlas.sqlite` vs `open_core.sqlite`:** identical when both present after a fresh copy; `atlas.sqlite` is gitignored and may drift if `database.build()` is run locally.
-- **Column/payload duplication:** every module column is repeated inside `payload`. Acceptable for self-contained exports; costly for migrations.
+`data/source_inputs/source_registry.json` is the file-level ledger. Every row records **licence**, **URL**, **version**, **retrieval date**, and **extraction method**. Coverage includes WikiPathways, Escher, Metabolism Regulation, PANTHER, Reactome (archive-v97 diagrams), BRENDA (remote SVG + SOURCE hash), Human-maps (130 official Escher JSON paths), and the Human-GEM reaction crosswalk.
 
-## Registry / reproducibility gaps
+## WikiPathways layout
 
-- Indexes: `core_family_idx`, `biological_idx` only. Missing `source` / `lineage` indexes on `maps` and `modules`.
-- Some Escher paths in `source_registry.json` still use a stale relative prefix instead of `data/source_inputs/raw/escher/...`.
-- `freeze()` refuses to refresh if the manifest already exists — rebuilds are not driven from a single up-to-date manifest.
-- Extensions are outside sqlite; only `SOURCE.json` records their provenance (field names `license_url` vs `license_uri` are inconsistent).
+Pipeline: `layout_atlas/wikipathways_rebuild.py` over GPML in the **20261110** snapshot.
 
-## WikiPathways layout (current)
-
-Pipeline: `layout_atlas/wikipathways_rebuild.py` over all GPML files in the **20261110** snapshot.
-
-- Semantic modules stay in `open_core.sqlite` (1,245).
-- Geometry-only windows live in `data/extensions/wikipathways_geometry/` (29,673) so sqlite stays under GitHub’s size limit; both load by default via `database.modules()`.
+- Semantic modules stay in `open_core.sqlite`.
+- Geometry-only windows live in `data/extensions/wikipathways_geometry/` so sqlite stays under GitHub’s size limit; both load by default via `database.modules()`.
 - Licence: WikiPathways content is **CC0**; Atlas stamps `CC0-1.0`.
-- Maps without modules are typically gene/signaling drawings with no Rhea-validated events and no metabolite–metabolite edges.
 
 ## Reasonable follow-ups
 
-1. Keep `data/atlas_registry.json` and the About page in sync after every Atlas rebuild (`atlas_registry.py`, then `navigation.py`).
-2. Normalize open-core provenance fields (`layout_origin`, `provenance_status`, map `url`/`version`).
-3. Validation test: fail on missing licence / source / `layout_origin` / schema version / dangling module `map_id`.
-
-Out of scope (kept lean): dropping payload column duplication; deleting the empty `reviews` table; taxon-id coverage for every species string; treating gene-only WikiPathways drawings as metabolic geometry modules.
+1. Keep `data/atlas_registry.json` and the About page in sync after every Atlas rebuild.
+2. Raise PANTHER chemical retrieval when richer reaction annotations are available (do not invent unmapped identifiers).
+3. Validation test: fail on missing licence / source / `extraction` / `layout_origin` / schema version on newly written modules.
