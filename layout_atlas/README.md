@@ -7,7 +7,7 @@ This directory is the Python package behind Open Meta Maps. It builds a metaboli
 | Entry | What it does |
 |---|---|
 | `python3 project.py tool` | local web tool (`tool_server.py`, page in `results/tool/index.html`): upload a model, run the pipeline, preview, download |
-| `python3 project.py compose --gem MODEL.xml --out DIR --source-paths --layout-style expert` | the same pipeline from the command line (`compose_cli.py` → `tool_pipeline.py`) |
+| `python3 project.py compose --gem MODEL.xml --out DIR --source-paths` | the same pipeline from the command line (`compose_cli.py` → `tool_pipeline.py`; Bézier/`expert` layout is the default) |
 | `python3 project.py data list` / `fetch` | optional data packages, see [docs/data_packages.md](../docs/data_packages.md) |
 | `python3 project.py setup` | one-time build of the edge routers (needs `g++` or `clang++`, see below) |
 | `python3 project.py catalog` | rebuild the module catalog pages from the Atlas |
@@ -25,13 +25,13 @@ A run writes `map.json` (Escher), `map.svg`, `report.json`, `reaction_provenance
 | Whole-map composition | `composition.py` (recovers stray components, arranges independent modules in rows), `peripheral.py` (exchange and transport modules), `block_relocation.py` (moves expert blocks that sit far from the reactions they connect to) |
 | Connections and labels | `edge_style.py` (Bézier connections from expert templates, joint routing per reaction), `reaction_templates.py`, `label_placement.py`, `line_render.py`, `routing.py` (libavoid) |
 | Quality | `layout_quality.py` (final-geometry for the quality gate: curve crossings, collisions, …), `quality_gate.py` (accepts a change only if the final geometry is not worse), `evaluation/` (unified development scoring: Project 22 layout-benchmark metrics + the same final-geometry block; CLI `python3 project.py evaluate`) |
-| Pages | `ui.py`, `navigation.py`, `toolpage.py`, `gallery*.py` |
+| Pages | `ui.py`, `navigation.py`, `gallery*.py` (tool UI is the committed `results/tool/index.html`) |
 
 Files whose hashes are recorded by saved results (`routing.py`, `drawing.py`, `geometry.py`, `retrieval.py`, `semantic_transfer.py`, `celldesigner.py`) should not be edited casually.
 
 ## Switches
 
-The tool and `compose` expose the layout style (`--layout-style legacy|expert`, expert is what the web tool uses). The environment variables below switch individual steps; defaults are what a normal run uses.
+Maps are drawn with Bézier connections by default (`layout_style=expert`). `--layout-style legacy` remains an internal CLI option for orthogonal libavoid routing. The environment variables below switch individual steps; defaults are what a normal run uses.
 
 | Variable | Default | Meaning |
 |---|---|---|

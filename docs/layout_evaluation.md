@@ -8,7 +8,7 @@ evaluation overlap.
 CLI (optional deps: `pip install -r layout_atlas/requirements-eval.txt`):
 
 ```sh
-python3 project.py compose --gem examples/e_coli_core.xml --out results/eval_runs/e_coli_core --source-paths --layout-style expert
+python3 project.py compose --gem examples/e_coli_core.xml --out results/eval_runs/e_coli_core --source-paths
 python3 project.py evaluate --gem examples/e_coli_core.xml --map results/eval_runs/e_coli_core/map.json --out results/evaluation/e_coli_core.json
 ```
 
@@ -26,7 +26,7 @@ skipped in `evaluate` and should be read from compose’s `layout_issues.json` /
 
 ## Metric table
 
-Maps composed with `--source-paths --layout-style expert` (2026-11-11). `geom_*` are from
+Maps composed with `--source-paths` (Bézier/`expert` layout is the default; 2026-11-11). `geom_*` are from
 `layout_quality` (Bezier-aware). Straight-line gdMetriX crossings are omitted for larger GEMs.
 
 | model | runtime_s | participant_consistency | overlapping_pairs | overlap_area_share | long_edge_share | species_in_other_compartment | aspect_ratio | geom_crossings | geom_label_overlaps | stress | procrustes | knn_preservation |

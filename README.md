@@ -47,7 +47,7 @@ Upload an SBML or COBRA JSON model, generate a map and download the results. On 
 Command line:
 
 ```sh
-python3 project.py compose --gem examples/e_coli_core.xml --out results/e_coli_core/ --source-paths --layout-style expert
+python3 project.py compose --gem examples/e_coli_core.xml --out results/e_coli_core/ --source-paths
 ```
 
 
