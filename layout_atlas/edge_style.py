@@ -200,11 +200,22 @@ def apply(data, skip_edges=(), only=None):
             seg_grid[c].append(k)
     cur_edge = {}
 
+    def _gather(grid, lo, hi):
+        # Order does not matter for hit tests; skip sorted() on the hot path
+        seen = set()
+        out = []
+        for c in cells(lo, hi):
+            for i in grid.get(c, ()):
+                if i not in seen:
+                    seen.add(i)
+                    out.append(i)
+        return np.fromiter(out, dtype=int, count=len(out)) if out else np.zeros(0, dtype=int)
+
     def ev(smp):
         lo, hi = smp.min(axis=0) - 8, smp.max(axis=0) + 8
-        ni = np.array(sorted({i for c in cells(lo, hi) for i in rect_grid.get(c, ())}), dtype=int)
-        li = np.array(sorted({i for c in cells(lo, hi) for i in label_grid.get(c, ())}), dtype=int)
-        si = np.array(sorted({i for c in cells(lo, hi) for i in seg_grid.get(c, ())}), dtype=int)
+        ni = _gather(rect_grid, lo, hi)
+        li = _gather(label_grid, lo, hi)
+        si = _gather(seg_grid, lo, hi)
         own = cur_edge['own']
         r_sub, l_sub = (rects[ni] if len(ni) else rects[:0]), (label_rects[li] if len(li) else label_rects[:0])
         s_sub = seg_arr[si][seg_own[si] != cur_edge['rid']] if len(si) else np.zeros((0, 4))
@@ -406,7 +417,8 @@ def apply(data, skip_edges=(), only=None):
                 seg_n[0] += 1
                 for c in cells(np.minimum(a, b), np.maximum(a, b)):
                     seg_grid[c].append(k)
-    report.update(joint_route(data, joint_store, ev, cur_edge, rects, owner_arr, label_rects, label_owner, skip))
+    # Incremental restyles only joint-route the reactions that were redrawn
+    report.update(joint_route(data, joint_store, ev, cur_edge, rects, owner_arr, label_rects, label_owner, skip, only=only_set))
     data[0].setdefault('metadata', {})['routed_edges'] = routed
     return report
 
@@ -435,16 +447,21 @@ def _own_crossings(curves, skip_head=3, movable=None):
     return n
 
 
-def joint_route(data, store, ev, cur_edge, rects, owner_arr, label_rects, label_owner, skip):
+def joint_route(data, store, ev, cur_edge, rects, owner_arr, label_rects, label_owner, skip, only=None):
     """Reaction-level joint choice: the curves of one reaction are not independent.  For every reaction whose curves cross each other away from the reaction point,
     the candidate of each curve is re-chosen jointly (coordinate descent over the stored candidates, a few rounds), scored as
     (curves through glyphs, crossings among the reaction's own curves, crossings with other connections, anomalies, labels hit, detour).  Only a strictly better
-    combination replaces the current one.  A crossing that no candidate combination can remove stays and is counted."""
+    combination replaces the current one.  A crossing that no candidate combination can remove stays and is counted.
+
+    When `only` is a set of reaction ids (incremental restyle), other reactions are left untouched.
+    """
     import line_render
     rep = dict(joint_reactions_with_own_crossings=0, joint_fixed=0, joint_own_crossings_before=0, joint_own_crossings_after=0)
     body = data[1]
     by_id = {r['bigg_id']: r for r in body['reactions'].values()}
     for rid, items in store.items():
+        if only is not None and rid not in only:
+            continue
         movable = [it for it in items if not it.get('fixed') and not str(it['key']).startswith('spseg')]
         if not movable or len(movable) > JOINT_MAX_BIG:
             continue
