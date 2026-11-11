@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "generated": "2026-11-11",
+  "open_core": {
+    "path": "data/open_core.sqlite",
+    "sha256": "b4d665337cacfd22a486831642e93b5a4961064b377a36847a3ded09e9924800",
+    "bytes": 68161536,
+    "maps": {
+      "escher": 22,
+      "reactome": 86,
+      "wikipathways": 2215
+    },
+    "modules": {
+      "escher": 9098,
+      "reactome": 3405,
+      "wikipathways": 4696
+    },
+    "modules_with_extensions": {
+      "escher": 9098,
+      "reactome": 3405,
+      "wikipathways": 4696,
+      "brenda": 11703,
+      "human_maps": 8540
+    },
+    "reactions": 63274,
+    "licences": {
+      "CC0-1.0": 13794,
+      "CC0-1.0-data": 3405,
+      "CC-BY-4.0": 20243
+    }
+  },
+  "extensions": {
+    "brenda": {
+      "url": "https://brenda-enzymes.org/pathways/BRENDA_map.svg",
+      "sha256": "3107fc59d9c87e272e0b817e3f529b985d8118a57c78c58cf4ce0ba7d2d486da",
+      "bytes": 5688753,
+      "access_date": "2026-11-11",
+      "license": "CC-BY-4.0",
+      "license_url": "https://www.brenda.dsmz.de/license.php",
+      "attribution": "BRENDA; Chang et al. NAR 2026 doi:10.1093/nar/gkaf1113",
+      "partition": "open_core",
+      "admitted_to_open_core": true,
+      "modules": 11703,
+      "pathways": 194
+    },
+    "human_maps": {
+      "source": "human_maps",
+      "url": "https://github.com/SysBioChalmers/Human-maps",
+      "license": "CC-BY-4.0",
+      "license_uri": "https://creativecommons.org/licenses/by/4.0/",
+      "maps": 130,
+      "modules": 8540,
+      "families": 2439,
+      "admitted_to_open_core": true,
+      "partition": "open_core",
+      "import_policy": "official escher/ JSON only via database.escher_diagram + diagram_modules",
+      "by_sa_note": "Companion SVG exports embed BY-SA metadata; they are not imported. Escher JSON files contain no BY-SA marks.",
+      "access_date": "2026-11-11"
+    }
+  },
+  "input_manifest": {
+    "version": "0.3-source-inputs",
+    "files": 2330,
+    "sha256": "bc4da2fb5517795cd7f6b6dac90adfe55b2414fe82905114c3130801e08c9e44"
+  },
+  "source_registry": {
+    "path": "data/source_inputs/source_registry.json",
+    "sha256": "11fb0425370197a5bc21c5fdc8ac1cff44011eb4ac1be138c0576a842af2ff01",
+    "wikipathways_release": "20261110"
+  },
+  "extraction": {
+    "pipeline": "database.build / diagram_modules / from_legacy",
+    "atlas_schema_version": 1
+  }
+}
