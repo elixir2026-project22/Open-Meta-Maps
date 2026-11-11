@@ -150,12 +150,10 @@ def score_escher_map(
         # Prefer map-native aspect_ratio (W/H) in the shared geometry block.
         if details.get("aspect_ratio") is not None:
             benchmark["aspect_ratio"] = details["aspect_ratio"]
-        if details.get("area_per_node") is not None and benchmark.get("area_per_node") is None:
-            benchmark["area_per_node"] = details["area_per_node"]
         if details.get("species_in_other_compartment") is not None and benchmark.get("species_in_other_compartment") is None:
             benchmark["species_in_other_compartment"] = details["species_in_other_compartment"]
-        if details.get("participant_consistency") is not None and benchmark.get("participant_consistency") is None:
-            benchmark["participant_consistency"] = details["participant_consistency"]
+        # area_per_node / participant_consistency stay on the evaluate CLI via
+        # metrics.all_benchmark_metrics (not the Layout quality panel).
 
     return dict(
         model=pathway.name,

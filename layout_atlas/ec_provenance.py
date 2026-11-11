@@ -40,7 +40,9 @@ import semantic_transfer as st
 
 KINDS = ['expert_derived', 'topology_layout_suggestion', 'functional_layout_suggestion', 'bridge', 'generated']
 COLORS = {'expert_derived': '#2e7d32', 'topology_layout_suggestion': '#8e6bbf', 'functional_layout_suggestion': '#c9a227', 'bridge': '#3d6fa3', 'generated': '#9aa9b2'}
-LABELS = {'expert_derived': ('Expert-derived', '专家来源'), 'topology_layout_suggestion': ('Topology-only layout suggestion', '仅拓扑的布局建议'),
+# Display names for the tool-page provenance legend (and SVG <title> tooltips).
+# Key ``expert_derived`` is kept for report.json / reaction_provenance.json compatibility.
+LABELS = {'expert_derived': ('Curated', '人工绘制'), 'topology_layout_suggestion': ('Topology-only layout suggestion', '仅拓扑的布局建议'),
           'functional_layout_suggestion': ('Functional (EC) layout suggestion', '功能（EC）布局建议'), 'bridge': ('Network bridge', '网络桥接'),
           'generated': ('Generated', '算法生成')}
 
@@ -329,18 +331,11 @@ def evidence_summary(provenance):
     return out
 
 
-def legend_svg(legend):
-    """Legend box: a short coloured LINE per provenance kind (reactions are lines in the map)."""
-    rows = ['<g font-family="Helvetica, Arial, sans-serif" font-size="13"><rect x="14" y="14" width="330" height="%d" rx="6" fill="#fff" stroke="#c9d6da"/>' % (30 + 22 * len(legend))]
-    for i, (kind, n) in enumerate(legend):
-        y = 38 + 22 * i
-        rows.append(f'<line x1="24" y1="{y - 4}" x2="46" y2="{y - 4}" stroke="{COLORS[kind]}" stroke-width="3" stroke-linecap="round"/><text x="54" y="{y}" fill="#17323d">{escape(LABELS[kind][0])}: {n}</text>')
-    rows.append('</g>')
-    return ''.join(rows)
+def recolor_svg(text, kinds):
+    """Colour the reaction markers of an exported map by provenance (reaction markers are the orange circles followed by their label).
 
-
-def recolor_svg(text, kinds, legend=None):
-    """Colour the reaction markers of an exported map by provenance (reaction markers are the orange circles followed by their label)."""
+    Provenance counts are shown in the Map Generator UI, not drawn into the SVG.
+    """
     def repl(m):
         label = unescape(m.group(4))
         kind = kinds.get(label)
@@ -348,8 +343,4 @@ def recolor_svg(text, kinds, legend=None):
             return m.group(0)
         return (f'<circle cx="{m.group(1)}" cy="{m.group(2)}" r="5.5" fill="{COLORS[kind]}"><title>{escape(label)} - {LABELS[kind][0]}</title></circle>'
                 f'<text {m.group(3)}>{m.group(4)}</text>')
-    text = re.sub(r'<circle cx="([^"]+)" cy="([^"]+)" r="4" fill="#d77d38"/><text ([^>]*)>([^<]*)</text>', repl, text)
-    if legend:
-        marker = '<rect width="100%" height="100%" fill="white"/>'
-        text = text.replace(marker, marker + legend_svg(legend), 1) if marker in text else text
-    return text
+    return re.sub(r'<circle cx="([^"]+)" cy="([^"]+)" r="4" fill="#d77d38"/><text ([^>]*)>([^<]*)</text>', repl, text)
