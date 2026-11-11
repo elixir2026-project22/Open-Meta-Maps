@@ -18,7 +18,7 @@ ZH={"EC extended mode (functional layout suggestions, off by default)": "EC 扩�
 'Reactions covered by expert structures':'专家结构覆盖的反应','Complete equation':'方程完整','EC topology':'EC 拓扑','Geometry only':'仅几何','Bridge reactions':'桥接反应','Algorithm-completed':'算法补全','Total reactions':'反应总数',
 'Coverage of the model reactions':'模型反应的覆盖情况','Annotation coverage':'注释覆盖率','Warnings':'警告','No warnings.':'没有警告。','Model':'模型','reactions':'反应','metabolites':'代谢物','Modules used':'使用的模块','Total time':'总用时',
 'Skeleton: expert structures only, plus network bridges. Colour = source library; dashed = bridge.':'骨架：只含专家结构，加上网络桥接。颜色 = 来源库；虚线 = 桥接。','Completed map: the skeleton plus algorithm-completed reactions.':'补全后的地图：骨架加上算法补全的反应。',
-'Drag to pan, wheel to zoom.':'拖动平移，滚轮缩放。','Fit':'适应窗口','Not available yet.':'暂未提供。','Views':'视图','Draw this view':'绘制此视图','Open':'打开','not drawn':'未绘制','queued for drawing':'已排队绘制','drawn':'已绘制',
+'Drag to pan, wheel to zoom.':'拖动平移，滚轮缩放。','Drag to pan, wheel or pinch to zoom toward the pointer.':'拖动平移；滚轮或双指缩放（以指针为中心）。','Zoom in':'放大','Zoom out':'缩小','Minimap':'缩略图','Fit':'适应窗口','Not available yet.':'暂未提供。','Views':'视图','Draw this view':'绘制此视图','Open':'打开','not drawn':'未绘制','queued for drawing':'已排队绘制','drawn':'已绘制',
 'Module':'模块','Source map':'来源图','Species':'物种','Licence':'许可','Size tier':'规模分级','Reactions covered':'覆盖的反应','Match level':'匹配级别','micro':'微型','small':'小型','structure':'结构单元',
 'File':'文件','Type':'类型','Size':'大小','Download':'下载','Error':'错误','Source library':'来源库','Bridge':'桥接','no modules':'没有模块','Click a column header to sort.':'点击列标题排序。','Loading…':'加载中…',
 'Uploading…':'上传中…','Waiting for the server…':'等待服务器…'}
