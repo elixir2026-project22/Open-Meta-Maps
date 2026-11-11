@@ -75,7 +75,7 @@ Once matching has chosen Atlas structures, `tool_pipeline.draw_map` / `draw_glob
 
 **Determinism:** fixed layout seed `20261105` (`core.SEEDS`), ELK/fCoSE seeds, and `PYTHONHASHSEED=0` on pipeline re-exec. There is no compose `--seed` flag yet; `--compare-map` on evaluate measures displacement only.
 
-### Project 22 layout rules (status)
+### Layout rules (status)
 
 | Rule | Status | Notes |
 |---|---|---|

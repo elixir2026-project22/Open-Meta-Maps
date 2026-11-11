@@ -1,6 +1,6 @@
-"""Project 22 layout-rule metrics on a final Escher map (transfer-check field names).
+"""Layout-rule metrics on a final Escher map (transfer-check field names).
 
-Reimplemented from the BioHackathon Project 22 layout rules / layout-transfer-check
+Reimplemented from the BioHackathon layout rules / layout-transfer-check
 field names. Never copies GPL code. Thresholds that involve angles or relative
 lengths are the group's first guesses (documented in docs/layout_evaluation.md).
 """

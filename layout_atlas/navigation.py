@@ -357,8 +357,8 @@ def about():
         '复用人工绘制结构之后的布局',
         '<p>'
         + b(
-            'After matching, the Composer keeps curated blocks rigid, completes uncovered reactions, orients free reactions, composes stray components, draws Bézier connections and places labels. Full stage table and Project 22 rule status: README (Layout after curated reuse).',
-            '匹配之后，Composer 将人工绘制的结构块保持为刚性、补全未覆盖反应、调整自由反应朝向、归拢游离组分、绘制 Bézier 连线并放置标签。分阶段说明与 Project 22 规则对照见 README（Layout after curated reuse）。',
+            'After matching, the Composer keeps curated blocks rigid, completes uncovered reactions, orients free reactions, composes stray components, draws Bézier connections and places labels. Full stage table and layout rule status: README (Layout after curated reuse).',
+            '匹配之后，Composer 将人工绘制的结构块保持为刚性、补全未覆盖反应、调整自由反应朝向、归拢游离组分、绘制 Bézier 连线并放置标签。分阶段说明与布局规则对照见 README（Layout after curated reuse）。',
         )
         + '</p><ul><li>'
         + b(
@@ -377,8 +377,8 @@ def about():
         )
         + '</li><li>'
         + b(
-            'Project 22 rules (crossings, overlaps, long edges, participant consistency, compartments, compactness, reproducibility, scale): mostly partial; compartment respect and build-on-previous-layout not yet product goals. Gaps: 2D component packing, harder orientation, compose --seed.',
-            'Project 22 规则（交叉、重叠、长边、参与物朝向、区室、紧凑性、可复现、规模）：多为部分满足；区室约束与“在既有布局上增量”尚未作为产品目标。缺口：二维组分打包、更强朝向约束、compose --seed。',
+            'Layout rules (crossings, overlaps, long edges, participant consistency, compartments, compactness, reproducibility, scale): mostly partial; compartment respect and build-on-previous-layout not yet product goals. Gaps: 2D component packing, harder orientation, compose --seed.',
+            '布局规则（交叉、重叠、长边、参与物朝向、区室、紧凑性、可复现、规模）：多为部分满足；区室约束与“在既有布局上增量”尚未作为产品目标。缺口：二维组分打包、更强朝向约束、compose --seed。',
         )
         + '</li></ul>',
     )
