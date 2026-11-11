@@ -51,7 +51,7 @@ REACTION_STYLE = 'line'  # 'line' (reactions are lines between metabolites, like
 STEPS = [('parse', 'Parse the model', '解析模型'), ('map', 'Match library structures', '匹配库中的结构'),
          ('select', 'Select structures', '选择结构'), ('skeleton', 'Build the skeleton', '搭建骨架'),
          ('complete', 'Complete the map', '补全图'), ('report', 'Write the report', '生成报告')]
-SOURCE_COLORS = {'escher': '#128781', 'reactome': '#3d6fa3', 'wikipathways': '#8a5fb0', 'brenda': '#b04a4a'}
+SOURCE_COLORS = {'escher': '#128781', 'reactome': '#3d6fa3', 'wikipathways': '#8a5fb0', 'brenda': '#b04a4a', 'human_maps': '#2d6a8f'}
 LEVEL_RANK = {'complete_equation': 0, 'reaction_reference': 1, 'partial_reference': 2, 'ec_topology': 3, 'geometry': 4}
 LEVEL_NAMES = {'complete_equation': 'complete_equation', 'reaction_reference': 'reference_supported', 'partial_reference': 'reference_supported',
                'ec_topology': 'ec_topology', 'geometry': 'geometry_only'}

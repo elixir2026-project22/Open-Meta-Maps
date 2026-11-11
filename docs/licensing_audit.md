@@ -10,14 +10,12 @@ All 17,221 modules in `open_core.sqlite` come from three sources (checked by rea
 |---|---|---|---|---|
 | WikiPathways | 4,718 | CC0 | `source_inputs/terms/wikipathways.html` (CC0 waiver for content) | OK |
 | Reactome | 3,405 | CC0 for data and derived files; CC BY 4.0 for pathway illustrations and artwork | `source_inputs/terms/reactome.html` | OK for layout data; if Reactome illustrations are ever added, CC BY 4.0 attribution is required |
-| Escher maps | 9,098 | recorded in the Atlas as CC0-1.0 | Escher community-maps LICENSE is CC0 | OK |
+| Escher maps | 9,098 | CC0-1.0 | Escher community-maps repository LICENSE is CC0 | OK |
 | BRENDA pathway maps | 11,703 | CC BY 4.0 | https://www.brenda.dsmz.de/license.php; doi:10.1093/nar/gkaf1113 | OK (layout possibly automatic; retrieval deprioritises vs expert maps) |
 
-### Escher maps (open)
+### Escher maps
 
-The 22 maps come from BiGG-based Escher maps (e_coli_core, iAF1260, iJO1366, iMM904, RECON1). The `CC0-1.0` label in the Atlas metadata is not backed by any licence text in the raw files or in the provenance records. Checked externally: the Escher software is MIT-licensed, but the Escher project page says nothing about the licence of published maps. The BiGG site states its data is available under the "BiGG License" (<https://bigg.ucsd.edu/license>), which allows copying and redistribution for educational, research and non-profit purposes and says commercial use is not covered. Whether the Escher maps fall under it is not stated.
-
-Action: confirm the licence of each of the 22 maps with their authors or the Escher/BiGG maintainers; until then treat these maps as "redistribution terms unconfirmed" and do not describe the Atlas as fully CC0.
+The 22 maps come from the Escher community-maps repository (BiGG-based maps for e_coli_core, iAF1260, iJO1366, iMM904, RECON1). The upstream repository LICENSE is CC0; Atlas modules record `CC0-1.0`.
 
 ## 2. Third-party files tracked in the repository
 
@@ -34,7 +32,7 @@ Action: confirm the licence of each of the 22 maps with their authors or the Esc
 | ~~`model_input.py`, `central_reference.json` (sbml2escher)~~ | removed 2026-11-10: the SBML reader is now libSBML-based (`layout_atlas/model_io.py`), the currency list is `data/currency_metabolites.json` | **Resolved** |
 | `data/routing/source.zip` (adaptagrams, libavoid) | adaptagrams is LGPL; exact terms not re-checked | **Open**: confirm and add the LGPL notice |
 | Yeast-maps / original yeast map | GPL-3.0 (Yeast-maps) | **Removed** from packages, acquisition and docs. Not redistributed. |
-| Human-maps (`human_maps.zip`, official `escher/` JSON) | repository CC BY 4.0 | **Included**: import via Escher module extraction into the open-core Atlas; check embedded map metadata for BY-SA markings |
+| Human-maps (official `escher/` JSON) | CC BY 4.0 | **Included** (8,540 modules via `database.escher_diagram`). Companion SVG exports embed BY-SA metadata and are **not** imported; the Escher JSON files have no BY-SA marks. |
 | `data/extensions/{units,source_paths,reaction_geometry_templates}` | derived from the open-core maps | inherits the Escher-map status above |
 | `data/annotation_bridge.json` | derived from model annotations (identifier links) | inherits the model licences above |
 

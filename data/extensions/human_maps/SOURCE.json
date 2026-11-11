@@ -1,0 +1,14 @@
+{
+  "source": "human_maps",
+  "url": "https://github.com/SysBioChalmers/Human-maps",
+  "license": "CC-BY-4.0",
+  "license_uri": "https://creativecommons.org/licenses/by/4.0/",
+  "maps": 130,
+  "modules": 8540,
+  "families": 2439,
+  "admitted_to_open_core": true,
+  "partition": "open_core",
+  "import_policy": "official escher/ JSON only via database.escher_diagram + diagram_modules",
+  "by_sa_note": "Companion SVG exports embed BY-SA metadata; they are not imported. Escher JSON files contain no BY-SA marks.",
+  "access_date": "2026-11-11"
+}

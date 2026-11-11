@@ -21,12 +21,15 @@ def _core_modules_cached():
  """Cached open-core modules (immutable during one process)."""
  db=connect();out=tuple(unpack(r[0]) for r in db.execute('SELECT payload FROM modules ORDER BY id'));db.close();return out
 
-def modules(include_brenda=True):
- """Open-core modules from atlas.sqlite, plus BRENDA pathway modules when the default extension is present."""
+def modules(include_brenda=True, include_human_maps=True):
+ """Open-core modules from atlas.sqlite, plus default extensions when present."""
  out=list(_core_modules_cached())
- if include_brenda:
-  path=DATA/'extensions/brenda/modules.json.gz'
-  if path.exists():
+ for flag, rel in (
+  (include_brenda,'extensions/brenda/modules.json.gz'),
+  (include_human_maps,'extensions/human_maps/modules.json.gz'),
+ ):
+  path=DATA/rel
+  if flag and path.exists():
    with gzip.open(path,'rt') as f: out.extend(json.load(f))
  return out
 
@@ -145,6 +148,50 @@ def reactome_diagram(path):
    p=e.get('position',{});events.append(dict(key='r:'+str(e['id']),id=event.get('stId',str(e['reactomeId'])),references={'reactome':[event.get('stId',str(e['reactomeId']))]},coefficients={k:v for k,v in coeff.items() if v},visible=visible,xy=[p.get('x',0),p.get('y',0)],position_origin='observed',reversible=False,paths=e.get('segments',[])))
  rid=path.stem
  return dict(id=uid([rid,sha(path.read_bytes())]),source='reactome',species='Homo sapiens',lineage='reactome:'+rid,map_id=rid,name=a.get('displayName',rid),license='CC0-1.0-data',glyphs=glyphs,events=events,source_sha256=sha(path.read_bytes()),path=str(path.relative_to(BASE)))
+
+
+def escher_diagram(path, source='escher', license='CC0-1.0', species='unspecified', reaction_namespace='bigg.reaction', **meta):
+ """Parse an official Escher JSON map ([metadata, content]) into the diagram form used by diagram_modules.
+
+ Generic for any GEM-aligned Escher map: reaction and metabolite ids are taken from the map's bigg_id fields
+ (which may hold BiGG, Human-GEM MAR ids, or other namespaces) and recorded under reaction_namespace.
+ """
+ path=Path(path); raw=json.loads(path.read_bytes())
+ if not isinstance(raw,list) or len(raw)<2: raise ValueError('Escher map must be a [metadata, content] list: '+str(path))
+ header,content=raw[0],raw[1]; nodes=content.get('nodes') or {}; reactions=content.get('reactions') or {}; glyphs={}
+ for nid,n in nodes.items():
+  kind=n.get('node_type')
+  if kind=='metabolite':
+   entity=n.get('bigg_id') or n.get('name') or str(nid)
+   glyphs[str(nid)]=dict(entity=entity,xy=[n.get('x',0),n.get('y',0)],label=n.get('name') or entity,primary=bool(n.get('node_is_primary')),kind='metabolite')
+  elif kind in ('midmarker','multimarker'):
+   glyphs[str(nid)]=dict(entity=None,xy=[n.get('x',0),n.get('y',0)],label='',kind=kind)
+ events=[]; skipped=Counter()
+ for rid,r in reactions.items():
+  mets=r.get('metabolites') or []
+  if not mets: skipped['no_metabolites']+=1; continue
+  coeff={m['bigg_id']:float(m['coefficient']) for m in mets if m.get('bigg_id') is not None}
+  if not coeff: skipped['no_id_coeff']+=1; continue
+  segs=r.get('segments') or {}; used={str(s.get('from_node_id')) for s in segs.values()}|{str(s.get('to_node_id')) for s in segs.values()}
+  visible={}
+  for nid in used:
+   g=glyphs.get(nid)
+   if g and g.get('kind')=='metabolite' and g['entity'] in coeff: visible[nid]=coeff[g['entity']]
+  if not visible:
+   for nid,g in glyphs.items():
+    if g.get('kind')=='metabolite' and g['entity'] in coeff: visible[nid]=coeff[g['entity']]
+  if not visible: skipped['no_visible_glyphs']+=1; continue
+  mids=[nid for nid in used if glyphs.get(nid,{}).get('kind')=='midmarker']
+  if mids: xy=glyphs[mids[0]]['xy']
+  elif r.get('label_x') is not None: xy=[r['label_x'],r.get('label_y',0)]
+  else:
+   pts=[glyphs[n]['xy'] for n in visible]; xy=[sum(p[0] for p in pts)/len(pts),sum(p[1] for p in pts)/len(pts)]
+  rid_s=str(rid); rx_id=r.get('bigg_id') or r.get('name') or rid_s
+  events.append(dict(key='r:'+rid_s,id=rx_id,references={reaction_namespace:[rx_id]},coefficients=coeff,visible=visible,xy=xy,position_origin='observed',reversible=bool(r.get('reversibility')),core=list(visible)))
+ digest=sha(path.read_bytes()); name=header.get('map_name') or path.stem
+ out=dict(id=uid([source,digest]),source=source,species=species,lineage=source+':'+digest,map_id=header.get('map_id') or digest[:24],name=name,license=license,glyphs=glyphs,events=events,source_sha256=digest,path=str(path),format='escher',audit=dict(skipped))
+ out.update(meta); return out
+
 
 def build():
  rhea=rhea_index();mods=[];original_maps=source_maps();bysha={d['source_sha256']:d for d in original_maps if d['source']=='wikipathways'};maps=[{k:d.get(k) for k in ('id','source','source_id','species','lineage','name','license','source_sha256','provenance_status')} for d in original_maps];binding_audit=[]
