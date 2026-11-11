@@ -75,7 +75,7 @@ def _final_obstacles(data):
         if t == 'metabolite':
             rects.append((n['x'] - er_NODE, n['y'] - er_NODE, n['x'] + er_NODE, n['y'] + er_NODE))
             owner.append(nid); kind.append('node'); label_of.append(n.get('bigg_id'))
-            if 'label_x' in n:
+            if 'label_x' in n and not n.get('label_hidden'):
                 w = font.getlength(n.get('bigg_id', ''))
                 rects.append((n['label_x'] - 2, n['label_y'] - 14, n['label_x'] + w + 2, n['label_y'] + 4))
                 owner.append(nid); kind.append('label'); label_of.append(n.get('bigg_id'))
@@ -84,7 +84,7 @@ def _final_obstacles(data):
             owner.append(nid); kind.append('node'); label_of.append(None)
     for rx in body['reactions'].values():
         mid = next((s['from_node_id'] for s in rx['segments'].values() if body['nodes'][s['from_node_id']].get('node_type') == 'midmarker'), None)
-        if mid is None:
+        if mid is None or 'label_x' not in rx or rx.get('label_hidden'):
             continue
         w = font.getlength(rx['bigg_id'])
         rects.append((rx['label_x'] - 2, rx['label_y'] - 14, rx['label_x'] + w + 2, rx['label_y'] + 4))

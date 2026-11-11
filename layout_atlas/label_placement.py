@@ -17,7 +17,7 @@ from collections import defaultdict
 
 PADX, PADY_UP, PADY_DOWN = 2.0, 14.0, 4.0
 CELL = 150.0
-DENSITY_THRESHOLD = 8  # if more than this many labels in a cell, consider hiding currency
+DENSITY_THRESHOLD = 6  # if more than this many labels in a cell, consider hiding currency
 CURRENCY_PATTERNS = {'atp', 'adp', 'amp', 'nad', 'nadh', 'nadp', 'nadph', 'coa', 'fad', 'fadh2',
                      'h2o', 'h', 'pi', 'ppi', 'co2', 'o2', 'nh4', 'gtp', 'gdp', 'gmp', 'ctp', 'cdp',
                      'cmp', 'utp', 'udp', 'ump', 'accoa', 'succoa', 'malacp', 'malcoa'}
@@ -208,12 +208,14 @@ def optimize(data, passes=10, hide_currency=True):
             cx, cy = L['cx'], L['cy']
             cell = (int(cx // CELL), int(cy // CELL))
             if cell in dense_cells:
-                # Hide by moving label far off-canvas (keeps data structure valid)
+                # Hide without stacking at one sentinel point (that inflated overlap metrics)
                 drop(i, current[i])
-                L['box']['label_x'] = -9999.0
-                L['box']['label_y'] = -9999.0
+                L['box'].pop('label_x', None)
+                L['box'].pop('label_y', None)
+                L['box']['label_hidden'] = True
+                current[i] = (0.0, 0.0, 0.0, 0.0)
                 hidden += 1
-        after = sum(cost(i, current[i]) > 0 for i in range(len(labels)))
+        after = sum(1 for i in range(len(labels)) if 'label_x' in labels[i]['box'] and cost(i, current[i]) > 0)
     
     return dict(labels=len(labels), with_conflict_before=before, with_conflict_after=after, 
                 moves=moved, hidden_currency=hidden, dense_cells=len(dense_cells))
