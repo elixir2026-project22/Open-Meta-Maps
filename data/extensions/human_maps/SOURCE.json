@@ -13,5 +13,12 @@
   "access_date": "2026-11-11",
   "license_scope": "official escher/ JSON maps only",
   "reaction_namespace": "human.gem",
-  "canonicalization": "Human-GEM reactions.tsv crosswalk → bigg.reaction / metanetx.reaction / rhea when annotated; MAR kept under human.gem"
+  "canonicalization": "Human-GEM reactions.tsv crosswalk → bigg.reaction / metanetx.reaction / rhea when annotated; MAR kept under human.gem",
+  "extraction": {
+    "methods": {
+      "diagram_modules": 8540
+    },
+    "modules": 8540,
+    "atlas_schema_version": 1
+  }
 }

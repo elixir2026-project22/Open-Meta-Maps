@@ -337,5 +337,12 @@
   },
   "decode_failures": [],
   "excluded_modules": 0,
-  "canonicalization": "Unique Rhea matches via participant ChEBI equations; native sbgn.process retained"
+  "canonicalization": "Unique Rhea matches via participant ChEBI equations; native sbgn.process retained",
+  "extraction": {
+    "methods": {
+      "diagram_modules": 423
+    },
+    "modules": 423,
+    "atlas_schema_version": 1
+  }
 }

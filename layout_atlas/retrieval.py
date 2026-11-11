@@ -223,15 +223,33 @@ class Library:
     if p['id'] not in seen:proposals.append(p);seen.add(p['id'])
   return proposals,dict(query_windows=window_count,candidates=len(proposals),levels=dict(Counter(p['match_level'] for p in proposals)),max_candidates_per_query=24,root_budget=max_roots,queried_reaction_ids=sorted(queried_reactions),query_reaction_union=len(queried_reactions))
 
+# Compactness is features[5] = matched_nodes / bbox_area (see candidate scoring above).
+# Coverage-safe: among same-source biochemical proposals with identical reaction sets,
+# keep the best selection_score and break remaining ties by higher compactness.
 def select(proposals,ranker=None):
+ if not proposals: return []
  for p in proposals:
-  utility=float(ranker(p['features'])) if ranker else p['score']-2*len(p['reaction_ids']);p['selection_score']=2*len(p['reaction_ids'])+utility+layout_priority({'source':p.get('source'),'layout_origin':p.get('layout_origin')})
+  utility=float(ranker(p['features'])) if ranker else p['score']-2*len(p['reaction_ids'])
+  p['selection_score']=2*len(p['reaction_ids'])+utility+layout_priority({'source':p.get('source'),'layout_origin':p.get('layout_origin')})
+ best={}; drop=set()
+ for p in proposals:
+  if float(p['features'][1])<1: continue
+  key=(p.get('source'), frozenset(p['reaction_ids']))
+  cur=best.get(key)
+  def better(a,b):
+   return (a['selection_score'], float(a['features'][5]), a['id'])>(b['selection_score'], float(b['features'][5]), b['id'])
+  if cur is None or better(p,cur):
+   if cur is not None: drop.add(id(cur))
+   best[key]=p
+  else:
+   drop.add(id(p))
+ pool=[p for p in proposals if id(p) not in drop]
  chosen=[];used=set()
- for p in sorted(proposals,key=lambda p:(-p['selection_score'],p['id'])):
+ for p in sorted(pool,key=lambda p:(-p['selection_score'],p['id'])):
   if set(p['reaction_ids'])&used:continue
   chosen.append(p);used.update(p['reaction_ids'])
  # One-for-up-to-two local exchange, preserving all internal reaction exclusions.
- for p in sorted(proposals,key=lambda p:(-p['selection_score'],p['id'])):
+ for p in sorted(pool,key=lambda p:(-p['selection_score'],p['id'])):
   conflicts=[c for c in chosen if set(c['reaction_ids'])&set(p['reaction_ids'])]
   if 1<=len(conflicts)<=2 and p['selection_score']>sum(c['selection_score'] for c in conflicts)+.05:
    chosen=[c for c in chosen if c not in conflicts]+[p]

@@ -232,6 +232,10 @@ def build(version=None, access_date=None):
             glyphs=len(d['glyphs']),
             modules=len(mods),
             audit=d.get('audit'),
+            extraction=(mods[0].get('extraction') if mods else database.extraction_block(
+                'diagram_modules', dict(max_roots=24, window_sizes=[1, 2, 4, 8, 12, 24]),
+                dict(source_events=len(d['events']), modules=0, reactions_covered=0, coverage=None),
+            )),
         ))
         per_map.append(dict(
             source_id=d.get('source_id'),

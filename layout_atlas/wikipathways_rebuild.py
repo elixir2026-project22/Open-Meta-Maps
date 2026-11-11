@@ -84,6 +84,14 @@ def geometry_modules(d, max_roots=24):
         m['reactions'] = []  # no chemical identity to index
         if 1 <= m['size'] <= 40 and len(m['nodes']) <= 100:
             out.append(m)
+    # Re-stamp after size filter so counts match stored modules.
+    from database import attach_extraction, WINDOW_SIZES
+    attach_extraction(
+        out, 'geometry_modules',
+        dict(max_roots=max_roots, window_sizes=list(WINDOW_SIZES),
+             underlying='diagram_modules over metabolite–metabolite GPML edges'),
+        source_events=len(diagram['events']),
+    )
     return out
 
 

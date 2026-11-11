@@ -30,5 +30,14 @@
   },
   "license_note": "Each unit keeps the licence, source_sha256 and original_instance pointer of its source map; no data from outside the open core.",
   "changes": "Source maps recut into non-overlapping 3-12 reaction structure units; coordinates normalised per unit, originals kept in original_coordinates.",
-  "geometry_only": "WikiPathways maps without reaction identity are segmented by shape only (pseudo-reactions = drawn interactions between metabolite glyphs) and flagged quality=geometry_only; maps that also have semantic units are not duplicated."
+  "geometry_only": "WikiPathways maps without reaction identity are segmented by shape only (pseudo-reactions = drawn interactions between metabolite glyphs) and flagged quality=geometry_only; maps that also have semantic units are not duplicated.",
+  "extraction": {
+    "methods": {
+      "geometry_modules": 1890,
+      "escher_community_windows": 768,
+      "diagram_modules": 305
+    },
+    "modules": 2963,
+    "atlas_schema_version": 1
+  }
 }
