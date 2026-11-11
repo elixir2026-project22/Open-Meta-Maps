@@ -27,9 +27,10 @@ from collections import defaultdict
 
 import numpy as np
 
-ASPECT_RANGE = (0.55, 2.4)        # canvas width / height outside this is discarded
-COMPACT_TOLERANCE = 0.75          # a candidate must cover at least this share of the best candidate's compactness
+ASPECT_RANGE = (0.6, 1.8)         # canvas width / height outside this is discarded (tighter than before)
+COMPACT_TOLERANCE = 0.80          # a candidate must cover at least this share of the best candidate's compactness (raised)
 LONG_TOLERANCE = 0.05             # counts within 5 % are treated as equal and the next criterion decides
+COMPACTNESS_WEIGHT = 0.3          # weight for compactness in final scoring
 
 
 def module_links(groups, cur, hub):
@@ -52,9 +53,11 @@ def module_links(groups, cur, hub):
     return weights, links
 
 
-def stress_layout(sizes, weights, aspect=1.0, compress=1.0, iterations=300):
-    """Stress majorization (SMACOF) of the module-connection graph.  Target distance between linked modules is the sum of their half
-    diagonals plus a gap; unconnected components are placed one after another."""
+def stress_layout(sizes, weights, aspect=1.0, compress=1.0, iterations=300, compact=0.02):
+    """Stress majorization (SMACOF) of the module-connection graph with compactness term.
+    Target distance between linked modules is the sum of their half diagonals plus a gap;
+    unconnected components are placed one after another.  A small inward pull toward the
+    centre keeps the layout compact."""
     import networkx as nx
     from scipy.sparse.csgraph import shortest_path
     n = len(sizes)
@@ -69,23 +72,27 @@ def stress_layout(sizes, weights, aspect=1.0, compress=1.0, iterations=300):
     finite = np.isfinite(D)
     big = D[finite].max() if finite.any() else 1.0
     D = np.where(finite, D, big * 1.5 + 1.0)
-    unit = float(np.median(radius)) * 2.2 + 90.0
-    target = D * unit + (radius[:, None] + radius[None, :]) * .8
+    unit = float(np.median(radius)) * 2.0 + 70.0  # tighter spacing
+    target = D * unit + (radius[:, None] + radius[None, :]) * .7  # closer together
     np.fill_diagonal(target, 0.0)
     # start from a deterministic spiral (no random numbers) stretched to the aspect ratio
     angle = np.arange(n) * 2.399963
-    rad = np.sqrt(np.arange(n) + 1.0) * unit * .7
+    rad = np.sqrt(np.arange(n) + 1.0) * unit * .6  # tighter initial spiral
     xy = np.stack([np.cos(angle) * rad, np.sin(angle) * rad], axis=1)
     weight = 1.0 / np.maximum(target, 1.0) ** 2
     np.fill_diagonal(weight, 0.0)
     wsum = weight.sum(1)
-    for _ in range(iterations):
+    for it in range(iterations):
         diff = xy[:, None, :] - xy[None, :, :]
         dist = np.maximum(np.linalg.norm(diff, axis=2), 1e-6)
         # Gauss-Seidel-free SMACOF update (weighted, majorizing)
         ratio = weight * target / dist
         np.fill_diagonal(ratio, 0.0)
         new = (weight @ xy + ratio.sum(1)[:, None] * xy - ratio @ xy) / wsum[:, None]
+        # compactness: pull toward centre (decays over iterations to allow settling)
+        centre = new.mean(0)
+        pull = compact * (1.0 - it / iterations)
+        new = new * (1.0 - pull) + centre * pull
         xy = new
     xy[:, 0] *= aspect ** .5
     xy[:, 1] /= aspect ** .5
@@ -132,22 +139,42 @@ def metrics(centres, sizes, weights, links):
 
 
 def choose(rows):
-    """rows: [{name, metrics}] -> (index, reason)."""
+    """rows: [{name, metrics}] -> (index, reason).
+    Uses weighted scoring: long edges are bad, but compactness also matters."""
     ok = [i for i, r in enumerate(rows) if ASPECT_RANGE[0] <= r['metrics']['aspect'] <= ASPECT_RANGE[1]] or list(range(len(rows)))
     best_compact = max(rows[i]['metrics']['compactness'] for i in ok)
     ok = [i for i in ok if rows[i]['metrics']['compactness'] >= COMPACT_TOLERANCE * best_compact]
     pool = list(ok)
     steps = []
-    for key in ('links_over_1000', 'links_over_250', 'module_crossings'):
+    
+    # First pass: eliminate based on links_over_1000 (hard limit)
+    for key in ('links_over_1000',):
         low = min(rows[i]['metrics'][key] for i in pool)
         keep = [i for i in pool if rows[i]['metrics'][key] <= low * (1 + LONG_TOLERANCE) + 0.5]
         steps.append(f'{key}: best {low}, kept {[rows[i]["name"] for i in keep]}')
         pool = keep
-        if len(pool) == 1:
-            break
-    winner = pool[0]
+    
+    # Second pass: weighted score of links_over_250, module_crossings, and (1 - compactness)
+    def score(i):
+        m = rows[i]['metrics']
+        # Normalize by dividing by (best + 1) to avoid division by zero
+        best_250 = min(rows[j]['metrics']['links_over_250'] for j in pool) + 1
+        best_cross = min(rows[j]['metrics']['module_crossings'] for j in pool) + 1
+        best_comp = max(rows[j]['metrics']['compactness'] for j in pool)
+        s = (m['links_over_250'] / best_250 + 
+             0.5 * m['module_crossings'] / best_cross +
+             COMPACTNESS_WEIGHT * (1.0 - m['compactness'] / best_comp))
+        return s
+    
+    if len(pool) > 1:
+        scores = {i: score(i) for i in pool}
+        winner = min(pool, key=lambda i: scores[i])
+        steps.append(f'weighted_score: {[(rows[i]["name"], round(scores[i], 3)) for i in pool]}, winner {rows[winner]["name"]}')
+    else:
+        winner = pool[0]
+    
     discarded = [rows[i]['name'] for i in range(len(rows)) if i not in ok]
-    return winner, dict(rule='aspect and compactness screen, then links_over_1000 > links_over_250 > module_crossings (5% tolerance)', discarded=discarded, steps=steps)
+    return winner, dict(rule='aspect/compactness screen, links_over_1000 filter, then weighted score (links_over_250 + crossings + compactness)', discarded=discarded, steps=steps)
 
 
 def place(items, weights, links, layout_blocks, log=None):

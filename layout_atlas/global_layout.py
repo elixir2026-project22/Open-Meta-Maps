@@ -318,10 +318,12 @@ def layout_blocks(sizes, weights, seed=SEEDS[0], iterations=500, aspect=1.4, ini
             np.add.at(push, ea[:, 1], -direction * pull[:, None])
         push /= (wsum[:, None] + 1.0)  # weighted-mean step: stable however many neighbours a hub block has
         centre = xy.mean(0)
-        push -= (xy - centre) * np.array([.01 / aspect ** .5, .01 * aspect ** .5])
+        push -= (xy - centre) * np.array([.015 / aspect ** .5, .015 * aspect ** .5])  # stronger gravity
         xy += push * min(1.0, step * 2)
         xy = _separate(xy, half, passes=3)
     xy = _separate(xy, half, passes=400)
+    # Final compaction pass to squeeze out empty space
+    xy = _compact(xy, half, weights, iterations=40)
     return xy
 
 
@@ -353,6 +355,37 @@ def _separate(xy, half, passes=3):
                         xy[j, 1] += sgn * py / 2
         if not moved:
             break
+    return xy
+
+
+def _compact(xy, half, weights, iterations=50):
+    """Pull blocks toward centre while respecting overlaps, weighted by connectivity.
+    Blocks with more connections have more pull toward the dense core."""
+    n = len(xy)
+    if n < 2:
+        return xy
+    xy = xy.copy()
+    # Compute weight sum for each block (how connected it is)
+    wsum = np.zeros(n)
+    for (a, b), w in weights.items():
+        wsum[a] += w
+        wsum[b] += w
+    wsum = np.maximum(wsum, 0.1)
+    
+    for it in range(iterations):
+        # Weighted centre (more connected blocks pull harder)
+        weighted_centre = np.average(xy, axis=0, weights=wsum)
+        # Pull toward centre, stronger for less connected blocks (they should move more)
+        strength = 0.15 * (1.0 - it / iterations)
+        for i in range(n):
+            direction = weighted_centre - xy[i]
+            dist = np.linalg.norm(direction)
+            if dist > 1.0:
+                # Less connected blocks move more
+                move = direction / dist * min(dist * strength / (wsum[i] + 0.1), 20.0)
+                xy[i] += move
+        # Resolve overlaps
+        xy = _separate(xy, half, passes=3)
     return xy
 
 
