@@ -160,6 +160,43 @@ def test_svg_has_no_provenance_legend():
         assert f'fill="{colour}"' not in svg
 
 
+def test_currency_spokes_marked():
+    """Currency nodes use node_is_primary=False; their spokes, circles and labels are tagged."""
+    import line_render
+
+    data = [
+        {},
+        {
+            "nodes": {
+                "m1": {"node_type": "midmarker", "x": 100.0, "y": 100.0},
+                "a1": {"node_type": "metabolite", "x": 200.0, "y": 100.0, "bigg_id": "g6p_c",
+                       "node_is_primary": True, "label_x": 210.0, "label_y": 100.0},
+                "c1": {"node_type": "metabolite", "x": 100.0, "y": 200.0, "bigg_id": "atp_c",
+                       "node_is_primary": False, "label_x": 100.0, "label_y": 210.0},
+            },
+            "reactions": {
+                "1": {
+                    "bigg_id": "R1", "name": "R1", "label_x": 100, "label_y": 90,
+                    "metabolites": [{"bigg_id": "g6p_c", "coefficient": -1},
+                                    {"bigg_id": "atp_c", "coefficient": -1}],
+                    "segments": {
+                        "0": {"from_node_id": "m1", "to_node_id": "a1"},
+                        "1": {"from_node_id": "m1", "to_node_id": "c1"},
+                    },
+                }
+            },
+            "canvas": {"x": 0, "y": 0, "width": 300, "height": 300},
+        },
+    ]
+    svg = line_render.render(data)
+    assert 'data-met="atp_c" data-currency="1"' in svg
+    assert 'data-m="atp_c" data-currency="1"' in svg
+    assert 'data-nl="c1" data-currency="1"' in svg
+    assert 'data-met="g6p_c" data-currency' not in svg
+    assert 'data-m="g6p_c" data-currency' not in svg
+    assert 'data-nl="a1" data-currency' not in svg
+
+
 if __name__ == "__main__":
     test_region_window_keys_membership()
     test_worst_region_count_matches_drawn_box()
@@ -167,4 +204,5 @@ if __name__ == "__main__":
     test_detailed_panel_keeps_goals_only()
     test_content_bbox_shared()
     test_svg_has_no_provenance_legend()
+    test_currency_spokes_marked()
     print("ok")
