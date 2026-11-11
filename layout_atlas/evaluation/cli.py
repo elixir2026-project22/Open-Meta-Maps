@@ -179,7 +179,7 @@ def run_batch(args) -> int:
 
 
 def main(argv=None) -> int:
-    p = argparse.ArgumentParser(description="Evaluate Open Meta Maps Escher layouts (Project 22 metrics).")
+    p = argparse.ArgumentParser(description="Evaluate Open Meta Maps Escher layouts (layout rules).")
     p.add_argument("--gem", help="SBML / model file")
     p.add_argument("--map", help="Escher map.json")
     p.add_argument("--reference", help="Optional reference: SBGN, Escher JSON, or {id:[x,y]} JSON")
