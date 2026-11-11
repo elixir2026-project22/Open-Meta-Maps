@@ -48,6 +48,16 @@ def _flat_row(report: dict) -> dict:
         "geom_crossings_total": cross.get("total"),
         "geom_node_overlap_pairs": coll.get("node_overlap_pairs"),
         "geom_label_overlap_pairs": coll.get("label_overlap_pairs"),
+        "structure_continuity": (
+            (report.get("structure_continuity") or {}).get("contiguous_pair_share")
+            if isinstance(report.get("structure_continuity"), dict)
+            else (g.get("structure_continuity") or {}).get("contiguous_pair_share")
+        ),
+        "split_structures": (
+            (report.get("structure_continuity") or {}).get("split_structures")
+            if isinstance(report.get("structure_continuity"), dict)
+            else (g.get("structure_continuity") or {}).get("split_structures")
+        ),
         "gdmetrix": (report.get("dependencies") or {}).get("gdmetrix"),
     }
 

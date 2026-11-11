@@ -665,7 +665,12 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     else:
         metric['edge_routing'] = dict(mode=EDGE_ROUTING, not_applied='large model: routing of the algorithm-placed connections is a later step')
     t_quality = time.time()
-    quality_summary, quality_issues = layout_quality.evaluate(data, skip_edges)
+    # Persist structure membership on the map so continuity can be scored from map.json alone.
+    codes = module_codes(blocks) if blocks else {}
+    expert_structures = [dict(id=b.get('id') or b.get('template_id'), code=codes.get(b.get('id')), reactions=list(b['reaction_ids']))
+                         for b in blocks if len(b.get('reaction_ids') or []) >= 2]
+    data[0].setdefault('metadata', {})['expert_structures'] = expert_structures
+    quality_summary, quality_issues = layout_quality.evaluate(data, skip_edges, structures=expert_structures)
     quality_summary['seconds'] = round(time.time() - t_quality, 1)
     quality_summary['layout_style'] = LAYOUT_STYLE
     if composition_report is not None:

@@ -51,6 +51,22 @@ Private BRENDA `brenda_*.xml` files were not available; re-run with a local clon
 
 Machine-readable copy: [`docs/evaluation/summary.csv`](evaluation/summary.csv).
 
+## Structure continuity
+
+Computed from the final `map.json` for each reused expert structure (≥2 reactions): share of
+reaction pairs that share a non-currency metabolite and lie within **3× median reaction spacing**,
+plus how many structures split into more than one geometric piece. Scale-free; no model-specific
+thresholds. Shown on the tool Layout quality card (EN + zh).
+
+| model | contiguous_pair_share | structures | split_structures | pairs |
+|---|---:|---:|---:|---:|
+| e_coli_core | 0.856 | 11 | 0 | 146 |
+| iIT341 | 0.906 | 85 | 4 | 235 |
+| iMM904 | 0.893 | 131 | 7 | 484 |
+
+Expert structures stay mostly contiguous on these maps; residual splits are sparse (≈5% of
+structures on the larger GEMs) and are listed under `layout_issues.json` → `split_structures`.
+
 ## Where we are weakest (with examples)
 
 Ranked by how consistently they hurt maps across models (not by one model’s absolute scores).

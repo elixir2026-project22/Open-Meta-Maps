@@ -1,9 +1,10 @@
 """Final-geometry measures used by the quality gate (curve crossings, collisions, length, orientation).
 
 Development scoring that also covers Project 22 layout-benchmark rules (crossings via gdMetriX when
-available, box overlaps, participant consistency, compartments, long edges, reference similarity) lives in
-``evaluation/`` and is the single CLI path: ``python3 project.py evaluate ...``.  That path calls
-``evaluate()`` here for the Escher-native geometry block so the gate and the report stay one evaluator.
+available, box overlaps, participant consistency, compartments, long edges, reference similarity,
+structure continuity) lives in ``evaluation/`` and is the single CLI path:
+``python3 project.py evaluate ...``.  That path calls ``evaluate()`` here for the Escher-native
+geometry block so the gate and the report stay one evaluator.
 
 Also contains metric_details and assert_chemistry (used by compose) to avoid
 loading experiment/UI modules during compose.
@@ -116,11 +117,16 @@ def _seg_hits(a, b, S):
     return idx, p + np.outer(t[idx], r)
 
 
-def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000):
-    """-> (summary, issues).  `summary` holds the six core indicators, the details and the worst local regions; `issues` lists where the problems are."""
+def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, structures=None):
+    """-> (summary, issues).  `summary` holds the six core indicators, the details and the worst local regions; `issues` lists where the problems are.
+
+    ``structures``: optional reused expert structures ``[{id, reactions|reaction_ids}]`` (or id→ids).
+    When omitted, ``metadata.expert_structures`` is used, else a fallback from expert-derived connectivity.
+    """
     import edge_routing as er
     import line_render
     import orientation as orientation_module
+    from evaluation.continuity import structure_continuity as _structure_continuity
     meta = data[0].get('metadata', {})
     skip = {tuple(e) for e in (skip_edges if skip_edges is not None else meta.get('preserved_edges') or [])}
     skip |= {(p['reaction'], p['metabolite']) for p in (meta.get('source_paths') or [])}
@@ -298,6 +304,11 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000):
     n_alg = max(len(algo), 1)
     n_all = max(len(edges), 1)
     total_cross = sum(cross.values())
+    continuity = _structure_continuity(data, structures=structures)
+    # Keep the card payload small; full per-structure rows go under details.
+    continuity_core = {k: continuity.get(k) for k in (
+        'contiguous_pair_share', 'pairs', 'contiguous_pairs', 'structures', 'split_structures',
+        'split_structure_share', 'reaction_spacing_px', 'adjacency_factor', 'note')}
     summary = dict(
         edges=dict(total=len(edges), algorithm=len(algo), expert=len(edges) - len(algo)),
         core=dict(
@@ -306,7 +317,7 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000):
             collisions=dict(node_overlap_pairs=len(node_overlap), label_overlap_pairs=label_overlap, curves_through_nodes=node_hits, curves_through_labels=label_hits),
             length_p90=dict(px=round(float(np.percentile(all_len, 90)), 1), in_reaction_spacings=round(float(np.percentile(all_len, 90)) / max(spacing, 1.0), 2), reaction_spacing_px=round(spacing, 1)),
             core_orientation=dict(opposite_sides_share=(ori.get('core_participants') or {}).get('opposite_sides_share'), reactions=(ori.get('core_participants') or {}).get('reactions')),
-            structure_continuity=None,
+            structure_continuity=continuity_core,
             bezier_coverage=dict(share=round(bez_edges / n_alg, 3), algorithm_edges=len(algo), bezier=bez_edges, straight_lines=straight_edges, polylines_with_bends=poly_edges,
                                  orthogonal_polylines=ortho_edges)),
         details=dict(
@@ -316,11 +327,12 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000):
                               over_1_6=int(sum(d > 1.6 for d in detours))),
             curve_quality=dict(hooks=hooks, sharp_turns=sharp, self_intersections=selfx),
             crossing_density=dict(worst_window_crossings=windows[0]['crossings'] if windows else 0),
-            orientation=ori, composition=comp),
+            orientation=ori, composition=comp, structure_continuity=continuity),
         worst_regions=windows,
-        note='computed from the final map.json; crossings are counted on sampled final curves, source-split; structure continuity needs the V7 backbone layout and is not available yet')
+        note='computed from the final map.json; crossings are counted on sampled final curves, source-split; structure continuity scores reused expert structures on the final geometry')
     issues = dict(isolated_reactions=outlier_rows, crossings=cross_points, obstacle_hits=hit_points, curve_anomalies=anomalies, worst_regions=windows,
-                  node_overlaps=[dict(x=round(float(centres[i][0]), 1), y=round(float(centres[i][1]), 1)) for i, _ in node_overlap][:max_issues])
+                  node_overlaps=[dict(x=round(float(centres[i][0]), 1), y=round(float(centres[i][1]), 1)) for i, _ in node_overlap][:max_issues],
+                  split_structures=[d for d in continuity.get('details') or [] if d.get('components', 1) > 1][:max_issues])
     return summary, issues
 
 

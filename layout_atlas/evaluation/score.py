@@ -18,14 +18,36 @@ def _read_json(path: Path):
     return json.loads(path.read_text())
 
 
-def _optional_layout_quality(escher_map):
+def _structures_near_map(map_path: Path | None, escher_map) -> list[dict] | None:
+    """Load reused structures from map metadata or sibling modules.json."""
+    meta = (escher_map[0].get("metadata") if isinstance(escher_map, list) else {}) or {}
+    if meta.get("expert_structures"):
+        return meta["expert_structures"]
+    if map_path is None:
+        return None
+    modules = Path(map_path).with_name("modules.json")
+    if not modules.exists():
+        return None
+    try:
+        rows = _read_json(modules)
+    except Exception:
+        return None
+    out = []
+    for m in rows if isinstance(rows, list) else []:
+        rids = m.get("reactions") or m.get("reaction_ids") or []
+        if len(rids) >= 2:
+            out.append(dict(id=m.get("module_id") or m.get("id") or m.get("code"), code=m.get("code"), reactions=list(rids)))
+    return out or None
+
+
+def _optional_layout_quality(escher_map, structures=None):
     """Reuse the existing final-geometry evaluator (quality gate); never duplicate it."""
     try:
         import layout_quality
     except ImportError:
         return None, None
     try:
-        summary, issues = layout_quality.evaluate(escher_map)
+        summary, issues = layout_quality.evaluate(escher_map, structures=structures)
         return summary, issues
     except Exception as ex:  # noqa: BLE001 — evaluation aid must not fail the whole score
         return dict(error=f"{type(ex).__name__}: {ex}"), None
@@ -76,12 +98,29 @@ def score_escher_map(
 
     benchmark = metrics.all_benchmark_metrics(sub_pathway, pos_metric, reference=ref_pos)
     geom_summary, geom_issues = (None, None)
+    structures = _structures_near_map(Path(map_path) if map_path else None, escher_map)
+    # Continuity is cheap; always attach it even when the heavy curve geometry block is skipped.
+    try:
+        from evaluation.continuity import structure_continuity
+
+        continuity = structure_continuity(escher_map, structures=structures)
+    except Exception as ex:  # noqa: BLE001
+        continuity = dict(error=f"{type(ex).__name__}: {ex}")
     # Final-geometry (curve sampling) is O(segments²); skip automatically on large GEMs unless forced.
     n_rxn = len(pathway.reactions)
     if include_geometry and n_rxn > 800:
-        geom_summary = dict(skipped=True, reason=f"{n_rxn} reactions: use layout_issues.json from compose, or --force-geometry")
+        cont_core = None
+        if isinstance(continuity, dict) and "error" not in continuity:
+            cont_core = {k: continuity.get(k) for k in (
+                "contiguous_pair_share", "pairs", "contiguous_pairs", "structures", "split_structures",
+                "split_structure_share", "reaction_spacing_px", "adjacency_factor", "note")}
+        geom_summary = dict(
+            skipped=True,
+            reason=f"{n_rxn} reactions: use layout_issues.json from compose, or --force-geometry",
+            core=dict(structure_continuity=cont_core),
+        )
     elif include_geometry:
-        geom_summary, geom_issues = _optional_layout_quality(escher_map)
+        geom_summary, geom_issues = _optional_layout_quality(escher_map, structures=structures)
 
     examples = findings.weak_spots(sub_pathway, pos_metric, issues=geom_issues)
     cov = escher_bridge.coverage(pathway, pos)
@@ -111,6 +150,7 @@ def score_escher_map(
         dependencies=dict(gdmetrix=metrics.gdmetrix_available(), shapely=metrics.shapely_available()),
         benchmark=benchmark,
         geometry=geom_summary,
+        structure_continuity=continuity,
         examples=examples,
         note=(
             "Development evaluation (not a fair tool comparison). "

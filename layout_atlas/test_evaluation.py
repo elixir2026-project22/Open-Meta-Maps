@@ -45,9 +45,37 @@ def test_overlaps_no_touch():
     assert m["overlapping_pairs"] == 0.0
 
 
+def test_structure_continuity_adjacent():
+    from evaluation.continuity import structure_continuity
+
+    # Minimal Escher-like map: two reactions sharing a non-currency metabolite, close together.
+    data = [
+        {"map_name": "toy", "map_id": "toy", "schema": "1.0.0", "metadata": {
+            "reaction_provenance": {"r1": "expert_derived", "r2": "expert_derived"},
+            "expert_structures": [{"id": "s1", "code": "U0001", "reactions": ["r1", "r2"]}],
+        }},
+        {"nodes": {
+            "1": {"node_type": "midmarker", "x": 0, "y": 0},
+            "2": {"node_type": "midmarker", "x": 50, "y": 0},
+            "3": {"node_type": "metabolite", "x": 25, "y": 0, "bigg_id": "g6p_c", "node_is_primary": True},
+        }, "reactions": {
+            "a": {"bigg_id": "r1", "metabolites": [{"bigg_id": "g6p_c", "coefficient": -1}],
+                  "segments": {"0": {"from_node_id": "1", "to_node_id": "3"}}},
+            "b": {"bigg_id": "r2", "metabolites": [{"bigg_id": "g6p_c", "coefficient": 1}],
+                  "segments": {"0": {"from_node_id": "2", "to_node_id": "3"}}},
+        }, "canvas": {"x": 0, "y": 0, "width": 100, "height": 100}},
+    ]
+    c = structure_continuity(data)
+    assert c["structures"] == 1
+    assert c["pairs"] == 1
+    assert c["contiguous_pair_share"] == 1.0
+    assert c["split_structures"] == 0
+
+
 if __name__ == "__main__":
     test_participant_consistency_opposite()
     test_participant_consistency_same_side()
     test_long_edge_share()
     test_overlaps_no_touch()
+    test_structure_continuity_adjacent()
     print("ok")
