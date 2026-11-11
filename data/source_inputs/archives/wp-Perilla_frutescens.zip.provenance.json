@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Perilla_frutescens.zip",
-  "sha256": "6c7c9be91fd23060460946c0a60543dae50d1ba09e66c9e13cf622883ca70e18",
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Perilla_frutescens.zip",
+  "sha256": "ce36a1e2d261da79593fdd19e91649e34bcfab42bf1fe43a079431024d1d90e2",
   "bytes": 2493,
-  "local_path": "data/archives/wp-Perilla_frutescens.zip"
+  "local_path": "source_inputs/archives/wp-Perilla_frutescens.zip",
+  "access_date": "2026-11-11"
 }

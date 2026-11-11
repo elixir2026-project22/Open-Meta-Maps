@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Rattus_norvegicus.zip",
-  "sha256": "1d2006e66813033d6fd22fa4cef9e3e0147a758b63b6c0f41729901ec3382d45",
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Rattus_norvegicus.zip",
+  "sha256": "26465841fb3598699cfedc6505a09d1572ef2d348fadbe13260518cddb1de68e",
   "bytes": 946800,
-  "local_path": "data/archives/wp-Rattus_norvegicus.zip"
+  "local_path": "source_inputs/archives/wp-Rattus_norvegicus.zip",
+  "access_date": "2026-11-11"
 }

@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Plasmodium_falciparum.zip",
-  "sha256": "38f4f018ecc21292dad601d7b6cbb14bb24534826a80ceb14dbc81a84454585e",
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Plasmodium_falciparum.zip",
+  "sha256": "d7a2ee30048b0a71bc3f67ac0b8b18dccce2fafa0a0e14ab2939d6db885702f1",
   "bytes": 5260,
-  "local_path": "data/archives/wp-Plasmodium_falciparum.zip"
+  "local_path": "source_inputs/archives/wp-Plasmodium_falciparum.zip",
+  "access_date": "2026-11-11"
 }

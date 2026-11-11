@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Arabidopsis_thaliana.zip",
-  "sha256": "781c53d328026c2f179138cc641739b812c68d1b75b1bd4d31d9d58bebf177e7",
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Arabidopsis_thaliana.zip",
+  "sha256": "17fd4ce47fc4fcdda1fde4421a3f38f0c29e371106c046d1fef729d29a9d903d",
   "bytes": 249627,
-  "local_path": "data/archives/wp-Arabidopsis_thaliana.zip"
+  "local_path": "source_inputs/archives/wp-Arabidopsis_thaliana.zip",
+  "access_date": "2026-11-11"
 }

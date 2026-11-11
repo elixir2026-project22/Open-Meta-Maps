@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Danio_rerio.zip",
-  "sha256": "1a653d9067e9799935c68fbbf31908300d66bea486e9dffa5cb40e7c9f930d66",
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Danio_rerio.zip",
+  "sha256": "64516910dd6b3bf58b536a68cb08248e49264b7c4448a26259ff9bcb01a3b0c4",
   "bytes": 419240,
-  "local_path": "data/archives/wp-Danio_rerio.zip"
+  "local_path": "source_inputs/archives/wp-Danio_rerio.zip",
+  "access_date": "2026-11-11"
 }

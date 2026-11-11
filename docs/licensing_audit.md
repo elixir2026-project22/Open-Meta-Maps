@@ -22,7 +22,7 @@ The 22 maps come from the Escher community-maps repository (BiGG-based maps for 
 | Path | Licence | Result |
 |---|---|---|
 | `data/rhea/` | CC BY 4.0 (`rhea/LICENSE.txt`: copyright statement must be reproduced with each copy) | OK, keep `LICENSE.txt`; credit Rhea in the README |
-| `data/source_inputs/archives/wp-*.zip` and `raw/wp/` | CC0 (WikiPathways) | OK |
+| `data/source_inputs/archives/wp-*.zip` and `raw/wp/` | CC0 (WikiPathways); snapshot **20261110** | OK |
 | `data/reactome/` | CC0 data (Reactome v97) | OK |
 | `data/models/AraCore_v2_1.xml` | MIT (`LICENSE.AraCore`, Philipp Wendering) | OK |
 | `data/models/iYO844.xml` | from BiGG (BiGG License) | **Open**: non-commercial/educational terms |

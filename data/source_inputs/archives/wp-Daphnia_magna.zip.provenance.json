@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Daphnia_magna.zip",
-  "sha256": "25457e3dff5817747d966b32a1f04de3caad0b41e31e3db9fcc591a7bcac5b7d",
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Daphnia_magna.zip",
+  "sha256": "5280fe88d059567212fc5fb8658597806faa2f870e1f1f0b162da8aa24854187",
   "bytes": 8303,
-  "local_path": "data/archives/wp-Daphnia_magna.zip"
+  "local_path": "source_inputs/archives/wp-Daphnia_magna.zip",
+  "access_date": "2026-11-11"
 }

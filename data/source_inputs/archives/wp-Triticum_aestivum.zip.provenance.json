@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Triticum_aestivum.zip",
-  "sha256": "5d8209e149e146b84dcffd8abbbc0279f4c8ad70d163531be46895e8d940b266",
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Triticum_aestivum.zip",
+  "sha256": "6782459374b5ac8f0f4ef24e5f2dc6618da088e1613c5915c7cf02620d8093ff",
   "bytes": 2724,
-  "local_path": "data/archives/wp-Triticum_aestivum.zip"
+  "local_path": "source_inputs/archives/wp-Triticum_aestivum.zip",
+  "access_date": "2026-11-11"
 }

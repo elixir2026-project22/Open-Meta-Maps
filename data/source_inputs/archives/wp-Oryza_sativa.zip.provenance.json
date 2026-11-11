@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Oryza_sativa.zip",
-  "sha256": "c4deb4a9b047c8620463c9e7380370dd5a071f7684588cfff6d934125b93a1e2",
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Oryza_sativa.zip",
+  "sha256": "97b25ed9baae1ac979d9483aaa50f57560f57e9f8c399aa1bac26debf6924931",
   "bytes": 133512,
-  "local_path": "data/archives/wp-Oryza_sativa.zip"
+  "local_path": "source_inputs/archives/wp-Oryza_sativa.zip",
+  "access_date": "2026-11-11"
 }

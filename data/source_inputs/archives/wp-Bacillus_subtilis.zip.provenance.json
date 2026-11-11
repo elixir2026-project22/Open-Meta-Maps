@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Bacillus_subtilis.zip",
-  "sha256": "1cd0a4a1ce1e149b4d1f0f01d92219ba09240c4df1d8bda292d26770589c07e5",
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Bacillus_subtilis.zip",
+  "sha256": "8ff326ed1bbf0709510dd5c4c07deab8c914613291a7b39e232bef764638545c",
   "bytes": 4273,
-  "local_path": "data/archives/wp-Bacillus_subtilis.zip"
+  "local_path": "source_inputs/archives/wp-Bacillus_subtilis.zip",
+  "access_date": "2026-11-11"
 }

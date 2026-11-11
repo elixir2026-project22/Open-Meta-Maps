@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Zea_mays.zip",
-  "sha256": "ed41f57f7d2459013a10627e2bc1634cb44bbe3f7a5d8fcb6f259831f4dae500",
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Zea_mays.zip",
+  "sha256": "34792613797c80a271c768da7120cfb4300a089f21d9c4bfc0edd2eaefe22b57",
   "bytes": 51196,
-  "local_path": "data/archives/wp-Zea_mays.zip"
+  "local_path": "source_inputs/archives/wp-Zea_mays.zip",
+  "access_date": "2026-11-11"
 }

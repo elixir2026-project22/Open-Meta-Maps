@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Mycobacterium_tuberculosis.zip",
-  "sha256": "2ab13c394597e8272499ea8c31a1903faa18f95a0479546ab067cdcbec607018",
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Mycobacterium_tuberculosis.zip",
+  "sha256": "ddaadabffd22241a2402d46f86a3614600a236b380c2222b15001ada7af07cce",
   "bytes": 51081,
-  "local_path": "data/archives/wp-Mycobacterium_tuberculosis.zip"
+  "local_path": "source_inputs/archives/wp-Mycobacterium_tuberculosis.zip",
+  "access_date": "2026-11-11"
 }

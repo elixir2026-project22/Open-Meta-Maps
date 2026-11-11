@@ -1,0 +1,17 @@
+{
+  "from_version": "20261010",
+  "to_version": "20261110",
+  "gpml_files": 2215,
+  "semantic_modules": 1245,
+  "kept_modules": 4696,
+  "geometry_only_retained": 3451,
+  "failures": [],
+  "binding_status": {
+    "reaction_id_only": 1008,
+    "validated_visible_participants": 499,
+    "reference_direction_disagrees": 8,
+    "visual_direction_unresolved": 3,
+    "obsolete_reference_not_promoted": 3,
+    "unresolved": 1
+  }
+}

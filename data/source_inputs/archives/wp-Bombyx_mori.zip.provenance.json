@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Bombyx_mori.zip",
-  "sha256": "3c658e1094975141c383858dc8ec49daca56b33f6b016989575d807cee468b2c",
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Bombyx_mori.zip",
+  "sha256": "84237df3a47042701572709433be1a715c7224dc1d7b5aebb51eb7cbf42f5966",
   "bytes": 50883,
-  "local_path": "data/archives/wp-Bombyx_mori.zip"
+  "local_path": "source_inputs/archives/wp-Bombyx_mori.zip",
+  "access_date": "2026-11-11"
 }

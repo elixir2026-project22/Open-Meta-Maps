@@ -1,8 +1,9 @@
 {
   "source": "wikipathways",
-  "version": "20261010",
-  "url": "https://data.wikipathways.org/20261010/gpml/wikipathways-20261010-gpml-Caenorhabditis_elegans.zip",
-  "sha256": "f3bdf13720b633968fd28a6cb9c7d30b651cd1b418066049e062b9ddb1363894",
+  "version": "20261110",
+  "url": "https://data.wikipathways.org/20261110/gpml/wikipathways-20261110-gpml-Caenorhabditis_elegans.zip",
+  "sha256": "9577031bf346ae3e943678fb9d3573f2cddbb2037d5648f478ad8b34e6179109",
   "bytes": 297924,
-  "local_path": "data/archives/wp-Caenorhabditis_elegans.zip"
+  "local_path": "source_inputs/archives/wp-Caenorhabditis_elegans.zip",
+  "access_date": "2026-11-11"
 }
