@@ -59,6 +59,42 @@ Layout evaluation (development aid): `pip install -r layout_atlas/requirements-e
 - **Matching** — EC currentisation, Rhea metabolite scoring, name normalisation, weighted Jaccard, vicinity propagation; EC similarity extension optional and **off by default** (`--ec`). See [docs/reaction_map_matching.md](docs/reaction_map_matching.md).
 - **Layout Composer** — selects non-overlapping curated structures as a skeleton, places the rest, draws Bézier connections, reports layout quality. Curated reuse, topology-only references and EC suggestions are never merged into one reuse rate. See [docs/methodology.md](docs/methodology.md).
 
+## Layout after curated reuse
+
+Once matching has chosen Atlas structures, `tool_pipeline.draw_map` / `draw_global_map` run the stages below. Small models (≤150 reactions) take the full path; mid-size models (≤3 000) use a global plan (`global_layout.plan_global`) that starts with straight edges and then applies the same curated Bézier pass; larger models keep a skeleton and draw ~50-reaction views on demand.
+
+| Stage | What it does | Main code |
+|---|---|---|
+| **Rigid curated skeleton** | Scale each matched structure and pack blocks as rigid groups with shared metabolites as junctions (`drawing.pack_modules`, `geometry.module_scale`). Network bridges get anchors between blocks. | `drawing.py`, `geometry.py` |
+| **Complete uncovered reactions** | Place free nodes around fixed anchors (`drawing.complete`, `completion.complete_spaced`). Optional context sharing for currency-only reactions (`context.find` / `place`). Anchor uncovered reactions beside curated glyphs when possible (`completion_context.place`). | `completion.py`, `context.py`, `completion_context.py` |
+| **Metabolite instances** | Decide how many visual copies a non-currency metabolite gets to shorten long edges (`instances.optimize`). Currency/cofactors stay private `side:` glyphs per reaction (`drawing.display_scene`, `data/currency_metabolites.json`). | `instances.py`, `drawing.py` |
+| **Orientation** | Put free reactions between their core substrates and products; place currency copies on the substrate/product side (`orientation.apply`, default `full`). Curated reactions and `copy:` glyphs are not moved. | `orientation.py` |
+| **Composition & peripherals** | Pull related stray components toward the main network and shelf independents (`composition.compose`, `OPM_COMPOSE=on`). Attach exchange/simple transport modules to intracellular anchors (`peripheral.attach`). Optional relocation of exchange/transport *inside* large curated blocks (`block_relocation.relocate_sub`, `OPM_EXPERT_SUBMODULE=branch`). Whole-block relocation is off unless `OPM_BLOCK_RELOC=on`. | `composition.py`, `peripheral.py`, `block_relocation.py` |
+| **Spacing / relaxation** | Soft-preserve curated shape, shorten edges, and project minimum node spacing (`geometry.complete_scene` / `relax`; sparse path for large maps). | `geometry.py`, `global_layout.py` |
+| **Bézier connections** | Default `layout_style=curated`: fit algorithm-placed edges to cubic Béziers from reaction templates, scoring obstacles, crossings, curvature and detour (`edge_style.apply`). Optional `--source-paths` reuses original Escher curves on matched edges (`source_paths`). `--layout-style legacy` keeps orthogonal libavoid. | `edge_style.py`, `source_paths.py`, `routing.py` |
+| **Labels** | After curves exist, move labels among candidates to cut collisions (`label_placement.optimize`). | `label_placement.py` |
+| **Integrity** | Model hash, every reaction drawn, visual stoichiometry (`tool_pipeline.check_integrity`); protected shared glyphs must not split. | `tool_pipeline.py`, `completion_context.py` |
+
+**Quality evaluation** (development aid): compose writes `layout_quality.evaluate` into `layout_issues.json` / `report.json` (curve crossings by class, collisions, lengths, orientation share, structure continuity). `python3 project.py evaluate` adds Project 22 layout-benchmark metrics via `evaluation/score.py`. See [docs/layout_evaluation.md](docs/layout_evaluation.md).
+
+**Determinism:** fixed layout seed `20261105` (`core.SEEDS`), ELK/fCoSE seeds, and `PYTHONHASHSEED=0` on pipeline re-exec. There is no compose `--seed` flag yet; `--compare-map` on evaluate measures displacement only.
+
+### Project 22 layout rules (status)
+
+| Rule | Status | Notes |
+|---|---|---|
+| Avoid crossings | Partial | Minimised in `edge_style` / quality gate; GEMs still show many algo crossings |
+| Avoid overlaps | Partial | Spacing + label pass + gate; overlaps grow with map size |
+| Avoid long lines | Partial | Instances, composition, peripherals help; currency/biomass spokes remain |
+| Place participants consistently | Partial | `orientation` on by default; measured share still well below curated reference maps |
+| Respect compartments | Not yet | Compartment used in packing/shelves; cross-compartment species metric still high |
+| Aspect / compactness | Partial | Shelf aspect target; packing of independent components is still linear shelves |
+| Reproducibility | Partial | Fixed seeds; no compose seed CLI; evaluate `--compare-map` only |
+| Build on previous layout | Not yet | Displacement metric exists; not a compose objective |
+| Scale to GEMs | Partial | Global ≤3 000 + tiled views; large maps start routing-degraded |
+
+**Known gaps** (also [docs/limitations.md](docs/limitations.md), [docs/layout_evaluation.md](docs/layout_evaluation.md)): 2D component packing (in progress separately), harder orientation (incl. transporters), compartment-aware packing, more aggressive currency/biomass handling, crossing-aware composition acceptance, compose seed flag. Experimental off by default: `OPM_REGIONS`, `OPM_LOWCONF`, whole-block `OPM_BLOCK_RELOC`.
+
 ## Outputs
 
 | Output | Description |

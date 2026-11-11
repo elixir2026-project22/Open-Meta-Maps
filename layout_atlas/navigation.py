@@ -24,6 +24,7 @@ ZHX = {
     'The Atlas': 'Atlas',
     'Data sources and licensing': '数据来源与许可',
     'Matching and layout defaults': '匹配与布局默认',
+    'Layout after curated reuse': '复用人工绘制结构之后的布局',
     'Reproducibility': '可复现性',
     'Documentation': '文档',
     'Source': '来源',
@@ -351,6 +352,37 @@ def about():
         + '</li></ul>',
     )
 
+    s5b = sec(
+        'Layout after curated reuse',
+        '复用人工绘制结构之后的布局',
+        '<p>'
+        + b(
+            'After matching, the Composer keeps curated blocks rigid, completes uncovered reactions, orients free reactions, composes stray components, draws Bézier connections and places labels. Full stage table and Project 22 rule status: README (Layout after curated reuse).',
+            '匹配之后，Composer 将人工绘制的结构块保持为刚性、补全未覆盖反应、调整自由反应朝向、归拢游离组分、绘制 Bézier 连线并放置标签。分阶段说明与 Project 22 规则对照见 README（Layout after curated reuse）。',
+        )
+        + '</p><ul><li>'
+        + b(
+            'Rigid skeleton and completion: drawing.pack_modules, completion.complete_spaced, completion_context.place, instances.optimize (currency stays private side glyphs).',
+            '刚性骨架与补全：drawing.pack_modules、completion.complete_spaced、completion_context.place、instances.optimize（辅因子保持每反应私有的 side 图元）。',
+        )
+        + '</li><li>'
+        + b(
+            'Orientation, composition, peripherals: orientation.apply (default full); composition.compose and peripheral.attach on; whole-block relocation off unless OPM_BLOCK_RELOC=on.',
+            '朝向、排版与外围：orientation.apply（默认 full）；composition.compose 与 peripheral.attach 默认开；整块迁移仅在 OPM_BLOCK_RELOC=on 时启用。',
+        )
+        + '</li><li>'
+        + b(
+            'Bézier curated style (edge_style.apply), optional --source-paths; labels via label_placement.optimize; integrity via tool_pipeline.check_integrity.',
+            'Bézier 人工绘制风格（edge_style.apply），可选 --source-paths；标签由 label_placement.optimize；完整性由 tool_pipeline.check_integrity。',
+        )
+        + '</li><li>'
+        + b(
+            'Project 22 rules (crossings, overlaps, long edges, participant consistency, compartments, compactness, reproducibility, scale): mostly partial; compartment respect and build-on-previous-layout not yet product goals. Gaps: 2D component packing, harder orientation, compose --seed.',
+            'Project 22 规则（交叉、重叠、长边、参与物朝向、区室、紧凑性、可复现、规模）：多为部分满足；区室约束与“在既有布局上增量”尚未作为产品目标。缺口：二维组分打包、更强朝向约束、compose --seed。',
+        )
+        + '</li></ul>',
+    )
+
     s6 = sec(
         'Reproducibility',
         '可复现性',
@@ -404,7 +436,7 @@ def about():
     ui.write(
         d / 'index.html',
         ('About / Provenance', '关于 / 来源'),
-        s1 + s2 + s3 + s4 + s5 + s6 + s7,
+        s1 + s2 + s3 + s4 + s5 + s5b + s6 + s7,
         section='about',
         zh=ZHX,
         lead=b(

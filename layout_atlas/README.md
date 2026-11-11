@@ -37,7 +37,7 @@ Maps are drawn with Bézier connections by default (`layout_style=curated`). `--
 |---|---|---|
 | `OPM_COMPOSE`, `OPM_COMPOSE_LONG` | on | whole-map composition; relocation threshold normalised by reaction spacing |
 | `OPM_PERIPHERAL` | on | attach exchange + transport modules to the pathway they belong to |
-| `OPM_BLOCK_RELOC`, `OPM_RELOC_ACCEPT` | on, `balanced` | relocate curated blocks with a long connection; `strict` uses the strict quality gate |
+| `OPM_BLOCK_RELOC`, `OPM_RELOC_ACCEPT` | off, `balanced` | relocate curated blocks with a long connection (opt-in); `strict` uses the strict quality gate |
 | `OPM_EXPERT_SUBMODULE` | `branch` | move exchange + transport modules (including coupled transporters) that sit far from the rest of a large curated block next to it; the connections that cross the module boundary are re-drawn and recorded as `regenerated_expert_edges`. `on` = simple transports only, `off` = disabled |
 | `OPM_RELOC_CLEAR` | off | experimental local space-making for relocations |
 | `OPM_LOWCONF` | off | experimental: split topology-only structures whose reactions have unrelated neighbourhoods |
