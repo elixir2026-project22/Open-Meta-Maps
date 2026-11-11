@@ -367,16 +367,21 @@ def metric_details(path):
     from core import read
     data = read(path)
     content = data[1]
+    hidden = set((data[0].get('metadata') or {}).get('hidden_metabolite_labels') or [])
     nodes = {k: v for k, v in content['nodes'].items() if v['node_type'] != 'multimarker'}
     xy = {k: [v['x'], v['y']] for k, v in nodes.items()}
     boxes = {}
     for key, v in nodes.items():
         if v['node_type'] == 'metabolite':
+            if key in hidden or v.get('label_hidden'):
+                continue
             label = v['bigg_id']
             x = v['label_x']
             y = v['label_y']
         else:
             rx = next(r for r in content['reactions'].values() if any(s['from_node_id'] == key or s['to_node_id'] == key for s in r['segments'].values()))
+            if rx.get('label_hidden'):
+                continue
             label = rx['bigg_id']
             x = rx['label_x']
             y = rx['label_y']
