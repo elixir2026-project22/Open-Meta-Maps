@@ -7,6 +7,7 @@
 * POST /api/jobs             multipart/form-data: `model` (.xml SBML or .json COBRA/BiGG) + `options` (JSON string)
 * GET  /api/jobs/<id>        job state (see tool_pipeline.Job)
 * GET  /api/jobs/<id>/files/<name>   result files (skeleton.svg, map.svg, map.json, modules.json, report.json, licenses.json, views/<view>.svg ...)
+* POST /api/jobs/<id>/map            save interactive position edits into map.json (keeps map.original.json once; regenerates map.svg + layout quality)
 * POST /api/jobs/<id>/views/<view_id>  draw one view (queued behind running jobs)
 * DELETE /api/jobs/<id>      cancel a running job and delete its folder
 
@@ -282,6 +283,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return self.send_json(200, dict(ok=True))
         if path == '/api/jobs':
             return self.create_job()
+        m = re.match(r'^/api/jobs/([^/]+)/map$', path)
+        if m:
+            return self.save_map(m[1])
         m = re.match(r'^/api/jobs/([^/]+)/views/([^/]+)$', path)
         if m:
             jd = self.job_dir(m[1])
@@ -297,6 +301,42 @@ class Handler(http.server.BaseHTTPRequestHandler):
             tasks.put((jd, m[2]))
             return self.send_json(202, dict(id=m[1], view=m[2], status='queued'))
         return self.send_json(404, error('not_found', 'Unknown endpoint.', '没有这个接口。'))
+
+    def save_map(self, job_id):
+        jd = self.job_dir(job_id)
+        if jd is None:
+            return self.send_json(404, error('not_found', 'Unknown job.', '没有这个任务。'))
+        state = read_state(jd)
+        if not state or state.get('status') != 'done':
+            return self.send_json(409, error('not_ready', 'The job is not finished.', '任务未完成。'))
+        length = int(self.headers.get('Content-Length') or 0)
+        if length <= 0 or length > MAX_BYTES:
+            return self.send_json(413 if length > MAX_BYTES else 400,
+                                  error('too_large' if length > MAX_BYTES else 'bad_format',
+                                        'Edit payload missing or larger than 25 MB.',
+                                        '编辑内容缺失或超过 25 MB。'))
+        ctype = (self.headers.get('Content-Type') or '').split(';')[0].strip().lower()
+        if ctype not in ('application/json', 'text/json'):
+            return self.send_json(400, error('bad_format', 'Expected application/json.', '需要 application/json。'))
+        try:
+            edit = json.loads(self.rfile.read(length).decode())
+        except Exception:
+            return self.send_json(400, error('bad_format', 'The body is not valid JSON.', '请求体不是合法的 JSON。'))
+        try:
+            import map_edit
+            result = map_edit.save_map_edit(jd, edit, filename='map.json')
+        except Exception as e:
+            import jsonschema
+            if isinstance(e, jsonschema.ValidationError):
+                return self.send_json(400, error('bad_schema', 'Edit JSON failed schema validation: ' + e.message,
+                                                 '编辑 JSON 未通过模式校验：' + e.message))
+            if isinstance(e, (ValueError, FileNotFoundError, KeyError, TypeError)):
+                return self.send_json(400, error('bad_edit', str(e), str(e)))
+            return self.send_json(500, error('internal_error', 'Could not save the map edit.', '无法保存地图编辑。'))
+        state = read_state(jd) or state
+        return self.send_json(200, dict(id=job_id, status='saved', summary=state.get('summary'),
+                                        layout_quality=result.get('layout_quality'),
+                                        original_kept=result.get('original_kept', True)))
 
     def create_job(self):
         length = int(self.headers.get('Content-Length') or 0)
