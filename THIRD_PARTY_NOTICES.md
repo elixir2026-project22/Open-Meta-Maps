@@ -37,9 +37,7 @@ Open Meta Maps publishes **processed structures**: the module graphs, reaction i
 
 ## Not included in this repository
 
-- Yeast-maps (GPL-3.0) and the original Yeast-maps CellDesigner map are excluded.
-- MicroMap (NC-SA) is excluded; `layout_atlas/celldesigner.py` remains a generic CellDesigner importer.
-- PANTHER Pathway (CC BY 4.0): included from the data.pantherdb.org CD4.1 FTP tree — see [docs/panther_pilot.md](docs/panther_pilot.md).
+- Yeast-maps (GPL-3.0) and MicroMap (NC-SA) are excluded; `layout_atlas/celldesigner.py` remains a generic CellDesigner importer.
 - Optional **evaluation stand-in models** (iCH360 MIT, BioModels iPS189 CC0, Reactome SBML CC0, metabolismregulation gallery F001 CC BY 4.0) are not committed; see `examples/eval_models/manifest.json` and `fetch_eval_models.py`.
 
 ## Related work

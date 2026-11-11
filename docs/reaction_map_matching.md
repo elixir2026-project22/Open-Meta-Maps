@@ -19,8 +19,8 @@ Hand check (e_coli_core): PGI, PFK, GAPD, CS, ENO, FBA, ICDHyr land on the expec
 
 | Model | Default (EC off) | + EC (`--ec`) | BRENDA structures selected | Generated reactions |
 |---|---|---|---:|---:|
-| e_coli_core | 11 structures; expert_derived 66; generated 25 | unchanged (0 BRENDA / 0 ec_topology) | 0 | 25 |
-| iIT341 | 86 structures; curated/expert_derived 129; generated 274; 1 BRENDA | 98 structures (stages 86+12); expert 130; functional 23; generated 257; 12 BRENDA | 12 | 257 (−17) |
+| e_coli_core | 11 structures; curated (`expert_derived`) 66; generated 25 | unchanged (0 BRENDA / 0 ec_topology) | 0 | 25 |
+| iIT341 | 86 structures; curated (`expert_derived`) 129; generated 274; 1 BRENDA | 98 structures (stages 86+12); curated 130; functional 23; generated 257; 12 BRENDA | 12 | 257 (−17) |
 
 Curated-module reaction coverage: iIT341 264 → 288. No regression on e_coli_core. Importer label→identity stays in `identity_labels`; matching keys/scoring stay in `identifier_bridge` (no duplicated label index).
 

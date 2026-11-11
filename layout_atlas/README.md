@@ -66,6 +66,7 @@ python3 test_reaction_map_matching.py
 python3 map_matching_eval.py          # BRENDA / Atlas match rates for e_coli_core, iIT341
 python3 test_evaluation.py
 python3 test_layout_quality.py
+python3 test_tool_lifetime.py         # tool-server bye/GRACE/STALE auto-exit
 ```
 
 
