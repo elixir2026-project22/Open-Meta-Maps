@@ -283,6 +283,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return self.send_json(200, dict(ok=True))
         if path == '/api/jobs':
             return self.create_job()
+        m = re.match(r'^/api/jobs/([^/]+)/map/reset$', path)
+        if m:
+            return self.reset_map(m[1])
         m = re.match(r'^/api/jobs/([^/]+)/map$', path)
         if m:
             return self.save_map(m[1])
@@ -334,6 +337,30 @@ class Handler(http.server.BaseHTTPRequestHandler):
         return self.send_json(200, dict(id=job_id, status='saved', summary=state.get('summary'),
                                         layout_quality=result.get('layout_quality'),
                                         original_kept=result.get('original_kept', True)))
+
+    def reset_map(self, job_id):
+        jd = self.job_dir(job_id)
+        if jd is None:
+            return self.send_json(404, error('not_found', 'Unknown job.'))
+        state = read_state(jd)
+        if not state or state.get('status') != 'done':
+            return self.send_json(409, error('not_ready', 'The job is not finished.'))
+        length = int(self.headers.get('Content-Length') or 0)
+        if length > 0:
+            self.rfile.read(min(length, MAX_BYTES))
+        try:
+            import map_edit
+            result = map_edit.reset_map(jd, filename='map.json')
+        except FileNotFoundError:
+            return self.send_json(404, error('no_original', 'No original map backup to restore.'))
+        except Exception as e:
+            if isinstance(e, (ValueError, KeyError, TypeError)):
+                return self.send_json(400, error('bad_edit', str(e)))
+            return self.send_json(500, error('internal_error', 'Could not reset the map.'))
+        state = read_state(jd) or state
+        return self.send_json(200, dict(id=job_id, status='reset', summary=state.get('summary'),
+                                        layout_quality=result.get('layout_quality'),
+                                        original_kept=True))
 
     def create_job(self):
         length = int(self.headers.get('Content-Length') or 0)

@@ -136,6 +136,24 @@ class TestMapEditSave(unittest.TestCase):
         with self.assertRaises(ValueError):
             map_edit.save_map_edit(self.tmp, {'nodes': {'2': {'x': 1, 'y': 2}}}, filename='evil.json')
 
+    def test_reset_restores_original_and_svg(self):
+        map_edit.save_map_edit(self.tmp, {'nodes': {'2': {'x': 260.0, 'y': 120.0, 'label_x': 270.0, 'label_y': 110.0}}})
+        self.assertEqual(json.loads((self.tmp / 'map.json').read_text())[1]['nodes']['2']['x'], 260.0)
+        r = map_edit.reset_map(self.tmp)
+        self.assertTrue(r['ok'])
+        restored = json.loads((self.tmp / 'map.json').read_text())
+        self.assertEqual(restored[1]['nodes']['2']['x'], 200.0)
+        self.assertEqual(restored[1]['nodes']['2']['label_x'], 210.0)
+        svg = (self.tmp / 'map.svg').read_text()
+        self.assertIn('cx="200.0"', svg)
+        # original backup stays
+        self.assertTrue((self.tmp / 'map.original.json').is_file())
+        self.assertEqual(json.loads((self.tmp / 'map.original.json').read_text())[1]['nodes']['2']['x'], 200.0)
+
+    def test_reset_without_original_raises(self):
+        with self.assertRaises(FileNotFoundError):
+            map_edit.reset_map(self.tmp)
+
     def test_endpoint_helpers_match_server_guards(self):
         # mirror the server's job-id / safe-filename checks used before save_map_edit
         import re
