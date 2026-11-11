@@ -1,8 +1,9 @@
-"""Evaluate model-reaction → Atlas / BRENDA node matching for the three example models.
+"""Evaluate model-reaction → Atlas / BRENDA node matching for development models.
 
   python3 layout_atlas/map_matching_eval.py [--no-vicinity] [--json OUT]
 
-Reports match rates for e_coli_core, iIT341 and iMM904 (iML1515 skipped).  Open-data path only.
+Reports match rates for e_coli_core and iIT341 (iMM904 / iML1515 skipped during development).
+Open-data path only.
 """
 import argparse
 import json
@@ -16,7 +17,7 @@ import ec_channel as ec
 import identifier_bridge as ib
 
 
-MODELS = ['e_coli_core', 'iIT341', 'iMM904']
+MODELS = ['e_coli_core', 'iIT341']
 
 
 def atlas_ec_coverage(model):

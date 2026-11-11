@@ -1,8 +1,9 @@
-"""EC-off vs EC-on compose comparison for the three example models (iML1515 skipped).
+"""EC-off vs EC-on compose comparison for development models.
 
   python3 layout_atlas/ec_extension_eval.py --run     # compose both settings
   python3 layout_atlas/ec_extension_eval.py --summarize DIR
 
+Development regression uses e_coli_core and iIT341 only (iMM904 / iML1515 skipped).
 Does not change the default; writes a JSON summary for the recommendation note.
 """
 import argparse
@@ -15,7 +16,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from core import *
 
-MODELS = ['e_coli_core', 'iIT341', 'iMM904']
+MODELS = ['e_coli_core', 'iIT341']
 
 
 def _lq(report):
@@ -46,14 +47,20 @@ def _evidence(report):
 def summarize_job(folder):
     folder = Path(folder)
     report = read(folder / 'report.json')
-    prov = read(folder / 'reaction_provenance.json') if (folder / 'reaction_provenance.json').exists() else {}
+    raw_prov = read(folder / 'reaction_provenance.json') if (folder / 'reaction_provenance.json').exists() else {}
+    if isinstance(raw_prov, list):
+        prov_items = [(r.get('reaction') or r.get('id'), r) for r in raw_prov if isinstance(r, dict)]
+    elif isinstance(raw_prov, dict):
+        prov_items = list(raw_prov.items())
+    else:
+        prov_items = []
     # selected structures by match_level / source
     mods = read(folder / 'modules.json') if (folder / 'modules.json').exists() else []
     levels = Counter(m.get('match_level') for m in mods)
     sources = Counter(m.get('source') for m in mods)
     # ec_topology reaction sample
     ec_rxns = []
-    for rid, rec in (prov.items() if isinstance(prov, dict) else []):
+    for rid, rec in prov_items:
         if not isinstance(rec, dict):
             continue
         iden = rec.get('identity_evidence') or {}
