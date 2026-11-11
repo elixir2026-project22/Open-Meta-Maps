@@ -1,7 +1,7 @@
 """Evaluate the EC channel: reactions it adds beyond complete-equation matching, and how often it agrees with it.
 
 Retrieval-level only (no routing/learning): candidates are generated from the fixed libraries and counted.
-  python3 ec_experiment.py [model ...]
+  python3 experiments/ec_experiment.py [model ...]
 """
 
 import sys as _sys

@@ -1,4 +1,4 @@
-"""Runtime access to `data/identifier_bridge.json` (built by `build_identifier_bridge.py`): BiGG metabolite -> ChEBI and BiGG reaction -> EC number."""
+"""Runtime access to `data/identifier_bridge.json` (built by `tools/build_identifier_bridge.py`): BiGG metabolite -> ChEBI and BiGG reaction -> EC number."""
 import json
 import re
 from collections import defaultdict

@@ -6,7 +6,7 @@ The tool needs two identifier tables that the matching step uses:
 Both are stored WITH their origin: for every ChEBI id or EC number the list of models it was found in, so conflicting or multiple annotations are kept side by side
 (nothing is merged into a single value).  The JSON also records each model's file name, SHA-256, identifier and size, and the licence terms of the sources.
 
-  python3 layout_atlas/build_identifier_bridge.py --models-dir DIR [--human-gem FILE]
+  python3 tools/build_identifier_bridge.py --models-dir DIR [--human-gem FILE]
 
 DIR must contain e_coli_core.xml, iML1515.xml and iMM904.xml (the BiGG SBML files in `examples/`); Human-GEM.xml is taken from --human-gem or from DIR.
 """
