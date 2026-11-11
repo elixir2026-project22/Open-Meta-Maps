@@ -1,0 +1,233 @@
+"""Apply interactive map edits to a finished tool job (positions only).
+
+Keeps the first original once as map.original.json, writes edited map.json,
+regenerates map.svg with line_render, and refreshes layout_quality in report.json.
+"""
+from __future__ import annotations
+
+import copy
+import json
+import os
+from pathlib import Path
+
+import jsonschema
+
+# Patch body accepted by POST /api/jobs/<id>/map — only geometry fields.
+EDIT_SCHEMA = {
+    'type': 'object',
+    'additionalProperties': False,
+    'properties': {
+        'nodes': {
+            'type': 'object',
+            'additionalProperties': {
+                'type': 'object',
+                'additionalProperties': False,
+                'properties': {
+                    'x': {'type': 'number'},
+                    'y': {'type': 'number'},
+                    'label_x': {'type': 'number'},
+                    'label_y': {'type': 'number'},
+                },
+                'minProperties': 1,
+            },
+        },
+        'reactions': {
+            'type': 'object',
+            'additionalProperties': {
+                'type': 'object',
+                'additionalProperties': False,
+                'properties': {
+                    'label_x': {'type': 'number'},
+                    'label_y': {'type': 'number'},
+                    'segments': {
+                        'type': 'object',
+                        'additionalProperties': {
+                            'type': 'object',
+                            'additionalProperties': False,
+                            'properties': {
+                                'b1': {
+                                    'anyOf': [
+                                        {'type': 'null'},
+                                        {
+                                            'type': 'object',
+                                            'additionalProperties': False,
+                                            'required': ['x', 'y'],
+                                            'properties': {
+                                                'x': {'type': 'number'},
+                                                'y': {'type': 'number'},
+                                            },
+                                        },
+                                    ],
+                                },
+                                'b2': {
+                                    'anyOf': [
+                                        {'type': 'null'},
+                                        {
+                                            'type': 'object',
+                                            'additionalProperties': False,
+                                            'required': ['x', 'y'],
+                                            'properties': {
+                                                'x': {'type': 'number'},
+                                                'y': {'type': 'number'},
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                            'minProperties': 1,
+                        },
+                    },
+                },
+                'minProperties': 1,
+            },
+        },
+    },
+    'minProperties': 1,
+}
+
+
+def validate_edit(edit):
+    """Raise jsonschema.ValidationError when the edit patch is not valid."""
+    if not isinstance(edit, dict):
+        raise jsonschema.ValidationError('edit must be an object')
+    jsonschema.validate(edit, EDIT_SCHEMA)
+
+
+def apply_edit(data, edit):
+    """Return a deep-copied Escher map with geometry from `edit` applied."""
+    validate_edit(edit)
+    out = copy.deepcopy(data)
+    body = out[1]
+    nodes, reactions = body['nodes'], body['reactions']
+    for nid, patch in (edit.get('nodes') or {}).items():
+        if nid not in nodes:
+            raise ValueError('unknown node id: %s' % nid)
+        node = nodes[nid]
+        for key in ('x', 'y', 'label_x', 'label_y'):
+            if key in patch:
+                if key.startswith('label_') and node.get('node_type') != 'metabolite' and key not in node:
+                    # mid/multimarkers have no metabolite labels; ignore silently only if absent
+                    if key not in node:
+                        raise ValueError('node %s has no %s' % (nid, key))
+                node[key] = float(patch[key])
+    for rk, patch in (edit.get('reactions') or {}).items():
+        if rk not in reactions:
+            raise ValueError('unknown reaction id: %s' % rk)
+        rx = reactions[rk]
+        for key in ('label_x', 'label_y'):
+            if key in patch:
+                rx[key] = float(patch[key])
+        for sid, seg_patch in (patch.get('segments') or {}).items():
+            if sid not in rx.get('segments', {}):
+                raise ValueError('unknown segment %s on reaction %s' % (sid, rk))
+            seg = rx['segments'][sid]
+            for bk in ('b1', 'b2'):
+                if bk not in seg_patch:
+                    continue
+                val = seg_patch[bk]
+                if val is None:
+                    seg[bk] = None
+                else:
+                    seg[bk] = {'x': float(val['x']), 'y': float(val['y'])}
+    return out
+
+
+def _prov_kinds_legend(folder: Path):
+    kinds, legend = {}, []
+    prov_path = folder / 'reaction_provenance.json'
+    if prov_path.is_file():
+        rows = json.loads(prov_path.read_text())
+        kinds = {r['reaction']: r['provenance'] for r in rows if 'reaction' in r and 'provenance' in r}
+        from collections import Counter
+        import ec_provenance as epv
+        counts = Counter(kinds.values())
+        legend = [(k, counts.get(k, 0)) for k in epv.KINDS]
+    return kinds, legend
+
+
+def _refresh_quality(folder: Path, data):
+    """Recompute layout_quality.final_geometry and write it into report.json / job summary."""
+    import layout_quality
+    import orientation as orientation_module
+
+    structures = (data[0].get('metadata') or {}).get('expert_structures')
+    skip = (data[0].get('metadata') or {}).get('preserved_edges')
+    summary, _issues = layout_quality.evaluate(data, skip_edges=skip, structures=structures)
+    report_path = folder / 'report.json'
+    layout_quality_report = None
+    if report_path.is_file():
+        report = json.loads(report_path.read_text())
+        lq = report.setdefault('layout_quality', {})
+        lq['final_geometry'] = summary
+        # orientation summary uses the map; keep mode if present
+        mode = lq.get('orientation_mode')
+        if mode and mode != 'off':
+            kinds, _ = _prov_kinds_legend(folder)
+            try:
+                lq['orientation'] = orientation_module.summary(data, kinds)
+            except Exception:
+                pass
+        report_path.write_text(json.dumps(report, ensure_ascii=False, indent=1))
+        layout_quality_report = report.get('layout_quality')
+    job_path = folder / 'job.json'
+    if job_path.is_file() and layout_quality_report is not None:
+        state = json.loads(job_path.read_text())
+        if isinstance(state.get('summary'), dict):
+            state['summary']['layout_quality'] = layout_quality_report
+            tmp = folder / 'job.tmp'
+            tmp.write_text(json.dumps(state, ensure_ascii=False, indent=1))
+            os.replace(tmp, job_path)
+    return summary
+
+
+def _update_file_bytes(folder: Path, name: str):
+    job_path = folder / 'job.json'
+    if not job_path.is_file():
+        return
+    state = json.loads(job_path.read_text())
+    path = folder / name
+    if not path.is_file():
+        return
+    size = path.stat().st_size
+    for f in state.get('files') or []:
+        if f.get('name') == name:
+            f['bytes'] = size
+    tmp = folder / 'job.tmp'
+    tmp.write_text(json.dumps(state, ensure_ascii=False, indent=1))
+    os.replace(tmp, job_path)
+
+
+def save_map_edit(folder: Path, edit, *, filename='map.json'):
+    """Validate and persist an edit into the job folder.
+
+    Returns dict(ok=True, layout_quality=..., original_kept=bool).
+    Raises ValueError / jsonschema.ValidationError on bad input.
+    """
+    if filename != 'map.json':
+        raise ValueError('only map.json can be edited')
+    map_path = folder / filename
+    if not map_path.is_file():
+        raise FileNotFoundError('map.json missing')
+    data = json.loads(map_path.read_text())
+    if not (isinstance(data, list) and len(data) == 2 and isinstance(data[1], dict)):
+        raise ValueError('map.json is not a valid Escher map array')
+    edited = apply_edit(data, edit)
+    original = folder / 'map.original.json'
+    kept = original.is_file()
+    if not kept:
+        # first edit: freeze the pre-edit map once
+        original.write_text(json.dumps(data, ensure_ascii=False))
+        kept = True
+        first_backup = True
+    else:
+        first_backup = False
+    tmp = folder / 'map.json.tmp'
+    tmp.write_text(json.dumps(edited, ensure_ascii=False))
+    os.replace(tmp, map_path)
+    kinds, legend = _prov_kinds_legend(folder)
+    import line_render
+    line_render.render_file(map_path, folder / 'map.svg', kinds, legend or None)
+    quality = _refresh_quality(folder, edited)
+    for name in ('map.json', 'map.svg', 'report.json'):
+        _update_file_bytes(folder, name)
+    return dict(ok=True, layout_quality=quality, original_kept=True, first_backup=first_backup)
