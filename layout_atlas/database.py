@@ -1,5 +1,6 @@
 """Dual indexes: biochemical observations and core-shape templates with provenance."""
 import functools
+import gzip
 import zlib,itertools,xml.etree.ElementTree as ET
 from core import *
 from semantics import rhea_index,parse_gpml
@@ -16,13 +17,18 @@ def connect():
  CREATE TABLE IF NOT EXISTS reviews(module_id TEXT,reviewer TEXT,status TEXT,payload BLOB,PRIMARY KEY(module_id,reviewer));''');return db
 
 @functools.lru_cache(maxsize=1)
-def _modules_cached():
- """Cached inner call (immutable result during one process)."""
+def _core_modules_cached():
+ """Cached open-core modules (immutable during one process)."""
  db=connect();out=tuple(unpack(r[0]) for r in db.execute('SELECT payload FROM modules ORDER BY id'));db.close();return out
 
-def modules():
- """Return all modules from the database (cached in memory after first call)."""
- return list(_modules_cached())
+def modules(include_brenda=True):
+ """Open-core modules from atlas.sqlite, plus BRENDA pathway modules when the default extension is present."""
+ out=list(_core_modules_cached())
+ if include_brenda:
+  path=DATA/'extensions/brenda/modules.json.gz'
+  if path.exists():
+   with gzip.open(path,'rt') as f: out.extend(json.load(f))
+ return out
 
 def graph(m):
  g=nx.Graph()

@@ -6,6 +6,7 @@ Open Meta Maps publishes **processed structures**: the module graphs, reaction i
 
 | Source | What is used | Where it comes from | Licence as recorded |
 |---|---|---|---|
+| **BRENDA pathway maps** | pathway modules in `data/extensions/brenda/` | <https://www.brenda.dsmz.de/>; Chang et al. NAR 2026 doi:10.1093/nar/gkaf1113 | CC BY 4.0; layout possibly automatic |
 | **Escher maps** (RECON1, e_coli_core, iAF1260, iJO1366, iMM904; 22 maps) | module structures and layouts extracted from the maps; the original map files are kept as input in `data/source_inputs/raw/escher/` | <https://github.com/escher/community-maps> (commit `6aa92abded6d0f9c4502ff681e14e40c5c00d61f`) | recorded as CC0-1.0; **to be confirmed** with the map authors (no licence text found in the map files) |
 | **WikiPathways** | GPML pathway maps and structures extracted from them | <https://www.wikipathways.org>; terms snapshot `data/source_inputs/terms/wikipathways.html` (accessed 2026-11-05) | CC0 |
 | **Reactome** (release 97) | pathway diagram and graph data, structures extracted from them | <https://reactome.org>; terms snapshot `data/source_inputs/terms/reactome.html` (accessed 2026-11-05) | CC0 for data; pathway illustrations are CC BY 4.0 and are not used |

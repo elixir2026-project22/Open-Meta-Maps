@@ -10,9 +10,9 @@ ZH={"EC extended mode (functional layout suggestions, off by default)": "EC 扩�
 'Mock mode: no server is used; a canned job is replayed.':'模拟模式：不使用服务器，回放一个预置任务。',
 '1 · Model file':'1 · 模型文件','Drop a .xml or .json file here, or click to choose':'把 .xml 或 .json 文件拖到这里，或点击选择','No file chosen':'尚未选择文件','Remove':'移除',
 'Only .xml (SBML) and .json (BiGG/COBRA) files are accepted.':'只接受 .xml（SBML）和 .json（BiGG/COBRA）文件。','The file is larger than 25 MB.':'文件超过 25 MB。',
-'2 · Libraries':'2 · 模板库','Core (CC0 / CC BY)':'核心库（CC0 / CC BY）','EC channel':'EC 通道','BRENDA (layout origin unverified)':'BRENDA（布局来源未核实）',
+'2 · Libraries':'2 · 模板库','Core (CC0 / CC BY)':'核心库（CC0 / CC BY）','EC channel':'EC 通道',
 
-'BRENDA-derived layouts have an unverified layout origin; do not redistribute results that use them.':'来自 BRENDA 的布局，其布局来源未经核实；使用它们得到的结果请勿再分发。',
+
 '3 · Run':'3 · 运行','Run':'运行','Cancel':'取消','Remove job':'删除任务','Progress':'进度','Status:':'状态：','Log':'日志','Job':'任务','Status':'状态','queued':'排队中','running':'运行中','done':'已完成','failed':'失败','cancelled':'已取消','pending':'等待','Seconds':'秒',
 'Results':'结果','Overview':'概览','Skeleton':'骨架','Map':'地图','Modules':'模块','Downloads':'下载',
 'Reactions covered by expert structures':'专家结构覆盖的反应','Complete equation':'方程完整','EC topology':'EC 拓扑','Geometry only':'仅几何','Bridge reactions':'桥接反应','Algorithm-completed':'算法补全','Total reactions':'反应总数',
@@ -41,8 +41,8 @@ var dz=$('dz');dz.onclick=function(){$('fin').click()};$('fin').onchange=functio
 ['dragleave','drop'].forEach(function(ev){dz.addEventListener(ev,function(e){e.preventDefault();dz.classList.remove('on')})});
 dz.addEventListener('drop',function(e){var f=e.dataTransfer.files[0];if(f)setFile(f)});
 /* ---- options ---- */
-function opts(){return {libraries:{core:true,ec:$('o_ec').checked,brenda:$('o_br').checked},views:'on_demand'}}
-function notes(){var h='';if($('o_ec').checked)h+='<p class="note">'+tr('EC extended mode adds functional layout suggestions: reactions that share an EC number but whose equations are not verified. These are suggestions, not claimed equivalences.')+'</p>';if($('o_br').checked)h+='<p class="note">'+tr('BRENDA-derived layouts have an unverified layout origin; do not redistribute results that use them.')+'</p>';$('lnote').innerHTML=h}
+function opts(){return {libraries:{core:true,ec:$('o_ec').checked},views:'on_demand'}}
+function notes(){var h='';if($('o_ec').checked)h+='<p class="note">'+tr('EC extended mode adds functional layout suggestions: reactions that share an EC number but whose equations are not verified. These are suggestions, not claimed equivalences.')+'</p>';$('lnote').innerHTML=h}
 $('o_br').onchange=function(){if($('o_br').checked)$('o_ec').checked=true;notes()};$('o_mm').onchange=notes;$('o_ec').onchange=function(){if(!$('o_ec').checked&&$('o_br').checked)$('o_br').checked=false;notes()};
 /* ---- run ---- */
 function hint(){showErr(FILE?'Start the tool server first: python3 project.py tool — then open http://127.0.0.1:8765/tool/index.html. This page cannot run a job when opened as a local file.':'Cannot reach the tool server. Start it with: python3 project.py tool')}
@@ -143,7 +143,7 @@ BODY='''<div class="note" id="mockbar" style="display:none">Mock mode: no server
 <section class="panel"><h2>2 · Libraries</h2><div class="opts">
 <label><input type="checkbox" id="o_core" checked disabled> <span>Core (CC0 / CC BY)</span></label>
 <label><input type="checkbox" id="o_ec"> <span>EC extended mode (functional layout suggestions, off by default)</span></label>
-<label><input type="checkbox" id="o_br"> <span>BRENDA (layout origin unverified)</span></label></div><div id="lnote"></div></section>
+</div><div id="lnote"></div></section>
 <section class="panel"><h2>3 · Run</h2><div class="vbar2"><button type="button" id="run" class="primary">Run</button><button type="button" id="cancel" disabled>Cancel</button></div>
 <div id="prog" style="display:none"><p class="meta">Status: <b id="jstat"></b></p><div class="bar big"><i id="pbar" style="width:0;background:var(--accent)"></i></div><ol class="steps" id="steps"></ol><h3>Log</h3><pre id="slog" class="slog"></pre><div id="integ"></div></div></section>
 <section class="panel" id="res" style="display:none"><h2>Results</h2><div id="tabs" class="tabs" role="tablist"><button type="button" data-t="overview" aria-selected="true">Overview</button><button type="button" data-t="skeleton">Skeleton</button><button type="button" data-t="map">Map</button><button type="button" data-t="reactions">Reactions</button><button type="button" data-t="modules">Modules</button><button type="button" data-t="downloads">Downloads</button></div><div id="pane"></div></section>'''

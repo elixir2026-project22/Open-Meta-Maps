@@ -8,6 +8,14 @@ from semantics import rhea_index
 def duplicate_signature(m):
  return uid([m['geometry_fingerprint'],sorted([sorted((chem(k),float(v)) for k,v in r.get('coefficients',{}).items()) for r in m['reactions']])])
 
+def layout_priority(m):
+ """Expert Escher/WikiPathways/Reactome first; possibly-automatic layouts (e.g. BRENDA) rank lower when equivalent."""
+ lo=m.get('layout_origin') or {}
+ status=lo.get('status') if isinstance(lo,dict) else None
+ if status in ('possibly_automatic','unverified','automatic'): return -0.75
+ if m.get('source')=='brenda': return -0.75
+ return 0.0
+
 FEATURES=['size','biochemical_level','port_mismatch','port_direction_cost','aspect','compactness','axis_fraction','source_support','initial_fit','external_degree_x_aspect','port_fraction_x_spread']
 
 @lru_cache(maxsize=1)
@@ -191,7 +199,7 @@ class Library:
       if e.get('flow') in ('substrate','product') and tg.edges[a,b].get('role'):
        flow_cost+=e['flow']!=tg.edges[a,b]['role'];count+=1
      spread=float(np.std(xy[:,0])+np.std(xy[:,1]));features=[len(rs),biol,abs(ports-srcports),flow_cost/max(1,count),float(extent[0]/max(extent[1],.05)),len(tg)/area,float(axis),len(self.support[m['core_family']]),initial,sum(targetports.values())*float(extent[0]/max(extent[1],.05)),ports/max(len(tg),1)*spread]
-     p=dict(id=uid([m['id'],rs,sorted(mp.items())]),template_id=m['id'],map_id=m['map_id'],lineage=m['lineage'],source=m['source'],species=m['species'],geometry_fingerprint=m['geometry_fingerprint'],reaction_ids=[r[2:] for r in rs],node_mapping=mp,reaction_mapping=rmap,positions={k:np.array(v).tolist() for k,v in positions.items()},position_origins={mp[k]:source[k]['position_origin'] for k in mp},match_level=['geometry','partial_reference','complete_equation','reaction_reference'][biol],complete_chemical_equation_verified=biol>=2 and bool(mapping_checks) and all(x['complete_equation'] for x in mapping_checks),complete_equation_verified=biol>=2 and bool(mapping_checks) and all(x['complete_equation'] and x['compartments_verified'] for x in mapping_checks),mapping_evidence=mapping_checks,features=features,ports=targetports,score=2*len(rs)+.6*biol-.1*features[2]-.2*features[3]-.2*initial,expert_query_coordinates_used=False,template_quality=m['quality'],match_mode='core_subgraph' if partial_mode else 'exact_core',unmapped_target_nodes=sorted(set(tg)-set(mp.values())))
+     p=dict(id=uid([m['id'],rs,sorted(mp.items())]),template_id=m['id'],map_id=m['map_id'],lineage=m['lineage'],source=m['source'],species=m['species'],layout_origin=m.get('layout_origin'),license=m.get('license'),source_citation=m.get('source_citation'),geometry_fingerprint=m['geometry_fingerprint'],reaction_ids=[r[2:] for r in rs],node_mapping=mp,reaction_mapping=rmap,positions={k:np.array(v).tolist() for k,v in positions.items()},position_origins={mp[k]:source[k]['position_origin'] for k in mp},match_level=['geometry','partial_reference','complete_equation','reaction_reference'][biol],complete_chemical_equation_verified=biol>=2 and bool(mapping_checks) and all(x['complete_equation'] for x in mapping_checks),complete_equation_verified=biol>=2 and bool(mapping_checks) and all(x['complete_equation'] and x['compartments_verified'] for x in mapping_checks),mapping_evidence=mapping_checks,features=features,ports=targetports,score=2*len(rs)+.6*biol-.1*features[2]-.2*features[3]-.2*initial+layout_priority(m),expert_query_coordinates_used=False,template_quality=m['quality'],match_mode='core_subgraph' if partial_mode else 'exact_core',unmapped_target_nodes=sorted(set(tg)-set(mp.values())))
      pool.append(p)
    # Distinct geometry, not just distinct source identifiers; bounded to 24 candidates/query.
    distinct={}
@@ -203,7 +211,7 @@ class Library:
 
 def select(proposals,ranker=None):
  for p in proposals:
-  utility=float(ranker(p['features'])) if ranker else p['score']-2*len(p['reaction_ids']);p['selection_score']=2*len(p['reaction_ids'])+utility
+  utility=float(ranker(p['features'])) if ranker else p['score']-2*len(p['reaction_ids']);p['selection_score']=2*len(p['reaction_ids'])+utility+layout_priority({'source':p.get('source'),'layout_origin':p.get('layout_origin')})
  chosen=[];used=set()
  for p in sorted(proposals,key=lambda p:(-p['selection_score'],p['id'])):
   if set(p['reaction_ids'])&used:continue

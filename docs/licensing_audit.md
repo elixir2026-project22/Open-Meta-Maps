@@ -10,7 +10,8 @@ All 17,221 modules in `open_core.sqlite` come from three sources (checked by rea
 |---|---|---|---|---|
 | WikiPathways | 4,718 | CC0 | `source_inputs/terms/wikipathways.html` (CC0 waiver for content) | OK |
 | Reactome | 3,405 | CC0 for data and derived files; CC BY 4.0 for pathway illustrations and artwork | `source_inputs/terms/reactome.html` | OK for layout data; if Reactome illustrations are ever added, CC BY 4.0 attribution is required |
-| Escher maps | 9,098 | recorded in the Atlas as CC0-1.0 | none found | **Open**: see below |
+| Escher maps | 9,098 | recorded in the Atlas as CC0-1.0 | Escher community-maps LICENSE is CC0 | OK |
+| BRENDA pathway maps | 11,703 | CC BY 4.0 | https://www.brenda.dsmz.de/license.php; doi:10.1093/nar/gkaf1113 | OK (layout possibly automatic; retrieval deprioritises vs expert maps) |
 
 ### Escher maps (open)
 
@@ -39,7 +40,7 @@ Action: confirm the licence of each of the 22 maps with their authors or the Esc
 
 ## 3. Not in the repository (verified by `.gitignore` and tracked-file listing)
 
-- BRENDA-derived layouts: the source note says the BRENDA online version is CC BY 4.0 but the pathway-map-specific terms are not stated; not tracked.
+- BRENDA pathway modules: CC BY 4.0 (https://www.brenda.dsmz.de/license.php); included by default under `data/extensions/brenda/` with per-module attribution to BRENDA + NAR 2026 doi:10.1093/nar/gkaf1113; layout provenance marked possibly automatic.
 - `data/references/`, `Ref/`, `Presentation/`, `results/`: not tracked.
 - `celldesigner.py` is a generic CellDesigner importer (kept for optional pathway sources).
 

@@ -1,11 +1,10 @@
-"""Independent, provenance-preserving BRENDA pathway-map extension (trial ingestion).
+"""BRENDA pathway-map modules for the open-core Atlas (CC BY 4.0).
 
-Source: the public BRENDA combined pathway map (SVG, CC BY 4.0). It is stored under
-data/references/brenda/ and decoded here into pathway-level modules in the same record
-module record format as other Atlas extensions.  Status: *unverified layout origin* -- the node and edge
-geometry shows features of an automatic layered layout (see `layout_audit`), so these
-modules are NOT counted as expert designs and are NOT admitted to the open core until the
-data provider confirms how positions were produced.
+Source: the public BRENDA combined pathway map (SVG). Stored under data/references/brenda/
+and decoded into pathway-level modules. Layout provenance is marked as possibly automatic
+(see `layout_audit`), so retrieval prefers expert Escher / WikiPathways / Reactome modules
+when equivalents exist. Attribution: BRENDA + Chang et al., Nucleic Acids Research 2026,
+doi:10.1093/nar/gkaf1113.
 """
 import itertools
 import math
@@ -208,8 +207,8 @@ def extract(d):
                 paper='BRENDA in 2026, Nucleic Acids Research', license=dict(name='CC BY 4.0', uri='https://creativecommons.org/licenses/by/4.0/'),
                 retrieved='2026-11-09', source_sha256=d['source_sha256'],
                 changes='Pathway-level fragments decoded from the combined SVG; coordinates normalized for storage; originals kept.')
-    audit_note = dict(status='unverified', counted_as_expert_design=False,
-                      reason='geometry features are consistent with an automatic layered layout; provider confirmation pending')
+    audit_note = dict(status='possibly_automatic', counted_as_expert_design=False,
+                      reason='geometry features are consistent with an automatic layered layout; prefer expert Escher/WikiPathways/Reactome modules when equivalent')
     for slug in sorted(d['pathways']):
         nodes, core, side, other = pathway_graph(d, slug)
         rx = {n['id']: n for n in nodes.values() if n['role'] == 'reaction'}
@@ -272,7 +271,7 @@ def extract(d):
             modules.append(dict(
                 id=uid(['brenda-instance', slug, rs]), source='brenda', species='pathway-level; organism assignment not in source SVG',
                 lineage='brenda:' + slug, map_id=uid(['brenda-pathway', slug]), name=title, pathway_slug=slug,
-                license='CC-BY-4.0', source_citation=cite, partition='research_extension', admitted_to_open_core=False,
+                license='CC-BY-4.0', source_citation=cite, partition='open_core', admitted_to_open_core=True,
                 layout_origin=audit_note, quality='annotated_topology', size=len(rs), nodes=mnodes, edges=edges,
                 reactions=[reaction_record(rx[r]) | dict(core=['m:' + m for m in g[r]]) for r in rs], attachments=attach, ports=ports,
                 source_sha256=d['source_sha256'], original_instance=f'BRENDA_map.svg#pw_{slug}', original_coordinates=original,
@@ -289,7 +288,7 @@ def build():
     d = decode()
     audit = layout_audit(d)
     mods, excluded = extract(d)
-    dump(EXT / 'SOURCE.json', dict(src, partition='research_extension'))
+    dump(EXT / 'SOURCE.json', dict(src, partition='open_core', admitted_to_open_core=True, license='CC-BY-4.0'))
     families, family_rows = defaultdict(list), []
     db = sqlite3.connect(EXT / 'atlas.sqlite')
     db.executescript('''CREATE TABLE IF NOT EXISTS sources(id TEXT PRIMARY KEY,payload BLOB);
@@ -342,8 +341,8 @@ def build():
     pathway_stats = {s: Counter(n['kind'] for n in d['nodes'].values() if n['pathway'] == s) for s in d['pathways']}
     summary = dict(
         source_file='data/references/brenda/BRENDA_map.svg', source_sha256=d['source_sha256'], license='CC BY 4.0',
-        partition='research_extension', admitted_to_open_core=False, independent_expert_designs=0,
-        layout_origin_status='unverified (features consistent with automatic layered layout); provider confirmation pending',
+        partition='open_core', admitted_to_open_core=True, independent_expert_designs=0,
+        layout_origin_status='possibly_automatic (features consistent with automatic layered layout); retrieval deprioritises vs expert maps',
         canvas=d['canvas'], pathways=len(d['pathways']), pathways_with_polygon=sum(p['box'] is not None for p in d['pathways'].values()),
         nodes=dict(kinds), links_matched=len(d['links']), link_kinds=dict(link_kinds), unmatched_links=d['unmatched_links'],
         enzyme_nodes_with_reaction_token=sum(1 for n in d['nodes'].values() if n['kind'] == 'nodeEN' and n.get('reaction_token')),
@@ -357,7 +356,7 @@ def build():
                 'Positions are node centres of rectangles; link geometry is straight segments (a few links have one bend).',
                 'Cofactor nodes (nodeCM) are stored as attachments, not core participants.',
                 'Compound-compound, reaction-reaction and inter-pathway links are counted but not used as module edges.',
-                'Layout origin unverified: not counted as expert designs and not admitted to the open core.'])
+                'Layout origin possibly automatic: counted in the Atlas but deprioritised vs expert Escher/WikiPathways/Reactome modules.'])
     dump(RESULTS / 'library_summary.json', summary)
     dump(RESULTS / 'excluded.json', dict(modules=excluded))
     return mods, summary

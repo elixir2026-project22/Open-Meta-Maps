@@ -16,7 +16,9 @@
 
 # optional / large local data (not redistributed with the open-core checkout); the real files may live outside this repository (../LocalData)
 /data/atlas.sqlite
-/data/extensions/brenda
+/data/extensions/brenda/*
+!/data/extensions/brenda/SOURCE.json
+!/data/extensions/brenda/modules.json.gz
 /data/references
 /data/source_inputs/archives/human_maps.zip*
 /data/references/yeast_original

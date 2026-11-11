@@ -1,11 +1,10 @@
 # Optional data packages
 
-The repository contains the **open-core Atlas** (`data/open_core.sqlite`: 17,221 modules and 63,274 reactions from WikiPathways, Reactome and the Escher maps). Optional data packages (separate downloads, each with a notice):
+The repository contains the **open-core Atlas** (`data/open_core.sqlite`: 17,221 modules and 63,274 reactions from WikiPathways, Reactome and the Escher maps). BRENDA pathway modules ship in-tree under `data/extensions/brenda/` (CC BY 4.0). Remaining optional packages:
 
 | Package | Content | Terms |
 |---|---|---|
 | `atlas-full` | the full `atlas.sqlite` (open-core Atlas snapshot) | see the package notice |
-| `brenda` | BRENDA pathway-map extension (trial) | layout origin not confirmed: research use only |
 | ~~`reference-maps`~~ | withdrawn: Yeast-maps / original yeast map dropped (GPL-3.0); Human-maps move into the open-core Atlas via official Escher JSON | — |
 
 ```sh

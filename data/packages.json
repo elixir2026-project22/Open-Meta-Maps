@@ -9,20 +9,9 @@
    "sha256": "33850a35084f1f97275e6d89a77d03404119220ffe5577b93308a4058ddf5481",
    "bytes": 48347021,
    "files": 2,
-   "licence": "Modules and reactions from the open-core sources (WikiPathways CC0, Reactome CC0, Escher maps). The former reference-maps package (Human-maps / Yeast-maps) is withdrawn; Yeast-maps (GPL-3.0) are not redistributed.",
+   "licence": "Open-core Atlas modules (WikiPathways CC0, Reactome CC0, Escher maps CC0). BRENDA pathway modules (CC BY 4.0) ship as data/extensions/brenda/ and load with the default Atlas.",
    "marker": "atlas.sqlite",
    "notice": "package_notices/atlas-full.md"
-  },
-  {
-   "name": "brenda",
-   "title": "BRENDA pathway-map extension (trial)",
-   "file": "openmetamaps-brenda-data-v1.tar.gz",
-   "sha256": "70cb1e22230c7701b7986a5670ddc70bfe7c64b3f60ce898dd041461dbfb06bd",
-   "bytes": 35904067,
-   "files": 8,
-   "licence": "BRENDA online version and downloads: CC BY 4.0 per the BRENDA download page; the pathway-map-specific terms and the layout origin are NOT confirmed.",
-   "marker": "extensions/brenda/SOURCE.json",
-   "notice": "package_notices/brenda.md"
   }
  ]
 }

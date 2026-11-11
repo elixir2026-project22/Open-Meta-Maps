@@ -921,7 +921,7 @@ def run_job(folder):
     job = Job(folder)
     folder = job.folder
     options = read(folder / 'options.json') if (folder / 'options.json').exists() else {}
-    libs = dict(core=True, ec=False, brenda=False)  # EC = extended mode, off by default
+    libs = dict(core=True, ec=False)  # EC = extended mode, off by default
     libs.update(options.get('libraries', {}))
     libs.pop('micromap', None)  # MicroMap (NC-SA) removed; ignore stale option keys
     global REACTION_STYLE, COMPLETION, SOURCE_PATHS, LAYOUT, ORIENTATION, INSTANCES, CONTEXT, EDGE_ROUTING, COMPLETION_CONTEXT, LAYOUT_STYLE
@@ -1004,20 +1004,6 @@ def run_job(folder):
             core_ec, ec_screening['open_core'] = epv.screen(core_ec, templates, ecm)
             pools_ec.append(core_ec)
             job.log(f'EC candidates (open core): {einfo["candidates"]} found, screened against the equations: {ec_screening["open_core"]}')
-            if libs['brenda']:
-                import brenda_library as bl
-                brenda = bl.load()
-                templates.update({m['id']: m for m in brenda})
-                ec.enrich(brenda)
-                ecm_b = ec.ECMapper(model, bridge)
-                b_ec, binfo = ecm_b.proposals(brenda, 'BRENDA EC')
-                b_ec, ec_screening['brenda'] = epv.screen(b_ec, templates, ecm_b)
-                pools_ec.append(b_ec)
-                job.log(f'BRENDA EC candidates: {binfo["candidates"]} found, screened: {ec_screening["brenda"]}')
-                job.warn('brenda_unverified', 'BRENDA structures have an unverified layout origin (possibly algorithmic); they are research-only.',
-                         'BRENDA 结构的布局来源未经核实（可能是算法生成），仅供研究。')
-        elif libs['brenda']:
-            job.warn('brenda_needs_ec', 'BRENDA structures are matched through the EC channel; enable it to use them.', 'BRENDA 结构通过 EC 通道匹配，需要同时启用 EC 通道。')
         if libs['ec']:
             job.warn('ec_extended', 'EC extended mode is on: structures matched only through a shared EC number are marked as functional layout suggestions, not as expert-derived.',
                      'EC 扩展模式已开启：仅通过相同 EC 号匹配的结构只标为“功能布局建议”，不算专家来源。')
@@ -1237,7 +1223,7 @@ def run_job(folder):
             layout_quality_report['orientation'] = orientation_report.summary(read(folder / 'map.json'), prov_kinds)
         run_settings = dict(
             structure_library=library_kind, library_label={'windows': 'pathway-fragment reuse', 'units_sub': 'structure-unit reuse'}.get(library_kind, library_kind),
-            sources=dict(core_open_cc0_ccby=bool(libs['core']), brenda=bool(libs['brenda'])),
+            sources=dict(core_open_cc0_ccby=bool(libs['core']), brenda_pathway_maps=True),
             ec_extension=bool(libs['ec']), ec_note='layout hints only; the reactions and stoichiometry of the target GEM are never replaced',
             drawing_engine=dict(version='V7', layout_style=LAYOUT_STYLE, completion_context=COMPLETION_CONTEXT, instances=INSTANCES, orientation=ORIENTATION, expert_curves=bool(SOURCE_PATHS),
                                 edge_routing=EDGE_ROUTING, layout=LAYOUT),
