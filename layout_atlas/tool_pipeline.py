@@ -593,16 +593,16 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
                 f['segs'], f['status'] = segs, 'adjusted'
             f['deviation'] = round(float(np.hypot(*(rel - np.array(f['segs'][-1][-2:])))), 3)
             kept.append(f)
-        written = source_paths.write_curves_to_escher(data, kept)  # the curves become standard Escher segments (b1/b2) in map.json
-        rerouted['not_written_to_map_json'] += len(kept) - len(written)
-        kept = written
-        data[0]['metadata']['source_paths'] = [dict(reaction=f['reaction'], metabolite=f['metabolite'], status=f['status'], shift_px=f['shift_px'], source=f['source']) for f in kept]
+        # Record reuse for skip_edges / metrics now; stamp Beziers into map.json only after the
+        # final-geometry evaluate so quality-gate cost stays comparable to maps without curves.
+        data[0]['metadata']['source_paths'] = [dict(reaction=f['reaction'], metabolite=f['metabolite'], status=f['status'], shift_px=f['shift_px'], source=f['source'], segs=f['segs']) for f in kept]
         metric['source_paths'] = dict(structures=len(blocks), structures_with_paths=len({f['source']['map'] for f in found}), chains_eligible=totals.get('chains', 0),
                                       preserved=sum(f['status'] == 'preserved' for f in kept), adjusted=sum(f['status'] == 'adjusted' for f in kept),
                                       rerouted=sum(rerouted.values()), rerouted_by_reason=dict(rerouted), endpoint_mismatch=totals.get('endpoint_mismatch', 0),
                                       max_adjust_shift_px=max([f['shift_px'] for f in kept if f['status'] == 'adjusted'], default=0),
                                       transform_rejected=totals.get('transform_not_similarity', 0), not_in_module=totals.get('glyph_not_in_module', 0),
                                       max_endpoint_deviation_px=max([f['deviation'] for f in kept], default=0))
+        metric['_source_path_chains'] = kept
     expert_reactions = {rid for b in blocks for rid in b['reaction_ids']}
     data[0]['metadata']['preserved_edges'] = sorted([rid, mid] for (rid, mid), key in scene['participants'].items() if key.startswith('copy:') and rid in expert_reactions)
     skip_edges = data[0]['metadata']['preserved_edges'] + [[p['reaction'], p['metabolite']] for p in data[0]['metadata'].get('source_paths', [])]
@@ -701,6 +701,50 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
                                                          unattached=[dict(exchange=d['exchange'], transports=d['transports'], anchors=d['anchors'], x=d.get('x'), y=d.get('y'))
                                                                      for d in peripheral_report['details'] if d['state'] == 'not_attached'][:12])
         quality_issues['peripheral'] = peripheral_report['details']
+    # Stamp reused source curves into map.json after evaluate (keeps gate runtime/overlaps comparable).
+    pending = metric.pop('_source_path_chains', None)
+    if pending:
+        import source_paths
+        written = source_paths.write_curves_to_escher(data, pending)
+        sp = metric.get('source_paths') or {}
+        sp['written'] = len(written)
+        sp['not_written_to_map_json'] = len(pending) - len(written)
+        metric['source_paths'] = sp
+        data[0]['metadata']['source_paths'] = [
+            dict(reaction=f['reaction'], metabolite=f['metabolite'], status=f['status'], shift_px=f['shift_px'], source=f['source'])
+            for f in written
+        ]
+        # Refresh orderliness on the stamped map without a full crossing re-evaluate.
+        try:
+            from evaluation.map_rules import orderliness_metrics
+            edges, _nodes = layout_quality.build_edges(data, skip_edges)
+            spacing = ((quality_summary.get('core') or {}).get('long_lines') or {}).get('reaction_spacing_px') or 60.0
+            ord_m = orderliness_metrics(data[1], edges, float(spacing))
+            details = quality_summary.setdefault('details', {})
+            details['orderliness'] = dict(
+                main_segment_axis_share=ord_m.get('main_segment_axis_share'),
+                reaction_axis_share=ord_m.get('reaction_axis_share'),
+                chain_turn_median_deg=ord_m.get('chain_turn_median_deg'),
+                metabolite_grid_share=ord_m.get('metabolite_grid_share'),
+                segments=ord_m.get('orderliness_segments'),
+                reactions=ord_m.get('orderliness_reactions'),
+                chain_turns=ord_m.get('orderliness_chain_turns'),
+                metabolites=ord_m.get('orderliness_metabolites'),
+                grid_tol_px=ord_m.get('orderliness_grid_tol_px'),
+            )
+            for k in ('main_segment_axis_share', 'reaction_axis_share', 'chain_turn_median_deg', 'metabolite_grid_share'):
+                details[k] = ord_m.get(k)
+            details['panel'] = layout_quality._detailed_metrics_panel(
+                details,
+                line_shape=details.get('line_shape') or {},
+                cycles=details.get('cycles') or {},
+                unrelated=details.get('unrelated_overlaps') or {},
+                crossing_density=details.get('crossing_density') or {},
+                composition=details.get('composition') or {},
+            )
+        except Exception as ex:  # noqa: BLE001 — curve stamp must not fail the job
+            if log:
+                log(f'  orderliness refresh after source-path stamp skipped: {type(ex).__name__}: {ex}'[:160])
     metric['layout_quality_final'] = quality_summary
     metric['peripheral'] = None if peripheral_report is None else {k: v for k, v in peripheral_report.items() if k not in ('details', 'gate_rows')}
     dump(folder / 'layout_issues.json', quality_issues)
