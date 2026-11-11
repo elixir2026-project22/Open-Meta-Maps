@@ -484,10 +484,8 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         if log:
             log(f"  metabolite instances: +{instance_report['added']}, merged {instance_report['shared_nodes_merged']}, reattached {instance_report['reactions_reattached']}; edges >250: {instance_report['edges_over_250']}, >1000: {instance_report['edges_over_1000']}")
     regions_report = None
-    if LAYOUT_STYLE == 'expert' and os.environ.get('OPM_REGIONS', 'off') == 'on':    # opt-in experimental pass (lives under experiments/optional)
-        import sys
-        sys.path.insert(0, str(ROOT))
-        from experiments.optional import regions as regions_module
+    if LAYOUT_STYLE == 'expert' and os.environ.get('OPM_REGIONS', 'off') == 'on':    # opt-in pathway-region organisation
+        import regions as regions_module
         scene, regions_report = regions_module.organize(model, scene, blocks, currency(model))
         if log:
             log('  regions: ' + str(regions_report))
@@ -637,10 +635,8 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             if log:
                 log('  expert sub-module relocation: ' + str({k: v for k, v in sub.items() if k not in ('rows', 'regenerated_expert_edges')}))
             dump(folder / 'map.json', data)
-        if os.environ.get('OPM_REGION_PLACE', 'off') == 'on':     # opt-in experimental pass (lives under experiments/optional)
-            import sys
-            sys.path.insert(0, str(ROOT))
-            from experiments.optional import region_placement
+        if os.environ.get('OPM_REGION_PLACE', 'off') == 'on':     # opt-in pathway-aware region placement
+            import region_placement
             data, rp = region_placement.place(data, model, scene, blocks, currency(model), skip_edges, log=log)
             metric['region_placement'] = rp
             data[0].setdefault('metadata', {}).setdefault('regenerated_expert_edges', [])
@@ -1068,10 +1064,8 @@ def run_job(folder):
             selected = [p for p in selected if p not in _drop]
             job.log(f'Dropped {len(_drop)} topology-only structure(s) that covered very large reactions: {sorted(_big & {r for p in _drop for r in p["reaction_ids"]})}')
         lowconf_report = None
-        if LAYOUT_STYLE == 'expert' and os.environ.get('OPM_LOWCONF', 'off') == 'on':    # opt-in experimental pass (lives under experiments/optional)
-            import sys
-            sys.path.insert(0, str(ROOT))
-            from experiments.optional import lowconf
+        if LAYOUT_STYLE == 'expert' and os.environ.get('OPM_LOWCONF', 'off') == 'on':    # opt-in low-confidence structure decomposition
+            import lowconf
             selected, lowconf_report = lowconf.split(model, currency(model), selected)
             job.log(f"Low-confidence decomposition: {len(lowconf_report['split'])} structure(s) split, {lowconf_report['kept']} kept, of {lowconf_report['checked']} topology-only: {lowconf_report['split']}")
         used = {r for p in selected for r in p['reaction_ids']}

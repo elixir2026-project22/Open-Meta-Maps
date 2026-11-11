@@ -286,11 +286,8 @@ def _clearing_moves(model, scene, blocks, moving, scene_units=None):
     MAX_NEIGHBOUR_REACTIONS reactions) whose rectangle meets the target rectangle of a moving module (+ CLEAR_MARGIN) is pushed straight out of it along the axis of
     least penetration (rigid translation, like every other move here).  A larger unit in the way, or a push longer than MAX_CLEAR_PUSH, makes the candidate infeasible
     (returns None): space is made locally, the main network is never shoved around.  -> [(keys, delta, reactions)] for the neighbours."""
-    # Clearing is opt-in (OPM_RELOC_CLEAR); unit graph helper lives under experiments/optional
-    import sys
-    from pathlib import Path
-    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-    from experiments.optional import regions as _regions
+    # Clearing is opt-in (OPM_RELOC_CLEAR); unit graph from production regions helper
+    import regions as _regions
     unit_of, keys_of, reactions_of = scene_units or _regions.build_units(model, scene, blocks)
     pos = scene['positions']
     moving_reactions = {r for u, _ in moving for r in u['reactions']}
