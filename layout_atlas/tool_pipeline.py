@@ -943,7 +943,7 @@ def run_job(folder):
     libs.update(options.get('libraries', {}))
     libs.pop('micromap', None)  # MicroMap (NC-SA) removed; ignore stale option keys
     global REACTION_STYLE, COMPLETION, SOURCE_PATHS, LAYOUT, ORIENTATION, INSTANCES, CONTEXT, EDGE_ROUTING, COMPLETION_CONTEXT, LAYOUT_STYLE
-    LAYOUT_STYLE = options.get('layout_style') if options.get('layout_style') in ('legacy', 'expert') else 'legacy'
+    LAYOUT_STYLE = options.get('layout_style') if options.get('layout_style') in ('legacy', 'expert') else 'expert'
     COMPLETION_CONTEXT = options.get('completion_context') if options.get('completion_context') in ('auto', 'off') else 'auto'
     EDGE_ROUTING = options.get('edge_routing') if options.get('edge_routing') in ('libavoid', 'hybrid', 'none') else 'libavoid'
     CONTEXT = options.get('context') if options.get('context') in ('auto', 'off') else 'auto'

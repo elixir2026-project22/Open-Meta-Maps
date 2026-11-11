@@ -7,7 +7,7 @@ This directory is the Python package behind Open Meta Maps. It builds a metaboli
 | Entry | What it does |
 |---|---|
 | `python3 project.py tool` | local web tool (`tool_server.py`, page in `results/tool/index.html`): upload a model, run the pipeline, preview, download |
-| `python3 project.py compose --gem MODEL.xml --out DIR --source-paths --layout-style expert` | the same pipeline from the command line (`compose_cli.py` → `tool_pipeline.py`) |
+| `python3 project.py compose --gem MODEL.xml --out DIR --source-paths` | the same pipeline from the command line (`compose_cli.py` → `tool_pipeline.py`; Bézier/`expert` layout is the default) |
 | `python3 project.py data list` / `fetch` | optional data packages, see [docs/data_packages.md](../docs/data_packages.md) |
 | `python3 project.py setup` | one-time build of the edge routers (needs `g++` or `clang++`, see below) |
 | `python3 project.py catalog` | rebuild the module catalog pages from the Atlas |
@@ -31,7 +31,7 @@ Files whose hashes are recorded by saved results (`routing.py`, `drawing.py`, `g
 
 ## Switches
 
-The tool and `compose` expose the layout style (`--layout-style legacy|expert`, expert is what the web tool uses). The environment variables below switch individual steps; defaults are what a normal run uses.
+Maps are drawn with Bézier connections by default (`layout_style=expert`). `--layout-style legacy` remains an internal CLI option for orthogonal libavoid routing. The environment variables below switch individual steps; defaults are what a normal run uses.
 
 | Variable | Default | Meaning |
 |---|---|---|
