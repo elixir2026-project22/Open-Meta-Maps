@@ -43,7 +43,7 @@ dz.addEventListener('drop',function(e){var f=e.dataTransfer.files[0];if(f)setFil
 /* ---- options ---- */
 function opts(){return {libraries:{core:true,ec:$('o_ec').checked},views:'on_demand'}}
 function notes(){var h='';if($('o_ec').checked)h+='<p class="note">'+tr('EC extended mode adds functional layout suggestions: reactions that share an EC number but whose equations are not verified. These are suggestions, not claimed equivalences.')+'</p>';$('lnote').innerHTML=h}
-$('o_br').onchange=function(){if($('o_br').checked)$('o_ec').checked=true;notes()};$('o_mm').onchange=notes;$('o_ec').onchange=function(){if(!$('o_ec').checked&&$('o_br').checked)$('o_br').checked=false;notes()};
+$('o_br').onchange=function(){if($('o_br').checked)$('o_ec').checked=true;notes()};$('o_ec').onchange=function(){if(!$('o_ec').checked&&$('o_br').checked)$('o_br').checked=false;notes()};
 /* ---- run ---- */
 function hint(){showErr(FILE?'Start the tool server first: python3 project.py tool — then open http://127.0.0.1:8765/tool/index.html. This page cannot run a job when opened as a local file.':'Cannot reach the tool server. Start it with: python3 project.py tool')}
 $('run').onclick=function(){if(!file)return;showErr(null);job=null;mods=null;$('res').style.display='none';$('prog').style.display='';$('run').disabled=true;$('cancel').disabled=false;
