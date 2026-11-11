@@ -147,7 +147,8 @@ def run(model_name='e_coli_core'):
     summary=dict(model=model_name,model_hash=fingerprint,target_sha256=sha(target.read_bytes()),
                  seed=SEEDS[0],source_skeleton_sha256=sha((source/'skeleton.json').read_bytes()),
                  source_candidates_sha256=sha((source/'candidates.json.gz').read_bytes()),
-                 code_sha256={name:sha((BASE/name).read_bytes()) for name in ['geometry.py','drawing.py','geometry_experiment.py','routing.py']},
+                 code_sha256={**{name:sha((BASE/name).read_bytes()) for name in ['geometry.py','drawing.py','routing.py']},
+                              'experiments/geometry_experiment.py':sha((_ROOT/'experiments'/'geometry_experiment.py').read_bytes())},
                  display_graph_hash=uid([sorted(scene_ids[0]),sorted((r,m,k) for (r,m),k in scene_ids[1].items()),scene_ids[2]]),
                  frozen_candidate_ids=[p['id'] for p in selected],
                  config=geometry.CONFIG,results=results,fixed_view_results=view_rows,
@@ -155,7 +156,7 @@ def run(model_name='e_coli_core'):
     dump(destination/'summary.json',summary)
     cols=['condition','node_overlap_pairs','label_overlap_pairs','label_node_intersections','straight_crossings','canvas_area_per_reaction']
     (destination/'index.html').write_text(pages.geometry_index(summary['results'],destination))
-    import geometry_report;geometry_report.generate(summary)
+    from experiments import geometry_report;geometry_report.generate(summary)
     return summary
 
 if __name__=='__main__':run()

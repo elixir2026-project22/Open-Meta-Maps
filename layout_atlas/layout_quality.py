@@ -1,11 +1,11 @@
 """Layout quality measures that feed layout decisions (grown version by version; see Proposal/14).
 
-Also contains metric_details and assert_chemistry, moved from geometry_experiment to avoid
+Also contains metric_details and assert_chemistry (used by compose) to avoid
 loading experiment/UI modules during compose.
 
 V1 (reaction orientation) needs:
   orientation   share of reactions with substrates and products on opposite sides of the reaction point (orientation.summary)
-  label overlap pairs / node overlaps (drawing.export / geometry_experiment.metric_details, already in the map metric)
+  label overlap pairs / node overlaps (drawing.export / layout_quality.metric_details, already in the map metric)
   expert geometry   how far the layout moved the expert structures from where they were placed (similarity-aligned residual of the reaction
                     points of each structure: translation, rotation and uniform scale are not counted as distortion)
   integrity       the three integrity checks of the pipeline (unchanged)

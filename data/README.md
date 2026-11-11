@@ -22,7 +22,7 @@ Everything in this directory is read by the tool at run time. The Atlas (the str
 | `routing/` | pinned libavoid source, commit and licence |
 | `bibliography/` | evidence list used by the literature check |
 | `currency_metabolites.json` | BiGG ids of the currency / cofactor metabolites the layout treats specially (provenance inside) |
-| `identifier_bridge.json` | BiGG metabolite → ChEBI and BiGG reaction → EC tables, each entry with the models it was found in (built by `layout_atlas/build_identifier_bridge.py`) |
+| `identifier_bridge.json` | BiGG metabolite → ChEBI and BiGG reaction → EC tables, each entry with the models it was found in (built by `tools/build_identifier_bridge.py`) |
 | `packages.json` | manifest of the optional data packages |
 
 The number of module instances or source files is not the number of independent expert drawings: several modules can come from the same map.
