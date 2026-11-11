@@ -2,7 +2,8 @@
 
 Expert maps (Escher, WikiPathways, Reactome) show metabolites as the nodes and reactions as curves/lines between them, with the reaction
 name written beside the line.  The Escher mid-marker is only an anchor for the label and the branch point; it is not drawn here.
-The colour of a reaction line is its provenance (curated / expert_derived key, topology suggestion, functional/EC suggestion, bridge, generated).
+Exported reaction lines and arrowheads are a single dark stroke (#222); main vs currency width and opacity are unchanged.
+The tool viewer may recolour those paths from the `data-kind` provenance attribute.
 
 Input is the Escher JSON written by the drawing pipeline (map.json); nothing about the chemistry is changed, only how it is displayed.
 The old marker style stays available (`reaction_style = "marker"`): the drawing code in drawing.py is not modified.
@@ -64,19 +65,21 @@ def _curved_path(reaction, path, nodes):
     return d, curved
 
 
+EDGE = '#222'  # exported stroke / arrowhead; the tool viewer may override via data-kind
+
+
 def render(data, kinds=None):
     """SVG text of the map in line style.  `kinds` maps reaction id -> provenance kind.
 
-    Provenance legend counts live in the Map Generator UI / report.json, not in the SVG.
+    Lines and arrowheads are drawn in EDGE.  Each path carries data-kind when known so
+    the Map Generator viewer can recolour by provenance; legend counts stay in the UI.
     """
     body = data[1]
     nodes, reactions = body['nodes'], body['reactions']
     canvas = body.get('canvas') or {}
     width, height = canvas.get('width', 1000), canvas.get('height', 1000)
     kinds = kinds or {}
-    colors = dict(epv.COLORS)
-    defs = ''.join(f'<marker id="ar-{k}" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0L8,4L0,8Z" fill="{c}"/></marker>' for k, c in colors.items())
-    defs += '<marker id="ar-none" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0L8,4L0,8Z" fill="#70838c"/></marker>'
+    defs = ''.join(f'<marker id="ar-{k}" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0L8,4L0,8Z" fill="{EDGE}"/></marker>' for k in list(epv.COLORS) + ['none'])
     svg = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width:.0f} {height:.0f}" width="{width:.0f}" height="{height:.0f}"><rect width="100%" height="100%" fill="white"/><defs>{defs}</defs>']
     preserved = {(a, b) for a, b in (data[0].get('metadata', {}).get('preserved_edges') or [])}
     source_paths = {(p['reaction'], p['metabolite']): p for p in (data[0].get('metadata', {}).get('source_paths') or [])}
@@ -86,8 +89,8 @@ def render(data, kinds=None):
     for rk, r in reactions.items():
         rid = r['bigg_id']
         kind = kinds.get(rid)
-        color = colors.get(kind, '#70838c')
-        mark = f'url(#ar-{kind if kind in colors else "none"})'
+        mark = f'url(#ar-{kind if kind in epv.COLORS else "none"})'
+        kind_attr = f' data-kind="{escape(kind)}"' if kind else ''
         reversible = bool(r.get('reversibility'))
         coefficient = {}
         for m in r.get('metabolites', []):
@@ -104,12 +107,12 @@ def render(data, kinds=None):
                 curves_drawn += 1
                 status = (entry or {}).get('status', 'preserved')
                 title = f'<title>{escape(rid)} {escape(r.get("name") or "")} - {escape(epv.LABELS[kind][0]) if kind in epv.LABELS else "unclassified"} (expert {"curve" if curved else "line"}{", adjusted" if status == "adjusted" else ""})</title>'
-                top_lines.append(f'<path data-rx="{escape(rid)}" data-met="{escape(end.get("bigg_id") or "")}" d="{d_curve}" stroke="{color}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" fill="none"{(" marker-end=" + chr(34) + mark + chr(34)) if (product or reversible) else ""}>{title}</path>')
+                top_lines.append(f'<path data-rx="{escape(rid)}" data-met="{escape(end.get("bigg_id") or "")}"{kind_attr} d="{d_curve}" stroke="{EDGE}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" fill="none"{(" marker-end=" + chr(34) + mark + chr(34)) if (product or reversible) else ""}>{title}</path>')
                 continue
             if (rid, end.get('bigg_id')) in routed_edges:  # an algorithm-routed detour with rounded corners: the same segments as in map.json
                 arrows = f' marker-end="{mark}"' if (product or reversible) else ''
                 title = f'<title>{escape(rid)} {escape(r.get("name") or "")} - {escape(epv.LABELS[kind][0]) if kind in epv.LABELS else "unclassified"} (routed around obstacles)</title>'
-                lines.append(f'<path data-rx="{escape(rid)}" data-met="{escape(end.get("bigg_id") or "")}" d="{d_curve}" stroke="{color}" stroke-width="1.3" stroke-opacity=".7" stroke-linejoin="round" stroke-linecap="round" fill="none"{arrows}>{title}</path>')
+                lines.append(f'<path data-rx="{escape(rid)}" data-met="{escape(end.get("bigg_id") or "")}"{kind_attr} d="{d_curve}" stroke="{EDGE}" stroke-width="1.3" stroke-opacity=".7" stroke-linejoin="round" stroke-linecap="round" fill="none"{arrows}>{title}</path>')
                 continue
             if keep:
                 path = [path[0], path[-1]]  # edge of an expert structure: keep the structure's own straight connection, not the routed detour
@@ -117,7 +120,7 @@ def render(data, kinds=None):
             product = coefficient.get(end.get('bigg_id'), 1) > 0
             arrows = f' marker-end="{mark}"' if (product or reversible) else ''
             title = f'<title>{escape(rid)} {escape(r.get("name") or "")} - {escape(epv.LABELS[kind][0]) if kind in epv.LABELS else "unclassified"}</title>'
-            (top_lines if keep else lines).append(f'<path data-rx="{escape(rid)}" data-met="{escape(end.get("bigg_id") or "")}" d="M{pts}" stroke="{color}" stroke-width="{2.4 if keep else 1.3}"{"" if keep else " stroke-opacity=\".7\""} stroke-linejoin="round" stroke-linecap="round" fill="none"{arrows}>{title}</path>')
+            (top_lines if keep else lines).append(f'<path data-rx="{escape(rid)}" data-met="{escape(end.get("bigg_id") or "")}"{kind_attr} d="M{pts}" stroke="{EDGE}" stroke-width="{2.4 if keep else 1.3}"{"" if keep else " stroke-opacity=\".7\""} stroke-linejoin="round" stroke-linecap="round" fill="none"{arrows}>{title}</path>')
         labels.append(f'<text data-rk="{escape(rk)}" data-rl="{escape(rid)}" x="{r["label_x"]:.1f}" y="{r["label_y"]:.1f}" font-family="{FONT}" font-size="12" fill="#17323d" font-weight="600" stroke="#fff" stroke-width="3" paint-order="stroke">{escape(rid)}</text>')
     svg += lines + top_lines  # routed connections first, the expert structures' own edges on top
     hidden = set((data[0].get('metadata') or {}).get('hidden_metabolite_labels') or [])
