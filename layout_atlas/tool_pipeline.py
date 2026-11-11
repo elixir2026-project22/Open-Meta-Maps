@@ -233,15 +233,28 @@ def fixed_views(model, g, max_size=50):
 
 
 def load_bridge():
-    cache = DATA / 'annotation_bridge.json'
-    if cache.exists():
-        return read(cache)
+    """Load the Mapper identifier crosswalk.
+
+    Source of truth is ``data/identifier_bridge.json``. A gzipped local cache
+    (``data/annotation_bridge.json.gz``) may be written for speed; the old
+    uncompressed ``annotation_bridge.json`` is no longer tracked.
+    """
     import semantic_transfer as st
-    missing = [str(p) for _, p, _ in EXAMPLE_MODELS if not p.exists()]
-    if missing:
-        raise FileNotFoundError('annotation_bridge.json is missing and the models needed to rebuild it are not available: ' + ', '.join(missing) +
-                                ' (BiGG models are in examples/; point OPM_HUMAN_GEM to Human-GEM.xml)')
-    return st.annotation_bridge(EXAMPLE_MODELS)
+    gz = DATA / 'annotation_bridge.json.gz'
+    if gz.exists():
+        with gzip.open(gz, 'rt') as f:
+            return json.load(f)
+    legacy = DATA / 'annotation_bridge.json'
+    if legacy.exists():
+        return read(legacy)
+    available = [(n, p, s) for n, p, s in EXAMPLE_MODELS if Path(p).exists()]
+    bridge = st.mapper_bridge(available)
+    try:
+        with gzip.open(gz, 'wt') as f:
+            json.dump(bridge, f, ensure_ascii=False)
+    except OSError:
+        pass
+    return bridge
 
 
 def save_gz(path, obj):

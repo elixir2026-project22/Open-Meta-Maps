@@ -16,6 +16,9 @@
 
 # optional / large local data (not redistributed with the open-core checkout); the real files may live outside this repository (../LocalData)
 /data/atlas.sqlite
+# Derived Mapper crosswalk (built from identifier_bridge + available models); do not track
+/data/annotation_bridge.json
+/data/annotation_bridge.json.gz
 /data/extensions/brenda/*
 !/data/extensions/brenda/SOURCE.json
 !/data/extensions/brenda/modules.json.gz

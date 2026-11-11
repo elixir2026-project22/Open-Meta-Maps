@@ -18,6 +18,11 @@ def spelling(identifier):
 
 
 def annotation_bridge(models):
+    """Build a Mapper crosswalk from model annotations (legacy / enrichment path).
+
+    Prefer ``mapper_bridge`` which seeds from ``data/identifier_bridge.json`` (the
+    tracked identifier store) and only uses live models to add MetaNetX links.
+    """
     links=defaultdict(lambda:defaultdict(set));evidence=defaultdict(list);inputs=[]
     for name,path,_ in models:
         model=load_model(path);inputs.append(dict(model=name,path=str(path.relative_to(ROOT)),sha256=sha(path.read_bytes())))
@@ -31,6 +36,41 @@ def annotation_bridge(models):
     return dict(links={k:{ns:sorted(v) for ns,v in refs.items()} for k,refs in links.items()},
                 evidence=dict(evidence),inputs=inputs,
                 interpretation='Explicit annotations in fixed local target models plus underscore-escape spelling candidates; not a new MNXref release or identity certification')
+
+
+def mapper_bridge(models=None):
+    """Mapper crosswalk seeded from ``identifier_bridge`` (one identifier store).
+
+    ChEBI links come from ``data/identifier_bridge.json``. When ``models`` are
+    provided and readable, MetaNetX (and any extra ChEBI) annotations from those
+    models are merged in — they are not a second checked-in store.
+    """
+    import identifier_bridge as ib
+    links=defaultdict(lambda:defaultdict(set));evidence=defaultdict(list)
+    for bigg,chebis in ib.metabolite_chebi().items():
+        alias=spelling(bigg)
+        links[alias]['chebi'].update(chebis)
+    inputs=list(ib.sources())
+    for name,path,_ in (models or ()):
+        path=Path(path)
+        if not path.exists():
+            continue
+        model=load_model(path)
+        inputs.append(dict(model=name,path=str(path.relative_to(ROOT)) if ROOT in path.resolve().parents else str(path),
+                           sha256=sha(path.read_bytes()),role='metanetx_enrichment'))
+        for m in model['metabolites']:
+            refs=xrefs(m.get('annotations',[]));aliases=set(refs.get('bigg.metabolite',[]))
+            if name in ('e_coli_core','iML1515','iMM904','iYO844'):aliases.add(chem(m['id']))
+            for original_alias in aliases:
+                alias=spelling(original_alias)
+                for ns in ('chebi','metanetx.chemical'):
+                    links[alias][ns].update(refs.get(ns,[]))
+                if refs.get('metanetx.chemical') or refs.get('chebi'):
+                    evidence[alias].append(dict(model=name,metabolite=m['id'],references=refs))
+    return dict(
+        links={k:{ns:sorted(v) for ns,v in refs.items()} for k,refs in links.items()},
+        evidence=dict(evidence),inputs=inputs,
+        interpretation='ChEBI from data/identifier_bridge.json; MetaNetX (and extra ChEBI) enriched from available local models at load time — not a second identifier store')
 
 
 def entity_parts(entity):

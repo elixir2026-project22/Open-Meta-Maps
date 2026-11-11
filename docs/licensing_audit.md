@@ -41,7 +41,7 @@ The 22 maps come from the Escher community-maps repository (BiGG-based maps for 
 | Metabolism Regulation gallery SBGN-ML | CC BY 4.0 | **Included** via generic `layout_atlas/sbgn.py` (`data/extensions/metabolismregulation/`). See [metabolismregulation_import.md](metabolismregulation_import.md). |
 | PANTHER Pathway CellDesigner | CC BY 4.0 | **Included** (8 metabolic CD4.1 maps → 238 modules) via generic `celldesigner.py` + `identity_labels.py`. See [panther_pilot.md](panther_pilot.md). |
 | `data/extensions/{units,source_paths,reaction_geometry_templates}` | derived from the open-core maps | inherits the Escher-map status above |
-| `data/annotation_bridge.json` | derived from model annotations (identifier links) | inherits the model licences above |
+| `data/identifier_bridge.json` (+ derived Mapper crosswalk) | BiGG↔ChEBI / EC from public model annotations; Mapper view built at load time | inherits the model licences above |
 
 ## 3. Not in the repository (verified by `.gitignore` and tracked-file listing)
 
