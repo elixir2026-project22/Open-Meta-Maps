@@ -1,21 +1,24 @@
 # Licensing audit
 
-Status: audit of what the repository currently redistributes, dated 2026-11-10. Evidence is either local (term snapshots and provenance files in `data/source_inputs/`) or a public web page checked on that date. **This is an engineering review, not legal advice.** Items marked *open* need a decision or confirmation before a public release.
+Status: audit of what the repository currently redistributes, dated 2026-11-11. Evidence is either local (term snapshots and provenance files in `data/source_inputs/`) or a public web page checked on that date. **This is an engineering review, not legal advice.** Items marked *open* need a decision or confirmation before a public release.
 
-## 1. Atlas content (`open_core.sqlite`)
+Policy: the project redistributes **only** openly redistributable maps (CC0 / CC BY), all included by default. No NC or GPL map packages remain.
 
-All 17,221 modules in `open_core.sqlite` come from three sources (checked by reading the module payloads):
+## 1. Atlas content (`open_core.sqlite` + default extensions)
+
+Core SQLite modules (checked by reading the module payloads), plus default extensions loaded with the Atlas:
 
 | Source | Modules | Licence | Evidence | Result |
 |---|---|---|---|---|
-| WikiPathways | 4,718 | CC0 | `source_inputs/terms/wikipathways.html` (CC0 waiver for content) | OK |
+| WikiPathways | 4,696 | CC0 | `source_inputs/terms/wikipathways.html` (CC0 waiver for content); snapshot **20261110** | OK |
 | Reactome | 3,405 | CC0 for data and derived files; CC BY 4.0 for pathway illustrations and artwork | `source_inputs/terms/reactome.html` | OK for layout data; if Reactome illustrations are ever added, CC BY 4.0 attribution is required |
-| Escher maps | 9,098 | CC0-1.0 | Escher community-maps repository LICENSE is CC0 | OK |
+| Escher maps | 9,098 | CC0-1.0 | Escher community-maps repository `LICENSE` is CC0 | OK |
 | BRENDA pathway maps | 11,703 | CC BY 4.0 | https://www.brenda.dsmz.de/license.php; doi:10.1093/nar/gkaf1113 | OK (layout possibly automatic; retrieval deprioritises vs expert maps) |
+| Human-maps | 8,540 | CC BY 4.0 | official `escher/` JSON only | OK (SVGs with embedded BY-SA are not imported) |
 
 ### Escher maps
 
-The 22 maps come from the Escher community-maps repository (BiGG-based maps for e_coli_core, iAF1260, iJO1366, iMM904, RECON1). The upstream repository LICENSE is CC0; Atlas modules record `CC0-1.0`.
+The 22 maps come from the Escher community-maps repository (BiGG-based maps for e_coli_core, iAF1260, iJO1366, iMM904, RECON1). The upstream repository LICENSE is CC0; Atlas modules record `CC0-1.0`. The Atlas source label is `escher` (renamed from the former `community` label).
 
 ## 2. Third-party files tracked in the repository
 
@@ -38,14 +41,16 @@ The 22 maps come from the Escher community-maps repository (BiGG-based maps for 
 
 ## 3. Not in the repository (verified by `.gitignore` and tracked-file listing)
 
-- BRENDA pathway modules: CC BY 4.0 (https://www.brenda.dsmz.de/license.php); included by default under `data/extensions/brenda/` with per-module attribution to BRENDA + NAR 2026 doi:10.1093/nar/gkaf1113; layout provenance marked possibly automatic.
+- BRENDA pathway modules: CC BY 4.0 (https://www.brenda.dsmz.de/license.php); included by default under `data/extensions/brenda/` with per-module attribution to BRENDA + NAR 2026 doi:10.1093/nar/gkaf1113; layout provenance marked possibly automatic. The former optional `brenda` data package entry was removed as redundant.
+- PANTHER Pathway (CC BY 4.0): **pilot only** — live SBML download from pantherdb.org was blocked by Cloudflare (HTTP 403) from this environment; no files imported. See [panther_pilot.md](panther_pilot.md).
+- MicroMap (NC-SA): removed entirely; `celldesigner.py` remains as a generic CellDesigner importer.
 - `data/references/`, `Ref/`, `Presentation/`, `results/`: not tracked.
-- `celldesigner.py` is a generic CellDesigner importer (kept for optional pathway sources).
 
 ## 4. Recommended actions, in order
 
 1. ~~Remove Yeast-maps / yeast_original~~ (done). Human-maps re-admitted under CC BY 4.0 via official Escher JSON.
-2. Decide how to handle the BiGG-licensed example models and the Escher maps: obtain written confirmation, replace them with permissively licensed equivalents, or state the non-commercial restriction in the README.
+2. Decide how to handle the BiGG-licensed example models: obtain written confirmation, replace them with permissively licensed equivalents, or state the non-commercial restriction in the README. (Escher community-maps layouts themselves are CC0 per upstream LICENSE.)
 3. ~~Record the upstream licence of the `sbml2escher` files~~ (resolved: dependency removed); record the licence of adaptagrams/libavoid; `THIRD_PARTY_NOTICES.md` exists.
 4. Add Rhea and Human-GEM citations; keep every upstream `LICENSE` next to its data.
 5. Choose the software licence (not chosen yet) after step 2, since it determines what can be combined.
+6. Re-run the PANTHER CellDesigner pilot once pantherdb.org SBML can be fetched; decide on default Atlas inclusion only after coordinates / reaction mapping are confirmed.
