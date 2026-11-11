@@ -328,22 +328,33 @@ function panzoom(box,svg,mm){if(!svg.getAttribute('viewBox')){svg.setAttribute('
  return {fit:fit,zoom:zoom,zoomBy:zoomBy,focus:focus,on:function(fn){subs.push(fn)},destroy:function(){ro.disconnect()},viewBox:function(){return vb.slice()},base:function(){return base.slice()},pt:pt,setEditMode:setEditMode,setSpace:setSpace,rebuildMM:buildMM,editing:function(){return editMode}}}
 function fileFetchFail(el){return checkHealth().then(function(ok){if(!ok){dlFail();if(el)el.innerHTML='<p class="note err">'+esc(tr('Cannot download: the tool server is not reachable. Restart it with start_tool.command (or python3 project.py tool), then try again.'))+'</p>';return false}if(el)el.innerHTML='<p class="meta">'+tr('Not available yet.')+'</p>';return true})}
 function loadSvg(name,into,cb){var keep=[].slice.call(into.querySelectorAll(':scope > .minimap'));into.innerHTML='<p class="meta">'+tr('Loading…')+'</p>';keep.forEach(function(n){into.appendChild(n)});fetch(url(name)).then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(t){var s=sanitize(t);if(!s)throw 0;keep=[].slice.call(into.querySelectorAll(':scope > .minimap'));into.innerHTML='';into.appendChild(s);keep.forEach(function(n){into.appendChild(n)});cb(s)}).catch(function(){fileFetchFail(into).then(function(){keep.forEach(function(n){if(!n.parentNode)into.appendChild(n)})})})}
+var EDIT_LOCK_LABELS=true,OPM_EDIT_GEN=0;
 function mapEditor(box,svg,pz){
+ var editGen=++OPM_EDIT_GEN;
  var NS='http://www.w3.org/2000/svg',data=null,baseGeom=null,dirty=false,hist=[],hI=-1,sel={},drag=null,active=false,alive=true;
- var pathCache={},nodeSegs={},rxByBigg={};
+ var pathCache={},nodeSegs={},rxByBigg={},midToRx={},rxMids={},lockLabels=EDIT_LOCK_LABELS,hasOriginal=false,resetting=false;
  function geomOf(d){var g={nodes:{},reactions:{}};Object.keys(d[1].nodes).forEach(function(id){var n=d[1].nodes[id],o={x:n.x,y:n.y};if(n.label_x!=null){o.label_x=n.label_x;o.label_y=n.label_y}g.nodes[id]=o});
   Object.keys(d[1].reactions).forEach(function(rk){var r=d[1].reactions[rk],o={label_x:r.label_x,label_y:r.label_y,segments:{}};Object.keys(r.segments||{}).forEach(function(sid){var s=r.segments[sid],p={};if(s.b1)p.b1={x:s.b1.x,y:s.b1.y};else p.b1=null;if(s.b2)p.b2={x:s.b2.x,y:s.b2.y};else p.b2=null;o.segments[sid]=p});g.reactions[rk]=o});return g}
  function applyGeom(g){Object.keys(g.nodes).forEach(function(id){var n=data[1].nodes[id],o=g.nodes[id];if(!n||!o)return;n.x=o.x;n.y=o.y;if(o.label_x!=null){n.label_x=o.label_x;n.label_y=o.label_y}});
   Object.keys(g.reactions).forEach(function(rk){var r=data[1].reactions[rk],o=g.reactions[rk];if(!r||!o)return;r.label_x=o.label_x;r.label_y=o.label_y;Object.keys(o.segments||{}).forEach(function(sid){var s=r.segments[sid],p=o.segments[sid];if(!s||!p)return;s.b1=p.b1?{x:p.b1.x,y:p.b1.y}:null;s.b2=p.b2?{x:p.b2.x,y:p.b2.y}:null})})}
  function commitHist(){var s=JSON.stringify(geomOf(data));if(hist[hI]===s)return;hist=hist.slice(0,hI+1);hist.push(s);if(hist.length>60){hist.shift();hI=hist.length-1}else hI=hist.length-1;syncBtns()}
  function markDirty(){dirty=true;syncBtns()}
- function syncBtns(){var acts=$('peditacts'),u=$('pendo'),sv=$('psave'),ca=$('pcancel');if(acts)acts.hidden=!active;if(u)u.disabled=!active||hI<=0;if(sv)sv.disabled=!active||!dirty;if(ca)ca.disabled=!active;var ed=$('pedit');if(ed)ed.setAttribute('aria-pressed',active?'true':'false')}
- function indexMap(){nodeSegs={};pathCache={};rxByBigg={};Object.keys(data[1].reactions).forEach(function(rk){var r=data[1].reactions[rk];rxByBigg[r.bigg_id]=rk;Object.keys(r.segments||{}).forEach(function(sid){var s=r.segments[sid];(nodeSegs[s.from_node_id]=nodeSegs[s.from_node_id]||[]).push({rk:rk,sid:sid,end:'from'});(nodeSegs[s.to_node_id]=nodeSegs[s.to_node_id]||[]).push({rk:rk,sid:sid,end:'to'})})});
+ function syncBtns(){var acts=$('peditacts'),u=$('pendo'),sv=$('psave'),ca=$('pcancel'),lk=$('plock'),rs=$('preset');
+  if(acts)acts.hidden=!active;if(u)u.disabled=!active||hI<=0;if(sv)sv.disabled=!active||!dirty;if(ca)ca.disabled=!active;
+  if(lk){lk.disabled=!active;lk.setAttribute('aria-pressed',lockLabels?'true':'false')}
+  if(rs){rs.hidden=!hasOriginal;rs.disabled=!active||!hasOriginal||resetting}
+  var ed=$('pedit');if(ed)ed.setAttribute('aria-pressed',active?'true':'false')}
+ function indexMap(){nodeSegs={};pathCache={};rxByBigg={};midToRx={};rxMids={};Object.keys(data[1].reactions).forEach(function(rk){var r=data[1].reactions[rk],mids={};rxByBigg[r.bigg_id]=rk;
+  Object.keys(r.segments||{}).forEach(function(sid){var s=r.segments[sid];(nodeSegs[s.from_node_id]=nodeSegs[s.from_node_id]||[]).push({rk:rk,sid:sid,end:'from'});(nodeSegs[s.to_node_id]=nodeSegs[s.to_node_id]||[]).push({rk:rk,sid:sid,end:'to'});
+   [s.from_node_id,s.to_node_id].forEach(function(nid){var n=data[1].nodes[nid];if(!n)return;if(n.node_type==='midmarker'||n.node_type==='multimarker'){mids[nid]=1;(midToRx[nid]=midToRx[nid]||[]);if(midToRx[nid].indexOf(rk)<0)midToRx[nid].push(rk)}})});
+  rxMids[rk]=Object.keys(mids)});
   svg.querySelectorAll('path[data-rx]').forEach(function(p){var k=p.getAttribute('data-rx')+'|'+(p.getAttribute('data-met')||'');(pathCache[k]=pathCache[k]||[]).push(p)})}
  function ensureHandles(){svg.querySelectorAll('circle.edithandle').forEach(function(n){n.remove()});Object.keys(data[1].nodes).forEach(function(id){var n=data[1].nodes[id];if(n.node_type==='metabolite')return;if(svg.querySelector('circle[data-n="'+cssEsc(id)+'"]'))return;
    var c=document.createElementNS(NS,'circle');c.setAttribute('class','edithandle');c.setAttribute('data-n',id);c.setAttribute('cx',n.x);c.setAttribute('cy',n.y);c.setAttribute('r',n.node_type==='multimarker'?3.5:4.5);svg.appendChild(c)})}
  function cssEsc(s){return (window.CSS&&CSS.escape)?CSS.escape(s):String(s).replace(/"/g,'\\"')}
  function hit(el){while(el&&el!==svg){if(el.getAttribute){var n=el.getAttribute('data-n');if(n!=null)return {t:'n',id:n,el:el};var nl=el.getAttribute('data-nl');if(nl!=null)return {t:'nl',id:nl,el:el};var rk=el.getAttribute('data-rk');if(rk!=null)return {t:'rl',id:rk,el:el}}el=el.parentNode}return null}
+ function resolveHit(h){if(!h||!lockLabels)return h;if(h.t==='nl'){var c=svg.querySelector('circle[data-n="'+cssEsc(h.id)+'"]');return c?{t:'n',id:h.id,el:c}:null}
+  if(h.t==='rl'){var mids=rxMids[h.id]||[],i;for(i=0;i<mids.length;i++){var mc=svg.querySelector('circle[data-n="'+cssEsc(mids[i])+'"]');if(mc)return {t:'n',id:mids[i],el:mc}}return null}return h}
  function keyOf(h){return h.t+':'+h.id}
  function clearSel(){Object.keys(sel).forEach(function(k){var el=sel[k].el;if(el)el.classList.remove('sel')});sel={}}
  function addSel(h){var k=keyOf(h);if(sel[k])return;h.el.classList.add('sel');sel[k]=h}
@@ -361,9 +372,13 @@ function mapEditor(box,svg,pz){
   var c=svg.querySelector('circle[data-n="'+cssEsc(id)+'"]');if(c){c.setAttribute('cx',n.x);c.setAttribute('cy',n.y)}
   if(withLabel&&n.label_x!=null){var t=svg.querySelector('text[data-nl="'+cssEsc(id)+'"]');if(t){t.setAttribute('x',n.label_x);t.setAttribute('y',n.label_y)}}
   (nodeSegs[id]||[]).forEach(function(ref){var s=data[1].reactions[ref.rk].segments[ref.sid];if(ref.end==='from'&&s.b1){s.b1.x+=dx;s.b1.y+=dy}if(ref.end==='to'&&s.b2){s.b2.x+=dx;s.b2.y+=dy}})}
- function moveSelection(dx,dy){var seenR={},k,h;for(k in sel){h=sel[k];if(h.t==='n'){moveNode(h.id,dx,dy,true);(nodeSegs[h.id]||[]).forEach(function(ref){seenR[ref.rk]=1})}
-   else if(h.t==='nl'){var n=data[1].nodes[h.id];if(n&&n.label_x!=null){n.label_x+=dx;n.label_y+=dy;var t=svg.querySelector('text[data-nl="'+cssEsc(h.id)+'"]');if(t){t.setAttribute('x',n.label_x);t.setAttribute('y',n.label_y)}}}
-   else if(h.t==='rl'){var r=data[1].reactions[h.id];if(r){r.label_x+=dx;r.label_y+=dy;var rt=svg.querySelector('text[data-rk="'+cssEsc(h.id)+'"]');if(rt){rt.setAttribute('x',r.label_x);rt.setAttribute('y',r.label_y)}}}}
+ function moveMetLabel(id,dx,dy){var n=data[1].nodes[id];if(!n||n.label_x==null)return;n.label_x+=dx;n.label_y+=dy;var t=svg.querySelector('text[data-nl="'+cssEsc(id)+'"]');if(t){t.setAttribute('x',n.label_x);t.setAttribute('y',n.label_y)}}
+ function moveRxLabel(rk,dx,dy){var r=data[1].reactions[rk];if(!r)return;r.label_x+=dx;r.label_y+=dy;var rt=svg.querySelector('text[data-rk="'+cssEsc(rk)+'"]');if(rt){rt.setAttribute('x',r.label_x);rt.setAttribute('y',r.label_y)}}
+ function moveSelection(dx,dy){var seenR={},movedMet={},movedRx={},k,h;
+  for(k in sel){h=sel[k];if(h.t!=='n')continue;moveNode(h.id,dx,dy,!!lockLabels);if(lockLabels){movedMet[h.id]=1;(midToRx[h.id]||[]).forEach(function(rk){if(!movedRx[rk]){moveRxLabel(rk,dx,dy);movedRx[rk]=1}})}
+   (nodeSegs[h.id]||[]).forEach(function(ref){seenR[ref.rk]=1})}
+  if(!lockLabels){for(k in sel){h=sel[k];if(h.t==='nl'&&!movedMet[h.id]){moveMetLabel(h.id,dx,dy);movedMet[h.id]=1}
+   else if(h.t==='rl'&&!movedRx[h.id]){moveRxLabel(h.id,dx,dy);movedRx[h.id]=1}}}
   Object.keys(seenR).forEach(refreshRxPaths)}
  function buildPatch(){var edit={nodes:{},reactions:{}},g=geomOf(data),b=baseGeom,changed=false;
   Object.keys(g.nodes).forEach(function(id){var a=g.nodes[id],o=b.nodes[id],p={},k;if(!o)return;for(k in a)if(a[k]!==o[k])p[k]=a[k];if(Object.keys(p).length){edit.nodes[id]=p;changed=true}});
@@ -373,20 +388,31 @@ function mapEditor(box,svg,pz){
    if(Object.keys(segs).length)p.segments=segs;if(Object.keys(p).length){edit.reactions[rk]=p;changed=true}});
   return changed?edit:null}
  function onLeave(e){if(dirty){e.preventDefault();e.returnValue=''}}
+ function setLockLabels(on){lockLabels=!!on;EDIT_LOCK_LABELS=lockLabels;if(lockLabels){var keep={},k,h;for(k in sel){h=resolveHit(sel[k]);if(h)keep[keyOf(h)]=h}clearSel();Object.keys(keep).forEach(function(k){addSel(keep[k])})}syncBtns()}
  function setActive(on){if(on===active)return;if(on&&!ready)return;if(!on&&dirty&&!confirm(tr('Discard unsaved edits?')))return;active=on;pz.setEditMode(active);if(active){ensureHandles();indexMap();if(!hist.length){hist=[JSON.stringify(geomOf(data))];hI=0}}else{clearSel();svg.querySelectorAll('circle.edithandle,.selbox').forEach(function(n){n.remove()});if(dirty){applyGeom(baseGeom);paintGeom();dirty=false;hist=[JSON.stringify(baseGeom)];hI=0}}syncBtns()}
  function undo(){if(hI<=0)return;hI--;applyGeom(JSON.parse(hist[hI]));paintGeom();clearSel();ensureHandles();indexMap();dirty=hist[hI]!==JSON.stringify(baseGeom);syncBtns()}
  function save(){var patch=buildPatch();if(!patch){dirty=false;syncBtns();return}var btn=$('psave');if(btn)btn.disabled=true;
   fetch('/api/jobs/'+job.id+'/map',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(patch)}).then(function(r){return r.json().then(function(j){return [r.status,j]})}).then(function(a){
-   if(a[0]!==200){showErr(a[1].error||'Save failed');syncBtns();return}baseGeom=geomOf(data);dirty=false;hist=[JSON.stringify(baseGeom)];hI=0;pz.rebuildMM();
+   if(a[0]!==200){showErr(a[1].error||'Save failed');syncBtns();return}baseGeom=geomOf(data);dirty=false;hist=[JSON.stringify(baseGeom)];hI=0;hasOriginal=true;pz.rebuildMM();
    if(a[1].summary)job.summary=a[1].summary;fetch(url('report.json')).then(function(r){return r.ok?r.json():null}).then(function(j){if(j){report=j;lqPanel()}}).catch(function(){});syncBtns();
   }).catch(function(){showErr('Cannot reach the tool server. Start it with: python3 project.py tool');syncBtns()})}
  function cancel(){if(dirty&&!confirm(tr('Discard unsaved edits?')))return;applyGeom(baseGeom);paintGeom();dirty=false;hist=[JSON.stringify(baseGeom)];hI=0;setActive(false)}
+ function reset(){if(!hasOriginal||resetting)return;if(!confirm(tr('Restore the map from the saved original? Unsaved edits will be lost.')))return;
+  resetting=true;syncBtns();
+  fetch('/api/jobs/'+job.id+'/map/reset',{method:'POST'}).then(function(r){return r.json().then(function(j){return [r.status,j]})}).then(function(a){
+   if(a[0]!==200){showErr((a[1]&&a[1].error)||'Reset failed');resetting=false;syncBtns();return}
+   dirty=false;hist=[];hI=-1;clearSel();
+   if(a[1].summary)job.summary=a[1].summary;
+   destroy();window.OPM_EDIT=null;window.OPM_SVG=null;window.OPM_PZ=null;
+   // Remount the main map viewer (PN() is pane only while tab==='map')
+   mainRender();
+  }).catch(function(){showErr('Cannot reach the tool server. Start it with: python3 project.py tool');resetting=false;syncBtns()})}
  function onKey(e){if(!active||!alive)return;if(e.code==='Space'){e.preventDefault();pz.setSpace(true)}
   if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&(e.key==='z'||e.key==='Z')){e.preventDefault();undo()}}
  function onKeyUp(e){if(e.code==='Space')pz.setSpace(false)}
  function onDown(e){if(!active||e.button!==0)return;if(e.target&&e.target.closest&&e.target.closest('.minimap'))return;
   if(svg.classList.contains('spacepan'))return;
-  var h=hit(e.target),p=pz.pt(e),add=e.shiftKey||e.ctrlKey||e.metaKey;
+  var h=resolveHit(hit(e.target)),p=pz.pt(e),add=e.shiftKey||e.ctrlKey||e.metaKey;
   if(h){if(add)toggleSel(h);else if(!sel[keyOf(h)]){clearSel();addSel(h)}drag={kind:'move',x:p[0],y:p[1],moved:0};svg.setPointerCapture(e.pointerId);e.preventDefault();return}
   if(!add)clearSel();drag={kind:'box',x0:p[0],y0:p[1],x1:p[0],y1:p[1],add:add,el:null};svg.setPointerCapture(e.pointerId);e.preventDefault()}
  function onMove(e){if(!drag||!active)return;var p=pz.pt(e);if(drag.kind==='move'){var dx=p[0]-drag.x,dy=p[1]-drag.y;if(!dx&&!dy)return;drag.moved=1;moveSelection(dx,dy);drag.x=p[0];drag.y=p[1];markDirty();box.dataset.moved='1'}
@@ -396,16 +422,21 @@ function mapEditor(box,svg,pz){
   else if(drag.kind==='box'){var x=Math.min(drag.x0,drag.x1),y=Math.min(drag.y0,drag.y1),w=Math.abs(drag.x1-drag.x0),h=Math.abs(drag.y1-drag.y0);if(drag.el)drag.el.remove();
   if(w>2||h>2){if(!drag.add)clearSel();function inside(px,py){return px>=x&&px<=x+w&&py>=y&&py<=y+h}
    svg.querySelectorAll('circle[data-n]').forEach(function(c){if(inside(+c.getAttribute('cx'),+c.getAttribute('cy')))addSel({t:'n',id:c.getAttribute('data-n'),el:c})});
-   svg.querySelectorAll('text[data-nl]').forEach(function(t){if(inside(+t.getAttribute('x'),+t.getAttribute('y')))addSel({t:'nl',id:t.getAttribute('data-nl'),el:t})});
-   svg.querySelectorAll('text[data-rk]').forEach(function(t){if(inside(+t.getAttribute('x'),+t.getAttribute('y')))addSel({t:'rl',id:t.getAttribute('data-rk'),el:t})})}
+   svg.querySelectorAll('text[data-nl]').forEach(function(t){if(!inside(+t.getAttribute('x'),+t.getAttribute('y')))return;var id=t.getAttribute('data-nl');
+    if(lockLabels){var c=svg.querySelector('circle[data-n="'+cssEsc(id)+'"]');if(c)addSel({t:'n',id:id,el:c})}else addSel({t:'nl',id:id,el:t})});
+   svg.querySelectorAll('text[data-rk]').forEach(function(t){if(!inside(+t.getAttribute('x'),+t.getAttribute('y')))return;var rk=t.getAttribute('data-rk');
+    if(lockLabels){var mids=rxMids[rk]||[],i;for(i=0;i<mids.length;i++){var mc=svg.querySelector('circle[data-n="'+cssEsc(mids[i])+'"]');if(mc){addSel({t:'n',id:mids[i],el:mc});break}}}else addSel({t:'rl',id:rk,el:t})})}
   else if(!drag.add)clearSel()}
   drag=null;setTimeout(function(){box.dataset.moved='0'},0)}
  var ready=false;
- function boot(cb){fetch(url('map.json')).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){if(!alive)return;data=j;baseGeom=geomOf(data);indexMap();ready=true;cb&&cb()}).catch(function(){showErr(tr('Could not load map.json for editing.'))})}
- function destroy(){alive=false;window.removeEventListener('beforeunload',onLeave);document.removeEventListener('keydown',onKey);document.removeEventListener('keyup',onKeyUp);svg.removeEventListener('pointerdown',onDown);svg.removeEventListener('pointermove',onMove);svg.removeEventListener('pointerup',onUp);svg.removeEventListener('pointercancel',onUp);if(active){pz.setEditMode(false);svg.querySelectorAll('circle.edithandle,.selbox').forEach(function(n){n.remove()})}}
+ function boot(cb){fetch(url('map.json')).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){if(!alive)return;data=j;baseGeom=geomOf(data);indexMap();ready=true;
+  return fetch(url('map.original.json'),{cache:'no-store'}).then(function(r){hasOriginal=r.ok;syncBtns();cb&&cb()}).catch(function(){hasOriginal=false;syncBtns();cb&&cb()});
+ }).catch(function(){showErr(tr('Could not load map.json for editing.'))})}
+ function destroy(){alive=false;ready=false;active=false;window.removeEventListener('beforeunload',onLeave);document.removeEventListener('keydown',onKey);document.removeEventListener('keyup',onKeyUp);svg.removeEventListener('pointerdown',onDown);svg.removeEventListener('pointermove',onMove);svg.removeEventListener('pointerup',onUp);svg.removeEventListener('pointercancel',onUp);try{pz.setEditMode(false)}catch(e){}try{svg.querySelectorAll('circle.edithandle,.selbox').forEach(function(n){n.remove()})}catch(e){}}
  window.addEventListener('beforeunload',onLeave);document.addEventListener('keydown',onKey);document.addEventListener('keyup',onKeyUp);
  svg.addEventListener('pointerdown',onDown);svg.addEventListener('pointermove',onMove);svg.addEventListener('pointerup',onUp);svg.addEventListener('pointercancel',onUp);
- return {boot:boot,setActive:setActive,undo:undo,save:save,cancel:cancel,destroy:destroy,isActive:function(){return active},isDirty:function(){return dirty},isReady:function(){return ready}}}
+ return {boot:boot,setActive:setActive,undo:undo,save:save,cancel:cancel,reset:reset,destroy:destroy,setLockLabels:setLockLabels,getLockLabels:function(){return lockLabels},hasOriginal:function(){return hasOriginal},isActive:function(){return active},isDirty:function(){return dirty},isReady:function(){return ready},gen:function(){return editGen}}}
+
 function provenanceLegendHtml(){var pv=(report&&report.provenance)||(job.summary&&job.summary.provenance)||{};if(!pv||!Object.keys(pv).length)return '';return '<div class="provleg" aria-label="'+tr('Provenance')+'">'+PROV.map(function(p){var n=pv[p[0]];if(n==null&&p[0]==='expert_derived')n=pv.expert_derived;if(n==null)n=0;return '<span class="pl" title="'+esc(ptip(p))+'"><i style="--c:'+p[2]+'"></i>'+esc(p[1])+': '+n+'</span>'}).join('')+'</div>'}
 function svgTab(name,note,legend,extra){var bys=(job.summary.modules&&job.summary.modules.by_source)||{},lg='',canEdit=!PX&&name==='map.svg'&&!MOCK; if(legend){lg='<div class="legend">'+Object.keys(bys).map(function(k){return '<em style="--c:'+(PAL[k]||'#888')+'">'+esc(k)+' '+bys[k]+'</em>'}).join('')+'<em style="--c:#c58a1c">'+tr('Bridge')+'</em></div>'}
  var provLeg=(!PX&&name==='map.svg')?provenanceLegendHtml():'';
@@ -417,7 +448,7 @@ function svgTab(name,note,legend,extra){var bys=(job.summary.modules&&job.summar
   +'<button type="button" id="'+PX+'pmm" aria-pressed="true">'+tr('Minimap')+'</button>'
   +'<button type="button" id="'+PX+'pcof" aria-pressed="true">'+tr('Show cofactors')+'</button>'
   +'<button type="button" id="'+PX+'pfull">'+tr('Full screen')+'</button>'
-  +(canEdit?'<span class="egap"></span><button type="button" id="pedit" aria-pressed="false">'+tr('Edit')+'</button><span id="peditacts" hidden><button type="button" id="pendo" disabled>'+tr('Undo')+'</button><button type="button" id="psave" disabled>'+tr('Save')+'</button><button type="button" id="pcancel" class="danger" disabled>'+tr('Cancel')+'</button></span>':'')
+  +(canEdit?'<span class="egap"></span><button type="button" id="pedit" aria-pressed="false">'+tr('Edit')+'</button><span id="peditacts" hidden><button type="button" id="plock" aria-pressed="'+(EDIT_LOCK_LABELS?'true':'false')+'">'+tr('Lock labels')+'</button><button type="button" id="pendo" disabled>'+tr('Undo')+'</button><button type="button" id="psave" disabled>'+tr('Save')+'</button><button type="button" id="preset" hidden disabled>'+tr('Reset to original')+'</button><button type="button" id="pcancel" class="danger" disabled>'+tr('Cancel')+'</button></span>':'')
   +'</div><div class="vbox tall" id="'+PX+'pbox"><div class="minimap" id="'+PX+'mm" aria-label="'+tr('Minimap')+'"></div></div></div>'+provLeg+(extra||'');
  loadSvg(name,$(PX+'pbox'),function(s){var box=$(PX+'pbox'),mm=$(PX+'mm');var pz=panzoom(box,s,mm);if(!PX){window.OPM_PZ=pz;window.OPM_SVG=s}
   $(PX+'pfit').onclick=function(){pz.fit()};$(PX+'zin').onclick=function(){pz.zoomBy(-1)};$(PX+'zout').onclick=function(){pz.zoomBy(1)};
@@ -427,9 +458,10 @@ function svgTab(name,note,legend,extra){var bys=(job.summary.modules&&job.summar
   $(PX+'pfull').onclick=function(){if(document.fullscreenElement){document.exitFullscreen();return}if(v.classList.contains('full')){overlay(false);return}if(v.requestFullscreen){v.requestFullscreen().catch(function(){overlay(true)})}else{overlay(true)}};
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&v.classList.contains('full'))overlay(false)});
   if(!v.dataset.fs){v.dataset.fs='1';v.addEventListener('fullscreenchange',function(){setTimeout(pz.fit,120)})}
-  if(canEdit){var ed=mapEditor(box,s,pz);window.OPM_EDIT=ed;ed.boot(function(){});
+  if(canEdit){if(window.OPM_EDIT&&window.OPM_EDIT.destroy)try{window.OPM_EDIT.destroy()}catch(e){}var ed=mapEditor(box,s,pz);window.OPM_EDIT=ed;ed.boot(function(){});
    $('pedit').onclick=function(){if(ed.isActive())ed.setActive(false);else ed.setActive(true)};
-   $('pendo').onclick=function(){ed.undo()};$('psave').onclick=function(){ed.save()};$('pcancel').onclick=function(){ed.cancel()}}})}
+   $('plock').onclick=function(){ed.setLockLabels(!ed.getLockLabels())};
+   $('pendo').onclick=function(){ed.undo()};$('psave').onclick=function(){ed.save()};$('preset').onclick=function(){ed.reset()};$('pcancel').onclick=function(){ed.cancel()}}})}
 function mapBanner(kind,ml){var h='',n=ml.network,lq=job.summary&&job.summary.layout_quality;
  if(kind==='global_degraded'||kind==='global_completed'){h='<p class="note">'+tr('Global map: the whole network on one canvas, so metabolites shared between structures are connected on the map (a metabolite can still be drawn more than once; duplicates are not merged yet).')+(kind==='global_degraded'?' '+tr('Simplified: connections are straight lines (no routing) and long edges are not optimised yet.'):'')+'</p>';
   if(n)h+='<p class="meta">'+tr('Canvas {w} × {h} px · {e} connections · median length {m} px · {o} longer than 250 px · connected parts: {g} in the model, {d} on the map (each copy of a metabolite counts separately)',{w:n.canvas[0].toLocaleString(),h:n.canvas[1].toLocaleString(),e:n.edges.toLocaleString(),m:n.edge_length_median,o:n.edges_over_250.toLocaleString(),g:n.gem_components,d:n.drawn_components_by_instance})+'</p>'}

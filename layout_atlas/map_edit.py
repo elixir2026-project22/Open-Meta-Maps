@@ -228,3 +228,29 @@ def save_map_edit(folder: Path, edit, *, filename='map.json'):
     for name in ('map.json', 'map.svg', 'report.json'):
         _update_file_bytes(folder, name)
     return dict(ok=True, layout_quality=quality, original_kept=True, first_backup=first_backup)
+
+
+def reset_map(folder: Path, *, filename='map.json'):
+    """Restore map.json from map.original.json and regenerate SVG + quality.
+
+    Raises FileNotFoundError when no original backup exists.
+    """
+    if filename != 'map.json':
+        raise ValueError('only map.json can be reset')
+    original = folder / 'map.original.json'
+    if not original.is_file():
+        raise FileNotFoundError('map.original.json missing')
+    data = json.loads(original.read_text())
+    if not (isinstance(data, list) and len(data) == 2 and isinstance(data[1], dict)):
+        raise ValueError('map.original.json is not a valid Escher map array')
+    map_path = folder / filename
+    tmp = folder / 'map.json.tmp'
+    tmp.write_text(json.dumps(data, ensure_ascii=False))
+    os.replace(tmp, map_path)
+    kinds = _prov_kinds(folder)
+    import line_render
+    line_render.render_file(map_path, folder / 'map.svg', kinds)
+    quality = _refresh_quality(folder, data)
+    for name in ('map.json', 'map.svg', 'report.json'):
+        _update_file_bytes(folder, name)
+    return dict(ok=True, layout_quality=quality, original_kept=True)
