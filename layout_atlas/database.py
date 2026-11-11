@@ -196,9 +196,14 @@ def escher_diagram(path, source='escher', license='CC0-1.0', species='unspecifie
 
 
 def build():
- rhea=rhea_index();mods=[];original_maps=source_maps();bysha={d['source_sha256']:d for d in original_maps if d['source']=='wikipathways'};maps=[{k:d.get(k) for k in ('id','source','source_id','species','lineage','name','license','source_sha256','provenance_status')} for d in original_maps];binding_audit=[]
+ rhea=rhea_index();mods=[];original_maps=source_maps();bysha={d['source_sha256']:d for d in original_maps if d['source']=='wikipathways'};maps=[{k:d.get(k) for k in ('id','source','source_id','species','lineage','name','license','source_sha256','provenance_status')} for d in original_maps if d.get('source')!='escher'];binding_audit=[]
+ # Community Escher maps: in-repo cutter (escher_cutter). Stored observations remain for
+ # WikiPathways geometry_only rows and for cutter parity tests.
+ import escher_cutter
+ escher=escher_cutter.cut_all()
+ maps.extend(escher['maps']);mods.extend(escher['modules'])
  for m in source_modules():
-  if m['source']=='reactome':continue  # use the fixed v97 archive, keep v0.2 snapshots only as historical metadata
+  if m['source'] in ('reactome','escher'):continue  # reactome: fixed v97 archive; escher: escher_cutter
   if len(m.get('core_nodes',m['nodes']))<=100 and 1<= (m['size'] if m['quality']=='semantic_transfer' else len(m['edges']))<=40:mods.append(from_legacy(m))
  for p in sorted((INPUTS/'raw/wp').rglob('*.gpml')):
   d=parse_gpml(p,rhea)
