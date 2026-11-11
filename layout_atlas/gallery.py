@@ -36,7 +36,7 @@ def tier(size):return 0 if size<=1 else (1 if size<=3 else 2)
 
 def tier_badge(size):
  en,zh,_,ren,rzh,ten,tzh=TIERS[tier(size)]
- return f'<span class="tag tier t{tier(size)}" title="{html.escape(ten)}" data-title-zh="{html.escape(tzh)}">'+ui.bi(f'{en} · {ren}',f'{zh} · {rzh}')+'</span>'
+ return f'<span class="tag tier t{tier(size)}" title="{html.escape(ten)}">'+ui.bi(f'{en} · {ren}',f'{zh} · {rzh}')+'</span>'
 
 CODES={};GROUPS={};RED={};CUR=['windows']
 SHAPE_ZH={'chain':'链','cycle':'环','fork':'叉'};SHAPE_COLOR={'chain':'#3b77b8','cycle':'#2d8f6f','fork':'#b66b28'}
@@ -45,7 +45,7 @@ def is_units():return CUR[0]=='units'
 
 def shape_tags(m):
  s=m.get('shape_type','');a=len(m.get('appendix_reactions',[]))
- h=f'<span class="tag" title="shape: chain, cycle or fork" data-title-zh="形状：链、环或叉">'+ui.bi(s,SHAPE_ZH.get(s,s))+'</span>'
+ h=f'<span class="tag" title="shape: chain, cycle or fork">'+ui.bi(s,SHAPE_ZH.get(s,s))+'</span>'
  if a:h+='<span class="tag">'+ui.bi(f'+{a} appendix',f'+{a} 个附属反应')+'</span>'
  return h
 
@@ -70,12 +70,12 @@ def load_redundancy(mods,codes):
 
 def red_badge(r):
  if not r:return ''
- if r['mx']>0:return '<span class="tag ind" title="independent structure: not contained in a larger module of the same source map" data-title-zh="独立结构：不被同一来源图中更大的模块包含">'+ui.bi('independent','独立结构')+'</span>'
- return '<a class="tag cont" href="module.html?id='+r['link']+'" title="contained in a larger module of the same source map (overlapping window)" data-title-zh="被同一来源图中更大的模块包含（重叠窗口）">'+ui.bi('contained in '+r['cont'],'包含于 '+r['cont'])+'</a>'
+ if r['mx']>0:return '<span class="tag ind" title="independent structure: not contained in a larger module of the same source map">'+ui.bi('independent','独立结构')+'</span>'
+ return '<a class="tag cont" href="module.html?id='+r['link']+'" title="contained in a larger module of the same source map (overlapping window)">'+ui.bi('contained in '+r['cont'],'包含于 '+r['cont'])+'</a>'
 
 def group_badge(gp):
  if not gp or not gp['cross']:return ''
- n=gp['nmaps'];return '<span class="tag grp" title="same reactions drawn in more than one source map" data-title-zh="同一组反应在多张来源图中被画过">'+ui.bi(f'same reactions · {n} maps',f'同组反应 · {n} 张图')+'</span>'
+ n=gp['nmaps'];return '<span class="tag grp" title="same reactions drawn in more than one source map">'+ui.bi(f'same reactions · {n} maps',f'同组反应 · {n} 张图')+'</span>'
 
 def assign_codes(mods,families,fp='F',mp='M'):
  """Display-only codes: F0001.. by (instances desc, id); variants by (instances desc, id); M00001.. by (source, family, variant, id)."""
@@ -133,8 +133,8 @@ def card(m,count,source_support,row,vno,finst=0,fvar=0):
  fc=CODES['f'][m['core_family']];mc=CODES['m'][m['id']];vc=f'{fc}-v{vno}'
  text=' '.join([m['name'],m['species'],m['source'],m['core_family'],m['id'],fc,vc,mc]+rx_ids(m)).lower()
  return (f'<article class="card" id="m-{m["id"]}" data-src="{e(m["source"])}" data-sp="{e(m["species"])}" data-q="{e(m["quality"])}" data-t="{e(text)}">'
-  f'<h2 class="dn"><a href="module.html?id={mc}">{e(m["name"])}</a></h2><p class="meta" title="source map id {e(m["map_id"])}" data-title-zh="来源图ID {e(m["map_id"])}">{map_html(m)}</p><a class="svgl" href="module.html?id={mc}" title="Open detail view" data-title-zh="打开详情页">{"".join(svg)}</a>'
-  f'<p class="rx"><span class="fam" style="--h:{hue(m["core_family"])}" title="family id {e(m["core_family"])} · variant id {e(m["variant"])}" data-title-zh="家族ID {e(m["core_family"])} · 变体ID {e(m["variant"])}">{vc}</span> {rx_html(m)}</p>'
+  f'<h2 class="dn"><a href="module.html?id={mc}">{e(m["name"])}</a></h2><p class="meta" title="source map id {e(m["map_id"])}">{map_html(m)}</p><a class="svgl" href="module.html?id={mc}" title="Open detail view">{"".join(svg)}</a>'
+  f'<p class="rx"><span class="fam" style="--h:{hue(m["core_family"])}" title="family id {e(m["core_family"])} · variant id {e(m["variant"])}">{vc}</span> {rx_html(m)}</p>'
   f'<div class="tags"><span class="tag src-{e(m["source"])}">{e(m["source"])}</span><span class="tag">{e(m["species"])}</span><span class="tag">{e(m["quality"])}</span><span class="tag lic">{e(m["license"])}</span>{shape_tags(m) if is_units() else tier_badge(m["size"])+group_badge(GROUPS.get(m["id"]))+red_badge(RED.get(m["id"]))}</div>'
   f'<p class="meta">'+ui.bi(f'{m["size"]} reactions / route steps · {count} instance(s) · {source_support} source layout(s), not independent authors · {len(m["ports"])} ports · {len(m["attachments"])} attachments',f'{m["size"]} 个反应／路径步 · {count} 个实例 · {source_support} 个来源布局（并非独立作者） · {len(m["ports"])} 个端口 · {len(m["attachments"])} 个附件')+'</p>'
   f'<dl class="kv"><dt>Module code</dt><dd><code>{mc}</code></dd><dt>Family</dt><dd>{fc} · '+(ui.bi(f'Same connectivity shape: {finst} instances · {fvar} layout variants',f'同连接形状 {finst} 个实例 · {fvar} 种画法') if fvar>1 else ui.bi(f'Same connectivity shape: {finst} instances · only layout',f'同连接形状 {finst} 个实例 · 唯一画法'))+f'</dd><dt>Variant</dt><dd>'+(ui.bi(f'Variant {vno} of {fvar}',f'画法 {vno} / {fvar}') if fvar>1 else ui.bi('Only layout','唯一画法'))+f' ({vc})</dd><dt>Source map</dt><dd>{map_html(m)}</dd><dt>Licence</dt><dd>{e(m["license"])}</dd></dl>'
@@ -143,7 +143,7 @@ def card(m,count,source_support,row,vno,finst=0,fvar=0):
 
 PAGE_JS='''<script>
 (function(){var q=document.getElementById('q'),s=document.getElementById('src'),k=document.getElementById('cnt'),cs=[].slice.call(document.querySelectorAll('.card'));
-function f(){var t=q.value.trim().toLowerCase(),v=s.value,n=0;cs.forEach(function(c){var ok=(!v||c.dataset.src===v)&&(!t||c.dataset.t.indexOf(t)>=0);c.style.display=ok?'':'none';if(ok)n++});k.textContent=tr('{a} of {b} cards on this page shown',{a:n,b:cs.length})}document.addEventListener('langchange',f);
+function f(){var t=q.value.trim().toLowerCase(),v=s.value,n=0;cs.forEach(function(c){var ok=(!v||c.dataset.src===v)&&(!t||c.dataset.t.indexOf(t)>=0);c.style.display=ok?'':'none';if(ok)n++});k.textContent=tr('{a} of {b} cards on this page shown',{a:n,b:cs.length})};
 q.oninput=s.onchange=f;f();
 if(location.hash){var h=document.querySelector(location.hash);if(h){h.style.outline='2px solid var(--accent)'}}})();
 </script>'''
@@ -173,7 +173,7 @@ var prev='';out.innerHTML=r.slice(0,LIM).map(function(d){var same=d[14]===prev;p
 return '<tr'+(same?' class="same"':'')+'><td><a href="module.html?id='+d[21]+'">'+th(d[17])+'</a></td><td><a href="module.html?id='+d[21]+'">'+'<span class="dn">'+esc(d[1])+'</span></a>'+(UN?UT(d):TW(d))+'<div class="sub"><span class="muted" title="'+tr('module id')+' '+d[0]+'">'+d[21]+'</span> · '+'<span title="'+tr('source map id')+' '+d[22]+'">'+maptxt(d[16])+'</span> · '+esc(d[3])+'</div><div class="rx">'+rx+'</div></td><td><a href="#" class="fam" data-f="'+d[9]+'" style="--h:'+d[18]+'" title="'+tr('Click to show only this family')+'">'+d[14]+'-v'+d[15]+'</a><div class="sub">'+(d[20]>1?tr('Variant {a} of {b}',{a:d[15],b:d[20]})+' · '+tr('Same connectivity shape: {a} instances · {b} layout variants',{a:d[19],b:d[20]}):tr('Only layout')+' · '+tr('Same connectivity shape: {a} instances · only layout',{a:d[19]}))+'</div></td><td>'+esc(d[2])+'</td><td>'+esc(d[4])+'</td><td>'+d[5]+'</td><td>'+d[6]+'</td><td>'+esc(d[10])+'</td></tr>'}).join('');
 save();var fc=$('fchip');if(F){fc.style.display='';$('ftxt').textContent=tr('Showing one family only')+': '+D.filter(function(x){return x[9]===F})[0][14]}else fc.style.display='none'}
 out.onclick=function(e){var a=e.target.closest('a.fam');if(a){e.preventDefault();F=a.dataset.f;run();$('hits').scrollIntoView()}};
-$('fclear').onclick=function(){F='';run()};document.addEventListener('langchange',run);
+$('fclear').onclick=function(){F='';run()};
 ['q','mn','mx'].forEach(function(i){$(i).oninput=run});TS.forEach(function(i){$(i).onchange=run});$('rg').onchange=run;$('ind').onchange=run;$('tall').onclick=function(){TS.forEach(function(i){$(i).checked=true});$('ind').checked=false;run()};['src','sp','ql','od'].forEach(function(i){$(i).onchange=run});
 $('reset').onclick=function(){['q','mn','mx'].forEach(function(i){$(i).value=''});['src','sp','ql'].concat(UN?['shp']:[]).forEach(function(i){$(i).value=''});$('od').value='family';F='';TS.forEach(function(i,j){$(i).checked=UN||j>0});$('rg').checked=false;$('ind').checked=!UN;run()};run()})();
 </script>'''
@@ -237,7 +237,7 @@ def make(library='windows'):
   '<label>Species<select id="sp"><option value="">all</option>'+''.join(f'<option value="{html.escape(k)}">{html.escape(k)} ({v:,})</option>' for k,v in species.most_common())+'</select></label>'
   '<label>Quality<select id="ql"><option value="">all</option>'+''.join(f'<option value="{k}">{k}</option>' for k in sorted(quality))+'</select></label>'
   +(SHAPE_FILTER if U else '')+
-  (UNIT_HIDDEN if U else '<fieldset class="tiers"><legend>Size tier</legend><label><input type="checkbox" id="t0" value="0"> <span title="micro: stored for provenance and statistics, not used for retrieval" data-title-zh="微型：仅为来源记录与统计保存，不参与检索">micro · 1 reaction</span></label><label><input type="checkbox" id="t1" value="1" checked> <span title="small: used only to fill gaps" data-title-zh="小型：只用于补缺">small · 2–3 reactions</span></label><label><input type="checkbox" id="t2" value="2" checked> <span title="structure: reusable local layout" data-title-zh="结构单元：可复用的局部布局">structure · ≥4 reactions</span></label><label class="rgf"><span><input type="checkbox" id="ind" checked> <span title="Independent structure = a module not contained in a larger module of the same source map; the others are overlapping windows" data-title-zh="独立结构 = 不被同一来源图中更大模块包含的模块；其余是重叠窗口">Independent structures only</span></span></label><button id="tall" type="button">Show all</button></fieldset><label class="rgf"><span><input type="checkbox" id="rg"> <span title="Modules whose exact set of reactions is also drawn in at least one other source map (lower bound)" data-title-zh="完全相同的反应集合在至少另一张来源图中也被画过（下限值）">reaction set drawn in ≥2 maps</span></span></label>')+'<label>Min size<input id="mn" type="number" min="0" style="min-width:90px;width:90px"></label><label>Max size<input id="mx" type="number" min="0" style="min-width:90px;width:90px"></label><label>Order<select id="od"><option value="family">Group by family</option><option value="size">Size (large first)</option><option value="name">Name A–Z</option></select></label><button id="reset" type="button">Reset</button></div>'
+  (UNIT_HIDDEN if U else '<fieldset class="tiers"><legend>Size tier</legend><label><input type="checkbox" id="t0" value="0"> <span title="micro: stored for provenance and statistics, not used for retrieval">micro · 1 reaction</span></label><label><input type="checkbox" id="t1" value="1" checked> <span title="small: used only to fill gaps">small · 2–3 reactions</span></label><label><input type="checkbox" id="t2" value="2" checked> <span title="structure: reusable local layout">structure · ≥4 reactions</span></label><label class="rgf"><span><input type="checkbox" id="ind" checked> <span title="Independent structure = a module not contained in a larger module of the same source map; the others are overlapping windows">Independent structures only</span></span></label><button id="tall" type="button">Show all</button></fieldset><label class="rgf"><span><input type="checkbox" id="rg"> <span title="Modules whose exact set of reactions is also drawn in at least one other source map (lower bound)">reaction set drawn in ≥2 maps</span></span></label>')+'<label>Min size<input id="mn" type="number" min="0" style="min-width:90px;width:90px"></label><label>Max size<input id="mx" type="number" min="0" style="min-width:90px;width:90px"></label><label>Order<select id="od"><option value="family">Group by family</option><option value="size">Size (large first)</option><option value="name">Name A–Z</option></select></label><button id="reset" type="button">Reset</button></div>'
   '<p class="legendline">Same colour = same connectivity shape (family; reactions and metabolites can differ); variants = different layouts of that shape. <a href="'+ui.rel(dest/'index.html','index.html')+'#definitions">What do these terms mean?</a></p><div id="fchip" class="fchip" style="display:none"><span id="ftxt"></span><button id="fclear" type="button">Show all families</button></div><div id="cnt" class="count"></div><div id="cnt2" class="count"></div><div id="cnt3" class="count"></div><div class="tablewrap"><table><thead><tr><th>Layout</th><th>Module and reactions</th><th title="Family = modules with the same connectivity shape (reactions and metabolites can differ; only the connection pattern is the same). Variant = a different drawn layout of that shape.">Family · variant</th><th>Source</th><th>Quality</th><th>Size</th><th>Instances</th><th>Licence</th></tr></thead><tbody id="hits"></tbody></table></div>')
  if U:
   shp=Counter(m['shape_type'] for m in mods);breakdown=breakdown[:-6]+'<section class="panel"><h3>'+ui.bi('Units by shape','按形状统计的单元')+'</h3>'+bar(shp,SHAPE_COLOR)+'<p class="meta">'+ui.bi('chain = unbranched path; cycle = shortest rings (fused into ladders); fork = branch point with its arms. Appendix reactions are fragments of fewer than 3 reactions attached to a neighbouring unit.','链 = 无分支路径；环 = 最短环（可融合成梯形）；叉 = 分支点及其臂。附属反应 = 不足 3 个反应、并入相邻单元的碎片。')+'</p></section></div>'

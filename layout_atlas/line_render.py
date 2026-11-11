@@ -106,12 +106,12 @@ def render(data, kinds=None):
             if (curved or entry is not None) and (rid, end.get('bigg_id')) not in routed_edges:  # the expert's own line: Bezier segments or the polyline of an original connector, stored in the map as Escher segments
                 curves_drawn += 1
                 status = (entry or {}).get('status', 'preserved')
-                title = f'<title>{escape(rid)} {escape(r.get("name") or "")} - {escape(epv.LABELS[kind][0]) if kind in epv.LABELS else "unclassified"} (expert {"curve" if curved else "line"}{", adjusted" if status == "adjusted" else ""})</title>'
+                title = f'<title>{escape(rid)} {escape(r.get("name") or "")} - {escape(epv.LABELS[kind]) if kind in epv.LABELS else "unclassified"} (expert {"curve" if curved else "line"}{", adjusted" if status == "adjusted" else ""})</title>'
                 top_lines.append(f'<path data-rx="{escape(rid)}" data-met="{escape(end.get("bigg_id") or "")}"{kind_attr} d="{d_curve}" stroke="{EDGE}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" fill="none"{(" marker-end=" + chr(34) + mark + chr(34)) if (product or reversible) else ""}>{title}</path>')
                 continue
             if (rid, end.get('bigg_id')) in routed_edges:  # an algorithm-routed detour with rounded corners: the same segments as in map.json
                 arrows = f' marker-end="{mark}"' if (product or reversible) else ''
-                title = f'<title>{escape(rid)} {escape(r.get("name") or "")} - {escape(epv.LABELS[kind][0]) if kind in epv.LABELS else "unclassified"} (routed around obstacles)</title>'
+                title = f'<title>{escape(rid)} {escape(r.get("name") or "")} - {escape(epv.LABELS[kind]) if kind in epv.LABELS else "unclassified"} (routed around obstacles)</title>'
                 lines.append(f'<path data-rx="{escape(rid)}" data-met="{escape(end.get("bigg_id") or "")}"{kind_attr} d="{d_curve}" stroke="{EDGE}" stroke-width="1.3" stroke-opacity=".7" stroke-linejoin="round" stroke-linecap="round" fill="none"{arrows}>{title}</path>')
                 continue
             if keep:
@@ -119,7 +119,7 @@ def render(data, kinds=None):
             pts = ' L'.join(f"{nodes[k]['x']:.1f},{nodes[k]['y']:.1f}" for k in path)
             product = coefficient.get(end.get('bigg_id'), 1) > 0
             arrows = f' marker-end="{mark}"' if (product or reversible) else ''
-            title = f'<title>{escape(rid)} {escape(r.get("name") or "")} - {escape(epv.LABELS[kind][0]) if kind in epv.LABELS else "unclassified"}</title>'
+            title = f'<title>{escape(rid)} {escape(r.get("name") or "")} - {escape(epv.LABELS[kind]) if kind in epv.LABELS else "unclassified"}</title>'
             (top_lines if keep else lines).append(f'<path data-rx="{escape(rid)}" data-met="{escape(end.get("bigg_id") or "")}"{kind_attr} d="M{pts}" stroke="{EDGE}" stroke-width="{2.4 if keep else 1.3}"{"" if keep else " stroke-opacity=\".7\""} stroke-linejoin="round" stroke-linecap="round" fill="none"{arrows}>{title}</path>')
         labels.append(f'<text data-rk="{escape(rk)}" data-rl="{escape(rid)}" x="{r["label_x"]:.1f}" y="{r["label_y"]:.1f}" font-family="{FONT}" font-size="12" fill="#17323d" font-weight="600" stroke="#fff" stroke-width="3" paint-order="stroke">{escape(rid)}</text>')
     svg += lines + top_lines  # routed connections first, the expert structures' own edges on top

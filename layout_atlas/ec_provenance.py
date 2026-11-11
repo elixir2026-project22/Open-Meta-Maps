@@ -42,9 +42,9 @@ KINDS = ['expert_derived', 'topology_layout_suggestion', 'functional_layout_sugg
 COLORS = {'expert_derived': '#2e7d32', 'topology_layout_suggestion': '#8e6bbf', 'functional_layout_suggestion': '#c9a227', 'bridge': '#3d6fa3', 'generated': '#9aa9b2'}
 # Display names for the tool-page provenance legend (and SVG <title> tooltips).
 # Key ``expert_derived`` is kept for report.json / reaction_provenance.json compatibility.
-LABELS = {'expert_derived': ('Curated', '人工绘制'), 'topology_layout_suggestion': ('Topology-only layout suggestion', '仅拓扑的布局建议'),
-          'functional_layout_suggestion': ('Functional (EC) layout suggestion', '功能（EC）布局建议'), 'bridge': ('Network bridge', '网络桥接'),
-          'generated': ('Generated', '算法生成')}
+LABELS = {'expert_derived': 'Curated', 'topology_layout_suggestion': 'Topology-only layout suggestion',
+          'functional_layout_suggestion': 'Functional (EC) layout suggestion', 'bridge': 'Network bridge',
+          'generated': 'Generated'}
 
 
 def classify_pair(source_reaction, target_reaction, mapper):
@@ -341,6 +341,6 @@ def recolor_svg(text, kinds):
         kind = kinds.get(label)
         if kind is None:
             return m.group(0)
-        return (f'<circle cx="{m.group(1)}" cy="{m.group(2)}" r="5.5" fill="{COLORS[kind]}"><title>{escape(label)} - {LABELS[kind][0]}</title></circle>'
+        return (f'<circle cx="{m.group(1)}" cy="{m.group(2)}" r="5.5" fill="{COLORS[kind]}"><title>{escape(label)} - {LABELS[kind]}</title></circle>'
                 f'<text {m.group(3)}>{m.group(4)}</text>')
     return re.sub(r'<circle cx="([^"]+)" cy="([^"]+)" r="4" fill="#d77d38"/><text ([^>]*)>([^<]*)</text>', repl, text)

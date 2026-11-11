@@ -75,8 +75,8 @@ processes = {}
 lock = threading.Lock()
 
 
-def error(code, en, zh):
-    return dict(error=dict(code=code, message_en=en, message_zh=zh))
+def error(code, en):
+    return dict(error=dict(code=code, message_en=en))
 
 
 def tool_environment():
@@ -119,7 +119,7 @@ def write_state(job_dir, state):
 
 def queued_state(job_id):
     import tool_pipeline as tp
-    steps = [dict(key=k, label_en=en, label_zh=zh, state='pending', seconds=None) for k, en, zh in tp.STEPS]
+    steps = [dict(key=k, label_en=en, state='pending', seconds=None) for k, en in tp.STEPS]
     return dict(id=job_id, status='queued', step='parse', steps=steps, progress=0.0, log=[], warnings=[], error=None, summary=None, files=[], views=[])
 
 
@@ -140,13 +140,13 @@ def worker():
                 proc.kill()
                 proc.communicate()
                 state = read_state(job_dir) or state
-                state.update(status='failed', error=dict(code='timeout', message_en='The job exceeded the time limit and was stopped.', message_zh='任务超时，已停止。'))
+                state.update(status='failed', error=dict(code='timeout', message_en='The job exceeded the time limit and was stopped.'))
                 write_state(job_dir, state)
                 continue
             if proc.returncode not in (0, None) and not view:
                 state = read_state(job_dir) or state
                 if state.get('status') not in ('done', 'failed', 'cancelled'):
-                    state.update(status='failed', error=dict(code='internal_error', message_en='The pipeline process ended unexpectedly.', message_zh='处理进程意外结束。'))
+                    state.update(status='failed', error=dict(code='internal_error', message_en='The pipeline process ended unexpectedly.'))
                     state['log'] = state.get('log', []) + [dict(t=0, msg=(out or '')[-1500:])]
                     write_state(job_dir, state)
         finally:
@@ -203,22 +203,22 @@ class Handler(http.server.BaseHTTPRequestHandler):
     # ---- routing
     def do_GET(self):
         if not self.host_ok():
-            return self.send_json(403, error('bad_host', 'Forbidden host.', '不允许的主机名。'))
+            return self.send_json(403, error('bad_host', 'Forbidden host.'))
         path = unquote(urlparse(self.path).path)
         m = re.match(r'^/api/jobs/([^/]+)(?:/files/(.+))?$', path)
         if m:
             jd = self.job_dir(m[1])
             if jd is None:
-                return self.send_json(404, error('not_found', 'Unknown job.', '没有这个任务。'))
+                return self.send_json(404, error('not_found', 'Unknown job.'))
             if m[2] is None:
                 state = read_state(jd)
-                return self.send_json(200, state) if state else self.send_json(500, error('state_unreadable', 'Job state unreadable.', '无法读取任务状态。'))
+                return self.send_json(200, state) if state else self.send_json(500, error('state_unreadable', 'Job state unreadable.'))
             name = m[2]
             if not SAFE_FILE.match(name) or name.split('/')[0] in BLOCKED_TOP or '..' in name:
-                return self.send_json(403, error('forbidden', 'This file is not available.', '该文件不可下载。'))
+                return self.send_json(403, error('forbidden', 'This file is not available.'))
             f = jd / name
             if not f.is_file():
-                return self.send_json(404, error('not_found', 'File not found.', '没有这个文件。'))
+                return self.send_json(404, error('not_found', 'File not found.'))
             ctype = mimetypes.guess_type(f.name)[0] or 'application/octet-stream'
             extra = {'Content-Disposition': 'attachment; filename="%s"' % f.name} if self.path.endswith('?download=1') else {}
             return self.send_bytes(200, f.read_bytes(), ctype + ('; charset=utf-8' if ctype.startswith(('text/', 'application/json', 'image/svg')) else ''), extra)
@@ -227,7 +227,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if path == '/api/examples':
             return self.send_json(200, dict(examples=example_list()))
         if path.startswith('/api/'):
-            return self.send_json(404, error('not_found', 'Unknown endpoint.', '没有这个接口。'))
+            return self.send_json(404, error('not_found', 'Unknown endpoint.'))
         return self.static(path)
 
     HEARTBEAT = (b"<script>(function(){if(window.__opmHB)return;window.__opmHB=1;"
@@ -254,14 +254,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if rel == 'index.html':
             target = (BASE.parent / 'index.html').resolve()  # the project home page (Home link of every page)
             if not target.is_file():
-                return self.send_json(404, error('not_found', 'Not found.', '没有找到。'))
+                return self.send_json(404, error('not_found', 'Not found.'))
             return self.send_bytes(200, self.html_bytes(target.read_bytes()), 'text/html; charset=utf-8')
         target = (RESULTS / rel).resolve()
         # files under results/ are served; a developer may keep big generated folders outside the repository and link them in as FIRST-LEVEL symlinks of results/
         # (`results/catalog -> ../../../Experiments/...`): those link targets are allowed too, nothing else outside results/ is
         roots = [RESULTS.resolve()] + [c.resolve() for c in RESULTS.iterdir() if c.is_symlink()]
         if not any(r == target or r in target.parents for r in roots) or RUNS.resolve() in (target, *target.parents) or not target.is_file():
-            return self.send_json(404, error('not_found', 'Not found.', '没有找到。'))
+            return self.send_json(404, error('not_found', 'Not found.'))
         ctype = mimetypes.guess_type(target.name)[0] or 'application/octet-stream'
         if target.suffix == '.js':
             ctype = 'text/javascript'
@@ -272,7 +272,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
     def do_POST(self):
         if not self.host_ok():
-            return self.send_json(403, error('bad_host', 'Forbidden host.', '不允许的主机名。'))
+            return self.send_json(403, error('bad_host', 'Forbidden host.'))
         path = urlparse(self.path).path
         if path in ('/api/ping', '/api/bye'):
             length = int(self.headers.get('Content-Length') or 0)
@@ -290,49 +290,46 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if m:
             jd = self.job_dir(m[1])
             if jd is None or not VIEW_ID.match(m[2]):
-                return self.send_json(404, error('not_found', 'Unknown job or view.', '没有这个任务或视图。'))
+                return self.send_json(404, error('not_found', 'Unknown job or view.'))
             state = read_state(jd)
             if not state or state.get('status') != 'done' or not any(v['id'] == m[2] for v in state.get('views', [])):
-                return self.send_json(409, error('not_ready', 'The job is not finished or the view does not exist.', '任务未完成，或视图不存在。'))
+                return self.send_json(409, error('not_ready', 'The job is not finished or the view does not exist.'))
             for v in state['views']:
                 if v['id'] == m[2]:
                     v['state'] = 'queued'
             write_state(jd, state)
             tasks.put((jd, m[2]))
             return self.send_json(202, dict(id=m[1], view=m[2], status='queued'))
-        return self.send_json(404, error('not_found', 'Unknown endpoint.', '没有这个接口。'))
+        return self.send_json(404, error('not_found', 'Unknown endpoint.'))
 
     def save_map(self, job_id):
         jd = self.job_dir(job_id)
         if jd is None:
-            return self.send_json(404, error('not_found', 'Unknown job.', '没有这个任务。'))
+            return self.send_json(404, error('not_found', 'Unknown job.'))
         state = read_state(jd)
         if not state or state.get('status') != 'done':
-            return self.send_json(409, error('not_ready', 'The job is not finished.', '任务未完成。'))
+            return self.send_json(409, error('not_ready', 'The job is not finished.'))
         length = int(self.headers.get('Content-Length') or 0)
         if length <= 0 or length > MAX_BYTES:
             return self.send_json(413 if length > MAX_BYTES else 400,
-                                  error('too_large' if length > MAX_BYTES else 'bad_format',
-                                        'Edit payload missing or larger than 25 MB.',
-                                        '编辑内容缺失或超过 25 MB。'))
+                                  error('too_large' if length > MAX_BYTES else 'bad_format', 'Edit payload missing or larger than 25 MB.'))
         ctype = (self.headers.get('Content-Type') or '').split(';')[0].strip().lower()
         if ctype not in ('application/json', 'text/json'):
-            return self.send_json(400, error('bad_format', 'Expected application/json.', '需要 application/json。'))
+            return self.send_json(400, error('bad_format', 'Expected application/json.'))
         try:
             edit = json.loads(self.rfile.read(length).decode())
         except Exception:
-            return self.send_json(400, error('bad_format', 'The body is not valid JSON.', '请求体不是合法的 JSON。'))
+            return self.send_json(400, error('bad_format', 'The body is not valid JSON.'))
         try:
             import map_edit
             result = map_edit.save_map_edit(jd, edit, filename='map.json')
         except Exception as e:
             import jsonschema
             if isinstance(e, jsonschema.ValidationError):
-                return self.send_json(400, error('bad_schema', 'Edit JSON failed schema validation: ' + e.message,
-                                                 '编辑 JSON 未通过模式校验：' + e.message))
+                return self.send_json(400, error('bad_schema', 'Edit JSON failed schema validation: ' + e.message))
             if isinstance(e, (ValueError, FileNotFoundError, KeyError, TypeError)):
-                return self.send_json(400, error('bad_edit', str(e), str(e)))
-            return self.send_json(500, error('internal_error', 'Could not save the map edit.', '无法保存地图编辑。'))
+                return self.send_json(400, error('bad_edit', str(e)))
+            return self.send_json(500, error('internal_error', 'Could not save the map edit.'))
         state = read_state(jd) or state
         return self.send_json(200, dict(id=job_id, status='saved', summary=state.get('summary'),
                                         layout_quality=result.get('layout_quality'),
@@ -341,31 +338,30 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def create_job(self):
         length = int(self.headers.get('Content-Length') or 0)
         if length <= 0 or length > MAX_BYTES + 200_000:
-            return self.send_json(413, error('too_large', 'The upload is larger than 25 MB.', '上传文件超过 25 MB。'))
+            return self.send_json(413, error('too_large', 'The upload is larger than 25 MB.'))
         ctype = self.headers.get('Content-Type') or ''
         if not ctype.startswith('multipart/form-data'):
-            return self.send_json(400, error('bad_format', 'Expected multipart/form-data.', '需要 multipart/form-data。'))
+            return self.send_json(400, error('bad_format', 'Expected multipart/form-data.'))
         fields = parse_multipart(ctype, self.rfile.read(length))
         example = fields.get('example', (None, b''))[1].decode(errors='ignore').strip()
         if example:
             if example not in EXAMPLES or not EXAMPLES[example][1].is_file():
-                return self.send_json(400, error('bad_format', 'Unknown example model.', '没有这个示例模型。'))
+                return self.send_json(400, error('bad_format', 'Unknown example model.'))
             fields['model'] = (EXAMPLES[example][1].name, EXAMPLES[example][1].read_bytes())
         if 'model' not in fields or not fields['model'][1]:
-            return self.send_json(400, error('bad_format', 'No model file in the upload.', '上传里没有模型文件。'))
+            return self.send_json(400, error('bad_format', 'No model file in the upload.'))
         filename, data = fields['model']
         ext = Path(filename or '').suffix.lower()
         if ext not in ('.xml', '.json') or len(data) > MAX_BYTES:
-            return self.send_json(400 if len(data) <= MAX_BYTES else 413, error('too_large' if len(data) > MAX_BYTES else 'bad_format',
-                                  'Only .xml (SBML) or .json (COBRA/BiGG) files up to 25 MB are accepted.', '只接受不超过 25 MB 的 .xml（SBML）或 .json（COBRA/BiGG）文件。'))
+            return self.send_json(400 if len(data) <= MAX_BYTES else 413, error('too_large' if len(data) > MAX_BYTES else 'bad_format', 'Only .xml (SBML) or .json (COBRA/BiGG) files up to 25 MB are accepted.'))
         try:
             options = json.loads(fields.get('options', (None, b'{}'))[1].decode() or '{}')
             assert isinstance(options, dict)
         except Exception:
-            return self.send_json(400, error('bad_format', 'The options field is not valid JSON.', 'options 字段不是合法的 JSON。'))
+            return self.send_json(400, error('bad_format', 'The options field is not valid JSON.'))
         options = dict(libraries={k: bool(v) for k, v in (options.get('libraries') or {}).items() if k in ('core', 'ec')}, library=options.get('library') if options.get('library') in ('windows', 'units_sub') else 'windows', source_paths=bool(options.get('source_paths')), layout=options.get('layout') if options.get('layout') in ('global', 'tiled') else 'global', layout_style=('legacy' if options.get('layout_style')=='legacy' else 'curated'), completion_context=options.get('completion_context') if options.get('completion_context') in ('auto', 'off') else 'auto', edge_routing=options.get('edge_routing') if options.get('edge_routing') in ('libavoid', 'hybrid', 'none') else 'libavoid', context=options.get('context') if options.get('context') in ('auto', 'off') else 'auto', instances=options.get('instances') if options.get('instances') in ('auto', 'off') else 'auto', block_layout=options.get('block_layout') if options.get('block_layout') in ('auto', 'single') else 'single', orientation=options.get('orientation') if options.get('orientation') in ('off', 'sides', 'full') else ('off' if options.get('orientation') is False else 'full'))
         if tasks.qsize() + len(processes) >= MAX_QUEUE:
-            return self.send_json(429, error('busy', 'The tool is busy; try again when the running job has finished.', '工具正忙，请等当前任务结束后再试。'))
+            return self.send_json(429, error('busy', 'The tool is busy; try again when the running job has finished.'))
         job_id = 'j_' + uuid.uuid4().hex[:10]
         jd = RUNS / job_id
         (jd / 'upload').mkdir(parents=True)
@@ -378,11 +374,11 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
     def do_DELETE(self):
         if not self.host_ok():
-            return self.send_json(403, error('bad_host', 'Forbidden host.', '不允许的主机名。'))
+            return self.send_json(403, error('bad_host', 'Forbidden host.'))
         m = re.match(r'^/api/jobs/([^/]+)$', urlparse(self.path).path)
         jd = self.job_dir(m[1]) if m else None
         if jd is None:
-            return self.send_json(404, error('not_found', 'Unknown job.', '没有这个任务。'))
+            return self.send_json(404, error('not_found', 'Unknown job.'))
         with lock:
             proc = processes.get(jd.name)
             if proc:

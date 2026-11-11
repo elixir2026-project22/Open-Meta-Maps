@@ -5,7 +5,7 @@ One computation path: ``evaluate()`` feeds the quality gate, the tool panel, and
 layout-benchmark / layout-transfer-check field names are used where they exist;
 gdMetriX extras stay CLI-only (optional GPL import, never vendored).
 
-User-facing wording uses **curated** (人工绘制), not "expert". Internal aliases
+User-facing wording uses **curated**, not "expert". Internal aliases
 ``algorithm_expert`` / ``expert_expert`` remain for the quality gate.
 
 Also contains metric_details and assert_chemistry (used by compose).
@@ -499,7 +499,6 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, str
 
 
 STAGE_NOT_YET = 'not yet optimised'
-STAGE_NOT_YET_ZH = '待优化'
 
 
 def _row(label, value, *, code=None, tip=None, better=None, target=None, stage=None, miss=False):
@@ -720,7 +719,7 @@ def _detailed_metrics_panel(details, *, line_shape, cycles, unrelated, crossing_
                 miss=False,
             ),
         ]))
-    return dict(groups=groups, stage_not_yet=STAGE_NOT_YET, stage_not_yet_zh=STAGE_NOT_YET_ZH)
+    return dict(groups=groups, stage_not_yet=STAGE_NOT_YET)
 
 
 def _turn_stats(pts):

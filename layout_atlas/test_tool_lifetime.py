@@ -60,7 +60,9 @@ class LifetimeConstants(unittest.TestCase):
         self.assertIn('function safeDownload', html)
         self.assertIn('data-dl=', html)
         self.assertIn('Cannot download: the tool server is not reachable', html)
-        self.assertIn('无法下载：工具服务器不可用', html)
+        self.assertNotIn('无法下载：工具服务器不可用', html)
+        self.assertNotIn('id="lang"', html)
+        self.assertNotIn('data-zh', html)
         self.assertIn("visibilitychange", html)
         self.assertIn("visibilityState==='visible'", html)
         # bye only on pagehide/unload — not on download clicks

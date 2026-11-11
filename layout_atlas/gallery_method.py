@@ -54,7 +54,7 @@ def switch(current, other_href_units='../catalog_units/index.html', other_href_w
     parts = []
     for key, (en, zh), href in items:
         if key == current:
-            parts.append(f'<span aria-current="page" title="current library" data-title-zh="当前所在的库">{bi(en, zh)}</span>')
+            parts.append(f'<span aria-current="page" title="current library">{bi(en, zh)}</span>')
         else:
             parts.append(f'<a href="{href}">{bi(en, zh)}</a>')
     return ('<div class="pager libsw" role="navigation" aria-label="Library"><span style="background:none;border:0;color:var(--mute)">' + bi('Library:', '模块库：') + '</span>' + ''.join(parts) + '</div>')
