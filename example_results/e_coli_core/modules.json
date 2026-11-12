@@ -1,7 +1,7 @@
 [
   {
     "code": "U0001",
-    "module_id": "690c9ede0285b7624f587a33",
+    "module_id": "369facda4a68e5257088426a",
     "source": "escher",
     "map_name": "e_coli_core.Core metabolism",
     "species": "Escherichia coli",
@@ -9,6 +9,7 @@
     "size": 40,
     "tier": "structure",
     "reactions": [
+      "ACALD",
       "ACONTa",
       "ACONTb",
       "AKGDH",
@@ -18,7 +19,6 @@
       "EX_fum_e",
       "EX_gln__L_e",
       "EX_glu__L_e",
-      "EX_mal__L_e",
       "EX_succ_e",
       "FRD7",
       "FUM",
@@ -58,7 +58,7 @@
   },
   {
     "code": "U0002",
-    "module_id": "39a80d6c9b49b7441bf36db4",
+    "module_id": "06a2985ae5efb837af1991f3",
     "source": "escher",
     "map_name": "iMM904.Central carbon metabolism",
     "species": "Saccharomyces cerevisiae",
@@ -69,11 +69,11 @@
       "FBA",
       "GAPD",
       "GND",
+      "PGL",
       "RPE",
       "RPI",
       "TKT1",
-      "TKT2",
-      "TPI"
+      "TKT2"
     ],
     "match_level": "reaction_reference",
     "partition": "open_core",
@@ -83,7 +83,7 @@
   },
   {
     "code": "U0003",
-    "module_id": "8cb4f305d956103574fab0b2",
+    "module_id": "e8777d3623634c9a78ddf099",
     "source": "escher",
     "map_name": "e_coli_core.Core metabolism",
     "species": "Escherichia coli",
@@ -104,28 +104,7 @@
   },
   {
     "code": "U0004",
-    "module_id": "3928f6d477efa2f22e46989b",
-    "source": "escher",
-    "map_name": "e_coli_core.Core metabolism",
-    "species": "Escherichia coli",
-    "license": "CC0-1.0",
-    "size": 4,
-    "tier": "structure",
-    "reactions": [
-      "ACALD",
-      "ACALDt",
-      "ALCD2x",
-      "ETOHt2r"
-    ],
-    "match_level": "reaction_reference",
-    "partition": "open_core",
-    "provenance": {
-      "expert_derived": 4
-    }
-  },
-  {
-    "code": "U0005",
-    "module_id": "7df7555093d5ca7edebfa0a5",
+    "module_id": "d02d34b0e6a1b03ede552807",
     "source": "escher",
     "map_name": "e_coli_core.Core metabolism",
     "species": "Escherichia coli",
@@ -133,8 +112,8 @@
     "size": 2,
     "tier": "small",
     "reactions": [
-      "D_LACt2",
-      "EX_lac__D_e"
+      "EX_for_e",
+      "FORt2"
     ],
     "match_level": "reaction_reference",
     "partition": "open_core",
@@ -143,8 +122,8 @@
     }
   },
   {
-    "code": "U0006",
-    "module_id": "954489273de4ecdf1ec923c0",
+    "code": "U0005",
+    "module_id": "8a3287d8c4fac2120df47aa4",
     "source": "escher",
     "map_name": "e_coli_core.Core metabolism",
     "species": "Escherichia coli",
@@ -162,8 +141,8 @@
     }
   },
   {
-    "code": "U0007",
-    "module_id": "98d732015ac0be39f55872e9",
+    "code": "U0006",
+    "module_id": "cd614a3e56799c6ab19e3daf",
     "source": "escher",
     "map_name": "e_coli_core.Core metabolism",
     "species": "Escherichia coli",
@@ -171,8 +150,8 @@
     "size": 2,
     "tier": "small",
     "reactions": [
-      "ACKr",
-      "ACt2r"
+      "D_LACt2",
+      "EX_lac__D_e"
     ],
     "match_level": "reaction_reference",
     "partition": "open_core",
@@ -181,7 +160,7 @@
     }
   },
   {
-    "code": "U0008",
+    "code": "U0007",
     "module_id": "1663e00d23c12c4fc242e28c",
     "source": "wikipathways",
     "map_name": "Glycerol metabolism including linked IMDs",
@@ -200,8 +179,8 @@
     }
   },
   {
-    "code": "U0009",
-    "module_id": "f000334968af9ed2962bae04",
+    "code": "U0008",
+    "module_id": "3befb02748b08f38323d4655",
     "source": "escher",
     "map_name": "e_coli_core.Core metabolism",
     "species": "Escherichia coli",
@@ -209,8 +188,8 @@
     "size": 2,
     "tier": "small",
     "reactions": [
-      "EX_for_e",
-      "FORt2"
+      "ACKr",
+      "ACt2r"
     ],
     "match_level": "reaction_reference",
     "partition": "open_core",
@@ -219,7 +198,7 @@
     }
   },
   {
-    "code": "U0010",
+    "code": "U0009",
     "module_id": "b52b2a4f3f2f4c69ba946619",
     "source": "human_maps",
     "map_name": "Cysteine and methionine metabolism (Human-GEM 2.1.1)",
@@ -238,17 +217,36 @@
     }
   },
   {
-    "code": "U0011",
-    "module_id": "56c5d0fda73578319af0545f",
+    "code": "U0010",
+    "module_id": "4590a11b77ff048bbecdbaf0",
     "source": "escher",
-    "map_name": "iJO1366.Central metabolism",
+    "map_name": "e_coli_core.Core metabolism",
     "species": "Escherichia coli",
     "license": "CC0-1.0",
     "size": 2,
     "tier": "small",
     "reactions": [
-      "G6PDH2r",
-      "PGL"
+      "ACALDt",
+      "EX_acald_e"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0011",
+    "module_id": "07b252b6ae7ab27e72f9ea6e",
+    "source": "escher",
+    "map_name": "e_coli_core.Core metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ALCD2x",
+      "ETOHt2r"
     ],
     "match_level": "reaction_reference",
     "partition": "open_core",

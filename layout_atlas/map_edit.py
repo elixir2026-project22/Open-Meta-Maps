@@ -255,9 +255,19 @@ def save_map_edit(folder: Path, edit, *, filename='map.json'):
     import line_render
     line_render.render_file(map_path, folder / 'map.svg', kinds)
     quality = _refresh_quality(folder, edited)
-    for name in ('map.json', 'map.svg', 'report.json'):
+    _refresh_exports(folder)
+    for name in ('map.json', 'map.svg', 'report.json', 'map.sbgn', 'map.sbml', 'map.celldesigner.xml'):
         _update_file_bytes(folder, name)
     return dict(ok=True, layout_quality=quality, original_kept=True, first_backup=first_backup)
+
+
+def _refresh_exports(folder: Path):
+    """Rewrite SBGN-ML / SBML Layout / CellDesigner beside the current map.json."""
+    upload = next(iter(sorted((folder / 'upload').glob('model.*'))), None)
+    if upload is None:
+        return
+    import map_exports
+    map_exports.write_all_exports(folder, model_path=upload)
 
 
 def reset_map(folder: Path, *, filename='map.json'):
@@ -281,6 +291,7 @@ def reset_map(folder: Path, *, filename='map.json'):
     import line_render
     line_render.render_file(map_path, folder / 'map.svg', kinds)
     quality = _refresh_quality(folder, data)
-    for name in ('map.json', 'map.svg', 'report.json'):
+    _refresh_exports(folder)
+    for name in ('map.json', 'map.svg', 'report.json', 'map.sbgn', 'map.sbml', 'map.celldesigner.xml'):
         _update_file_bytes(folder, name)
     return dict(ok=True, layout_quality=quality, original_kept=True)

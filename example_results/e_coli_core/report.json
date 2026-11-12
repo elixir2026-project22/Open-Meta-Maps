@@ -45,13 +45,13 @@
     "metabolite_bigg": 1.0
   },
   "covered": {
-    "expert_module_reactions": 70,
-    "complete_equation": 68,
+    "expert_module_reactions": 68,
+    "complete_equation": 66,
     "reference_supported": 0,
     "ec_topology": 0,
     "geometry_only": 2,
-    "bridge_reactions": 1,
-    "algorithm_completed": 24,
+    "bridge_reactions": 2,
+    "algorithm_completed": 25,
     "total": 95
   },
   "modules": 11,
@@ -61,7 +61,7 @@
     "human_maps": 1
   },
   "levels": {
-    "complete_equation": 68,
+    "complete_equation": 66,
     "geometry_only": 2
   },
   "map": {
@@ -75,58 +75,62 @@
       }
     ],
     "metrics": {
-      "node_overlap_pairs": 1,
+      "node_overlap_pairs": 2,
       "label_overlap_pairs": 0,
-      "straight_crossings": 86
+      "straight_crossings": 48
     },
     "source_paths": {
       "structures": 11,
-      "structures_with_paths": 3,
-      "chains_eligible": 131,
-      "preserved": 18,
-      "adjusted": 11,
-      "rerouted": 102,
+      "structures_with_paths": 2,
+      "chains_eligible": 127,
+      "preserved": 19,
+      "adjusted": 9,
+      "rerouted": 99,
       "rerouted_by_reason": {
-        "shift_too_large": 102
+        "shift_too_large": 99
       },
       "endpoint_mismatch": 0,
-      "max_adjust_shift_px": 13.022,
+      "max_adjust_shift_px": 15.798,
       "transform_rejected": 0,
-      "not_in_module": 128,
-      "max_endpoint_deviation_px": 2.937,
-      "written": 29,
+      "not_in_module": 125,
+      "max_endpoint_deviation_px": 2.961,
+      "written": 28,
       "not_written_to_map_json": 0
     },
     "expert_geometry": {
-      "structures": 4,
-      "distortion_rms_px_mean": 0.45,
-      "distortion_rms_px_max": 3.16,
-      "distortion_max_px": 5.97,
-      "mean_displacement_px": 0.9,
+      "structures": 3,
+      "distortion_rms_px_mean": 0.48,
+      "distortion_rms_px_max": 3.14,
+      "distortion_max_px": 4.6,
+      "mean_displacement_px": 1.1,
       "note": "residual after translation, rotation and uniform scaling of each structure"
     },
     "instance_optimization": {
       "summary_reactions": [],
-      "added": 9,
+      "added": 11,
       "summary_degree_cut": 12,
       "hub_metabolites": 2,
-      "isolated_reactions_attached": 0,
+      "isolated_reactions_attached": 1,
       "protected_groups": {},
-      "shared_nodes_merged": 15,
+      "shared_nodes_merged": 16,
       "reactions_reattached": 8,
       "edges_over_250": {
-        "before": 78,
-        "after": 66
+        "before": 75,
+        "after": 62
       },
       "edges_over_1000": {
-        "before": 21,
+        "before": 23,
         "after": 9
       },
-      "long_edge_reduction_per_added_instance": 1.33,
+      "long_edge_reduction_per_added_instance": 1.18,
       "metabolites_split": 7,
       "top_split": [
         [
           "pep_c",
+          3
+        ],
+        [
+          "g6p_c",
           2
         ],
         [
@@ -134,19 +138,15 @@
           2
         ],
         [
+          "3pg_c",
+          1
+        ],
+        [
           "accoa_c",
           1
         ],
         [
           "for_c",
-          1
-        ],
-        [
-          "g3p_c",
-          1
-        ],
-        [
-          "g6p_c",
           1
         ],
         [
@@ -162,7 +162,7 @@
         "max_new": 8,
         "summary_min": 12
       },
-      "instances_separated": 39
+      "instances_separated": 41
     },
     "context_placement": {
       "reactions_without_core_participants": 18,
@@ -176,25 +176,25 @@
       "isolated_reactions_after": 7
     },
     "completion_context": {
-      "candidates": 7,
-      "placed": 7,
+      "candidates": 9,
+      "placed": 9,
       "tiers": {
-        "T2": 6,
-        "T1": 1
+        "T2": 7,
+        "T1": 2
       },
       "rounds": {
-        "round1": 7,
+        "round1": 9,
         "round2": 0
       },
       "attachment_rate_before": {
-        "eligible": 7,
-        "attached": 1,
-        "rate": 0.143
+        "eligible": 9,
+        "attached": 3,
+        "rate": 0.333
       },
       "attachment_rate_after": {
-        "eligible": 7,
-        "attached": 1,
-        "rate": 0.143
+        "eligible": 9,
+        "attached": 3,
+        "rate": 0.333
       },
       "details": {
         "ENO": {
@@ -202,7 +202,7 @@
           "anchors": [
             "2pg_c"
           ],
-          "old": 4376,
+          "old": 3741,
           "new": 200,
           "round": 1,
           "copies": 1
@@ -212,17 +212,7 @@
           "anchors": [
             "ac_e"
           ],
-          "old": 886,
-          "new": 110,
-          "round": 1,
-          "copies": 0
-        },
-        "EX_acald_e": {
-          "tier": "T2",
-          "anchors": [
-            "acald_e"
-          ],
-          "old": 859,
+          "old": 762,
           "new": 110,
           "round": 1,
           "copies": 0
@@ -232,7 +222,17 @@
           "anchors": [
             "etoh_e"
           ],
-          "old": 829,
+          "old": 695,
+          "new": 110,
+          "round": 1,
+          "copies": 0
+        },
+        "EX_mal__L_e": {
+          "tier": "T2",
+          "anchors": [
+            "mal__L_e"
+          ],
+          "old": 669,
           "new": 110,
           "round": 1,
           "copies": 0
@@ -242,7 +242,7 @@
           "anchors": [
             "pyr_e"
           ],
-          "old": 941,
+          "old": 877,
           "new": 110,
           "round": 1,
           "copies": 0
@@ -257,14 +257,35 @@
           "round": 1,
           "copies": 1
         },
+        "G6PDH2r": {
+          "tier": "T2",
+          "anchors": [
+            "6pgl_c"
+          ],
+          "old": 4104,
+          "new": 305,
+          "round": 1,
+          "copies": 1
+        },
         "PFK": {
           "tier": "T1",
           "anchors": [
             "fdp_c",
             "f6p_c"
           ],
-          "old": 961,
-          "new": 310,
+          "old": 704,
+          "new": 331,
+          "round": 1,
+          "copies": 0
+        },
+        "TPI": {
+          "tier": "T1",
+          "anchors": [
+            "dhap_c",
+            "g3p_c"
+          ],
+          "old": 1069,
+          "new": 232,
           "round": 1,
           "copies": 0
         }
@@ -279,40 +300,35 @@
         "save_per_copy": 250.0
       },
       "after_compose": {
-        "placed": 1,
-        "candidates": 7,
+        "placed": 2,
+        "candidates": 9,
         "tiers": {
+          "T2": 1,
           "T1": 1
         },
         "rounds": {
-          "round1": 1,
+          "round1": 2,
           "round2": 0
         },
         "boundary_aware": true,
         "prefer_ew": false,
         "attach_sides": {
-          "E": 3,
-          "W": 3,
-          "S": 1
+          "E": 2,
+          "W": 4,
+          "S": 1,
+          "N": 2
         }
       },
       "compact_long_arms": {
-        "shortened": 18,
-        "pulled_midmarkers": 11,
+        "shortened": 20,
+        "pulled_midmarkers": 10,
         "max_arm": 220.0,
         "target": 150.0,
         "details": [
           {
             "reaction": "PGK",
             "metabolite": "13dpg_c",
-            "before": 447.0,
-            "after": 150.0,
-            "moved": "metabolite"
-          },
-          {
-            "reaction": "PGL",
-            "metabolite": "6pgc_c",
-            "before": 394.5,
+            "before": 507.7,
             "after": 150.0,
             "moved": "metabolite"
           },
@@ -342,7 +358,7 @@
             "metabolite": "acald_c",
             "before": 625.0,
             "after": 150.0,
-            "moved": "midmarker"
+            "moved": "metabolite"
           },
           {
             "reaction": "ACt2r",
@@ -353,8 +369,8 @@
           },
           {
             "reaction": "BIOMASS_Ecoli_core_w_GAM",
-            "metabolite": "g3p_c",
-            "before": 887.5,
+            "metabolite": "r5p_c",
+            "before": 234.9,
             "after": 150.0,
             "moved": "metabolite"
           },
@@ -410,7 +426,21 @@
           {
             "reaction": "TALA",
             "metabolite": "s7p_c",
-            "before": 282.8,
+            "before": 321.1,
+            "after": 150.0,
+            "moved": "metabolite"
+          },
+          {
+            "reaction": "TPI",
+            "metabolite": "dhap_c",
+            "before": 364.6,
+            "after": 150.0,
+            "moved": "metabolite"
+          },
+          {
+            "reaction": "EX_mal__L_e",
+            "metabolite": "mal__L_e",
+            "before": 290.7,
             "after": 150.0,
             "moved": "metabolite"
           },
@@ -464,13 +494,6 @@
             "moved": "midmarker"
           },
           {
-            "reaction": "G6PDH2r",
-            "metabolite": "g6p_c",
-            "before": 458.3,
-            "after": 150.0,
-            "moved": "metabolite"
-          },
-          {
             "reaction": "GLCpts",
             "metabolite": "glc__D_e",
             "before": 303.9,
@@ -500,6 +523,13 @@
           },
           {
             "reaction": "MALt2_2",
+            "metabolite": "mal__L_e",
+            "before": 246.6,
+            "after": 150.0,
+            "moved": "metabolite"
+          },
+          {
+            "reaction": "MALt2_2",
             "metabolite": "mal__L_c",
             "before": 1847.5,
             "after": 150.0,
@@ -508,62 +538,62 @@
         ]
       },
       "attachment_rate_final": {
-        "eligible": 7,
-        "attached": 7,
+        "eligible": 9,
+        "attached": 9,
         "rate": 1.0
       }
     },
     "layout_quality_final": {
       "edges": {
         "total": 360,
-        "algorithm": 214,
-        "curated": 146,
-        "expert": 146
+        "algorithm": 219,
+        "curated": 141,
+        "expert": 141
       },
       "core": {
         "crossings": {
-          "counted": 6,
-          "total": 52,
-          "same_reaction": 37,
+          "counted": 3,
+          "total": 56,
+          "same_reaction": 46,
           "same_reaction_curated": 0,
           "same_reaction_expert": 0,
           "algorithm_algorithm": 2,
-          "algorithm_curated": 4,
-          "curated_curated": 9,
-          "algorithm_expert": 4,
-          "expert_expert": 9,
+          "algorithm_curated": 1,
+          "curated_curated": 7,
+          "algorithm_expert": 1,
+          "expert_expert": 7,
           "main_metabolite": 1,
-          "currency_involved": 5,
-          "per_100_edges": 2.8
+          "currency_involved": 2,
+          "per_100_edges": 1.37
         },
         "overlaps": {
-          "overlapping_pairs": 1,
+          "overlapping_pairs": 2,
           "node_overlap_pairs": 0,
-          "label_overlap_pairs": 1,
-          "curves_through_nodes": 10,
-          "curves_through_labels": 0
+          "label_overlap_pairs": 2,
+          "curves_through_nodes": 14,
+          "curves_through_labels": 1
         },
         "collisions": {
-          "overlapping_pairs": 1,
+          "overlapping_pairs": 2,
           "node_overlap_pairs": 0,
-          "label_overlap_pairs": 1,
-          "curves_through_nodes": 10,
-          "curves_through_labels": 0
+          "label_overlap_pairs": 2,
+          "curves_through_nodes": 14,
+          "curves_through_labels": 1
         },
         "long_lines": {
-          "p90_reaction_spacings": 1.64,
-          "edge_len_max_rel": 14.15,
-          "p90_px": 330.0,
-          "reaction_spacing_px": 201.0,
-          "over_250": 61
+          "p90_reaction_spacings": 1.62,
+          "edge_len_max_rel": 14.346,
+          "p90_px": 325.1,
+          "reaction_spacing_px": 200.1,
+          "over_250": 59
         },
         "length_p90": {
-          "px": 330.0,
-          "in_reaction_spacings": 1.64,
-          "reaction_spacing_px": 201.0
+          "px": 325.1,
+          "in_reaction_spacings": 1.62,
+          "reaction_spacing_px": 200.1
         },
         "participant_placement": {
-          "inout_opposite_share": 0.813,
+          "inout_opposite_share": 0.827,
           "inout_opposite_share_core": 0.825,
           "reactions_all": 75,
           "reactions_core": 63,
@@ -581,20 +611,20 @@
           "long_threshold_spacings": 3.0
         },
         "structure_continuity": {
-          "contiguous_pair_share": 0.933,
-          "pairs": 60,
-          "contiguous_pairs": 56,
-          "structures": 19,
+          "contiguous_pair_share": 0.951,
+          "pairs": 81,
+          "contiguous_pairs": 77,
+          "structures": 17,
           "split_structures": 3,
-          "split_structure_share": 0.158,
-          "reaction_spacing_px": 201.0,
+          "split_structure_share": 0.176,
+          "reaction_spacing_px": 200.1,
           "adjacency_factor": 3.0,
           "note": "Share of expert-structure reaction pairs that share a non-currency metabolite and lie within adjacency_factor × median reaction spacing; split_structures count structures whose contiguous pairs form more than one geometric piece."
         },
         "bezier_coverage": {
           "share": 1.0,
-          "algorithm_edges": 214,
-          "bezier": 214,
+          "algorithm_edges": 219,
+          "bezier": 219,
           "straight_lines": 0,
           "polylines_with_bends": 0,
           "orthogonal_polylines": 0
@@ -602,69 +632,28 @@
       },
       "details": {
         "algorithm_curated_crossings": {
-          "count": 4,
-          "headline": 6,
+          "count": 1,
+          "headline": 3,
           "by_reason": {
-            "spoke/currency": 3,
             "main_metabolite": 1
           },
           "top_algorithm_reactions": [
             {
-              "algorithm_rid": "ATPM",
-              "crossings": 2,
-              "why": "Algorithm reaction ATPM’s link to atp_c crosses curated reaction SUCCt2_2’s link to succ_c (currency spoke)"
-            },
-            {
-              "algorithm_rid": "ACALD",
+              "algorithm_rid": "TPI",
               "crossings": 1,
-              "why": "Algorithm reaction ACALD’s link to h_c crosses curated reaction CS’s link to accoa_c (currency spoke)"
-            },
-            {
-              "algorithm_rid": "ENO",
-              "crossings": 1,
-              "why": "Algorithm reaction ENO’s link to pep_c crosses curated reaction PGM’s link to 2pg_c (main metabolite)"
+              "why": "Algorithm reaction TPI’s link to g3p_c crosses curated reaction BIOMASS_Ecoli_core_w_GAM’s link to e4p_c (main metabolite)"
             }
           ],
           "samples": [
             {
-              "algorithm_rid": "ACALD",
-              "curated_rid": "CS",
-              "algorithm_met": "h_c",
-              "curated_met": "accoa_c",
-              "reason": "spoke/currency",
-              "why": "Algorithm reaction ACALD’s link to h_c crosses curated reaction CS’s link to accoa_c (currency spoke)",
-              "x": 1899.2,
-              "y": 4342.1
-            },
-            {
-              "algorithm_rid": "ENO",
-              "curated_rid": "PGM",
-              "algorithm_met": "pep_c",
-              "curated_met": "2pg_c",
+              "algorithm_rid": "TPI",
+              "curated_rid": "BIOMASS_Ecoli_core_w_GAM",
+              "algorithm_met": "g3p_c",
+              "curated_met": "e4p_c",
               "reason": "main_metabolite",
-              "why": "Algorithm reaction ENO’s link to pep_c crosses curated reaction PGM’s link to 2pg_c (main metabolite)",
-              "x": 4592.2,
-              "y": 2674.2
-            },
-            {
-              "algorithm_rid": "ATPM",
-              "curated_rid": "SUCCt2_2",
-              "algorithm_met": "atp_c",
-              "curated_met": "succ_c",
-              "reason": "spoke/currency",
-              "why": "Algorithm reaction ATPM’s link to atp_c crosses curated reaction SUCCt2_2’s link to succ_c (currency spoke)",
-              "x": 4086.4,
-              "y": 3386.9
-            },
-            {
-              "algorithm_rid": "ATPM",
-              "curated_rid": "SUCCt2_2",
-              "algorithm_met": "adp_c",
-              "curated_met": "succ_c",
-              "reason": "spoke/currency",
-              "why": "Algorithm reaction ATPM’s link to adp_c crosses curated reaction SUCCt2_2’s link to succ_c (currency spoke)",
-              "x": 3984.8,
-              "y": 3372.3
+              "why": "Algorithm reaction TPI’s link to g3p_c crosses curated reaction BIOMASS_Ecoli_core_w_GAM’s link to e4p_c (main metabolite)",
+              "x": 4879.7,
+              "y": 2653.1
             }
           ]
         },
@@ -679,12 +668,12 @@
                 "currency": false,
                 "link_class": "inter_curated_block",
                 "from_xy": [
-                  2803.7,
-                  3796.1
+                  2875.2,
+                  3861.3
                 ],
                 "to_xy": [
-                  1716.9,
-                  4353.1
+                  1788.4,
+                  4418.3
                 ],
                 "from_type": "midmarker",
                 "to_type": "metabolite"
@@ -697,12 +686,12 @@
                 "currency": false,
                 "link_class": "inter_curated_block",
                 "from_xy": [
-                  1433.0,
-                  3934.1
+                  1504.5,
+                  3999.3
                 ],
                 "to_xy": [
-                  2551.7,
-                  4132.1
+                  2623.2,
+                  4197.3
                 ],
                 "from_type": "midmarker",
                 "to_type": "metabolite"
@@ -715,12 +704,12 @@
                 "currency": false,
                 "link_class": "inter_curated_block",
                 "from_xy": [
-                  2142.7,
-                  3768.1
+                  2214.2,
+                  3833.3
                 ],
                 "to_xy": [
-                  1169.4,
-                  4353.1
+                  1240.9,
+                  4418.3
                 ],
                 "from_type": "midmarker",
                 "to_type": "metabolite"
@@ -733,12 +722,12 @@
                 "currency": false,
                 "link_class": "inter_curated_block",
                 "from_xy": [
-                  1443.0,
-                  3894.1
+                  1514.5,
+                  3959.3
                 ],
                 "to_xy": [
-                  2551.7,
-                  4132.1
+                  2623.2,
+                  4197.3
                 ],
                 "from_type": "midmarker",
                 "to_type": "metabolite"
@@ -751,12 +740,12 @@
                 "currency": false,
                 "link_class": "inter_curated_block",
                 "from_xy": [
-                  2152.7,
-                  3798.1
+                  2224.2,
+                  3863.3
                 ],
                 "to_xy": [
-                  1169.4,
-                  4353.1
+                  1240.9,
+                  4418.3
                 ],
                 "from_type": "midmarker",
                 "to_type": "metabolite"
@@ -769,12 +758,12 @@
                 "currency": false,
                 "link_class": "inter_curated_block",
                 "from_xy": [
-                  4419.5,
-                  3435.1
+                  4491.0,
+                  3500.3
                 ],
                 "to_xy": [
-                  3312.7,
-                  3275.1
+                  3384.2,
+                  3340.3
                 ],
                 "from_type": "midmarker",
                 "to_type": "metabolite"
@@ -787,12 +776,12 @@
                 "currency": false,
                 "link_class": "inter_curated_block",
                 "from_xy": [
-                  4420.5,
-                  3254.1
+                  4492.0,
+                  3319.3
                 ],
                 "to_xy": [
-                  3312.7,
-                  3275.1
+                  3384.2,
+                  3340.3
                 ],
                 "from_type": "midmarker",
                 "to_type": "metabolite"
@@ -805,12 +794,12 @@
                 "currency": false,
                 "link_class": "inter_curated_block",
                 "from_xy": [
-                  3309.7,
-                  4265.1
+                  3381.2,
+                  4330.3
                 ],
                 "to_xy": [
-                  3312.7,
-                  3275.1
+                  3384.2,
+                  3340.3
                 ],
                 "from_type": "midmarker",
                 "to_type": "metabolite"
@@ -823,12 +812,12 @@
                 "currency": false,
                 "link_class": "inter_curated_block",
                 "from_xy": [
-                  2690.7,
-                  4294.1
+                  2762.2,
+                  4359.3
                 ],
                 "to_xy": [
-                  1716.9,
-                  4353.1
+                  1788.4,
+                  4418.3
                 ],
                 "from_type": "midmarker",
                 "to_type": "metabolite"
@@ -841,30 +830,30 @@
                 "currency": false,
                 "link_class": "inter_curated_block",
                 "from_xy": [
-                  4415.5,
-                  3636.1
+                  4487.0,
+                  3701.3
                 ],
                 "to_xy": [
-                  3638.7,
-                  4035.1
+                  3710.2,
+                  4100.3
                 ],
                 "from_type": "midmarker",
                 "to_type": "metabolite"
               }
             ],
             "n_edges": 360,
-            "p90": 330.0,
-            "p90_ex_intra_curated": 252.4,
+            "p90": 325.1,
+            "p90_ex_intra_curated": 203.4,
             "by_class": {
-              "inter_curated_block": 22,
-              "intra_curated_block": 105,
-              "curated_unscoped": 19,
-              "algorithm": 214
+              "inter_curated_block": 15,
+              "intra_curated_block": 120,
+              "curated_unscoped": 6,
+              "algorithm": 219
             },
             "above_p90_by_class": {
-              "inter_curated_block": 18,
-              "intra_curated_block": 14,
-              "curated_unscoped": 4
+              "inter_curated_block": 13,
+              "intra_curated_block": 22,
+              "curated_unscoped": 1
             },
             "note": "intra_curated_block edges are rigid under translation-only packing; p90_ex_intra_curated is the packing-relevant long-line gate"
           },
@@ -875,182 +864,190 @@
                 "metabolite": "mal__L_c",
                 "length_px": 1847.5,
                 "curated": true,
-                "key": "copy:ccdc9b32c395e30b382051b4:mal__L_c"
+                "key": "copy:05a4558d51e0bf86849aae74:mal__L_c"
               },
               {
                 "reaction": "FUMt2_2",
                 "metabolite": "fum_c",
                 "length_px": 1491.5,
                 "curated": true,
-                "key": "copy:ccdc9b32c395e30b382051b4:fum_c"
+                "key": "copy:05a4558d51e0bf86849aae74:fum_c"
               },
               {
                 "reaction": "MALS",
                 "metabolite": "accoa_c",
                 "length_px": 1221.2,
                 "curated": true,
-                "key": "copy:ccdc9b32c395e30b382051b4:accoa_c"
+                "key": "copy:05a4558d51e0bf86849aae74:accoa_c"
               },
               {
                 "reaction": "PPCK",
                 "metabolite": "oaa_c",
                 "length_px": 1136.1,
                 "curated": true,
-                "key": "copy:ccdc9b32c395e30b382051b4:oaa_c"
+                "key": "copy:05a4558d51e0bf86849aae74:oaa_c"
               },
               {
                 "reaction": "ME1",
                 "metabolite": "pyr_c",
                 "length_px": 1135.6,
                 "curated": true,
-                "key": "copy:ccdc9b32c395e30b382051b4:pyr_c"
+                "key": "copy:05a4558d51e0bf86849aae74:pyr_c"
               },
               {
                 "reaction": "PPC",
                 "metabolite": "oaa_c",
                 "length_px": 1134.0,
                 "curated": true,
-                "key": "copy:ccdc9b32c395e30b382051b4:oaa_c"
+                "key": "copy:05a4558d51e0bf86849aae74:oaa_c"
               },
               {
                 "reaction": "ME2",
                 "metabolite": "pyr_c",
                 "length_px": 1129.1,
                 "curated": true,
-                "key": "copy:ccdc9b32c395e30b382051b4:pyr_c"
+                "key": "copy:05a4558d51e0bf86849aae74:pyr_c"
               },
               {
                 "reaction": "SUCCt2_2",
                 "metabolite": "succ_c",
                 "length_px": 1118.3,
                 "curated": true,
-                "key": "copy:ccdc9b32c395e30b382051b4:succ_c"
+                "key": "copy:05a4558d51e0bf86849aae74:succ_c"
               },
               {
                 "reaction": "SUCCt3",
                 "metabolite": "succ_c",
                 "length_px": 1108.0,
                 "curated": true,
-                "key": "copy:ccdc9b32c395e30b382051b4:succ_c"
+                "key": "copy:05a4558d51e0bf86849aae74:succ_c"
               },
               {
                 "reaction": "ICL",
                 "metabolite": "succ_c",
                 "length_px": 990.0,
                 "curated": true,
-                "key": "copy:ccdc9b32c395e30b382051b4:succ_c"
+                "key": "copy:05a4558d51e0bf86849aae74:succ_c"
               }
             ],
             "n_edges": 167,
-            "p90": 518.4
+            "p90": 519.4
           }
         },
         "line_shape": {
-          "detour_median": 1.064,
-          "detour_p90": 1.075,
+          "detour_median": 1.065,
+          "detour_p90": 1.076,
           "detour_over_1_6": 0,
           "hooks": 0,
           "sharp_turns": 0,
           "self_intersections": 0,
-          "bends_per_arc": 0.028,
-          "bent_arc_share": 0.0167
+          "bends_per_arc": 0.056,
+          "bent_arc_share": 0.0333
         },
         "cycles": {
-          "cycle_circularity": 0.3772,
-          "cycle_direction": "cw",
-          "cycle_direction_consistency": 0.525,
+          "cycle_circularity": 0.341,
+          "cycle_direction": "ccw",
+          "cycle_direction_consistency": 0.575,
           "cycle_order_consistency": 1.0,
           "cycles": 40,
           "cycle_len": 3
         },
         "orderliness": {
           "main_segment_axis_share": 0.497,
-          "main_segment_axis_share_length": 0.4677,
+          "main_segment_axis_share_length": 0.4607,
           "reaction_axis_share": 0.6349,
-          "chain_turn_median_deg": 9.37,
-          "metabolite_grid_share": 0.5974,
+          "chain_turn_median_deg": 10.71,
+          "metabolite_grid_share": 0.6329,
           "segments": 167,
           "reactions": 63,
           "chain_turns": 29,
-          "metabolites": 77,
-          "grid_tol_px": 4.06
+          "metabolites": 79,
+          "grid_tol_px": 3.77
         },
         "main_segment_axis_share": 0.497,
-        "main_segment_axis_share_length": 0.4677,
+        "main_segment_axis_share_length": 0.4607,
         "reaction_axis_share": 0.6349,
-        "chain_turn_median_deg": 9.37,
-        "metabolite_grid_share": 0.5974,
+        "chain_turn_median_deg": 10.71,
+        "metabolite_grid_share": 0.6329,
         "flow_main_dir": "up",
         "flow_main_dir_share": 0.2857,
-        "exchange_periphery_share": 0.3077,
+        "exchange_periphery_share": 0.4167,
         "blank_space": {
-          "blank_space_share": 0.5579,
-          "space_utilisation": 0.4421,
-          "largest_empty_rect_share": 0.1714,
-          "cell_px": 120.62,
-          "spacing_px": 201.0
+          "blank_space_share": 0.5932,
+          "space_utilisation": 0.4068,
+          "largest_empty_rect_share": 0.1695,
+          "cell_px": 120.06,
+          "spacing_px": 200.1
         },
-        "blank_space_share": 0.5579,
-        "space_utilisation": 0.4421,
-        "largest_empty_rect_share": 0.1714,
+        "blank_space_share": 0.5932,
+        "space_utilisation": 0.4068,
+        "largest_empty_rect_share": 0.1695,
         "unrelated_overlaps": {
           "node_overlaps": 0.0,
-          "edge_through_node": 1.0,
-          "collinear_edge_overlaps": 2.0,
-          "total": 3.0
+          "edge_through_node": 2.0,
+          "collinear_edge_overlaps": 0.0,
+          "total": 2.0
         },
-        "aspect_ratio": 1.6079,
+        "aspect_ratio": 1.6941,
         "aspect_ratio_target": 1.0,
-        "aspect_ratio_vs_target": 0.6079,
+        "aspect_ratio_vs_target": 0.6941,
         "species_in_other_compartment": null,
         "thresholds_note": "inout opposite ≥120.0° is a Project 22 first guess; participant_consistency >90.0° stays on the evaluate CLI; hub/long currency thresholds are relative to median reaction spacing; blank_space / unrelated_overlaps follow MetaCarto ideas (CC BY 4.0; reimplemented, not copied); map size, aspect W/H and blank/utilisation share one content-node bbox; orderliness axis tolerance ±10° (count-weighted gate; length-weighted reported); grid tolerance 0.02 × median nearest-neighbour main-metabolite distance (floor 1 px)",
         "crossing_density": {
-          "worst_window_crossings": 3
+          "worst_window_crossings": 1
         },
         "orientation": {
           "all_participants": {
             "reactions": 75,
-            "opposite_sides_share": 0.813,
-            "angle_median": 160
+            "opposite_sides_share": 0.827,
+            "angle_median": 161
           },
           "core_participants": {
             "reactions": 63,
             "opposite_sides_share": 0.825,
-            "angle_median": 170
+            "angle_median": 168
           },
           "threshold_deg": 120.0,
-          "opposite_sides_share": 0.813,
-          "angle_median": 160
+          "opposite_sides_share": 0.827,
+          "angle_median": 161
         },
         "composition": {
           "canvas": [
-            6293,
-            3914
+            6739,
+            3978
           ],
-          "aspect": 1.6079,
-          "aspect_ratio": 1.6079,
+          "aspect": 1.6941,
+          "aspect_ratio": 1.6941,
           "aspect_ratio_target": 1.0,
-          "aspect_ratio_vs_target": 0.6079,
-          "blank_space_share": 0.5579,
-          "space_utilisation": 0.4421,
-          "largest_empty_rect_share": 0.1714,
-          "cell_px": 120.62,
+          "aspect_ratio_vs_target": 0.6941,
+          "blank_space_share": 0.5932,
+          "space_utilisation": 0.4068,
+          "largest_empty_rect_share": 0.1695,
+          "cell_px": 120.06,
           "isolated_reactions": 0,
-          "max_reactions_in_one_cell": 13
+          "max_reactions_in_one_cell": 9
         },
         "structure_continuity": {
-          "contiguous_pair_share": 0.933,
-          "pairs": 60,
-          "contiguous_pairs": 56,
-          "structures": 19,
+          "contiguous_pair_share": 0.951,
+          "pairs": 81,
+          "contiguous_pairs": 77,
+          "structures": 17,
           "split_structures": 3,
-          "split_structure_share": 0.158,
-          "reaction_spacing_px": 201.0,
+          "split_structure_share": 0.176,
+          "reaction_spacing_px": 200.1,
           "adjacency_factor": 3.0,
           "note": "Share of expert-structure reaction pairs that share a non-currency metabolite and lie within adjacency_factor × median reaction spacing; split_structures count structures whose contiguous pairs form more than one geometric piece.",
           "details": [
             {
-              "structure": "ccdc9b32c395e30b382051b4#cc0",
+              "structure": "05a4558d51e0bf86849aae74#cc0",
+              "reactions": 9,
+              "pairs": 20,
+              "contiguous_pairs": 19,
+              "components": 1,
+              "contiguous_pair_share": 0.95
+            },
+            {
+              "structure": "05a4558d51e0bf86849aae74#cc1",
               "reactions": 5,
               "pairs": 5,
               "contiguous_pairs": 5,
@@ -1058,31 +1055,23 @@
               "contiguous_pair_share": 1.0
             },
             {
-              "structure": "ccdc9b32c395e30b382051b4#cc1",
-              "reactions": 6,
-              "pairs": 11,
-              "contiguous_pairs": 11,
+              "structure": "05a4558d51e0bf86849aae74#cc2",
+              "reactions": 8,
+              "pairs": 16,
+              "contiguous_pairs": 16,
               "components": 1,
               "contiguous_pair_share": 1.0
             },
             {
-              "structure": "ccdc9b32c395e30b382051b4#cc2",
-              "reactions": 4,
-              "pairs": 3,
-              "contiguous_pairs": 3,
+              "structure": "05a4558d51e0bf86849aae74#cc3",
+              "reactions": 5,
+              "pairs": 4,
+              "contiguous_pairs": 4,
               "components": 2,
               "contiguous_pair_share": 1.0
             },
             {
-              "structure": "ccdc9b32c395e30b382051b4#cc3",
-              "reactions": 4,
-              "pairs": 2,
-              "contiguous_pairs": 2,
-              "components": 2,
-              "contiguous_pair_share": 1.0
-            },
-            {
-              "structure": "ccdc9b32c395e30b382051b4#cc4",
+              "structure": "05a4558d51e0bf86849aae74#cc4",
               "reactions": 2,
               "pairs": 1,
               "contiguous_pairs": 1,
@@ -1090,66 +1079,34 @@
               "contiguous_pair_share": 1.0
             },
             {
-              "structure": "ccdc9b32c395e30b382051b4#cc5",
-              "reactions": 4,
-              "pairs": 5,
-              "contiguous_pairs": 5,
+              "structure": "05a4558d51e0bf86849aae74#cc5",
+              "reactions": 5,
+              "pairs": 10,
+              "contiguous_pairs": 8,
               "components": 1,
-              "contiguous_pair_share": 1.0
+              "contiguous_pair_share": 0.8
             },
             {
-              "structure": "ccdc9b32c395e30b382051b4#cc6",
-              "reactions": 4,
-              "pairs": 6,
-              "contiguous_pairs": 4,
-              "components": 1,
-              "contiguous_pair_share": 0.667
-            },
-            {
-              "structure": "ccdc9b32c395e30b382051b4#cc7",
-              "reactions": 4,
-              "pairs": 6,
-              "contiguous_pairs": 6,
-              "components": 1,
-              "contiguous_pair_share": 1.0
-            },
-            {
-              "structure": "da5dc1ed9131ee6811efdccc#cc0",
-              "reactions": 3,
-              "pairs": 3,
-              "contiguous_pairs": 3,
-              "components": 1,
-              "contiguous_pair_share": 1.0
-            },
-            {
-              "structure": "da5dc1ed9131ee6811efdccc#cc1",
-              "reactions": 3,
-              "pairs": 3,
-              "contiguous_pairs": 3,
-              "components": 1,
-              "contiguous_pair_share": 1.0
-            },
-            {
-              "structure": "d0031bc7d33a9b419f72d837",
-              "reactions": 4,
-              "pairs": 4,
-              "contiguous_pairs": 3,
-              "components": 1,
-              "contiguous_pair_share": 0.75
-            },
-            {
-              "structure": "1b58b5bdca08f1a7bcffdf78",
-              "reactions": 4,
-              "pairs": 4,
-              "contiguous_pairs": 4,
-              "components": 1,
-              "contiguous_pair_share": 1.0
-            },
-            {
-              "structure": "ebeeeab5abee4e62055a4540",
+              "structure": "05a4558d51e0bf86849aae74#cc6",
               "reactions": 2,
-              "pairs": 1,
-              "contiguous_pairs": 1,
+              "pairs": 0,
+              "contiguous_pairs": 0,
+              "components": 2,
+              "contiguous_pair_share": null
+            },
+            {
+              "structure": "66e523bfda3063fb7bc3f362",
+              "reactions": 8,
+              "pairs": 13,
+              "contiguous_pairs": 13,
+              "components": 1,
+              "contiguous_pair_share": 1.0
+            },
+            {
+              "structure": "950ba90ccee27dee333492af",
+              "reactions": 4,
+              "pairs": 4,
+              "contiguous_pairs": 4,
               "components": 1,
               "contiguous_pair_share": 1.0
             },
@@ -1162,7 +1119,7 @@
               "contiguous_pair_share": 0.0
             },
             {
-              "structure": "24d29880e9ec2643d20ae478",
+              "structure": "94c054f906d21f0a2087dc53",
               "reactions": 2,
               "pairs": 1,
               "contiguous_pairs": 1,
@@ -1170,7 +1127,7 @@
               "contiguous_pair_share": 1.0
             },
             {
-              "structure": "ad1e63f63a1a945d61fd5fd4",
+              "structure": "25c16d0297cc8e93b1baeac3",
               "reactions": 2,
               "pairs": 1,
               "contiguous_pairs": 1,
@@ -1178,7 +1135,7 @@
               "contiguous_pair_share": 1.0
             },
             {
-              "structure": "1c0bb5d12f134c4c808bcc26",
+              "structure": "59a1c3aa06df23e5a6573925",
               "reactions": 2,
               "pairs": 1,
               "contiguous_pairs": 1,
@@ -1186,7 +1143,23 @@
               "contiguous_pair_share": 1.0
             },
             {
-              "structure": "08a14bf4c89172150e7da931",
+              "structure": "f7d3b0457a3623f5dfa41644",
+              "reactions": 2,
+              "pairs": 1,
+              "contiguous_pairs": 1,
+              "components": 1,
+              "contiguous_pair_share": 1.0
+            },
+            {
+              "structure": "bee463ed50b4ae60148e680a",
+              "reactions": 2,
+              "pairs": 1,
+              "contiguous_pairs": 1,
+              "components": 1,
+              "contiguous_pair_share": 1.0
+            },
+            {
+              "structure": "65b9b47c824e721a8fd8f1a3",
               "reactions": 2,
               "pairs": 1,
               "contiguous_pairs": 1,
@@ -1204,15 +1177,15 @@
           ]
         },
         "edges_footnote": {
-          "algorithm": 214,
-          "curated": 146,
+          "algorithm": 219,
+          "curated": 141,
           "total": 360
         },
         "warnings": [],
         "bezier_coverage": {
           "share": 1.0,
-          "algorithm_edges": 214,
-          "bezier": 214,
+          "algorithm_edges": 219,
+          "bezier": 219,
           "straight_lines": 0,
           "polylines_with_bends": 0,
           "orthogonal_polylines": 0
@@ -1226,7 +1199,7 @@
               "rows": [
                 {
                   "label": "Local crossing hotspot",
-                  "value": 3,
+                  "value": 1,
                   "code": "worst_window_crossings",
                   "tip": "Most algorithm×algorithm / algorithm×curated crossings inside one 400 px window (stride 200). Lower is better; target as few as possible (headline crossings are on the cards).",
                   "better": "lower",
@@ -1236,7 +1209,7 @@
                 },
                 {
                   "label": "Unrelated overlaps",
-                  "value": "0.0 / 1.0 / 2.0",
+                  "value": "0.0 / 2.0 / 0.0",
                   "code": "unrelated_overlaps",
                   "tip": "Overlaps between reactions that share no non-currency metabolite (node · edge-through-node · collinear edge). Lower is better; target 0.",
                   "better": "lower",
@@ -1253,7 +1226,7 @@
               "rows": [
                 {
                   "label": "Detour (median · p90 · above 1.6)",
-                  "value": "1.064 / 1.075 / 0",
+                  "value": "1.065 / 1.076 / 0",
                   "code": "detour",
                   "tip": "Path length ÷ straight chord for algorithm connections. Lower is better; Bézier routing penalises detour above 1.6.",
                   "better": "lower",
@@ -1273,7 +1246,7 @@
                 },
                 {
                   "label": "Bends per connection",
-                  "value": "0.028 · bent 2%",
+                  "value": "0.056 · bent 3%",
                   "code": "bends_per_arc",
                   "tip": "Mean direction changes per connection. Lower is better on curated Bézier maps; target near 0.",
                   "better": "lower",
@@ -1290,7 +1263,7 @@
               "rows": [
                 {
                   "label": "Exchange reactions on the periphery",
-                  "value": "31%",
+                  "value": "42%",
                   "code": "exchange_periphery_share",
                   "tip": "Share of exchange/demand reactions that sit in the outer band of their component. Higher is better; target most exchanges outside the core.",
                   "better": "higher",
@@ -1320,7 +1293,7 @@
                 },
                 {
                   "label": "Grid-aligned metabolites",
-                  "value": "60%",
+                  "value": "63%",
                   "code": "metabolite_grid_share",
                   "tip": "Share of main metabolite glyphs that share an x or y with another nearby main glyph (tolerance 0.02 × median nearest-neighbour main-metabolite distance, floor 1 px). Higher is better; goal 85% on curated BiGG e_coli_core.",
                   "better": "higher",
@@ -1330,7 +1303,7 @@
                 },
                 {
                   "label": "Median chain turn angle",
-                  "value": "9.37°",
+                  "value": "10.71°",
                   "code": "chain_turn_median_deg",
                   "tip": "Median turn at a main metabolite shared by exactly two reactions (0° = the two midmarkers sit on opposite sides of the metabolite). Lower is better; goal 0° on curated BiGG e_coli_core.",
                   "better": "lower",
@@ -1340,13 +1313,13 @@
                 },
                 {
                   "label": "Cycle circularity / direction / order",
-                  "value": "0.3772 / 0.525 (cw) / 1.0",
+                  "value": "0.341 / 0.575 (ccw) / 1.0",
                   "code": "cycle_circularity",
                   "tip": "How round and consistently oriented drawn cycles are (isoperimetric quotient and neighbour order). Higher is better; goal higher circularity and neighbour-order consistency.",
                   "better": "higher",
                   "target": "higher circularity & consistency",
                   "stage": "not yet optimised",
-                  "miss": false
+                  "miss": true
                 },
                 {
                   "label": "Species in another compartment",
@@ -1367,7 +1340,7 @@
               "rows": [
                 {
                   "label": "Map size",
-                  "value": "6293 × 3914 px",
+                  "value": "6739 × 3978 px",
                   "code": "content_bbox",
                   "tip": "Width × height of the content-node bounding box (metabolites + reaction midmarkers). Same box as aspect and blank space.",
                   "better": null,
@@ -1377,7 +1350,7 @@
                 },
                 {
                   "label": "Aspect ratio (W/H) vs target",
-                  "value": "1.6079 · target 1.0 · |Δ| 0.6079",
+                  "value": "1.6941 · target 1.0 · |Δ| 0.6941",
                   "code": "aspect_ratio",
                   "tip": "Content width ÷ height versus target 1.0. Closer to the target is better.",
                   "better": "closer to target",
@@ -1387,7 +1360,7 @@
                 },
                 {
                   "label": "Blank space / space utilisation",
-                  "value": "56% blank · 44% used",
+                  "value": "59% blank · 41% used",
                   "code": "blank_space_share",
                   "tip": "Blank cells versus occupied cells on one raster of the content box (utilisation = 1 − blank). Lower blank / higher utilisation is better.",
                   "better": "lower blank",
@@ -1417,7 +1390,7 @@
                 },
                 {
                   "label": "Most reactions in one cell",
-                  "value": 13,
+                  "value": 9,
                   "code": "max_reactions_in_one_cell",
                   "tip": "Peak reaction count in one spacing-scaled packing cell. Lower local peaks are better; flags overcrowding.",
                   "better": "lower",
@@ -1449,27 +1422,27 @@
           "stage_not_yet": "not yet optimised"
         },
         "composition_pass": {
-          "components": 16,
-          "tiles": 36,
+          "components": 17,
+          "tiles": 38,
           "curated_tiles": 11,
-          "auto_tiles": 25,
+          "auto_tiles": 27,
           "large_tiles": 3,
-          "small_tiles": 33,
+          "small_tiles": 35,
           "large_area_pct": 75.0,
-          "moved_related": 3,
+          "moved_related": 2,
           "arranged_independent": 7,
-          "kept_near": 0,
+          "kept_near": 1,
           "failed": 0,
-          "gathered": 3,
+          "gathered": 2,
           "same_map_rigid_reactions": 56,
-          "main": 6,
-          "spacing_px": 200.1,
+          "main": 7,
+          "spacing_px": 181.0,
           "pocket_pack": {
             "placed": 7,
             "missed": 0,
-            "cell": 110.1,
-            "search_pad": 355.2,
-            "aspect_after": 1.384
+            "cell": 99.6,
+            "search_pad": 346.3,
+            "aspect_after": 1.372
           },
           "shelf": {
             "side": "pocket",
@@ -1486,30 +1459,30 @@
           "interior_repack": [
             {
               "placed": 0,
-              "missed": 3,
+              "missed": 4,
               "moved_px": 0.0,
-              "cell": 110.1,
-              "search_pad": 355.2,
-              "aspect_after": 1.368
+              "cell": 99.6,
+              "search_pad": 346.3,
+              "aspect_after": 1.364
             }
           ],
           "landscape_reflow": {
             "applied": true,
-            "aspect_before": 1.518,
+            "aspect_before": 1.413,
             "page_rotated_90": false,
             "pocket": {
               "placed": 6,
               "missed": 0,
-              "cell": 72.6,
-              "search_pad": 285.0,
-              "aspect_after": 1.334,
+              "cell": 72.5,
+              "search_pad": 284.7,
+              "aspect_after": 1.331,
               "leftover": 4
             },
-            "aspect_after": 1.708,
+            "aspect_after": 1.739,
             "pack": {
               "side": "right",
-              "target_width": 1720,
-              "aspect": 1.708,
+              "target_width": 1890,
+              "aspect": 1.739,
               "in_band": true,
               "movable": 4,
               "pocket": 6
@@ -1517,42 +1490,28 @@
             "reason": "main_frozen_shelf_reflow"
           },
           "compact_long_arms_escher": {
-            "shortened": 30,
+            "shortened": 27,
             "max_arm": 220.0,
             "target": 150.0,
             "details": [
               {
                 "reaction": "AKGt2r",
                 "metabolite": "akg_e",
-                "before": 478.6,
+                "before": 479.4,
                 "after": 150.0,
                 "moved": "shared_midmarker"
               },
               {
                 "reaction": "EX_akg_e",
                 "metabolite": "akg_e",
-                "before": 478.8,
-                "after": 150.0,
-                "moved": "shared_metabolite"
-              },
-              {
-                "reaction": "EX_acald_e",
-                "metabolite": "acald_e",
-                "before": 465.1,
-                "after": 150.0,
-                "moved": "shared_midmarker"
-              },
-              {
-                "reaction": "ACALDt",
-                "metabolite": "acald_e",
-                "before": 603.8,
+                "before": 474.7,
                 "after": 150.0,
                 "moved": "shared_metabolite"
               },
               {
                 "reaction": "EX_pyr_e",
                 "metabolite": "pyr_e",
-                "before": 403.3,
+                "before": 403.4,
                 "after": 150.0,
                 "moved": "shared_midmarker"
               },
@@ -1566,63 +1525,63 @@
               {
                 "reaction": "SUCCt3",
                 "metabolite": "succ_e",
-                "before": 487.4,
+                "before": 487.3,
                 "after": 150.0,
                 "moved": "shared_midmarker"
               },
               {
                 "reaction": "SUCCt2_2",
                 "metabolite": "succ_e",
-                "before": 499.7,
+                "before": 499.1,
                 "after": 150.0,
                 "moved": "shared_midmarker"
               },
               {
                 "reaction": "EX_succ_e",
                 "metabolite": "succ_e",
-                "before": 1609.8,
+                "before": 1611.3,
                 "after": 150.0,
                 "moved": "shared_metabolite"
               },
               {
                 "reaction": "D_LACt2",
                 "metabolite": "lac__D_e",
-                "before": 263.9,
+                "before": 272.3,
                 "after": 150.0,
                 "moved": "shared_metabolite"
               },
               {
                 "reaction": "ETOHt2r",
                 "metabolite": "etoh_e",
-                "before": 312.3,
+                "before": 312.5,
                 "after": 150.0,
                 "moved": "shared_metabolite"
               },
               {
                 "reaction": "FORt",
                 "metabolite": "for_e",
-                "before": 250.3,
+                "before": 249.9,
                 "after": 150.0,
                 "moved": "shared_midmarker"
               },
               {
                 "reaction": "FORt2",
                 "metabolite": "for_e",
-                "before": 282.6,
+                "before": 291.2,
                 "after": 150.0,
                 "moved": "shared_metabolite"
               },
               {
                 "reaction": "EX_fru_e",
                 "metabolite": "fru_e",
-                "before": 297.7,
+                "before": 297.3,
                 "after": 150.0,
                 "moved": "shared_midmarker"
               },
               {
                 "reaction": "FRUpts2",
                 "metabolite": "fru_e",
-                "before": 456.4,
+                "before": 455.3,
                 "after": 150.0,
                 "moved": "shared_metabolite"
               },
@@ -1636,77 +1595,77 @@
               {
                 "reaction": "EX_fum_e",
                 "metabolite": "fum_e",
-                "before": 1083.4,
+                "before": 1076.9,
                 "after": 150.0,
                 "moved": "shared_metabolite"
               },
               {
                 "reaction": "GLCpts",
                 "metabolite": "glc__D_e",
-                "before": 428.0,
+                "before": 423.9,
                 "after": 150.0,
                 "moved": "shared_midmarker"
               },
               {
                 "reaction": "EX_glc__D_e",
                 "metabolite": "glc__D_e",
-                "before": 269.9,
+                "before": 273.5,
                 "after": 150.0,
                 "moved": "shared_metabolite"
               },
               {
                 "reaction": "GLNabc",
                 "metabolite": "gln__L_e",
-                "before": 397.7,
+                "before": 398.3,
                 "after": 150.0,
                 "moved": "shared_midmarker"
               },
               {
                 "reaction": "EX_gln__L_e",
                 "metabolite": "gln__L_e",
-                "before": 426.5,
+                "before": 427.4,
                 "after": 150.0,
                 "moved": "shared_metabolite"
               },
               {
                 "reaction": "GLUt2r",
                 "metabolite": "glu__L_e",
-                "before": 409.5,
+                "before": 410.9,
                 "after": 150.0,
                 "moved": "shared_metabolite"
               },
               {
-                "reaction": "MALt2_2",
+                "reaction": "EX_mal__L_e",
                 "metabolite": "mal__L_e",
-                "before": 436.0,
+                "before": 1522.2,
                 "after": 150.0,
                 "moved": "shared_midmarker"
               },
               {
-                "reaction": "EX_mal__L_e",
+                "reaction": "MALt2_2",
                 "metabolite": "mal__L_e",
-                "before": 1435.4,
+                "before": 1780.7,
                 "after": 150.0,
                 "moved": "shared_metabolite"
               },
               {
                 "reaction": "AKGt2r",
                 "metabolite": "h_e",
-                "before": 281.3,
+                "before": 282.5,
                 "after": 150.0,
                 "moved": "metabolite"
               },
               {
                 "reaction": "SUCCt2_2",
                 "metabolite": "h_e",
-                "before": 300.7,
+                "before": 299.9,
                 "after": 150.0,
                 "moved": "metabolite"
               },
               {
                 "reaction": "SUCCt3",
                 "metabolite": "h_e",
-                "before": 386.7,
+                "before": 386.4,
                 "after": 150.0,
                 "moved": "metabolite"
               },
@@ -1720,69 +1679,74 @@
               {
                 "reaction": "GLCpts",
                 "metabolite": "g6p_c",
-                "before": 277.3,
-                "after": 150.0,
-                "moved": "metabolite"
-              },
-              {
-                "reaction": "MALt2_2",
-                "metabolite": "h_e",
-                "before": 236.2,
+                "before": 275.5,
                 "after": 150.0,
                 "moved": "metabolite"
               }
             ]
           },
           "squeeze": {
-            "dx": 93.6,
+            "dx": 60.6,
             "dy": 0.0,
-            "max_gap": 251.3,
+            "max_gap": 250.1,
             "applied": true,
             "mode": "x",
-            "aspect_before": 1.637,
-            "aspect_after": 1.613,
-            "spacing_px": 201.0,
+            "aspect_before": 1.714,
+            "aspect_after": 1.699,
+            "spacing_px": 200.1,
             "k": 1.25,
             "fallback": true,
             "first": {
               "dx": 0.0,
               "dy": 0.0,
-              "max_gap": 351.8196448466174,
+              "max_gap": 350.18894477129965,
               "applied": false,
-              "spacing_px": 201.0,
+              "spacing_px": 200.1,
               "k": 1.75
             }
           },
           "empty_corridor_escher": {
             "applied": true,
             "shortened": 2,
-            "length_removed": 2524.84,
-            "max_gap": 301.56,
-            "min_len": 904.7,
+            "length_removed": 2528.61,
+            "max_gap": 300.16,
+            "min_len": 900.5,
             "moved_nodes": 10,
             "post_squeeze": {
               "applied": true,
-              "dx": 0.0,
+              "dx": 9.0,
               "dy": 0.0,
-              "max_gap": 251.3
+              "max_gap": 250.1
             }
           }
         },
         "peripheral": {
-          "modules": 2,
-          "attachable": 2,
+          "modules": 3,
+          "attachable": 3,
           "attached": 1,
-          "not_attached": 1,
+          "not_attached": 2,
           "independent": 0,
-          "proposed": 1,
+          "proposed": 2,
           "gate": {
-            "proposed": 1,
+            "proposed": 2,
             "accepted": 0,
-            "rejected": 1,
+            "rejected": 2,
             "budget_exhausted": 0,
-            "seconds": 0.8
+            "seconds": 2.8
           },
           "unattached": [
+            {
+              "exchange": "EX_acald_e",
+              "transports": [
+                "ACALDt"
+              ],
+              "anchors": [
+                "ACALD",
+                "ALCD2x"
+              ],
+              "x": null,
+              "y": null
+            },
             {
               "exchange": "EX_for_e",
               "transports": [
@@ -1800,114 +1764,112 @@
       },
       "worst_regions": [
         {
-          "x": 3860.1,
-          "y": 3071.7,
+          "x": 4827.4,
+          "y": 2264.4,
           "w": 400,
           "h": 400,
-          "crossings": 3,
-          "obstacle_hits": 3,
+          "crossings": 1,
+          "obstacle_hits": 6,
           "node_overlaps": 0,
-          "edges": 16,
+          "edges": 25,
           "reactions": [
-            "ADK1",
-            "ATPM",
-            "ATPS4r",
-            "SUCCt2_2"
+            "BIOMASS_Ecoli_core_w_GAM",
+            "TPI"
           ]
         },
         {
-          "x": 260.1,
-          "y": 3671.7,
+          "x": 4827.4,
+          "y": 1664.4,
           "w": 400,
           "h": 400,
           "crossings": 1,
           "obstacle_hits": 3,
           "node_overlaps": 0,
-          "edges": 25,
+          "edges": 22,
           "reactions": [
             "CYTBD",
+            "NADH16",
             "NADTRHD",
             "THD2"
           ]
         },
         {
-          "x": 4460.1,
-          "y": 2471.7,
+          "x": 4427.4,
+          "y": 4064.4,
           "w": 400,
           "h": 400,
           "crossings": 1,
-          "obstacle_hits": 2,
+          "obstacle_hits": 3,
           "node_overlaps": 0,
-          "edges": 15,
+          "edges": 18,
           "reactions": [
-            "BIOMASS_Ecoli_core_w_GAM",
-            "ENO",
-            "PGM"
+            "ADK1",
+            "ATPM",
+            "ATPS4r"
           ]
         },
         {
-          "x": 1660.1,
-          "y": 4271.7,
-          "w": 400,
-          "h": 400,
-          "crossings": 1,
-          "obstacle_hits": 0,
-          "node_overlaps": 0,
-          "edges": 12,
-          "reactions": [
-            "ACALD",
-            "CS"
-          ]
-        },
-        {
-          "x": 3660.1,
-          "y": 3871.7,
+          "x": 1227.5,
+          "y": 3864.4,
           "w": 400,
           "h": 400,
           "crossings": 0,
           "obstacle_hits": 1,
           "node_overlaps": 0,
-          "edges": 11,
+          "edges": 12,
           "reactions": [
-            "GLUDy"
+            "PPC"
+          ]
+        },
+        {
+          "x": 827.5,
+          "y": 4064.4,
+          "w": 400,
+          "h": 400,
+          "crossings": 0,
+          "obstacle_hits": 1,
+          "node_overlaps": 0,
+          "edges": 8,
+          "reactions": [
+            "PPS"
           ]
         }
       ],
       "note": "computed from the final map.json; crossings are counted on sampled final curves, source-split (algorithm×algorithm + algorithm×curated; curated×curated not in the headline) and role-split (main-metabolite vs currency-involved); worst_regions use uncapped counted crossings in true 400 px / stride-200 boxes; structure continuity scores reused curated structures; 120° opposite-side threshold is a Project 22 first guess; Detailed metrics keep only layout goals (one content bbox for size/aspect/blank)",
-      "seconds": 0.2,
+      "seconds": 0.4,
       "layout_style": "curated"
     },
     "edge_style": {
-      "relocated": 0,
+      "relocated": 1,
       "edges": 360,
-      "expert_or_curved": 146,
-      "bezier": 214,
-      "straightish": 53,
-      "curved": 161,
+      "expert_or_curved": 141,
+      "bezier": 219,
+      "straightish": 59,
+      "curved": 160,
       "corridor": 0,
-      "degraded": 204,
+      "degraded": 203,
       "no_template": 0,
-      "hits_after": 204,
-      "crossings_after": 41,
-      "joint_reactions_with_own_crossings": 1,
-      "joint_fixed": 1,
-      "joint_own_crossings_before": 3,
+      "hits_after": 203,
+      "crossings_after": 17,
+      "joint_reactions_with_own_crossings": 0,
+      "joint_fixed": 0,
+      "joint_own_crossings_before": 0,
       "joint_own_crossings_after": 0,
-      "seconds": 1.8
+      "seconds": 3.4
     },
     "peripheral": {
-      "modules": 2,
-      "attachable": 2,
+      "modules": 3,
+      "attachable": 3,
       "attached": 1,
-      "not_attached": 1,
+      "not_attached": 2,
       "independent": 0,
-      "proposed": 1,
+      "proposed": 2,
       "gate": {
-        "proposed": 1,
+        "proposed": 2,
         "accepted": 0,
-        "rejected": 1,
+        "rejected": 2,
         "budget_exhausted": 0,
-        "seconds": 0.8
+        "seconds": 2.8
       }
     },
     "block_relocation": null,
@@ -1924,32 +1886,32 @@
       "submodule_triggers": 0
     },
     "label_placement": {
-      "labels": 347,
-      "with_conflict_before": 178,
-      "with_conflict_after": 13,
-      "moves": 162,
+      "labels": 349,
+      "with_conflict_before": 164,
+      "with_conflict_after": 10,
+      "moves": 158,
       "reanchored": 0,
-      "hidden_currency": 4,
-      "dense_cells": 2,
-      "seconds": 0.2
+      "hidden_currency": 2,
+      "dense_cells": 3,
+      "seconds": 0.6
     },
     "hotspot_repair": {
       "enabled": true,
       "k": 10,
       "before": {
-        "crossings": 14,
+        "crossings": 6,
         "top_window_crossings": [
-          4,
-          3,
-          2
+          1,
+          1,
+          1
         ],
-        "worst_window": 4,
+        "worst_window": 1,
         "node_overlaps": 0,
         "label_overlaps": 12,
-        "continuity_share": 0.655,
+        "continuity_share": 0.644,
         "split_structures": 2,
-        "length_p90": 330.0339219591014,
-        "currency_involved": 13,
+        "length_p90": 325.09747034217565,
+        "currency_involved": 5,
         "main_metabolite": 1
       },
       "accepted": [
@@ -1957,99 +1919,16 @@
           "kind": "side_rotate",
           "order": [
             0,
-            "ATPM",
-            "207",
-            0
-          ],
-          "window": [
-            3860.1,
-            3071.7
-          ],
-          "before_crossings": 14,
-          "after_crossings": 13,
-          "delta": -1,
-          "reaction": "ATPM"
-        },
-        {
-          "kind": "reposition",
-          "order": [
-            5,
-            "158",
-            0
-          ],
-          "window": [
-            260.1,
-            3671.7
-          ],
-          "before_crossings": 13,
-          "after_crossings": 11,
-          "delta": -2
-        },
-        {
-          "kind": "side_rotate",
-          "order": [
-            0,
-            "ACALD",
-            "189",
-            0
-          ],
-          "window": [
-            1660.1,
-            4271.7
-          ],
-          "before_crossings": 11,
-          "after_crossings": 10,
-          "delta": -1,
-          "reaction": "ACALD"
-        },
-        {
-          "kind": "side_rotate",
-          "order": [
-            0,
-            "PDH",
-            "303",
-            1
-          ],
-          "window": [
-            1260.1,
-            4071.7
-          ],
-          "before_crossings": 10,
-          "after_crossings": 9,
-          "delta": -1,
-          "reaction": "PDH"
-        },
-        {
-          "kind": "side_rotate",
-          "order": [
-            0,
-            "PDH",
-            "304",
-            0
-          ],
-          "window": [
-            1260.1,
-            4071.7
-          ],
-          "before_crossings": 9,
-          "after_crossings": 8,
-          "delta": -1,
-          "reaction": "PDH"
-        },
-        {
-          "kind": "side_rotate",
-          "order": [
-            0,
             "PPC",
-            "317",
+            "319",
             1
           ],
           "window": [
-            1060.1,
-            3871.7
+            1227.5,
+            3864.4
           ],
-          "before_crossings": 8,
-          "after_crossings": 7,
+          "before_crossings": 6,
+          "after_crossings": 5,
           "delta": -1,
           "reaction": "PPC"
         },
@@ -2057,115 +1936,67 @@
           "kind": "side_rotate",
           "order": [
             0,
+            "ACALD",
+            "190",
+            0
+          ],
+          "window": [
+            1627.5,
+            4264.4
+          ],
+          "before_crossings": 5,
+          "after_crossings": 4,
+          "delta": -1,
+          "reaction": "ACALD"
+        },
+        {
+          "kind": "side_rotate",
+          "order": [
+            0,
             "ME1",
-            "292",
+            "294",
             1
           ],
           "window": [
-            2060.1,
-            3471.7
+            2027.5,
+            3664.4
           ],
-          "before_crossings": 7,
-          "after_crossings": 6,
+          "before_crossings": 4,
+          "after_crossings": 3,
           "delta": -1,
           "reaction": "ME1"
         }
       ],
-      "rejected": 525,
-      "tries": 532,
-      "rounds": 7,
+      "rejected": 462,
+      "tries": 465,
+      "rounds": 4,
       "reject_reasons": {
-        "no_crossing_drop": 463,
-        "label_overlap": 19,
-        "no_real_drop": 23,
-        "node_overlap": 20
+        "no_crossing_drop": 363,
+        "node_overlap": 73,
+        "no_real_drop": 16,
+        "label_overlap": 10
       },
       "budget_s": 35.0,
       "budget_mass": {
-        "window_crossings": 14,
-        "window_edges": 99
+        "window_crossings": 6,
+        "window_edges": 95
       },
-      "setup_s": 0.06,
+      "setup_s": 0.12,
       "diagnosis": [
-        {
-          "total": 4,
-          "currency_involved": 4,
-          "main_metabolite": 0,
-          "involves_long_edge": 3,
-          "spacing_px": 201.0,
-          "window": [
-            3860.1,
-            3071.7
-          ],
-          "listed_crossings": 4,
-          "reactions": [
-            "ADK1",
-            "ATPM",
-            "SUCCt2_2"
-          ]
-        },
-        {
-          "total": 3,
-          "currency_involved": 3,
-          "main_metabolite": 0,
-          "involves_long_edge": 0,
-          "spacing_px": 201.0,
-          "window": [
-            260.1,
-            3671.7
-          ],
-          "listed_crossings": 3,
-          "reactions": [
-            "NADTRHD",
-            "THD2"
-          ]
-        },
-        {
-          "total": 2,
-          "currency_involved": 2,
-          "main_metabolite": 0,
-          "involves_long_edge": 2,
-          "spacing_px": 201.0,
-          "window": [
-            1660.1,
-            4271.7
-          ],
-          "listed_crossings": 2,
-          "reactions": [
-            "ACALD",
-            "CS"
-          ]
-        },
-        {
-          "total": 2,
-          "currency_involved": 2,
-          "main_metabolite": 0,
-          "involves_long_edge": 0,
-          "spacing_px": 201.0,
-          "window": [
-            1260.1,
-            4071.7
-          ],
-          "listed_crossings": 2,
-          "reactions": [
-            "PDH",
-            "PFL"
-          ]
-        },
         {
           "total": 1,
           "currency_involved": 0,
           "main_metabolite": 1,
           "involves_long_edge": 0,
-          "spacing_px": 201.0,
+          "spacing_px": 200.1,
           "window": [
-            4460.1,
-            2471.7
+            4827.4,
+            2264.4
           ],
           "listed_crossings": 1,
           "reactions": [
-            "ENO",
-            "PGM"
+            "BIOMASS_Ecoli_core_w_GAM",
+            "TPI"
           ]
         },
         {
@@ -2173,10 +2004,42 @@
           "currency_involved": 1,
           "main_metabolite": 0,
           "involves_long_edge": 0,
-          "spacing_px": 201.0,
+          "spacing_px": 200.1,
           "window": [
-            1060.1,
-            3671.7
+            4827.4,
+            1664.4
+          ],
+          "listed_crossings": 1,
+          "reactions": [
+            "NADTRHD",
+            "THD2"
+          ]
+        },
+        {
+          "total": 1,
+          "currency_involved": 1,
+          "main_metabolite": 0,
+          "involves_long_edge": 0,
+          "spacing_px": 200.1,
+          "window": [
+            4427.4,
+            4064.4
+          ],
+          "listed_crossings": 1,
+          "reactions": [
+            "ADK1",
+            "ATPS4r"
+          ]
+        },
+        {
+          "total": 1,
+          "currency_involved": 1,
+          "main_metabolite": 0,
+          "involves_long_edge": 0,
+          "spacing_px": 200.1,
+          "window": [
+            1227.5,
+            3864.4
           ],
           "listed_crossings": 1,
           "reactions": [
@@ -2189,10 +2052,26 @@
           "currency_involved": 1,
           "main_metabolite": 0,
           "involves_long_edge": 1,
-          "spacing_px": 201.0,
+          "spacing_px": 200.1,
           "window": [
-            2060.1,
-            3471.7
+            1627.5,
+            4264.4
+          ],
+          "listed_crossings": 1,
+          "reactions": [
+            "ACALD",
+            "CS"
+          ]
+        },
+        {
+          "total": 1,
+          "currency_involved": 1,
+          "main_metabolite": 0,
+          "involves_long_edge": 1,
+          "spacing_px": 200.1,
+          "window": [
+            2027.5,
+            3664.4
           ],
           "listed_crossings": 1,
           "reactions": [
@@ -2202,56 +2081,56 @@
         }
       ],
       "after": {
-        "crossings": 6,
+        "crossings": 3,
         "top_window_crossings": [
-          3,
+          1,
           1,
           1
         ],
-        "worst_window": 3,
+        "worst_window": 1,
         "node_overlaps": 0,
-        "label_overlaps": 12,
-        "continuity_share": 0.655,
+        "label_overlaps": 11,
+        "continuity_share": 0.644,
         "split_structures": 2,
-        "length_p90": 330.0339219591014,
-        "currency_involved": 5,
+        "length_p90": 325.09747034217565,
+        "currency_involved": 2,
         "main_metabolite": 1
       },
-      "accepted_count": 7,
-      "search_s": 4.74,
-      "seconds": 4.81,
+      "accepted_count": 3,
+      "search_s": 8.66,
+      "seconds": 8.8,
       "improved": true,
-      "index_headline": 6
+      "index_headline": 3
     },
     "protected": {
-      "groups": 45,
-      "strict": 45,
+      "groups": 44,
+      "strict": 44,
       "conditional": 0,
-      "reactions": 77,
+      "reactions": 76,
       "violations": 0,
       "violated": [],
       "moved": {}
     },
     "node_overlap_kinds": {
-      "copy|copy|same_metabolite": 1
+      "copy|copy|same_metabolite": 2
     },
     "edge_routing": {
       "mode": "curated (Bezier connections)"
     }
   },
   "candidates": {
-    "retrieval": 3542,
-    "complete_equation": 211,
+    "retrieval": 3858,
+    "complete_equation": 175,
     "ec": 0
   },
   "channels": {
     "retrieval_levels": {
-      "reaction_reference": 265,
-      "geometry": 3269,
+      "reaction_reference": 257,
+      "geometry": 3594,
       "partial_reference": 6,
-      "complete_equation": 2
+      "complete_equation": 1
     },
-    "complete_equation_candidates": 211,
+    "complete_equation_candidates": 175,
     "ec_candidates": 0,
     "selected_structures": 11,
     "libraries": {
@@ -2283,34 +2162,34 @@
     }
   },
   "provenance": {
-    "generated": 24,
-    "expert_derived": 68,
+    "generated": 25,
+    "expert_derived": 66,
     "topology_layout_suggestion": 2,
-    "bridge": 1
+    "bridge": 2
   },
   "evidence": {
     "identity_evidence": {
-      "stoichiometry_verified": 68,
+      "stoichiometry_verified": 66,
       "topology_only": 2
     },
     "identity_verified": {
-      "verified": 68,
+      "verified": 66,
       "not_verified": 2
     },
     "chemical_compatibility": {
-      "compatible": 68,
+      "compatible": 66,
       "unknown": 2
     },
     "difference_types": {
-      "exact_equation": 68
+      "exact_equation": 66
     },
     "layout_provenance": {
-      "de_novo": 25,
-      "expert_exact": 68,
+      "de_novo": 27,
+      "expert_exact": 66,
       "expert_topological": 2
     },
     "transfer_mode": {
-      "exact": 68,
+      "exact": 66,
       "topology": 2
     },
     "identity_revoked": 0
@@ -2318,64 +2197,64 @@
   "layout_quality": {
     "orientation_mode": "full",
     "expert_geometry": {
-      "structures": 4,
-      "distortion_rms_px_mean": 0.45,
-      "distortion_rms_px_max": 3.16,
-      "distortion_max_px": 5.97,
-      "mean_displacement_px": 0.9,
+      "structures": 3,
+      "distortion_rms_px_mean": 0.48,
+      "distortion_rms_px_max": 3.14,
+      "distortion_max_px": 4.6,
+      "mean_displacement_px": 1.1,
       "note": "residual after translation, rotation and uniform scaling of each structure"
     },
     "final_geometry": {
       "edges": {
         "total": 360,
-        "algorithm": 214,
-        "curated": 146,
-        "expert": 146
+        "algorithm": 219,
+        "curated": 141,
+        "expert": 141
       },
       "core": {
         "crossings": {
-          "counted": 6,
-          "total": 52,
-          "same_reaction": 37,
+          "counted": 3,
+          "total": 56,
+          "same_reaction": 46,
           "same_reaction_curated": 0,
           "same_reaction_expert": 0,
           "algorithm_algorithm": 2,
-          "algorithm_curated": 4,
-          "curated_curated": 9,
-          "algorithm_expert": 4,
-          "expert_expert": 9,
+          "algorithm_curated": 1,
+          "curated_curated": 7,
+          "algorithm_expert": 1,
+          "expert_expert": 7,
           "main_metabolite": 1,
-          "currency_involved": 5,
-          "per_100_edges": 2.8
+          "currency_involved": 2,
+          "per_100_edges": 1.37
         },
         "overlaps": {
-          "overlapping_pairs": 1,
+          "overlapping_pairs": 2,
           "node_overlap_pairs": 0,
-          "label_overlap_pairs": 1,
-          "curves_through_nodes": 10,
-          "curves_through_labels": 0
+          "label_overlap_pairs": 2,
+          "curves_through_nodes": 14,
+          "curves_through_labels": 1
         },
         "collisions": {
-          "overlapping_pairs": 1,
+          "overlapping_pairs": 2,
           "node_overlap_pairs": 0,
-          "label_overlap_pairs": 1,
-          "curves_through_nodes": 10,
-          "curves_through_labels": 0
+          "label_overlap_pairs": 2,
+          "curves_through_nodes": 14,
+          "curves_through_labels": 1
         },
         "long_lines": {
-          "p90_reaction_spacings": 1.64,
-          "edge_len_max_rel": 14.15,
-          "p90_px": 330.0,
-          "reaction_spacing_px": 201.0,
-          "over_250": 61
+          "p90_reaction_spacings": 1.62,
+          "edge_len_max_rel": 14.346,
+          "p90_px": 325.1,
+          "reaction_spacing_px": 200.1,
+          "over_250": 59
         },
         "length_p90": {
-          "px": 330.0,
-          "in_reaction_spacings": 1.64,
-          "reaction_spacing_px": 201.0
+          "px": 325.1,
+          "in_reaction_spacings": 1.62,
+          "reaction_spacing_px": 200.1
         },
         "participant_placement": {
-          "inout_opposite_share": 0.813,
+          "inout_opposite_share": 0.827,
           "inout_opposite_share_core": 0.825,
           "reactions_all": 75,
           "reactions_core": 63,
@@ -2393,20 +2272,20 @@
           "long_threshold_spacings": 3.0
         },
         "structure_continuity": {
-          "contiguous_pair_share": 0.933,
-          "pairs": 60,
-          "contiguous_pairs": 56,
-          "structures": 19,
+          "contiguous_pair_share": 0.951,
+          "pairs": 81,
+          "contiguous_pairs": 77,
+          "structures": 17,
           "split_structures": 3,
-          "split_structure_share": 0.158,
-          "reaction_spacing_px": 201.0,
+          "split_structure_share": 0.176,
+          "reaction_spacing_px": 200.1,
           "adjacency_factor": 3.0,
           "note": "Share of expert-structure reaction pairs that share a non-currency metabolite and lie within adjacency_factor × median reaction spacing; split_structures count structures whose contiguous pairs form more than one geometric piece."
         },
         "bezier_coverage": {
           "share": 1.0,
-          "algorithm_edges": 214,
-          "bezier": 214,
+          "algorithm_edges": 219,
+          "bezier": 219,
           "straight_lines": 0,
           "polylines_with_bends": 0,
           "orthogonal_polylines": 0
@@ -2414,69 +2293,28 @@
       },
       "details": {
         "algorithm_curated_crossings": {
-          "count": 4,
-          "headline": 6,
+          "count": 1,
+          "headline": 3,
           "by_reason": {
-            "spoke/currency": 3,
             "main_metabolite": 1
           },
           "top_algorithm_reactions": [
             {
-              "algorithm_rid": "ATPM",
-              "crossings": 2,
-              "why": "Algorithm reaction ATPM’s link to atp_c crosses curated reaction SUCCt2_2’s link to succ_c (currency spoke)"
-            },
-            {
-              "algorithm_rid": "ACALD",
+              "algorithm_rid": "TPI",
               "crossings": 1,
-              "why": "Algorithm reaction ACALD’s link to h_c crosses curated reaction CS’s link to accoa_c (currency spoke)"
-            },
-            {
-              "algorithm_rid": "ENO",
-              "crossings": 1,
-              "why": "Algorithm reaction ENO’s link to pep_c crosses curated reaction PGM’s link to 2pg_c (main metabolite)"
+              "why": "Algorithm reaction TPI’s link to g3p_c crosses curated reaction BIOMASS_Ecoli_core_w_GAM’s link to e4p_c (main metabolite)"
             }
           ],
           "samples": [
             {
-              "algorithm_rid": "ACALD",
-              "curated_rid": "CS",
-              "algorithm_met": "h_c",
-              "curated_met": "accoa_c",
-              "reason": "spoke/currency",
-              "why": "Algorithm reaction ACALD’s link to h_c crosses curated reaction CS’s link to accoa_c (currency spoke)",
-              "x": 1899.2,
-              "y": 4342.1
-            },
-            {
-              "algorithm_rid": "ENO",
-              "curated_rid": "PGM",
-              "algorithm_met": "pep_c",
-              "curated_met": "2pg_c",
+              "algorithm_rid": "TPI",
+              "curated_rid": "BIOMASS_Ecoli_core_w_GAM",
+              "algorithm_met": "g3p_c",
+              "curated_met": "e4p_c",
               "reason": "main_metabolite",
-              "why": "Algorithm reaction ENO’s link to pep_c crosses curated reaction PGM’s link to 2pg_c (main metabolite)",
-              "x": 4592.2,
-              "y": 2674.2
-            },
-            {
-              "algorithm_rid": "ATPM",
-              "curated_rid": "SUCCt2_2",
-              "algorithm_met": "atp_c",
-              "curated_met": "succ_c",
-              "reason": "spoke/currency",
-              "why": "Algorithm reaction ATPM’s link to atp_c crosses curated reaction SUCCt2_2’s link to succ_c (currency spoke)",
-              "x": 4086.4,
-              "y": 3386.9
-            },
-            {
-              "algorithm_rid": "ATPM",
-              "curated_rid": "SUCCt2_2",
-              "algorithm_met": "adp_c",
-              "curated_met": "succ_c",
-              "reason": "spoke/currency",
-              "why": "Algorithm reaction ATPM’s link to adp_c crosses curated reaction SUCCt2_2’s link to succ_c (currency spoke)",
-              "x": 3984.8,
-              "y": 3372.3
+              "why": "Algorithm reaction TPI’s link to g3p_c crosses curated reaction BIOMASS_Ecoli_core_w_GAM’s link to e4p_c (main metabolite)",
+              "x": 4879.7,
+              "y": 2653.1
             }
           ]
         },
@@ -2491,12 +2329,12 @@
                 "currency": false,
                 "link_class": "inter_curated_block",
                 "from_xy": [
-                  2803.7,
-                  3796.1
+                  2875.2,
+                  3861.3
                 ],
                 "to_xy": [
-                  1716.9,
-                  4353.1
+                  1788.4,
+                  4418.3
                 ],
                 "from_type": "midmarker",
                 "to_type": "metabolite"
@@ -2509,12 +2347,12 @@
                 "currency": false,
                 "link_class": "inter_curated_block",
                 "from_xy": [
-                  1433.0,
-                  3934.1
+                  1504.5,
+                  3999.3
                 ],
                 "to_xy": [
-                  2551.7,
-                  4132.1
+                  2623.2,
+                  4197.3
                 ],
                 "from_type": "midmarker",
                 "to_type": "metabolite"
@@ -2527,12 +2365,12 @@
                 "currency": false,
                 "link_class": "inter_curated_block",
                 "from_xy": [
-                  2142.7,
-                  3768.1
+                  2214.2,
+                  3833.3
                 ],
                 "to_xy": [
-                  1169.4,
-                  4353.1
+                  1240.9,
+                  4418.3
                 ],
                 "from_type": "midmarker",
                 "to_type": "metabolite"
@@ -2545,12 +2383,12 @@
                 "currency": false,
                 "link_class": "inter_curated_block",
                 "from_xy": [
-                  1443.0,
-                  3894.1
+                  1514.5,
+                  3959.3
                 ],
                 "to_xy": [
-                  2551.7,
-                  4132.1
+                  2623.2,
+                  4197.3
                 ],
                 "from_type": "midmarker",
                 "to_type": "metabolite"
@@ -2563,12 +2401,12 @@
                 "currency": false,
                 "link_class": "inter_curated_block",
                 "from_xy": [
-                  2152.7,
-                  3798.1
+                  2224.2,
+                  3863.3
                 ],
                 "to_xy": [
-                  1169.4,
-                  4353.1
+                  1240.9,
+                  4418.3
                 ],
                 "from_type": "midmarker",
                 "to_type": "metabolite"
@@ -2581,12 +2419,12 @@
                 "currency": false,
                 "link_class": "inter_curated_block",
                 "from_xy": [
-                  4419.5,
-                  3435.1
+                  4491.0,
+                  3500.3
                 ],
                 "to_xy": [
-                  3312.7,
-                  3275.1
+                  3384.2,
+                  3340.3
                 ],
                 "from_type": "midmarker",
                 "to_type": "metabolite"
@@ -2599,12 +2437,12 @@
                 "currency": false,
                 "link_class": "inter_curated_block",
                 "from_xy": [
-                  4420.5,
-                  3254.1
+                  4492.0,
+                  3319.3
                 ],
                 "to_xy": [
-                  3312.7,
-                  3275.1
+                  3384.2,
+                  3340.3
                 ],
                 "from_type": "midmarker",
                 "to_type": "metabolite"
@@ -2617,12 +2455,12 @@
                 "currency": false,
                 "link_class": "inter_curated_block",
                 "from_xy": [
-                  3309.7,
-                  4265.1
+                  3381.2,
+                  4330.3
                 ],
                 "to_xy": [
-                  3312.7,
-                  3275.1
+                  3384.2,
+                  3340.3
                 ],
                 "from_type": "midmarker",
                 "to_type": "metabolite"
@@ -2635,12 +2473,12 @@
                 "currency": false,
                 "link_class": "inter_curated_block",
                 "from_xy": [
-                  2690.7,
-                  4294.1
+                  2762.2,
+                  4359.3
                 ],
                 "to_xy": [
-                  1716.9,
-                  4353.1
+                  1788.4,
+                  4418.3
                 ],
                 "from_type": "midmarker",
                 "to_type": "metabolite"
@@ -2653,30 +2491,30 @@
                 "currency": false,
                 "link_class": "inter_curated_block",
                 "from_xy": [
-                  4415.5,
-                  3636.1
+                  4487.0,
+                  3701.3
                 ],
                 "to_xy": [
-                  3638.7,
-                  4035.1
+                  3710.2,
+                  4100.3
                 ],
                 "from_type": "midmarker",
                 "to_type": "metabolite"
               }
             ],
             "n_edges": 360,
-            "p90": 330.0,
-            "p90_ex_intra_curated": 252.4,
+            "p90": 325.1,
+            "p90_ex_intra_curated": 203.4,
             "by_class": {
-              "inter_curated_block": 22,
-              "intra_curated_block": 105,
-              "curated_unscoped": 19,
-              "algorithm": 214
+              "inter_curated_block": 15,
+              "intra_curated_block": 120,
+              "curated_unscoped": 6,
+              "algorithm": 219
             },
             "above_p90_by_class": {
-              "inter_curated_block": 18,
-              "intra_curated_block": 14,
-              "curated_unscoped": 4
+              "inter_curated_block": 13,
+              "intra_curated_block": 22,
+              "curated_unscoped": 1
             },
             "note": "intra_curated_block edges are rigid under translation-only packing; p90_ex_intra_curated is the packing-relevant long-line gate"
           },
@@ -2687,182 +2525,190 @@
                 "metabolite": "mal__L_c",
                 "length_px": 1847.5,
                 "curated": true,
-                "key": "copy:ccdc9b32c395e30b382051b4:mal__L_c"
+                "key": "copy:05a4558d51e0bf86849aae74:mal__L_c"
               },
               {
                 "reaction": "FUMt2_2",
                 "metabolite": "fum_c",
                 "length_px": 1491.5,
                 "curated": true,
-                "key": "copy:ccdc9b32c395e30b382051b4:fum_c"
+                "key": "copy:05a4558d51e0bf86849aae74:fum_c"
               },
               {
                 "reaction": "MALS",
                 "metabolite": "accoa_c",
                 "length_px": 1221.2,
                 "curated": true,
-                "key": "copy:ccdc9b32c395e30b382051b4:accoa_c"
+                "key": "copy:05a4558d51e0bf86849aae74:accoa_c"
               },
               {
                 "reaction": "PPCK",
                 "metabolite": "oaa_c",
                 "length_px": 1136.1,
                 "curated": true,
-                "key": "copy:ccdc9b32c395e30b382051b4:oaa_c"
+                "key": "copy:05a4558d51e0bf86849aae74:oaa_c"
               },
               {
                 "reaction": "ME1",
                 "metabolite": "pyr_c",
                 "length_px": 1135.6,
                 "curated": true,
-                "key": "copy:ccdc9b32c395e30b382051b4:pyr_c"
+                "key": "copy:05a4558d51e0bf86849aae74:pyr_c"
               },
               {
                 "reaction": "PPC",
                 "metabolite": "oaa_c",
                 "length_px": 1134.0,
                 "curated": true,
-                "key": "copy:ccdc9b32c395e30b382051b4:oaa_c"
+                "key": "copy:05a4558d51e0bf86849aae74:oaa_c"
               },
               {
                 "reaction": "ME2",
                 "metabolite": "pyr_c",
                 "length_px": 1129.1,
                 "curated": true,
-                "key": "copy:ccdc9b32c395e30b382051b4:pyr_c"
+                "key": "copy:05a4558d51e0bf86849aae74:pyr_c"
               },
               {
                 "reaction": "SUCCt2_2",
                 "metabolite": "succ_c",
                 "length_px": 1118.3,
                 "curated": true,
-                "key": "copy:ccdc9b32c395e30b382051b4:succ_c"
+                "key": "copy:05a4558d51e0bf86849aae74:succ_c"
               },
               {
                 "reaction": "SUCCt3",
                 "metabolite": "succ_c",
                 "length_px": 1108.0,
                 "curated": true,
-                "key": "copy:ccdc9b32c395e30b382051b4:succ_c"
+                "key": "copy:05a4558d51e0bf86849aae74:succ_c"
               },
               {
                 "reaction": "ICL",
                 "metabolite": "succ_c",
                 "length_px": 990.0,
                 "curated": true,
-                "key": "copy:ccdc9b32c395e30b382051b4:succ_c"
+                "key": "copy:05a4558d51e0bf86849aae74:succ_c"
               }
             ],
             "n_edges": 167,
-            "p90": 518.4
+            "p90": 519.4
           }
         },
         "line_shape": {
-          "detour_median": 1.064,
-          "detour_p90": 1.075,
+          "detour_median": 1.065,
+          "detour_p90": 1.076,
           "detour_over_1_6": 0,
           "hooks": 0,
           "sharp_turns": 0,
           "self_intersections": 0,
-          "bends_per_arc": 0.028,
-          "bent_arc_share": 0.0167
+          "bends_per_arc": 0.056,
+          "bent_arc_share": 0.0333
         },
         "cycles": {
-          "cycle_circularity": 0.3772,
-          "cycle_direction": "cw",
-          "cycle_direction_consistency": 0.525,
+          "cycle_circularity": 0.341,
+          "cycle_direction": "ccw",
+          "cycle_direction_consistency": 0.575,
           "cycle_order_consistency": 1.0,
           "cycles": 40,
           "cycle_len": 3
         },
         "orderliness": {
           "main_segment_axis_share": 0.497,
-          "main_segment_axis_share_length": 0.4677,
+          "main_segment_axis_share_length": 0.4607,
           "reaction_axis_share": 0.6349,
-          "chain_turn_median_deg": 9.37,
-          "metabolite_grid_share": 0.5974,
+          "chain_turn_median_deg": 10.71,
+          "metabolite_grid_share": 0.6329,
           "segments": 167,
           "reactions": 63,
           "chain_turns": 29,
-          "metabolites": 77,
-          "grid_tol_px": 4.06
+          "metabolites": 79,
+          "grid_tol_px": 3.77
         },
         "main_segment_axis_share": 0.497,
-        "main_segment_axis_share_length": 0.4677,
+        "main_segment_axis_share_length": 0.4607,
         "reaction_axis_share": 0.6349,
-        "chain_turn_median_deg": 9.37,
-        "metabolite_grid_share": 0.5974,
+        "chain_turn_median_deg": 10.71,
+        "metabolite_grid_share": 0.6329,
         "flow_main_dir": "up",
         "flow_main_dir_share": 0.2857,
-        "exchange_periphery_share": 0.3077,
+        "exchange_periphery_share": 0.4167,
         "blank_space": {
-          "blank_space_share": 0.5579,
-          "space_utilisation": 0.4421,
-          "largest_empty_rect_share": 0.1714,
-          "cell_px": 120.62,
-          "spacing_px": 201.0
+          "blank_space_share": 0.5932,
+          "space_utilisation": 0.4068,
+          "largest_empty_rect_share": 0.1695,
+          "cell_px": 120.06,
+          "spacing_px": 200.1
         },
-        "blank_space_share": 0.5579,
-        "space_utilisation": 0.4421,
-        "largest_empty_rect_share": 0.1714,
+        "blank_space_share": 0.5932,
+        "space_utilisation": 0.4068,
+        "largest_empty_rect_share": 0.1695,
         "unrelated_overlaps": {
           "node_overlaps": 0.0,
-          "edge_through_node": 1.0,
-          "collinear_edge_overlaps": 2.0,
-          "total": 3.0
+          "edge_through_node": 2.0,
+          "collinear_edge_overlaps": 0.0,
+          "total": 2.0
         },
-        "aspect_ratio": 1.6079,
+        "aspect_ratio": 1.6941,
         "aspect_ratio_target": 1.0,
-        "aspect_ratio_vs_target": 0.6079,
+        "aspect_ratio_vs_target": 0.6941,
         "species_in_other_compartment": null,
         "thresholds_note": "inout opposite ≥120.0° is a Project 22 first guess; participant_consistency >90.0° stays on the evaluate CLI; hub/long currency thresholds are relative to median reaction spacing; blank_space / unrelated_overlaps follow MetaCarto ideas (CC BY 4.0; reimplemented, not copied); map size, aspect W/H and blank/utilisation share one content-node bbox; orderliness axis tolerance ±10° (count-weighted gate; length-weighted reported); grid tolerance 0.02 × median nearest-neighbour main-metabolite distance (floor 1 px)",
         "crossing_density": {
-          "worst_window_crossings": 3
+          "worst_window_crossings": 1
         },
         "orientation": {
           "all_participants": {
             "reactions": 75,
-            "opposite_sides_share": 0.813,
-            "angle_median": 160
+            "opposite_sides_share": 0.827,
+            "angle_median": 161
           },
           "core_participants": {
             "reactions": 63,
             "opposite_sides_share": 0.825,
-            "angle_median": 170
+            "angle_median": 168
           },
           "threshold_deg": 120.0,
-          "opposite_sides_share": 0.813,
-          "angle_median": 160
+          "opposite_sides_share": 0.827,
+          "angle_median": 161
         },
         "composition": {
           "canvas": [
-            6293,
-            3914
+            6739,
+            3978
           ],
-          "aspect": 1.6079,
-          "aspect_ratio": 1.6079,
+          "aspect": 1.6941,
+          "aspect_ratio": 1.6941,
           "aspect_ratio_target": 1.0,
-          "aspect_ratio_vs_target": 0.6079,
-          "blank_space_share": 0.5579,
-          "space_utilisation": 0.4421,
-          "largest_empty_rect_share": 0.1714,
-          "cell_px": 120.62,
+          "aspect_ratio_vs_target": 0.6941,
+          "blank_space_share": 0.5932,
+          "space_utilisation": 0.4068,
+          "largest_empty_rect_share": 0.1695,
+          "cell_px": 120.06,
           "isolated_reactions": 0,
-          "max_reactions_in_one_cell": 13
+          "max_reactions_in_one_cell": 9
         },
         "structure_continuity": {
-          "contiguous_pair_share": 0.933,
-          "pairs": 60,
-          "contiguous_pairs": 56,
-          "structures": 19,
+          "contiguous_pair_share": 0.951,
+          "pairs": 81,
+          "contiguous_pairs": 77,
+          "structures": 17,
           "split_structures": 3,
-          "split_structure_share": 0.158,
-          "reaction_spacing_px": 201.0,
+          "split_structure_share": 0.176,
+          "reaction_spacing_px": 200.1,
           "adjacency_factor": 3.0,
           "note": "Share of expert-structure reaction pairs that share a non-currency metabolite and lie within adjacency_factor × median reaction spacing; split_structures count structures whose contiguous pairs form more than one geometric piece.",
           "details": [
             {
-              "structure": "ccdc9b32c395e30b382051b4#cc0",
+              "structure": "05a4558d51e0bf86849aae74#cc0",
+              "reactions": 9,
+              "pairs": 20,
+              "contiguous_pairs": 19,
+              "components": 1,
+              "contiguous_pair_share": 0.95
+            },
+            {
+              "structure": "05a4558d51e0bf86849aae74#cc1",
               "reactions": 5,
               "pairs": 5,
               "contiguous_pairs": 5,
@@ -2870,31 +2716,23 @@
               "contiguous_pair_share": 1.0
             },
             {
-              "structure": "ccdc9b32c395e30b382051b4#cc1",
-              "reactions": 6,
-              "pairs": 11,
-              "contiguous_pairs": 11,
+              "structure": "05a4558d51e0bf86849aae74#cc2",
+              "reactions": 8,
+              "pairs": 16,
+              "contiguous_pairs": 16,
               "components": 1,
               "contiguous_pair_share": 1.0
             },
             {
-              "structure": "ccdc9b32c395e30b382051b4#cc2",
-              "reactions": 4,
-              "pairs": 3,
-              "contiguous_pairs": 3,
+              "structure": "05a4558d51e0bf86849aae74#cc3",
+              "reactions": 5,
+              "pairs": 4,
+              "contiguous_pairs": 4,
               "components": 2,
               "contiguous_pair_share": 1.0
             },
             {
-              "structure": "ccdc9b32c395e30b382051b4#cc3",
-              "reactions": 4,
-              "pairs": 2,
-              "contiguous_pairs": 2,
-              "components": 2,
-              "contiguous_pair_share": 1.0
-            },
-            {
-              "structure": "ccdc9b32c395e30b382051b4#cc4",
+              "structure": "05a4558d51e0bf86849aae74#cc4",
               "reactions": 2,
               "pairs": 1,
               "contiguous_pairs": 1,
@@ -2902,66 +2740,34 @@
               "contiguous_pair_share": 1.0
             },
             {
-              "structure": "ccdc9b32c395e30b382051b4#cc5",
-              "reactions": 4,
-              "pairs": 5,
-              "contiguous_pairs": 5,
+              "structure": "05a4558d51e0bf86849aae74#cc5",
+              "reactions": 5,
+              "pairs": 10,
+              "contiguous_pairs": 8,
               "components": 1,
-              "contiguous_pair_share": 1.0
+              "contiguous_pair_share": 0.8
             },
             {
-              "structure": "ccdc9b32c395e30b382051b4#cc6",
-              "reactions": 4,
-              "pairs": 6,
-              "contiguous_pairs": 4,
-              "components": 1,
-              "contiguous_pair_share": 0.667
-            },
-            {
-              "structure": "ccdc9b32c395e30b382051b4#cc7",
-              "reactions": 4,
-              "pairs": 6,
-              "contiguous_pairs": 6,
-              "components": 1,
-              "contiguous_pair_share": 1.0
-            },
-            {
-              "structure": "da5dc1ed9131ee6811efdccc#cc0",
-              "reactions": 3,
-              "pairs": 3,
-              "contiguous_pairs": 3,
-              "components": 1,
-              "contiguous_pair_share": 1.0
-            },
-            {
-              "structure": "da5dc1ed9131ee6811efdccc#cc1",
-              "reactions": 3,
-              "pairs": 3,
-              "contiguous_pairs": 3,
-              "components": 1,
-              "contiguous_pair_share": 1.0
-            },
-            {
-              "structure": "d0031bc7d33a9b419f72d837",
-              "reactions": 4,
-              "pairs": 4,
-              "contiguous_pairs": 3,
-              "components": 1,
-              "contiguous_pair_share": 0.75
-            },
-            {
-              "structure": "1b58b5bdca08f1a7bcffdf78",
-              "reactions": 4,
-              "pairs": 4,
-              "contiguous_pairs": 4,
-              "components": 1,
-              "contiguous_pair_share": 1.0
-            },
-            {
-              "structure": "ebeeeab5abee4e62055a4540",
+              "structure": "05a4558d51e0bf86849aae74#cc6",
               "reactions": 2,
-              "pairs": 1,
-              "contiguous_pairs": 1,
+              "pairs": 0,
+              "contiguous_pairs": 0,
+              "components": 2,
+              "contiguous_pair_share": null
+            },
+            {
+              "structure": "66e523bfda3063fb7bc3f362",
+              "reactions": 8,
+              "pairs": 13,
+              "contiguous_pairs": 13,
+              "components": 1,
+              "contiguous_pair_share": 1.0
+            },
+            {
+              "structure": "950ba90ccee27dee333492af",
+              "reactions": 4,
+              "pairs": 4,
+              "contiguous_pairs": 4,
               "components": 1,
               "contiguous_pair_share": 1.0
             },
@@ -2974,7 +2780,7 @@
               "contiguous_pair_share": 0.0
             },
             {
-              "structure": "24d29880e9ec2643d20ae478",
+              "structure": "94c054f906d21f0a2087dc53",
               "reactions": 2,
               "pairs": 1,
               "contiguous_pairs": 1,
@@ -2982,7 +2788,7 @@
               "contiguous_pair_share": 1.0
             },
             {
-              "structure": "ad1e63f63a1a945d61fd5fd4",
+              "structure": "25c16d0297cc8e93b1baeac3",
               "reactions": 2,
               "pairs": 1,
               "contiguous_pairs": 1,
@@ -2990,7 +2796,7 @@
               "contiguous_pair_share": 1.0
             },
             {
-              "structure": "1c0bb5d12f134c4c808bcc26",
+              "structure": "59a1c3aa06df23e5a6573925",
               "reactions": 2,
               "pairs": 1,
               "contiguous_pairs": 1,
@@ -2998,7 +2804,23 @@
               "contiguous_pair_share": 1.0
             },
             {
-              "structure": "08a14bf4c89172150e7da931",
+              "structure": "f7d3b0457a3623f5dfa41644",
+              "reactions": 2,
+              "pairs": 1,
+              "contiguous_pairs": 1,
+              "components": 1,
+              "contiguous_pair_share": 1.0
+            },
+            {
+              "structure": "bee463ed50b4ae60148e680a",
+              "reactions": 2,
+              "pairs": 1,
+              "contiguous_pairs": 1,
+              "components": 1,
+              "contiguous_pair_share": 1.0
+            },
+            {
+              "structure": "65b9b47c824e721a8fd8f1a3",
               "reactions": 2,
               "pairs": 1,
               "contiguous_pairs": 1,
@@ -3016,15 +2838,15 @@
           ]
         },
         "edges_footnote": {
-          "algorithm": 214,
-          "curated": 146,
+          "algorithm": 219,
+          "curated": 141,
           "total": 360
         },
         "warnings": [],
         "bezier_coverage": {
           "share": 1.0,
-          "algorithm_edges": 214,
-          "bezier": 214,
+          "algorithm_edges": 219,
+          "bezier": 219,
           "straight_lines": 0,
           "polylines_with_bends": 0,
           "orthogonal_polylines": 0
@@ -3038,7 +2860,7 @@
               "rows": [
                 {
                   "label": "Local crossing hotspot",
-                  "value": 3,
+                  "value": 1,
                   "code": "worst_window_crossings",
                   "tip": "Most algorithm×algorithm / algorithm×curated crossings inside one 400 px window (stride 200). Lower is better; target as few as possible (headline crossings are on the cards).",
                   "better": "lower",
@@ -3048,7 +2870,7 @@
                 },
                 {
                   "label": "Unrelated overlaps",
-                  "value": "0.0 / 1.0 / 2.0",
+                  "value": "0.0 / 2.0 / 0.0",
                   "code": "unrelated_overlaps",
                   "tip": "Overlaps between reactions that share no non-currency metabolite (node · edge-through-node · collinear edge). Lower is better; target 0.",
                   "better": "lower",
@@ -3065,7 +2887,7 @@
               "rows": [
                 {
                   "label": "Detour (median · p90 · above 1.6)",
-                  "value": "1.064 / 1.075 / 0",
+                  "value": "1.065 / 1.076 / 0",
                   "code": "detour",
                   "tip": "Path length ÷ straight chord for algorithm connections. Lower is better; Bézier routing penalises detour above 1.6.",
                   "better": "lower",
@@ -3085,7 +2907,7 @@
                 },
                 {
                   "label": "Bends per connection",
-                  "value": "0.028 · bent 2%",
+                  "value": "0.056 · bent 3%",
                   "code": "bends_per_arc",
                   "tip": "Mean direction changes per connection. Lower is better on curated Bézier maps; target near 0.",
                   "better": "lower",
@@ -3102,7 +2924,7 @@
               "rows": [
                 {
                   "label": "Exchange reactions on the periphery",
-                  "value": "31%",
+                  "value": "42%",
                   "code": "exchange_periphery_share",
                   "tip": "Share of exchange/demand reactions that sit in the outer band of their component. Higher is better; target most exchanges outside the core.",
                   "better": "higher",
@@ -3132,7 +2954,7 @@
                 },
                 {
                   "label": "Grid-aligned metabolites",
-                  "value": "60%",
+                  "value": "63%",
                   "code": "metabolite_grid_share",
                   "tip": "Share of main metabolite glyphs that share an x or y with another nearby main glyph (tolerance 0.02 × median nearest-neighbour main-metabolite distance, floor 1 px). Higher is better; goal 85% on curated BiGG e_coli_core.",
                   "better": "higher",
@@ -3142,7 +2964,7 @@
                 },
                 {
                   "label": "Median chain turn angle",
-                  "value": "9.37°",
+                  "value": "10.71°",
                   "code": "chain_turn_median_deg",
                   "tip": "Median turn at a main metabolite shared by exactly two reactions (0° = the two midmarkers sit on opposite sides of the metabolite). Lower is better; goal 0° on curated BiGG e_coli_core.",
                   "better": "lower",
@@ -3152,13 +2974,13 @@
                 },
                 {
                   "label": "Cycle circularity / direction / order",
-                  "value": "0.3772 / 0.525 (cw) / 1.0",
+                  "value": "0.341 / 0.575 (ccw) / 1.0",
                   "code": "cycle_circularity",
                   "tip": "How round and consistently oriented drawn cycles are (isoperimetric quotient and neighbour order). Higher is better; goal higher circularity and neighbour-order consistency.",
                   "better": "higher",
                   "target": "higher circularity & consistency",
                   "stage": "not yet optimised",
-                  "miss": false
+                  "miss": true
                 },
                 {
                   "label": "Species in another compartment",
@@ -3179,7 +3001,7 @@
               "rows": [
                 {
                   "label": "Map size",
-                  "value": "6293 × 3914 px",
+                  "value": "6739 × 3978 px",
                   "code": "content_bbox",
                   "tip": "Width × height of the content-node bounding box (metabolites + reaction midmarkers). Same box as aspect and blank space.",
                   "better": null,
@@ -3189,7 +3011,7 @@
                 },
                 {
                   "label": "Aspect ratio (W/H) vs target",
-                  "value": "1.6079 · target 1.0 · |Δ| 0.6079",
+                  "value": "1.6941 · target 1.0 · |Δ| 0.6941",
                   "code": "aspect_ratio",
                   "tip": "Content width ÷ height versus target 1.0. Closer to the target is better.",
                   "better": "closer to target",
@@ -3199,7 +3021,7 @@
                 },
                 {
                   "label": "Blank space / space utilisation",
-                  "value": "56% blank · 44% used",
+                  "value": "59% blank · 41% used",
                   "code": "blank_space_share",
                   "tip": "Blank cells versus occupied cells on one raster of the content box (utilisation = 1 − blank). Lower blank / higher utilisation is better.",
                   "better": "lower blank",
@@ -3229,7 +3051,7 @@
                 },
                 {
                   "label": "Most reactions in one cell",
-                  "value": 13,
+                  "value": 9,
                   "code": "max_reactions_in_one_cell",
                   "tip": "Peak reaction count in one spacing-scaled packing cell. Lower local peaks are better; flags overcrowding.",
                   "better": "lower",
@@ -3261,27 +3083,27 @@
           "stage_not_yet": "not yet optimised"
         },
         "composition_pass": {
-          "components": 16,
-          "tiles": 36,
+          "components": 17,
+          "tiles": 38,
           "curated_tiles": 11,
-          "auto_tiles": 25,
+          "auto_tiles": 27,
           "large_tiles": 3,
-          "small_tiles": 33,
+          "small_tiles": 35,
           "large_area_pct": 75.0,
-          "moved_related": 3,
+          "moved_related": 2,
           "arranged_independent": 7,
-          "kept_near": 0,
+          "kept_near": 1,
           "failed": 0,
-          "gathered": 3,
+          "gathered": 2,
           "same_map_rigid_reactions": 56,
-          "main": 6,
-          "spacing_px": 200.1,
+          "main": 7,
+          "spacing_px": 181.0,
           "pocket_pack": {
             "placed": 7,
             "missed": 0,
-            "cell": 110.1,
-            "search_pad": 355.2,
-            "aspect_after": 1.384
+            "cell": 99.6,
+            "search_pad": 346.3,
+            "aspect_after": 1.372
           },
           "shelf": {
             "side": "pocket",
@@ -3298,30 +3120,30 @@
           "interior_repack": [
             {
               "placed": 0,
-              "missed": 3,
+              "missed": 4,
               "moved_px": 0.0,
-              "cell": 110.1,
-              "search_pad": 355.2,
-              "aspect_after": 1.368
+              "cell": 99.6,
+              "search_pad": 346.3,
+              "aspect_after": 1.364
             }
           ],
           "landscape_reflow": {
             "applied": true,
-            "aspect_before": 1.518,
+            "aspect_before": 1.413,
             "page_rotated_90": false,
             "pocket": {
               "placed": 6,
               "missed": 0,
-              "cell": 72.6,
-              "search_pad": 285.0,
-              "aspect_after": 1.334,
+              "cell": 72.5,
+              "search_pad": 284.7,
+              "aspect_after": 1.331,
               "leftover": 4
             },
-            "aspect_after": 1.708,
+            "aspect_after": 1.739,
             "pack": {
               "side": "right",
-              "target_width": 1720,
-              "aspect": 1.708,
+              "target_width": 1890,
+              "aspect": 1.739,
               "in_band": true,
               "movable": 4,
               "pocket": 6
@@ -3329,42 +3151,28 @@
             "reason": "main_frozen_shelf_reflow"
           },
           "compact_long_arms_escher": {
-            "shortened": 30,
+            "shortened": 27,
             "max_arm": 220.0,
             "target": 150.0,
             "details": [
               {
                 "reaction": "AKGt2r",
                 "metabolite": "akg_e",
-                "before": 478.6,
+                "before": 479.4,
                 "after": 150.0,
                 "moved": "shared_midmarker"
               },
               {
                 "reaction": "EX_akg_e",
                 "metabolite": "akg_e",
-                "before": 478.8,
-                "after": 150.0,
-                "moved": "shared_metabolite"
-              },
-              {
-                "reaction": "EX_acald_e",
-                "metabolite": "acald_e",
-                "before": 465.1,
-                "after": 150.0,
-                "moved": "shared_midmarker"
-              },
-              {
-                "reaction": "ACALDt",
-                "metabolite": "acald_e",
-                "before": 603.8,
+                "before": 474.7,
                 "after": 150.0,
                 "moved": "shared_metabolite"
               },
               {
                 "reaction": "EX_pyr_e",
                 "metabolite": "pyr_e",
-                "before": 403.3,
+                "before": 403.4,
                 "after": 150.0,
                 "moved": "shared_midmarker"
               },
@@ -3378,63 +3186,63 @@
               {
                 "reaction": "SUCCt3",
                 "metabolite": "succ_e",
-                "before": 487.4,
+                "before": 487.3,
                 "after": 150.0,
                 "moved": "shared_midmarker"
               },
               {
                 "reaction": "SUCCt2_2",
                 "metabolite": "succ_e",
-                "before": 499.7,
+                "before": 499.1,
                 "after": 150.0,
                 "moved": "shared_midmarker"
               },
               {
                 "reaction": "EX_succ_e",
                 "metabolite": "succ_e",
-                "before": 1609.8,
+                "before": 1611.3,
                 "after": 150.0,
                 "moved": "shared_metabolite"
               },
               {
                 "reaction": "D_LACt2",
                 "metabolite": "lac__D_e",
-                "before": 263.9,
+                "before": 272.3,
                 "after": 150.0,
                 "moved": "shared_metabolite"
               },
               {
                 "reaction": "ETOHt2r",
                 "metabolite": "etoh_e",
-                "before": 312.3,
+                "before": 312.5,
                 "after": 150.0,
                 "moved": "shared_metabolite"
               },
               {
                 "reaction": "FORt",
                 "metabolite": "for_e",
-                "before": 250.3,
+                "before": 249.9,
                 "after": 150.0,
                 "moved": "shared_midmarker"
               },
               {
                 "reaction": "FORt2",
                 "metabolite": "for_e",
-                "before": 282.6,
+                "before": 291.2,
                 "after": 150.0,
                 "moved": "shared_metabolite"
               },
               {
                 "reaction": "EX_fru_e",
                 "metabolite": "fru_e",
-                "before": 297.7,
+                "before": 297.3,
                 "after": 150.0,
                 "moved": "shared_midmarker"
               },
               {
                 "reaction": "FRUpts2",
                 "metabolite": "fru_e",
-                "before": 456.4,
+                "before": 455.3,
                 "after": 150.0,
                 "moved": "shared_metabolite"
               },
@@ -3448,77 +3256,77 @@
               {
                 "reaction": "EX_fum_e",
                 "metabolite": "fum_e",
-                "before": 1083.4,
+                "before": 1076.9,
                 "after": 150.0,
                 "moved": "shared_metabolite"
               },
               {
                 "reaction": "GLCpts",
                 "metabolite": "glc__D_e",
-                "before": 428.0,
+                "before": 423.9,
                 "after": 150.0,
                 "moved": "shared_midmarker"
               },
               {
                 "reaction": "EX_glc__D_e",
                 "metabolite": "glc__D_e",
-                "before": 269.9,
+                "before": 273.5,
                 "after": 150.0,
                 "moved": "shared_metabolite"
               },
               {
                 "reaction": "GLNabc",
                 "metabolite": "gln__L_e",
-                "before": 397.7,
+                "before": 398.3,
                 "after": 150.0,
                 "moved": "shared_midmarker"
               },
               {
                 "reaction": "EX_gln__L_e",
                 "metabolite": "gln__L_e",
-                "before": 426.5,
+                "before": 427.4,
                 "after": 150.0,
                 "moved": "shared_metabolite"
               },
               {
                 "reaction": "GLUt2r",
                 "metabolite": "glu__L_e",
-                "before": 409.5,
+                "before": 410.9,
                 "after": 150.0,
                 "moved": "shared_metabolite"
               },
               {
-                "reaction": "MALt2_2",
+                "reaction": "EX_mal__L_e",
                 "metabolite": "mal__L_e",
-                "before": 436.0,
+                "before": 1522.2,
                 "after": 150.0,
                 "moved": "shared_midmarker"
               },
               {
-                "reaction": "EX_mal__L_e",
+                "reaction": "MALt2_2",
                 "metabolite": "mal__L_e",
-                "before": 1435.4,
+                "before": 1780.7,
                 "after": 150.0,
                 "moved": "shared_metabolite"
               },
               {
                 "reaction": "AKGt2r",
                 "metabolite": "h_e",
-                "before": 281.3,
+                "before": 282.5,
                 "after": 150.0,
                 "moved": "metabolite"
               },
               {
                 "reaction": "SUCCt2_2",
                 "metabolite": "h_e",
-                "before": 300.7,
+                "before": 299.9,
                 "after": 150.0,
                 "moved": "metabolite"
               },
               {
                 "reaction": "SUCCt3",
                 "metabolite": "h_e",
-                "before": 386.7,
+                "before": 386.4,
                 "after": 150.0,
                 "moved": "metabolite"
               },
@@ -3532,69 +3340,74 @@
               {
                 "reaction": "GLCpts",
                 "metabolite": "g6p_c",
-                "before": 277.3,
-                "after": 150.0,
-                "moved": "metabolite"
-              },
-              {
-                "reaction": "MALt2_2",
-                "metabolite": "h_e",
-                "before": 236.2,
+                "before": 275.5,
                 "after": 150.0,
                 "moved": "metabolite"
               }
             ]
           },
           "squeeze": {
-            "dx": 93.6,
+            "dx": 60.6,
             "dy": 0.0,
-            "max_gap": 251.3,
+            "max_gap": 250.1,
             "applied": true,
             "mode": "x",
-            "aspect_before": 1.637,
-            "aspect_after": 1.613,
-            "spacing_px": 201.0,
+            "aspect_before": 1.714,
+            "aspect_after": 1.699,
+            "spacing_px": 200.1,
             "k": 1.25,
             "fallback": true,
             "first": {
               "dx": 0.0,
               "dy": 0.0,
-              "max_gap": 351.8196448466174,
+              "max_gap": 350.18894477129965,
               "applied": false,
-              "spacing_px": 201.0,
+              "spacing_px": 200.1,
               "k": 1.75
             }
           },
           "empty_corridor_escher": {
             "applied": true,
             "shortened": 2,
-            "length_removed": 2524.84,
-            "max_gap": 301.56,
-            "min_len": 904.7,
+            "length_removed": 2528.61,
+            "max_gap": 300.16,
+            "min_len": 900.5,
             "moved_nodes": 10,
             "post_squeeze": {
               "applied": true,
-              "dx": 0.0,
+              "dx": 9.0,
               "dy": 0.0,
-              "max_gap": 251.3
+              "max_gap": 250.1
             }
           }
         },
         "peripheral": {
-          "modules": 2,
-          "attachable": 2,
+          "modules": 3,
+          "attachable": 3,
           "attached": 1,
-          "not_attached": 1,
+          "not_attached": 2,
           "independent": 0,
-          "proposed": 1,
+          "proposed": 2,
           "gate": {
-            "proposed": 1,
+            "proposed": 2,
             "accepted": 0,
-            "rejected": 1,
+            "rejected": 2,
             "budget_exhausted": 0,
-            "seconds": 0.8
+            "seconds": 2.8
           },
           "unattached": [
+            {
+              "exchange": "EX_acald_e",
+              "transports": [
+                "ACALDt"
+              ],
+              "anchors": [
+                "ACALD",
+                "ALCD2x"
+              ],
+              "x": null,
+              "y": null
+            },
             {
               "exchange": "EX_for_e",
               "transports": [
@@ -3612,117 +3425,115 @@
       },
       "worst_regions": [
         {
-          "x": 3860.1,
-          "y": 3071.7,
+          "x": 4827.4,
+          "y": 2264.4,
           "w": 400,
           "h": 400,
-          "crossings": 3,
-          "obstacle_hits": 3,
+          "crossings": 1,
+          "obstacle_hits": 6,
           "node_overlaps": 0,
-          "edges": 16,
+          "edges": 25,
           "reactions": [
-            "ADK1",
-            "ATPM",
-            "ATPS4r",
-            "SUCCt2_2"
+            "BIOMASS_Ecoli_core_w_GAM",
+            "TPI"
           ]
         },
         {
-          "x": 260.1,
-          "y": 3671.7,
+          "x": 4827.4,
+          "y": 1664.4,
           "w": 400,
           "h": 400,
           "crossings": 1,
           "obstacle_hits": 3,
           "node_overlaps": 0,
-          "edges": 25,
+          "edges": 22,
           "reactions": [
             "CYTBD",
+            "NADH16",
             "NADTRHD",
             "THD2"
           ]
         },
         {
-          "x": 4460.1,
-          "y": 2471.7,
+          "x": 4427.4,
+          "y": 4064.4,
           "w": 400,
           "h": 400,
           "crossings": 1,
-          "obstacle_hits": 2,
+          "obstacle_hits": 3,
           "node_overlaps": 0,
-          "edges": 15,
+          "edges": 18,
           "reactions": [
-            "BIOMASS_Ecoli_core_w_GAM",
-            "ENO",
-            "PGM"
+            "ADK1",
+            "ATPM",
+            "ATPS4r"
           ]
         },
         {
-          "x": 1660.1,
-          "y": 4271.7,
-          "w": 400,
-          "h": 400,
-          "crossings": 1,
-          "obstacle_hits": 0,
-          "node_overlaps": 0,
-          "edges": 12,
-          "reactions": [
-            "ACALD",
-            "CS"
-          ]
-        },
-        {
-          "x": 3660.1,
-          "y": 3871.7,
+          "x": 1227.5,
+          "y": 3864.4,
           "w": 400,
           "h": 400,
           "crossings": 0,
           "obstacle_hits": 1,
           "node_overlaps": 0,
-          "edges": 11,
+          "edges": 12,
           "reactions": [
-            "GLUDy"
+            "PPC"
+          ]
+        },
+        {
+          "x": 827.5,
+          "y": 4064.4,
+          "w": 400,
+          "h": 400,
+          "crossings": 0,
+          "obstacle_hits": 1,
+          "node_overlaps": 0,
+          "edges": 8,
+          "reactions": [
+            "PPS"
           ]
         }
       ],
       "note": "computed from the final map.json; crossings are counted on sampled final curves, source-split (algorithm×algorithm + algorithm×curated; curated×curated not in the headline) and role-split (main-metabolite vs currency-involved); worst_regions use uncapped counted crossings in true 400 px / stride-200 boxes; structure continuity scores reused curated structures; 120° opposite-side threshold is a Project 22 first guess; Detailed metrics keep only layout goals (one content bbox for size/aspect/blank)",
-      "seconds": 0.2,
+      "seconds": 0.4,
       "layout_style": "curated"
     },
     "orientation": {
       "all_participants": {
         "reactions": 75,
-        "opposite_sides_share": 0.813,
-        "angle_median": 160,
+        "opposite_sides_share": 0.827,
+        "angle_median": 161,
         "expert_structure_reactions": {
-          "n": 60,
-          "opposite_sides_share": 0.867,
-          "angle_median": 164
+          "n": 58,
+          "opposite_sides_share": 0.862,
+          "angle_median": 163
         },
         "algorithm_placed_reactions": {
-          "n": 15,
-          "opposite_sides_share": 0.6,
-          "angle_median": 140
+          "n": 17,
+          "opposite_sides_share": 0.706,
+          "angle_median": 138
         }
       },
       "core_participants": {
         "reactions": 63,
         "opposite_sides_share": 0.825,
-        "angle_median": 170,
+        "angle_median": 168,
         "expert_structure_reactions": {
-          "n": 60,
-          "opposite_sides_share": 0.85,
-          "angle_median": 171
+          "n": 58,
+          "opposite_sides_share": 0.845,
+          "angle_median": 170
         },
         "algorithm_placed_reactions": {
-          "n": 3,
-          "opposite_sides_share": 0.333,
-          "angle_median": 58
+          "n": 5,
+          "opposite_sides_share": 0.6,
+          "angle_median": 133
         }
       },
       "threshold_deg": 120.0,
-      "opposite_sides_share": 0.813,
-      "angle_median": 160
+      "opposite_sides_share": 0.827,
+      "angle_median": 161
     }
   },
   "ec_screening": {},
@@ -3734,11 +3545,11 @@
     "CYTBD",
     "ENO",
     "EX_ac_e",
-    "EX_acald_e",
     "EX_co2_e",
     "EX_etoh_e",
     "EX_h2o_e",
     "EX_h_e",
+    "EX_mal__L_e",
     "EX_nh4_e",
     "EX_o2_e",
     "EX_pi_e",
@@ -3750,15 +3561,16 @@
     "O2t",
     "PFK",
     "PIt2r",
-    "THD2"
+    "THD2",
+    "TPI"
   ],
   "code_sha256": {
-    "tool_pipeline.py": "2da74bbf6b23450d00d694a89868c840fb7428b5f49124bd34e39a1c2be71b73",
+    "tool_pipeline.py": "cd3fe714908075884f26e8c63d966c95b48c8641e4be5e9bf7114dcacfd5de88",
     "ec_channel.py": "6414d3544fa9714d163e58f4b6415c2e5e80b45dbcb9367cf9166d40c5da0820",
-    "retrieval.py": "db2b8288b12cc194cdf0cc786c04ef4cca949fcd857a61494e0b734217cb5409",
-    "semantic_transfer.py": "dfcc42a2594095ba1c4c1225dfc4cfe6de556dde6f66b6cdc0419136a0e88cae",
-    "drawing.py": "b9404af7fcfd521c9640e647050a54d1cd31f21aa9776d0000790965d42a06fa"
+    "retrieval.py": "db3a45c0a152b849bd73125088a1e6590b42483dcfe2c87a06ced1540245b497",
+    "semantic_transfer.py": "bfccc46d5a91c00e7946574dac3c1ea45ba6bdc156029f9470d6e4766a9f3339",
+    "drawing.py": "81fbb44c0fdc9c4c0ae5df10f6e2c057e437d944a20892dee90d3fd1874e7b29"
   },
-  "seconds": 42.7,
+  "seconds": 64.7,
   "limits": "Matching depends on the model annotations; the skeleton covers only reactions with an expert structure; completion is algorithmic."
 }
