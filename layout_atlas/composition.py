@@ -409,15 +409,16 @@ def compose(model, scene, blocks, cur):
             overlap_w = max(0.0, min(chi[0], mhi[0]) - max(clo[0], mlo[0]))
             overlap_h = max(0.0, min(chi[1], mhi[1]) - max(clo[1], mlo[1]))
             area = max(float((chi[0] - clo[0]) * (chi[1] - clo[1])), 1.0)
-            # Outside or barely overlapping the main AABB. Small components
-            # (≤6 reactions) whose centre sits in the outer 12% margin also count.
+            # Outside or barely overlapping the main AABB — pack into free regions
+            # inside main before growing the canvas. Small (≤4 rx) tiles in the
+            # outer 10% margin also count (far-right stubs / TR floaters).
             n_rx_i = len(comps[i]['reactions'])
             centre = 0.5 * (clo + chi)
-            core_lo = mlo + 0.12 * (mhi - mlo)
-            core_hi = mhi - 0.12 * (mhi - mlo)
+            core_lo = mlo + 0.10 * (mhi - mlo)
+            core_hi = mhi - 0.10 * (mhi - mlo)
             outside_core = (centre[0] < core_lo[0] or centre[0] > core_hi[0]
                             or centre[1] < core_lo[1] or centre[1] > core_hi[1])
-            if overlap_w * overlap_h >= 0.45 * area and not (n_rx_i <= 6 and outside_core):
+            if overlap_w * overlap_h >= 0.45 * area and not (n_rx_i <= 4 and outside_core):
                 continue
             bw = float(max(chi[0] - clo[0], 40.0) + 60.0)
             bh = float(max(chi[1] - clo[1], 40.0) + 60.0)
@@ -896,28 +897,22 @@ def fit_canvas_to_content(data, pad=40.0):
 
 
 def compact_empty_corridors_escher(data, max_gap=None, spacing=None):
-    """Shorten empty axis-aligned mid↔met edges on a finished Escher map.
+    """Shorten extreme empty axis-aligned mid↔met edges on a finished Escher map.
 
-    Builds edges from the map itself (so post-restore drift of a few px still
-    counts as vertical/horizontal) and reuses ``curated_axes.compress_empty_axis_edges``.
-    Clears Bezier handles on shortened edges so restyle can rebuild.
+    For a long empty corridor to a *shared* metabolite, translate the whole
+    reaction unit (midmarker + private spoke metabolites) toward that shared
+    pool — never yank the shared glyph, and never leave private heads behind.
+    Private (degree-1) metabolites may move alone.
     """
     import curated_axes as ca
     body = data[1]
     nodes = body.get('nodes') or {}
     reactions = body.get('reactions') or {}
-    # Stable keys for compress: node ids as strings.
-    cloud = {}
-    for nid, n in nodes.items():
-        if 'x' not in n or 'y' not in n:
-            continue
-        if n.get('node_type') not in ('metabolite', 'midmarker'):
-            continue
-        cloud[str(nid)] = [float(n['x']), float(n['y'])]
-    edges = []
-    edge_lens = []
-    mid_of = {}
+    # Metabolite node -> reaction bigg_ids that touch it.
+    holders = defaultdict(set)
+    rx_parts = {}  # rid -> (mid_id, [met_ids])
     for rx in reactions.values():
+        rid = rx.get('bigg_id') or ''
         mid_id = None
         mets = []
         for seg in (rx.get('segments') or {}).values():
@@ -926,60 +921,149 @@ def compact_empty_corridors_escher(data, max_gap=None, spacing=None):
                 sid = str(nid)
                 if n.get('node_type') == 'midmarker':
                     mid_id = sid
-                elif n.get('node_type') == 'metabolite':
+                elif n.get('node_type') == 'metabolite' and 'x' in n:
                     mets.append(sid)
-        if mid_id is None:
+                    holders[sid].add(rid)
+        if mid_id is not None:
+            rx_parts[rid] = (mid_id, mets)
+    edge_lens = []
+    candidates = []  # (length, rid, mid_id, met_id, vertical)
+    for rid, (mid_id, mets) in rx_parts.items():
+        mid = nodes.get(mid_id) or {}
+        if 'x' not in mid:
             continue
-        mid_of[rx.get('bigg_id') or mid_id] = mid_id
-        mxy = cloud.get(mid_id)
-        if mxy is None:
-            continue
-        for mid in mets:
-            if mid not in cloud:
+        for met_id in mets:
+            met = nodes.get(met_id) or {}
+            if 'x' not in met:
                 continue
-            d = float(math.hypot(cloud[mid][0] - mxy[0], cloud[mid][1] - mxy[1]))
-            if d > 1e-6:
-                edges.append((mid_id, mid))
-                edge_lens.append(d)
-    if not edges:
+            dx = float(met['x'] - mid['x']); dy = float(met['y'] - mid['y'])
+            length = float(math.hypot(dx, dy))
+            if length < 1e-6:
+                continue
+            edge_lens.append(length)
+            vertical, horizontal = ca._axis_aligned(dx, dy)
+            if not (vertical or horizontal):
+                continue
+            candidates.append((length, rid, mid_id, met_id, vertical))
+    if not candidates:
         return dict(applied=False, shortened=0)
     if max_gap is None:
         med = float(np.median(edge_lens)) if edge_lens else 150.0
-        # Only extreme padding runs: keep local chemistry readable.
         max_gap = max(med * 2.2, float(spacing or med) * 1.5, 180.0)
-    # Drop short candidates so we do not churn near-median spans.
     min_len = float(max_gap) * 2.5
-    edges = [(a, b) for a, b in edges
-             if math.hypot(cloud[a][0] - cloud[b][0], cloud[a][1] - cloud[b][1]) >= min_len]
-    if not edges:
+    candidates = [c for c in candidates if c[0] >= min_len]
+    if not candidates:
         return dict(applied=False, shortened=0, max_gap=round(float(max_gap), 2),
                     min_len=round(min_len, 1))
-    prefer_move = {str(nid) for nid, n in nodes.items()
-                   if n.get('node_type') == 'metabolite'}
-    before = {k: list(v) for k, v in cloud.items()}
-    rep = ca.compress_empty_axis_edges(
-        cloud, edges, max_gap=float(max_gap), prefer_move=prefer_move)
-    rep['min_len'] = round(min_len, 1)
-    if not rep.get('applied'):
-        return rep
-    moved = []
-    for nid, xy in cloud.items():
-        if before[nid][0] == xy[0] and before[nid][1] == xy[1]:
+    # Corridor emptiness uses all mid+met points.
+    cloud = {str(nid): [float(n['x']), float(n['y'])]
+             for nid, n in nodes.items()
+             if n.get('node_type') in ('metabolite', 'midmarker') and 'x' in n}
+    shortened = 0
+    removed = 0.0
+    moved = set()
+    candidates.sort(reverse=True)
+    for length, rid, mid_id, met_id, vertical in candidates:
+        mid = nodes.get(mid_id); met = nodes.get(met_id)
+        if mid is None or met is None or 'x' not in mid or 'x' not in met:
             continue
-        n = nodes.get(nid) or nodes.get(int(nid) if nid.isdigit() else nid)
-        if n is None:
+        a = np.array([mid['x'], mid['y']], float)
+        b = np.array([met['x'], met['y']], float)
+        length = float(np.hypot(*(a - b)))
+        if length < min_len:
             continue
-        n['x'], n['y'] = float(xy[0]), float(xy[1])
-        moved.append(nid)
-    # Drop Beziers on any segment touching a moved node.
-    moved_set = set(moved)
+        # Middle-span emptiness (ignore endpoint-local chemistry).
+        lo, hi = np.minimum(a, b), np.maximum(a, b)
+        span = float((hi[1] - lo[1]) if vertical else (hi[0] - lo[0]))
+        pad = max(span * 0.12, float(max_gap) * 0.5, 40.0)
+        cx, cy = 0.5 * (a[0] + b[0]), 0.5 * (a[1] + b[1])
+        band = 18.0 + 0.5 * (abs(a[0] - b[0]) if vertical else abs(a[1] - b[1]))
+        blocked = False
+        for k, xy in cloud.items():
+            if k in (mid_id, met_id):
+                continue
+            p = np.asarray(xy, float)
+            if vertical:
+                if abs(p[0] - cx) > band:
+                    continue
+                if lo[1] + pad < p[1] < hi[1] - pad:
+                    blocked = True; break
+            else:
+                if abs(p[1] - cy) > band:
+                    continue
+                if lo[0] + pad < p[0] < hi[0] - pad:
+                    blocked = True; break
+        if blocked:
+            continue
+        shared = len(holders.get(met_id, ())) > 1
+        if shared:
+            # Translate the whole reaction unit toward the shared pool: mid + every
+            # other metabolite on this reaction (including shared _e/_p partners).
+            # Companion EX/uptake reactions that only hold those moved partners are
+            # dragged by the same delta so their spokes stay short.
+            target = b + (a - b) * (float(max_gap) / length)
+            delta = target - a
+            move_ids = {mid_id}
+            partner_shared = []
+            for sid in rx_parts[rid][1]:
+                if sid == met_id:
+                    continue
+                move_ids.add(sid)
+                if len(holders.get(sid, ())) > 1:
+                    partner_shared.append(sid)
+            for sid in partner_shared:
+                for other_rid in holders.get(sid, ()):
+                    if other_rid == rid or other_rid not in rx_parts:
+                        continue
+                    omid, omets = rx_parts[other_rid]
+                    # Simple EX/uptake companions only (≤3 metabolite heads).
+                    if len(omets) > 3:
+                        continue
+                    move_ids.add(omid)
+                    for o in omets:
+                        if o != met_id:
+                            move_ids.add(o)
+            for sid in move_ids:
+                n = nodes.get(sid)
+                if n is None or 'x' not in n:
+                    continue
+                ox, oy = float(n['x']), float(n['y'])
+                n['x'] = ox + float(delta[0]); n['y'] = oy + float(delta[1])
+                if 'label_x' in n:
+                    n['label_x'] = float(n.get('label_x', ox) + delta[0])
+                    n['label_y'] = float(n.get('label_y', oy) + delta[1])
+                cloud[sid] = [n['x'], n['y']]
+                moved.add(sid)
+            # Keep reaction labels on moved midmarkers.
+            for r in reactions.values():
+                if r.get('bigg_id') in (rid,) or (
+                        r.get('bigg_id') and rx_parts.get(r.get('bigg_id'), (None,))[0] in move_ids):
+                    mid_moved = rx_parts.get(r.get('bigg_id'), (None,))[0]
+                    if mid_moved in move_ids and 'label_x' in r:
+                        r['label_x'] = float(nodes[mid_moved]['x'])
+                        r['label_y'] = float(nodes[mid_moved]['y'])
+            removed += length - float(max_gap)
+            shortened += 1
+        else:
+            # Private met: slide it toward the mid.
+            target = a + (b - a) * (float(max_gap) / length)
+            ox, oy = float(met['x']), float(met['y'])
+            met['x'], met['y'] = float(target[0]), float(target[1])
+            if 'label_x' in met:
+                met['label_x'] = float(met.get('label_x', ox) + (met['x'] - ox))
+                met['label_y'] = float(met.get('label_y', oy) + (met['y'] - oy))
+            cloud[met_id] = [met['x'], met['y']]
+            moved.add(met_id)
+            removed += length - float(max_gap)
+            shortened += 1
     for rx in reactions.values():
         for seg in (rx.get('segments') or {}).values():
-            if str(seg.get('from_node_id')) in moved_set or str(seg.get('to_node_id')) in moved_set:
+            if str(seg.get('from_node_id')) in moved or str(seg.get('to_node_id')) in moved:
                 seg['b1'] = None
                 seg['b2'] = None
-    rep['moved_nodes'] = len(moved)
-    return rep
+    return dict(applied=shortened > 0, shortened=shortened,
+                length_removed=round(removed, 2), max_gap=round(float(max_gap), 2),
+                min_len=round(min_len, 1), moved_nodes=len(moved))
 
 
 def _link_key(a, b):

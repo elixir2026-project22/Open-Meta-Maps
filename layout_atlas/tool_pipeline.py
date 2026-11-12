@@ -32,13 +32,8 @@ LAYOUT_STYLE = 'curated'  # 'legacy' | 'curated' (V7: Bezier curves from curated
 
 def normalize_layout_style(value):
     """Map user/API layout_style to the canonical value."""
-    if value == 'curated':
-        return 'curated'
     if value == 'legacy':
         return 'legacy'
-    # Accept the historical alias without advertising it.
-    if value == 'expert':
-        return 'curated'
     return 'curated'
 
 COMPLETION_CONTEXT = 'auto'  # 'auto' (V6: uncovered reactions are placed beside the glyphs of their own metabolites) | 'off'

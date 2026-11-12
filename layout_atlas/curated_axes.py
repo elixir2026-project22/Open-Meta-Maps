@@ -594,11 +594,10 @@ def bake_same_map_positions(blocks, model_n_reactions=None):
             for i in idxs:
                 for k, xy in abs_lookups[i].items():
                     cloud[k] = list(xy)
-            pad = compress_padding_joint(
-                cloud,
-                edge_lengths=abs_map.get('edge_lengths'),
-                edges=abs_map.get('edges') or [],
-                rounds=4)
+            # Global H/V padding only at bake time (preserves BiGG axis/orderliness).
+            # Extreme empty corridors are shortened later on the Escher map by
+            # translating whole reaction units toward shared pools.
+            pad = compress_padding_xy(cloud, edge_lengths=abs_map.get('edge_lengths'))
             for i in idxs:
                 abs_lookups[i] = {k: list(cloud[k]) for k in abs_lookups[i] if k in cloud}
             # Rebuild every resolvable glyph from (compressed) absolute coords.
