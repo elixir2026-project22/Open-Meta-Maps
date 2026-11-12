@@ -886,12 +886,14 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             # After absolute rigid restore, more windows need search than the default
             # mass-scaled budget covers (e_coli formate cluster alone was 15 crossings).
             n_rx = len(model['reactions'])
-            hs_budget = 20.0 if n_rx < 200 else 45.0
-            hs_k = 8 if n_rx < 200 else 8
+            # Corridor slides can add a few local spoke crossings; give small maps
+            # enough search to recover the pre-corridor counted-crossing floor.
+            hs_budget = 35.0 if n_rx < 200 else 45.0
+            hs_k = 10 if n_rx < 200 else 8
             metric['hotspot_repair'] = hotspot_repair.repair(
                 data, model=model, scene=scene, blocks=blocks, skip_edges=skip_edges, log=log,
-                structures=expert_structures_early, k=hs_k, max_accepts=80, budget_s=hs_budget,
-                max_rounds=6)
+                structures=expert_structures_early, k=hs_k, max_accepts=100, budget_s=hs_budget,
+                max_rounds=8)
             if log:
                 hr = metric['hotspot_repair']
                 log('  hotspot repair: ' + str({k: hr.get(k) for k in ('accepted_count', 'tries', 'rounds', 'seconds', 'improved')}))
