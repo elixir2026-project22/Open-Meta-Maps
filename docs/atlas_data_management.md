@@ -107,12 +107,16 @@ Computed by `tools/atlas_module_figures.py` from the loaded modules ([`docs/imag
 
 | Metric | Value |
 |---|---:|
-| Cut modules (default load) | 48,334 |
-| Unique after dedup (global) | 36,103 |
-| Modules nested in a larger set | 28,587 |
+| Source maps that yield modules | 1,405 |
+| Cut windows (default load) | 48,334 |
+| Unique windows after exact dedup (global) | 36,103 |
+| Windows nested in a larger reaction set | 28,587 |
 | Cross-source identical sets | 552 |
+| Distinct structures | 5,310 |
 
-Notable pairwise identical sets: Escher↔Human-maps 390; Escher↔iCH360 154; WikiPathways semantic↔Metabolism Regulation 10; Human-maps↔iCH360 3. Per-source modules vs unique counts are in the README / About table and the mosaic legend.
+Distinct structures are windows not contained in a larger window of the same source map (reaction set; node set for geometry-only windows) with at least 3 reactions, merged across sources by dedup key.
+
+Notable pairwise identical sets: Escher↔Human-maps 390; Escher↔iCH360 154; WikiPathways semantic↔Metabolism Regulation 10; Human-maps↔iCH360 3. Per-source source maps, cut windows and distinct structures are in the README / About table and the mosaic titles.
 
 ## Worked examples
 

@@ -3,7 +3,7 @@
   python3 layout_atlas/navigation.py
 
 Counts and licences come from data/atlas_registry.json.
-Overlap / unique-after-dedup counts come from docs/images/atlas/atlas_overlap.json when present.
+Source maps, cut windows, dedup and distinct-structure counts come from docs/images/atlas/atlas_overlap.json.
 Structure mirrors README: intro → data construction (Atlas) → layout optimisation → evaluation criteria → outputs / licensing.
 """
 import html
@@ -45,7 +45,6 @@ def about():
     ext = reg['extensions']
     mods = oc['modules_with_extensions']
     total = sum(mods.values())
-    core_sum = sum(oc['modules'].values())
     by_ov = (ov.get('by_source') or {})
     version = '0.3'
     try:
@@ -59,9 +58,6 @@ def about():
     def row(*cells):
         return '<tr>' + ''.join((f'<td>{c}</td>' for c in cells)) + '</tr>'
 
-    def uniq(key):
-        return (by_ov.get(key) or {}).get('unique_reaction_sets')
-
     s1 = sec(
         'About Open Meta Maps',
         '<p><b>' + b('Two parts: a curated-structure Atlas from public community maps, and a layout optimisation pipeline that reuses matching geometry and completes the rest with Bézier connections.') + '</b></p><p>' + b('Open Meta Maps is ELIXIR BioHackathon Europe 2026 ') + '<a href="https://github.com/elixir2026-project22">' + b('Project 22') + '</a>' + b(' (Open Pathway Maps). Every reaction and metabolite of the uploaded GEM is drawn; stoichiometry and compartments are unchanged.') + '</p><p class="meta">' + b('Map Generator: python3 project.py tool or ./start_tool.command. Examples: e_coli_core, iIT341, iMM904, iML1515. Viewer: pan, wheel/pinch zoom, minimap. Server exits when the last tab closes (~8 s); --keep-running disables that. Evaluate layouts with python3 project.py evaluate.') + '</p>',
@@ -71,31 +67,39 @@ def about():
     overview_rel = ui.rel(about_path, 'docs/images/atlas/atlas_overview.png')
     examples_rel = ui.rel(about_path, 'docs/images/atlas/atlas_examples.svg')
 
-    th = ''.join((f'<th>{b(h)}</th>' for h in ['Source', 'What is used', 'Modules', 'Unique after dedup', 'Licence']))
-    dflt_u = lambda k: _fmt(uniq(k)) if uniq(k) is not None else '—'
-    wp_mods = mods['wikipathways'] + mods['wikipathways_geometry']
-    wp_u = None
-    if uniq('wikipathways') is not None and uniq('wikipathways_geometry') is not None:
-        wp_u = uniq('wikipathways') + uniq('wikipathways_geometry')
+    def cell(key, field):
+        n = (by_ov.get(key) or {}).get(field)
+        return _fmt(n) if n is not None else '—'
+
+    def ov_stat(field):
+        return _fmt(ov[field]) if field in ov else '—'
+
+    th = ''.join((f'<th>{b(h)}</th>' for h in ['Source', 'What is used', 'Source maps', 'Cut windows', 'Distinct structures', 'Licence']))
     tbl = '<div class="tablewrap"><table><thead><tr>' + th + '</tr></thead><tbody>'
-    tbl += row('Escher', b(f"{oc['maps']['escher']} community maps"), _fmt(mods['escher']), dflt_u('escher'), 'CC0-1.0')
-    tbl += row('Reactome', b(f"release 97 · {oc['maps']['reactome']} diagrams"), _fmt(mods['reactome']), dflt_u('reactome'), 'CC0 (data)')
-    tbl += row('WikiPathways', b(f"release 20261110 · {oc['maps']['wikipathways']} maps; {_fmt(mods['wikipathways'])} semantic + {_fmt(mods['wikipathways_geometry'])} geometry-only"), _fmt(wp_mods), _fmt(wp_u) if wp_u is not None else '—', 'CC0-1.0')
-    tbl += row('Human-maps', b(f"{ext['human_maps']['maps']} official Escher JSON maps"), _fmt(mods['human_maps']), dflt_u('human_maps'), 'CC BY 4.0')
-    tbl += row('BRENDA', b(f"{ext['brenda']['pathways']} pathway maps; layout possibly automatic"), _fmt(mods['brenda']), dflt_u('brenda'), 'CC BY 4.0')
-    tbl += row('Metabolism Regulation', b(f"{ext['metabolismregulation']['maps']} SBGN-ML gallery maps"), _fmt(mods['metabolismregulation']), dflt_u('metabolismregulation'), 'CC BY 4.0')
-    tbl += row('PANTHER', b(f"version {ext['panther']['version']} · {ext['panther']['maps']} CellDesigner maps"), _fmt(mods['panther']), dflt_u('panther'), 'CC BY 4.0')
-    tbl += row('iCH360', b(f"{ext['ich360']['maps']} custom Escher maps"), _fmt(mods.get('ich360', 0)), dflt_u('ich360'), 'MIT')
+    for key, label, used, licence in (
+        ('escher', 'Escher', 'community maps', 'CC0-1.0'),
+        ('reactome', 'Reactome', 'release 97 diagrams', 'CC0 (data)'),
+        ('wikipathways', 'WikiPathways semantic', 'release 20261110', 'CC0-1.0'),
+        ('wikipathways_geometry', 'WikiPathways geometry-only', 'release 20261110', 'CC0-1.0'),
+        ('human_maps', 'Human-maps', 'official Escher JSON maps', 'CC BY 4.0'),
+        ('brenda', 'BRENDA', 'pathway maps; layout possibly automatic', 'CC BY 4.0'),
+        ('metabolismregulation', 'Metabolism Regulation', 'SBGN-ML gallery maps', 'CC BY 4.0'),
+        ('panther', 'PANTHER', f"version {ext['panther']['version']} CellDesigner maps", 'CC BY 4.0'),
+        ('ich360', 'iCH360', 'custom Escher maps', 'MIT'),
+    ):
+        tbl += row(label, b(used), cell(key, 'source_maps'), _fmt(mods.get(key, 0)), cell(key, 'distinct_structures'), licence)
+    tbl += row('<b>Total (default load)</b>', '', ov_stat('total_source_maps'), _fmt(total), ov_stat('distinct_structures_global'), '')
     tbl += '</tbody></table></div>'
 
-    uniq_total = ov.get('unique_reaction_sets_global')
-    stats = '<div class="stats">' + ui.stat(_fmt(total), 'cut modules (default Atlas)') + ui.stat(_fmt(uniq_total) if uniq_total is not None else '—', 'unique after dedup') + ui.stat(_fmt(core_sum), 'open-core SQLite modules') + '</div>'
+    stats = '<div class="stats">' + ui.stat(ov_stat('total_source_maps'), 'source maps') + ui.stat(_fmt(total), 'cut windows') + ui.stat(ov_stat('distinct_structures_global'), 'distinct structures') + '</div>'
+    counts_note = b('Cut windows are every stored module: each map is cut into breadth-first reaction windows of increasing size grown from many root reactions, so most windows nest inside larger windows of the same map. Small windows are kept intentionally because they match small models. Distinct structures are windows not contained in a larger window of the same source map (reaction set; node set for geometry-only windows) with at least 3 reactions, merged across sources by dedup key.')
 
     s_data = sec(
         '1. Data construction — the curated-structure Atlas',
         stats
-        + '<div class="fig"><img src="' + e(overview_rel) + '" alt="' + b('Overview of the Atlas: one panel per source, sized by its unique reaction sets and filled with every unique module') + '" width="700"/><p class="meta">' + b('One panel per source; panel area scales with its unique reaction sets, and every unique set is one tile. Framed tiles show the largest distinct shapes. Totals count cut windows, not independent drawings.') + '</p></div>'
+        + '<div class="fig"><img src="' + e(overview_rel) + '" alt="' + b('Overview of the Atlas: one panel per source, sized by its unique reaction sets and filled with every unique module') + '" width="700"/><p class="meta">' + b('One panel per source; panel area scales with its unique reaction sets, and every unique set is one tile. Framed tiles show the largest distinct shapes. Titles give the source maps, cut windows and distinct structures of each source.') + '</p></div>'
         + '<h3>' + b('Sources and licences') + '</h3>' + tbl
+        + '<p class="meta">' + counts_note + '</p>'
         + '<p class="meta">' + b('WikiPathways semantic modules live in open_core.sqlite; geometry-only windows ship as an extension for repository size. Both load by default. Dedup stats: docs/images/atlas/atlas_overlap.json.') + '</p>'
         + '<p>' + b('The Atlas Browser tab searches these curated modules by EC, reaction, metabolite or model ID, source map and licence, and downloads selected modules as Escher JSON with a provenance/licence manifest (rebuild the search index with python3 tools/build_atlas_browser_index.py).') + '</p>'
         + '<p>' + b('python3 project.py data export bundles the whole Atlas into one archive: Escher JSON per module, the same manifest and the third-party notices (--source, --licence and --all-windows select a part).') + '</p>'

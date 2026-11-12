@@ -5,11 +5,11 @@
 `data export` writes the curated-structure Atlas (or a filtered part) as one portable `.tar.gz`:
 
 ```sh
-python3 project.py data export                           # all sources, unique after dedup -> dist/openmetamaps-atlas-<registry date>.tar.gz
+python3 project.py data export                           # all sources, unique windows after exact dedup -> dist/openmetamaps-atlas-<registry date>.tar.gz
 python3 project.py data export --out PATH                # another archive path
 python3 project.py data export --source escher --source reactome
 python3 project.py data export --licence CC0-1.0         # licence ids as in the manifest: CC0-1.0, CC0-1.0-data, CC-BY-4.0, MIT
-python3 project.py data export --all-windows             # every cut window (48,334) instead of unique reaction sets (36,103)
+python3 project.py data export --all-windows             # every cut window (48,334) instead of unique windows (36,103)
 ```
 
 | Entry | Content |
