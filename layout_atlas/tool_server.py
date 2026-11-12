@@ -492,7 +492,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
         (jd / 'upload').mkdir(parents=True)
         (jd / 'upload' / ('model' + ext)).write_bytes(data)
         (jd / 'options.json').write_text(json.dumps(options))
-        (jd / 'meta.json').write_text(json.dumps(dict(original_name=Path(filename or 'model').name, bytes=len(data), created=time.time())))
+        import output_names
+        output_names.write_meta(jd, filename or 'model', size=len(data))
         write_state(jd, queued_state(job_id))
         tasks.put((jd, None))
         self.send_json(201, dict(id=job_id, status='queued'))
