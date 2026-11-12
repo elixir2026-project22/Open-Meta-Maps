@@ -131,23 +131,34 @@ Matched geometry is kept as drawn (translated only). Everything else is placed b
 
 **Determinism:** fixed layout seed `20261105` (`core.SEEDS`), ELK/fCoSE seeds, `PYTHONHASHSEED=0` on re-exec. Displacement measured by `evaluate --compare-map` only.
 
-### Layout rules (status)
+---
 
-| Rule | Status | Notes |
-|---|---|---|
-| Avoid crossings | Partial | Minimised in Bézier routing / quality gate; GEMs still show many algo crossings |
-| Avoid overlaps | Partial | Spacing + label pass + gate; overlaps grow with map size |
-| Avoid long lines | Partial | Instances, composition, peripherals help; currency/biomass spokes remain |
-| Place participants consistently | Partial | Orientation on by default; share still below curated reference maps |
-| Respect compartments | Not yet | Used in packing/shelves; cross-compartment species metric still high |
-| Aspect / compactness | Partial | Shelf aspect target; independent components still linear shelves |
-| Reproducibility | Partial | Fixed seeds; no compose seed CLI |
-| Build on previous layout | Partial | `--previous map.json` reuses matched geometry and grafts leftovers |
-| Scale to GEMs | Partial | Global ≤3 000 + tiled views; large maps start routing-degraded |
-
-### Evaluation
+## 3. Evaluation criteria
 
 Compose writes `layout_quality.evaluate` into `layout_issues.json` / `report.json`. `python3 project.py evaluate` adds layout-rules metrics via `evaluation/score.py`. See [docs/layout_evaluation.md](docs/layout_evaluation.md).
+
+### Metrics
+
+| Group | Metrics | Code |
+|---|---|---|
+| **Layout-benchmark metrics** | Crossings and crossing density, crossing angular resolution, overlapping pairs and overlap area share, participant consistency, edge length deviation, edge orthogonality, angular resolution, aspect ratio, area per node, homogeneity, stress, coverage | `metrics.py`, `escher_bridge.py` |
+| **Pathway-scorer rules** | Longest line over median edge length, share of lines longer than 2.5× the median, bends per line, cofactor clones (currency hubs and long currency arcs) | `map_rules.py` |
+| **Map rules** | Cycle circularity, direction and order; axis-aligned main segments and reaction axes; metabolites on a grid; chain turns; main flow direction; exchange reactions on the periphery; blank space and largest empty rectangle; unrelated overlaps (node overlaps, lines through nodes, collinear lines); label overlaps; species outside their compartment | `map_rules.py` |
+| **Curated-structure integrity** | Structure continuity and split structures: curated structures stay whole and are only translated | `continuity.py` |
+| **Stability** | Reproducibility across runs; displacement and Procrustes disparity against a previous map (`--previous`) | `stability.py` |
+| **Reference similarity** | Procrustes, distance correlation and kNN preservation against a reference SBGN map | `reference_sbgn.py` |
+
+### Acceptance criteria for changes
+
+A change to the layout pipeline is merged only when, on `e_coli_core` and `iIT341`:
+
+- no layout-benchmark metric gets worse, measured with the official layout-benchmark scorer;
+- every reaction and metabolite is drawn;
+- curated structures keep their internal geometry (translation only) and `--previous` pinned nodes do not move;
+- the canvas does not grow and no label is cropped;
+- compose time does not increase by more than 20%.
+
+### Optimisation targets
 
 | Target | Optimising stage(s) |
 |---|---|
@@ -163,6 +174,20 @@ Compose writes `layout_quality.evaluate` into `layout_issues.json` / `report.jso
 Layout targets (including backlog) stay on Detailed metrics; non-targets under Debug (including main flow-direction share).
 
 **Known gaps** ([docs/limitations.md](docs/limitations.md)): 2D component packing, harder orientation (incl. transporters), compartment-aware packing, stronger currency/biomass handling, crossing-aware composition acceptance, compose seed flag. Experimental off by default: `OPM_REGIONS`, `OPM_LOWCONF`, whole-block `OPM_BLOCK_RELOC`.
+
+### Layout rules (status)
+
+| Rule | Status | Notes |
+|---|---|---|
+| Avoid crossings | Partial | Minimised in Bézier routing / quality gate; GEMs still show many algo crossings |
+| Avoid overlaps | Partial | Spacing + label pass + gate; overlaps grow with map size |
+| Avoid long lines | Partial | Instances, composition, peripherals help; currency/biomass spokes remain |
+| Place participants consistently | Partial | Orientation on by default; share still below curated reference maps |
+| Respect compartments | Not yet | Used in packing/shelves; cross-compartment species metric still high |
+| Aspect / compactness | Partial | Shelf aspect target; independent components still linear shelves |
+| Reproducibility | Partial | Fixed seeds; no compose seed CLI |
+| Build on previous layout | Partial | `--previous map.json` reuses matched geometry and grafts leftovers |
+| Scale to GEMs | Partial | Global ≤3 000 + tiled views; large maps start routing-degraded |
 
 ---
 
