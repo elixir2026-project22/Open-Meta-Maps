@@ -32,7 +32,7 @@ Atlas already keeps overlapping drawings from one source (e.g. Human-maps compar
 
 `layout_atlas/ich360_library.py` → `database.escher_diagram` + Stage B `diagram_modules` (size-scaled roots, `independent_only`, `nest_factor=1.5`, large-map min size 4) with an extra keep-`size ≥ 4` filter. Each module carries `extraction` provenance (`method=diagram_modules`, `version=atlas-extraction-1`). `layout_origin.status` = `curated_hand_drawn`.
 
-Provenance: `data/extensions/ich360/SOURCE.json`, `data/source_inputs/source_registry.json`, licence snapshots under `data/terms/ich360_*`. Default load includes **503** iCH360 modules (sizes 4/8/12/24 only; total default Atlas **68,777**).
+Provenance: `data/extensions/ich360/SOURCE.json`, `data/source_inputs/source_registry.json`, licence snapshots under `data/terms/ich360_*`. Default load includes **436** iCH360 cut windows from 10 maps (92 distinct structures; total default Atlas **48,334** cut windows, **5,310** distinct structures).
 
 ## Compose metrics (`--source-paths`)
 

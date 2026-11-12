@@ -52,28 +52,35 @@ Layout evaluation: `pip install -r layout_atlas/requirements-eval.txt`, then `py
 
 ## 1. Data construction — the curated-structure Atlas
 
-The Atlas stores reusable pathway modules (topology, reaction identity, geometry, licence) cut from public community maps. Default load: `data/open_core.sqlite` plus in-tree extensions. Counts from [`data/atlas_registry.json`](data/atlas_registry.json) (generated 2026-11-12; About uses the same file).
+The Atlas stores reusable pathway modules (topology, reaction identity, geometry, licence) cut from public community maps. Default load: `data/open_core.sqlite` plus in-tree extensions. Licences and extraction provenance from [`data/atlas_registry.json`](data/atlas_registry.json); counts from [`docs/images/atlas/atlas_overlap.json`](docs/images/atlas/atlas_overlap.json) (About uses the same files).
 
 <img src="docs/images/atlas/atlas_overview.png" alt="Overview of the Atlas: one panel per source, sized by its unique reaction sets and filled with every unique module, with the largest distinct shapes drawn as framed tiles." width="700">
 
-*One panel per source; panel area scales with its unique reaction sets, and every unique set is one tile. Framed tiles show the largest distinct shapes. Titles give the cut and unique-after-dedup counts. Regenerate: `PYTHONPATH=layout_atlas python3 tools/atlas_module_figures.py overview`.*
+*One panel per source; panel area scales with its unique reaction sets, and every unique set is one tile. Framed tiles show the largest distinct shapes. Titles give the source maps, cut windows and distinct structures of each source. Regenerate: `PYTHONPATH=layout_atlas python3 tools/atlas_module_figures.py overview`.*
 
 ### Sources and licences
 
-| Source | Modules | Unique after dedup | Licence |
-|---|---:|---:|---|
-| Escher (22 community maps) | 13,047 | 10,626 | CC0-1.0 |
-| Reactome (release 97, 115 diagrams) | 1,811 | 1,800 | CC0 (data) |
-| WikiPathways semantic (20261110) | 669 | 565 | CC0-1.0 |
-| WikiPathways geometry-only | 15,611 | 8,489 | CC0-1.0 |
-| Human-maps (130 official Escher JSON) | 4,690 | 4,551 | CC BY 4.0 |
-| BRENDA (194 pathway maps; layout possibly automatic) | 11,703 | 9,913 | CC BY 4.0 |
-| Metabolism Regulation (22 SBGN-ML maps) | 229 | 172 | CC BY 4.0 |
-| PANTHER (3.4/CD4.1, 8 maps) | 138 | 116 | CC BY 4.0 |
-| iCH360 (10 custom Escher maps) | 436 | 426 | MIT |
-| **Total (default load)** | **48,334** | **36,103** | |
+| Source | Source maps | Cut windows | Distinct structures | Licence |
+|---|---:|---:|---:|---|
+| Escher (community maps) | 22 | 13,047 | 970 | CC0-1.0 |
+| Reactome (release 97 diagrams) | 86 | 1,811 | 315 | CC0 (data) |
+| WikiPathways semantic (20261110) | 65 | 669 | 97 | CC0-1.0 |
+| WikiPathways geometry-only (20261110) | 869 | 15,611 | 2,592 | CC0-1.0 |
+| Human-maps (official Escher JSON) | 130 | 4,690 | 908 | CC BY 4.0 |
+| BRENDA (pathway maps; layout possibly automatic) | 193 | 11,703 | 281 | CC BY 4.0 |
+| Metabolism Regulation (SBGN-ML maps) | 22 | 229 | 31 | CC BY 4.0 |
+| PANTHER (3.4/CD4.1 CellDesigner maps) | 8 | 138 | 27 | CC BY 4.0 |
+| iCH360 (custom Escher maps) | 10 | 436 | 92 | MIT |
+| **Total (default load)** | **1,405** | **48,334** | **5,310** | |
 
-Totals count **cut modules** (reaction windows), not independent drawings: several modules can come from the same source map, and many windows nest inside larger ones from the same map. Dedup uses canonical reaction-id sets (geometry fingerprint for WikiPathways geometry-only windows). Stats: [`docs/images/atlas/atlas_overlap.json`](docs/images/atlas/atlas_overlap.json) via `tools/atlas_module_figures.py`.
+**1,405 source maps → 48,334 cut windows → 5,310 distinct structures.**
+
+- **Source maps** are the maps that yield at least one module.
+- **Cut windows** are every stored module: each map is cut into breadth-first reaction windows of increasing size (up to 24 reactions, 40 for Escher) grown from many root reactions, so most windows nest inside larger windows of the same map. Small windows are kept intentionally because they match small models.
+- **Distinct structures** are windows that are not contained in a larger window of the same source map (reaction set; node set for geometry-only windows) and have at least 3 reactions, merged across sources by dedup key. The per-source sum is 5,313; 3 structures are identical across sources.
+- Dedup key: canonical reaction-id set (geometry fingerprint for WikiPathways geometry-only windows). Exact dedup alone leaves 36,103 unique windows.
+
+Stats: [`docs/images/atlas/atlas_overlap.json`](docs/images/atlas/atlas_overlap.json), computed by `compute_overlap()` in `tools/atlas_module_figures.py` (`PYTHONPATH=layout_atlas python3 tools/atlas_module_figures.py stats`).
 
 Attribution: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Source notes: [docs/data_sources.md](docs/data_sources.md).
 
@@ -96,12 +103,12 @@ Worked examples (cut boundaries, ID remap, cross-source dedup, provenance, compa
 ### Download the Atlas
 
 ```sh
-python3 project.py data export                                       # whole Atlas, unique after dedup -> dist/openmetamaps-atlas-<date>.tar.gz
+python3 project.py data export                                       # unique windows after exact dedup -> dist/openmetamaps-atlas-<date>.tar.gz
 python3 project.py data export --source panther --licence CC-BY-4.0  # one source, one licence (both repeatable)
 python3 project.py data export --all-windows --out atlas_all.tar.gz  # every cut window instead of unique reaction sets
 ```
 
-The archive holds one Escher JSON per module (`modules/<source>/<module_id>.json`), `manifest.json` (source map, licence, attribution text, reaction count, canonical reaction ids, extraction provenance and `also_in` for identical reaction sets in other sources), a short README and `THIRD_PARTY_NOTICES.md`. The default export has 36,103 modules; re-running it gives a byte-identical archive. To pick individual modules, search the Atlas Browser and download the selection as the same Escher JSON with the same manifest fields. Details: [docs/data_packages.md](docs/data_packages.md).
+The archive holds one Escher JSON per module (`modules/<source>/<module_id>.json`), `manifest.json` (source map, licence, attribution text, reaction count, canonical reaction ids, extraction provenance and `also_in` for identical reaction sets in other sources), a short README and `THIRD_PARTY_NOTICES.md`. The default export has 36,103 windows (one per unique reaction set, from 48,334 cut windows); re-running it gives a byte-identical archive. To pick individual modules, search the Atlas Browser and download the selection as the same Escher JSON with the same manifest fields. Details: [docs/data_packages.md](docs/data_packages.md).
 
 ---
 

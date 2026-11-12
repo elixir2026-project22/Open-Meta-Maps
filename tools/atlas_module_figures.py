@@ -6,7 +6,7 @@
 Writes under docs/images/atlas/:
   atlas_overview.png          — row treemap of sources (area ∝ unique sets); every unique module as a tile, hero tiles per source
   atlas_examples.svg/.png     — 4×4 captioned example grid (distinct maps)
-  atlas_overlap.json          — per-source counts, unique-after-dedup, nesting, pairwise overlap
+  atlas_overlap.json          — per-source source maps, cut windows, unique-after-dedup, nesting, distinct structures, pairwise overlap
   worked_*.svg/.png           — worked-example panels
 
 Figure rules: compact rows and columns, uniform cells within a panel,
@@ -93,6 +93,57 @@ def load_modules():
     return load_all()
 
 
+MIN_STRUCTURE_REACTIONS = 3
+
+
+def window_size(m):
+    """Reactions in a window; drawn interactions when the window has no reaction identities."""
+    rx = m.get('reactions') or []
+    return len(rx) if rx else int(m.get('size') or 0)
+
+
+def _containment_key(m, rs):
+    """Set used to test whether a window lies inside a larger window of the same map."""
+    if m.get('reactions'):
+        return rs
+    return frozenset(n['key'] for n in m.get('nodes') or [])
+
+
+def maximal_windows(mods, sets):
+    """Windows not contained in a larger window of the same source map."""
+    by_map = defaultdict(list)
+    for m in mods:
+        by_map[(source_key(m), m.get('map_id'))].append(m)
+    out = []
+    for items in by_map.values():
+        keys = [_containment_key(m, sets[m['id']]) for m in items]
+        postings = defaultdict(set)
+        for i, k in enumerate(keys):
+            for x in k:
+                postings[x].add(i)
+        for i, (m, k) in enumerate(zip(items, keys)):
+            if not k:
+                continue
+            cand = None
+            for x in k:
+                cand = set(postings[x]) if cand is None else cand & postings[x]
+                if len(cand) == 1:
+                    break
+            if not any(len(keys[j]) > len(k) for j in cand):
+                out.append(m)
+    return out
+
+
+def distinct_structures(mods, sets):
+    """Dedup keys of maximal windows with at least MIN_STRUCTURE_REACTIONS reactions, per source and merged."""
+    per_source = defaultdict(set)
+    for m in maximal_windows(mods, sets):
+        if window_size(m) >= MIN_STRUCTURE_REACTIONS:
+            per_source[source_key(m)].add(sets[m['id']])
+    merged = set().union(*per_source.values()) if per_source else set()
+    return per_source, merged
+
+
 def compute_overlap(mods):
     by_src = defaultdict(list)
     sets = {}
@@ -132,6 +183,7 @@ def compute_overlap(mods):
             if contained:
                 nested += local[s]
         per_source[key] = dict(
+            source_maps=len({m.get('map_id') for m in items}),
             modules=len(items),
             unique_reaction_sets=len(local),
             exact_duplicate_extra=sum(c - 1 for c in local.values() if c > 1),
@@ -182,12 +234,23 @@ def compute_overlap(mods):
         if nested_set_flags.get(sets[m['id']]):
             nested_global += 1
 
+    distinct_by_source, distinct_all = distinct_structures(mods, sets)
+    for key, info in per_source.items():
+        info['distinct_structures'] = len(distinct_by_source.get(key, ()))
+
     summary = dict(
+        total_source_maps=len({(source_key(m), m.get('map_id')) for m in mods}),
         total_modules=len(mods),
+        distinct_structures_global=len(distinct_all),
+        distinct_structure_rule=(
+            f'windows not contained in a larger window of the same source map '
+            f'(reaction set; node set for geometry-only windows), at least {MIN_STRUCTURE_REACTIONS} reactions, '
+            f'merged across sources by dedup key'
+        ),
         unique_reaction_sets_global=len(all_sets),
         modules_nested_in_larger_global=nested_global,
         cross_source_identical_sets=cross_shared_sets,
-        by_source={k: per_source.get(k, dict(modules=0, unique_reaction_sets=0, exact_duplicate_extra=0, nested_in_larger=0)) for k in SOURCE_ORDER},
+        by_source={k: per_source.get(k, dict(source_maps=0, modules=0, unique_reaction_sets=0, exact_duplicate_extra=0, nested_in_larger=0, distinct_structures=0)) for k in SOURCE_ORDER},
         pairwise_identical_sets=pairwise,
         also_in_examples=also_in_examples,
         dedup_key='canonical reaction-id set; geometry_fingerprint for WikiPathways geometry-only',
@@ -469,7 +532,7 @@ def write_overview_mosaic(by_src, summary, sets):
         items = [m for m in reps.get(sk) or [] if _drawable(m)]
         if not items:
             continue
-        counts = f"{info['modules']:,} cut · {info['unique_reaction_sets']:,} unique"
+        counts = f"{info['source_maps']:,} maps · {info['modules']:,} cut · {info['distinct_structures']:,} distinct"
         names = [SOURCE_LABEL.get(sk, sk), SOURCE_LABEL_SHORT.get(sk, sk)]
         title_w = max(draw.textlength(names[-1], font=font_name), max(draw.textlength(t, font=font_count) for t in counts.split(' · ')))
         # Smallest panel: the short title above one hero tile and a strip of texture.
@@ -518,9 +581,9 @@ def write_overview_mosaic(by_src, summary, sets):
             _pil_draw_module(draw, m, cx0 + c * tw, cy0 + r * th, tw, th)
 
     legend = (
-        f"Panel area scales with unique reaction sets  ·  every unique set is one tile; framed tiles are the largest distinct shapes  ·  "
-        f"cut {summary['total_modules']:,}  ·  unique {summary['unique_reaction_sets_global']:,}  ·  "
-        f"nested {summary['modules_nested_in_larger_global']:,}"
+        f"Panel area scales with unique reaction sets  ·  every unique set is one tile  ·  "
+        f"{summary['total_source_maps']:,} source maps → {summary['total_modules']:,} cut windows → "
+        f"{summary['distinct_structures_global']:,} distinct structures"
     )
     lw = draw.textlength(legend, font=font_legend)
     draw.text(((W - lw) / 2, H - pad - legend_h + 16 * hi), legend, fill=(31, 41, 55), font=font_legend)
@@ -1205,8 +1268,9 @@ def run_all():
     print('Wrote', stats_path, flush=True)
     for sk in SOURCE_ORDER:
         info = summary['by_source'][sk]
-        print(f"  {sk}: modules={info['modules']} unique={info['unique_reaction_sets']} nested={info['nested_in_larger']}", flush=True)
+        print(f"  {sk}: maps={info['source_maps']} modules={info['modules']} unique={info['unique_reaction_sets']} nested={info['nested_in_larger']} distinct={info['distinct_structures']}", flush=True)
     print(
+        f"maps={summary['total_source_maps']} distinct={summary['distinct_structures_global']} "
         f"global unique={summary['unique_reaction_sets_global']} "
         f"nested={summary['modules_nested_in_larger_global']} cross_sets={summary['cross_source_identical_sets']}",
         flush=True,
