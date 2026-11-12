@@ -145,7 +145,7 @@ Maps composed from the bundled example models. Every reaction and metabolite is 
 <em>Helicobacter pylori</em> iIT341 (554 reactions)
 </p>
 
-*Previews are cropped to content, 2800 px wide. Labels are kept only when they stay readable at that width. Regenerate: `PYTHONPATH=layout_atlas python3 tools/render_map_preview.py DIR/map.json docs/images/examples/NAME.png`.*
+*Previews are cropped to content and draw every reaction and metabolite label of map.svg. Zoom in to read the labels. Regenerate: `PYTHONPATH=layout_atlas python3 tools/render_map_preview.py DIR/map.json docs/images/examples/NAME.png`.*
 
 **Download.** Result files of both maps are in [`example_results/`](example_results/) (file list: [example_results/README.md](example_results/README.md)).
 

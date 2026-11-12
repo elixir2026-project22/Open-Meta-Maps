@@ -15,7 +15,7 @@ Each model folder holds the final map and its reports.
 |---|---|
 | `map.json` | Map in Escher JSON format; opens in [Escher](https://escher.github.io) and in the Map Generator |
 | `map.svg` | Vector drawing of the map |
-| `map.png` | Preview cropped to content, 2800 px wide; labels kept only when readable at that width |
+| `map.png` | Preview cropped to content, with every reaction and metabolite label of `map.svg` |
 | `licenses.json` | Licence and source of every reused curated structure |
 | `modules.json` | Reused curated structures with their source map and reactions |
 | `reaction_provenance.json` | Layout provenance of every reaction (curated structure or generated) |
@@ -28,6 +28,7 @@ Each model folder holds the final map and its reports.
 python3 project.py compose --gem examples/e_coli_core.xml --out results/e_coli_core/ --source-paths
 python3 project.py compose --gem examples/iIT341.xml --out results/iIT341/ --source-paths
 PYTHONPATH=layout_atlas python3 tools/render_map_preview.py results/e_coli_core/map.json results/e_coli_core/map.png
+PYTHONPATH=layout_atlas python3 tools/render_map_preview.py results/iIT341/map.json results/iIT341/map.png
 ```
 
 ## Licences
