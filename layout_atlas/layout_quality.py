@@ -217,12 +217,14 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, str
             if _self_cross(e['pts']):
                 selfx += 1; anomalies.append(dict(kind='self_intersection', reaction=e['rid'], metabolite=e['met']))
         else:
-            if len(e['curved']) == 1:
+            if _orthogonal(e['pts']):
+                ortho_edges += 1
+                if len(e['curved']) > 1:
+                    poly_edges += 1
+            elif len(e['curved']) == 1:
                 straight_edges += 1
             else:
                 poly_edges += 1
-                if _orthogonal(e['pts']):
-                    ortho_edges += 1
     all_len = np.array([float(np.sum(np.hypot(*np.diff(e['pts'], axis=0).T))) for e in edges]) if edges else np.zeros(1)
     mids = np.array([[n['x'], n['y']] for n in nodes.values() if n.get('node_type') == 'midmarker'], float)
     spacing = float(np.median(cKDTree(mids).query(mids, k=2)[0][:, 1])) if len(mids) > 2 else 60.0
@@ -326,11 +328,18 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, str
         curves_through_nodes=node_hits,
         curves_through_labels=label_hits,
     )
-    bezier = dict(share=round(bez_edges / n_alg, 3), algorithm_edges=len(algo), bezier=bez_edges, straight_lines=straight_edges,
-                  polylines_with_bends=poly_edges, orthogonal_polylines=ortho_edges)
+    routed = bez_edges + ortho_edges
+    bezier = dict(
+        share=round(routed / n_alg, 3), algorithm_edges=len(algo), bezier=bez_edges,
+        straight_lines=straight_edges, polylines_with_bends=poly_edges,
+        orthogonal_polylines=ortho_edges, routed=routed,
+        routed_share=round(routed / n_alg, 3))
     warnings = []
     if bezier['share'] < 0.999:
-        warnings.append(dict(code='bezier_coverage', message='algorithm connections as Bézier must be 100%', share=bezier['share']))
+        warnings.append(dict(
+            code='bezier_coverage',
+            message='algorithm connections must be routed (Bézier or orthogonal polyline)',
+            share=bezier['share']))
     cross_out = dict(
         counted=counted_cross,
         total=counted_cross + cross['curated_curated'] + cross['same_reaction'] + cross['same_reaction_curated'],
@@ -778,13 +787,26 @@ def _self_cross(pts):
     return False
 
 
-def _orthogonal(pts):
-    """Straight pieces that turn by ~90 degrees at every corner (a right-angle polyline)."""
-    v = np.diff(pts, axis=0)
+def _orthogonal(pts, tol=0.05):
+    """Axis-parallel polyline: one H/V chord, or right-angle bends between H/V pieces.
+
+    ``tol`` (px) absorbs end-marker vs bend rounding so official multimarker
+    polylines still count as routed orthogonal connections.
+    """
+    v = np.diff(np.asarray(pts, float), axis=0)
     n = np.hypot(v[:, 0], v[:, 1])
-    v = v[n > 1e-6] / n[n > 1e-6][:, None]
+    v = v[n > 1e-6]
+    if not len(v):
+        return False
+    # Every piece must be axis-parallel within ``tol``.
+    for dx, dy in v:
+        if abs(dx) > tol and abs(dy) > tol:
+            return False
+    if len(v) == 1:
+        return True
+    vn = v / np.hypot(v[:, 0], v[:, 1])[:, None]
     corners = 0
-    for a, b in zip(v[:-1], v[1:]):
+    for a, b in zip(vn[:-1], vn[1:]):
         ang = float(np.degrees(np.arccos(np.clip(a @ b, -1, 1))))
         if ang > 20:
             if abs(ang - 90) > 15:
