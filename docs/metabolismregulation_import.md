@@ -20,4 +20,4 @@ Provenance per file: source, CC BY 4.0, attribution, upstream commit version, SH
 
 Checked 2026-11-11: https://github.com/elixir2026-project22/data_shared is **not publicly available** (GitHub 404 / `git ls-remote` repository not found). The layout-benchmark README points at that repo for SBML models (BRENDA pathways, E. coli core, iCH360, Reactome, Human2, Mycoplasma, Stress Knowledge Map) and names the Metabolism Regulation gallery as the hand-drawn reference layouts (already imported here). No additional CC0/CC BY hand-drawn layouts could be fetched from `data_shared`. Public org repos (`layout-benchmark`, `sbml2map`, `ecmapper`) do not ship other hand-drawn SBGN/Escher reference packs beyond the gallery fetch helper.
 
-Overlap with BioHackathon layout evaluation is **not** a reason to exclude the gallery maps (imported deliberately).
+Gallery maps are imported into the default Atlas.

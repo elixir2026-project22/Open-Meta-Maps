@@ -1,10 +1,9 @@
-# Layout evaluation (development aid)
+# Layout evaluation
 
-This is a **development** evaluation of Open Meta Maps layouts against the Project 22
-[layout-benchmark](https://github.com/elixir2026-project22/layout-benchmark) rules and the
+Scores Open Meta Maps layouts against the
+[layout-benchmark](https://github.com/elixir2026-project22/layout-benchmark) metrics and the
 [layout-transfer-check](https://github.com/elixir2026-project22/layout-transfer-check) field
-names. It is **not** a fair comparison with other tools. Atlas data sources are never excluded
-because of evaluation overlap.
+names. All default Atlas sources remain available during evaluation.
 
 CLI (optional deps: `pip install -r layout_atlas/requirements-eval.txt`):
 
@@ -22,9 +21,9 @@ One computation path:
 2. **`layout_atlas/evaluation/`** — pathway metrics aligned with layout-benchmark (MIT; see
    `ATTRIBUTION.md`) plus optional gdMetriX (GPL-3.0, **import only**, never vendored; CLI extras).
 
-User-facing panel strings use **curated** / **人工绘制** (not “expert”). The 120° opposite-side
-threshold is a Project 22 first guess (transfer-check). Benchmark `participant_consistency` (>90°)
-stays on the evaluate CLI only (not duplicated on the panel).
+User-facing panel strings use **curated** (not “expert”). The 120° opposite-side threshold is the
+transfer-check first guess. Benchmark `participant_consistency` (>90°) stays on the evaluate CLI
+only (not duplicated on the panel).
 
 gdMetriX straight-line `crossings` are skipped when the undirected graph has more than 1200
 edges. For maps with more than 800 reactions the curve geometry block is skipped in `evaluate`
@@ -35,7 +34,7 @@ and should be read from compose’s `layout_issues.json` / `report.json`.
 Maps composed with `--source-paths` (Bézier / curated layout default). Geometry columns come from
 `layout_quality` on the final `map.json`.
 
-Stage A main vs this branch (`--source-paths`):
+Baseline (atlas-extraction-1 + compactness-aware select) vs +iCH360 (`--source-paths`):
 
 | metric | e_coli_core main | e_coli_core +iCH360 | iIT341 main | iIT341 +iCH360 |
 |---|---:|---:|---:|---:|
@@ -49,9 +48,7 @@ Stage A main vs this branch (`--source-paths`):
 | runtime_s | 77.9 | 74.7 | 457.3 | 454.2 |
 | iCH360 modules used | — | 0 | — | 7 |
 
-Refresh notes (2026-11-11): rebased iCH360 onto Stage A (extraction provenance + compactness-aware select) and re-composed e_coli_core / iIT341. e_coli_core unchanged with iCH360 loaded. iIT341 selects 4×`full_map` + 3×`ions_metals_uptake` size-2 geometry windows; crossings/blank/aspect improve vs Stage A main while coverage dips slightly. Older benchmark-aligned rows remain in [`docs/evaluation/summary.csv`](evaluation/summary.csv).
-
-Machine-readable copy: [`docs/evaluation/summary.csv`](evaluation/summary.csv).
+Refresh notes (2026-11-11): rebased iCH360 onto atlas-extraction-1 + compactness-aware select and re-composed e_coli_core / iIT341. e_coli_core unchanged with iCH360 loaded. iIT341 selects 4×`full_map` + 3×`ions_metals_uptake` size-2 geometry windows; crossings/blank/aspect improve while coverage dips slightly. Historical evaluate CSV (not a copy of the table above): [`docs/evaluation/summary.csv`](evaluation/summary.csv).
 
 **Test scope for this refresh:** only `e_coli_core` and `iIT341` (not iMM904 / iML1515).
 
@@ -73,7 +70,7 @@ Bézier coverage is a **warning** when below 100% (still a quality-gate hard che
 Only metrics the layout optimises or should optimise (layout **targets**, including backlog).
 Non-target diagnostics are hidden under Debug. Each row has a plain-language English label,
 a one-sentence tip (higher/lower + target), and the responsible pipeline stage
-(or **not yet optimised** / **待优化**). Values that clearly miss the target use a subtle
+(or **not yet optimised**). Values that clearly miss the target use a subtle
 amber highlight.
 
 | Group | Rows | Stage |
@@ -82,28 +79,20 @@ amber highlight.
 | Line shape | Detour; Hooks / sharp turns / self-intersections; Bends per connection | Bézier routing |
 | Structure & flow | Exchange reactions on the periphery; Axis-aligned main segments; Axis-aligned reaction axes; Grid-aligned metabolites; Median chain turn angle; Cycle circularity / direction / order; Species in another compartment | composition & peripherals; **not yet optimised** (orderliness / octilinear snap; ring/cycle placement; compartment packing) |
 | Space & shape | Map size; Aspect ratio vs target; Blank space / space utilisation; Largest empty rectangle; Isolated reactions; Most reactions in one cell | composition & packing |
-| Reproducibility | Procrustes / mean displacement (when `evaluate --compare-map`) | **not yet optimised** (detail only, not a main card) |
-| Debug diagnostics (hidden by default) | Main flow-direction share | debug only — not an optimisation target (would fight curated orientations) |
+| Reproducibility | Procrustes / mean displacement (when `evaluate --compare-map`) | **not yet optimised** (detail row) |
+| Debug diagnostics (hidden by default) | Main flow-direction share | Debug diagnostic |
 | Pipeline diagnostics (collapsed) | Composition-pass counts; Peripheral-module counts | composition & peripherals |
 
-**Orderliness (待优化):** length-weighted main-segment and reaction-axis shares within ±10° of
+**Orderliness (not yet optimised):** length-weighted main-segment and reaction-axis shares within ±10° of
 horizontal/vertical (cofactors excluded; resampling a curve does not change the segment score);
 metabolite grid share (tolerance 0.02 × median nearest-neighbour main-metabolite distance, floor
 1 px — small enough that the curated BiGG e_coli_core map stays clearly above our compose);
 median turn angle at degree-2 main metabolites along linear chains. Panel goals cite the curated
 BiGG e_coli_core ("Core metabolism") scores for these four metrics.
 
-Not added from layout-transfer-check: raw density, straight-line crossing counts, catalyst-beside, arrow-weight.
-
 **One bounding box:** map size, aspect ratio (W/H) and blank / utilisation all use the
 content-node bbox (metabolites + midmarkers). `space_utilisation = 1 − blank_space_share`
 on the same blank-space raster.
-
-**Removed from the panel** (duplicates or pure statistics with no layout goal): connection
-length percentiles / absolute px thresholds; `edge_len_max_rel` (already on Long lines);
-`participant_consistency` >90° (duplicate of the Participant placement card); `area_per_node`;
-subsystem conventions; 5th-neighbour distance percentiles; the second, inconsistent aspect /
-space-utilisation row.
 
 ## Structure continuity
 

@@ -12,7 +12,7 @@ This directory is the Python package behind Open Meta Maps. It builds a metaboli
 | `python3 project.py setup` | one-time build of the edge routers (needs `g++` or `clang++`, see below) |
 | `python3 project.py catalog` | rebuild the module catalog pages from the Atlas |
 
-A run writes `map.json` (Escher), `map.svg`, `report.json`, `reaction_provenance.json`, `layout_issues.json`, `licenses.json`, `skeleton.json` and `modules.json` into the output folder. `reaction_provenance.json` labels every reaction as curated (community layout), topology-only suggestion, functional (EC) suggestion, bridge or generated; these are reported separately and never merged into one reuse rate.
+A run writes `map.json` (Escher), `map.svg`, `report.json`, `reaction_provenance.json`, `layout_issues.json`, `licenses.json`, `skeleton.json` and `modules.json` into the output folder. `reaction_provenance.json` labels every reaction as curated (community layout), topology-only suggestion, functional (EC) suggestion, bridge or generated. Report curated, topology-only and EC suggestions as separate rates.
 
 ## Pipeline and main modules
 
@@ -25,7 +25,7 @@ A run writes `map.json` (Escher), `map.svg`, `report.json`, `reaction_provenance
 | Whole-map composition | `composition.py` (recovers stray components, arranges independent modules in rows), `peripheral.py` (exchange and transport modules), `block_relocation.py` (moves curated blocks that sit far from the reactions they connect to) |
 | Connections and labels | `edge_style.py` (Bézier connections from curated templates, joint routing per reaction), `reaction_templates.py`, `label_placement.py`, `line_render.py`, `routing.py` (libavoid) |
 | Local repair | `hotspot_repair.py` (post-layout pass: top-k crossing windows via shared `CrossingIndex`, incremental delta recount + window-scaled search budget; default on) |
-| Quality | `layout_quality.py` (final-geometry for the quality gate: curve crossings, collisions, …), `quality_gate.py` (accepts a change only if the final geometry is not worse), `evaluation/` (unified development scoring: Project 22 layout-benchmark metrics + the same final-geometry block; CLI `python3 project.py evaluate`) |
+| Quality | `layout_quality.py` (final-geometry for the quality gate: curve crossings, overlaps, …), `quality_gate.py` (accepts a change only if the final geometry is not worse), `evaluation/` (layout-benchmark metrics + the same final-geometry block; CLI `python3 project.py evaluate`) |
 | Pages | `ui.py`, `navigation.py`, `gallery*.py` (tool UI is the committed `results/tool/index.html`) |
 
 Files whose hashes are recorded by saved results (`routing.py`, `drawing.py`, `geometry.py`, `retrieval.py`, `semantic_transfer.py`, `celldesigner.py`) should not be edited casually.
@@ -39,7 +39,7 @@ Maps are drawn with Bézier connections by default (`layout_style=curated`). `--
 | `OPM_COMPOSE`, `OPM_COMPOSE_LONG` | on | whole-map composition; relocation threshold normalised by reaction spacing |
 | `OPM_PERIPHERAL` | on | attach exchange + transport modules to the pathway they belong to |
 | `OPM_BLOCK_RELOC`, `OPM_RELOC_ACCEPT` | off, `balanced` | relocate curated blocks with a long connection (opt-in); `strict` uses the strict quality gate |
-| `OPM_EXPERT_SUBMODULE` | `branch` | move exchange + transport modules (including coupled transporters) that sit far from the rest of a large curated block next to it; the connections that cross the module boundary are re-drawn and recorded as `regenerated_expert_edges`. `on` = simple transports only, `off` = disabled |
+| `OPM_EXPERT_SUBMODULE` | `branch` | Relocate exchange + transport modules (including coupled transporters) that sit far from the rest of a large **curated** block next to it (legacy env name). Boundary-crossing connections are re-drawn (metadata key `regenerated_expert_edges`). `on` = simple transports only, `off` = disabled |
 | `OPM_RELOC_CLEAR` | off | experimental local space-making for relocations |
 | `OPM_LOWCONF` | off | experimental: split topology-only structures whose reactions have unrelated neighbourhoods |
 | `OPM_REGIONS`, `OPM_REGION_PLACE` | off | experimental region-level arrangement (did not improve the example maps) |

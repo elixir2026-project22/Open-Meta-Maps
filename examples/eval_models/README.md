@@ -1,8 +1,7 @@
 # Extra models for layout evaluation
 
 Public stand-ins used when `elixir2026-project22/data_shared` is not reachable.
-They are for generality checks of the evaluation tool only; they are **not** added
-to the Atlas, and Atlas sources are never excluded because of evaluation overlap.
+They are for generality checks of the evaluation scoring CLI only.
 
 Model files are **not** committed. Download on demand into the gitignored
 `downloaded/` folder:
@@ -22,6 +21,4 @@ Licence for every entry was checked before listing; unclear licences are omitted
 | `R-HSA-77289` / `R-HSA-70171` | Reactome pathway SBML | CC0-1.0 (Reactome data) | Reactome Content Service |
 | `F001-glycolysis` (+ `.sbgn`) | Pathway SBML + hand-drawn reference | CC-BY-4.0 | [metabolismregulation gallery](https://metabolismregulation.github.io/gallery/) |
 
-**Not fetched:** `iML1515` (skipped by design); Human-GEM (size); private
-`data_shared` BRENDA pathway XMLs (repository returned 404). Point `--gem` at a
-local `data_shared` clone when available.
+**Not fetched:** `iML1515` (excluded from this sample set); Human-GEM (too large for routine download); private `data_shared` BRENDA pathway XMLs. Point `--gem` at a local `data_shared` clone when available.

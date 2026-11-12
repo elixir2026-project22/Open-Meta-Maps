@@ -1,12 +1,12 @@
 # Installation
 
-Validated on a fresh clone (macOS, Python 3.12, Node.js, Apple clang). Linux should work with `clang++` installed; it has not been tested.
+Validated on a fresh clone (macOS, Python 3.12, Node.js, Apple clang). Linux is expected to work with `g++` or `clang++` but is not CI-tested; Windows is untested (WSL recommended).
 
 ## Requirements
 
 - Python 3.11+ (packages pinned in `layout_atlas/requirements.txt`)
 - Node.js and npm (layout backend, pinned in `layout_atlas/runtime/package-lock.json`)
-- `clang++` and network access for the one-time router build
+- `g++` or `clang++` and network access for the one-time router build
 
 ## Steps
 
@@ -16,7 +16,7 @@ npm ci --prefix layout_atlas/runtime
 python3 project.py setup
 ```
 
-`setup` downloads the pinned libavoid source and builds the two edge routers into `layout_atlas/build/`. It is needed once.
+`setup` downloads the pinned libavoid source and builds the two edge routers into `layout_atlas/build/`. It is needed once. The build prefers `g++` when available, falling back to `clang++`.
 
 On first run, if `data/atlas.sqlite` is missing it is created as a copy of `data/open_core.sqlite`.
 

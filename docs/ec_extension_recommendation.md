@@ -1,4 +1,4 @@
-# Should `libs['ec']` be always on?
+# Should the EC similarity extension be on by default?
 
 Measured on **e_coli_core** and **iIT341** after the matching improvements and rebase onto open-licence Atlas + default BRENDA extension (iMM904 / iML1515 skipped for development). **EC off vs EC on**; defaults were **not** changed.
 
@@ -32,7 +32,7 @@ Most BRENDA-driven EC hits cannot verify the equation, so they remain functional
 
 ## Recommendation
 
-**Keep `libs['ec']` optional (UI checkbox); default stays off.**
+**Keep the EC similarity extension optional (UI checkbox / CLI `--ec`); default stays off.**
 
 Before considering default-on:
 
