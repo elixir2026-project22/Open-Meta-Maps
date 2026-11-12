@@ -38,7 +38,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -60,7 +60,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -96,7 +96,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "8cb4f305d956103574fab0b2",
+      "source_structure": "e8777d3623634c9a78ddf099",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -118,7 +118,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "1b58b5bdca08f1a7bcffdf78",
+      "structure_id": "950ba90ccee27dee333492af",
       "code": "U0003",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -177,7 +177,7 @@
     "ambiguity": null,
     "structure": {
       "structure_id": "7b4797d4d68a0ba87acb08a7",
-      "code": "U0008",
+      "code": "U0007",
       "source": "wikipathways",
       "match_level": "reaction_reference",
       "license": "CC0-1.0",
@@ -212,10 +212,10 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "56c5d0fda73578319af0545f",
-      "source_map": "e63b0b880daf3cfba5d13db3",
+      "source_structure": "06a2985ae5efb837af1991f3",
+      "source_map": "4b63988fe370b86a460095c8",
       "source_kind": "escher",
-      "source_species": "Escherichia coli",
+      "source_species": "Saccharomyces cerevisiae",
       "source_reaction": "PGL",
       "basis": {
         "shared_ec": [
@@ -234,8 +234,8 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ebeeeab5abee4e62055a4540",
-      "code": "U0011",
+      "structure_id": "66e523bfda3063fb7bc3f362",
+      "code": "U0002",
       "source": "escher",
       "match_level": "reaction_reference",
       "license": "CC0-1.0",
@@ -270,7 +270,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "3928f6d477efa2f22e46989b",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -292,8 +292,8 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "d0031bc7d33a9b419f72d837",
-      "code": "U0004",
+      "structure_id": "05a4558d51e0bf86849aae74",
+      "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
       "license": "CC0-1.0",
@@ -326,7 +326,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -346,7 +346,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -407,7 +407,7 @@
     "ambiguity": null,
     "structure": {
       "structure_id": "7b4797d4d68a0ba87acb08a7",
-      "code": "U0008",
+      "code": "U0007",
       "source": "wikipathways",
       "match_level": "reaction_reference",
       "license": "CC0-1.0",
@@ -454,7 +454,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "3928f6d477efa2f22e46989b",
+      "source_structure": "07b252b6ae7ab27e72f9ea6e",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -477,8 +477,8 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "d0031bc7d33a9b419f72d837",
-      "code": "U0004",
+      "structure_id": "f7d3b0457a3623f5dfa41644",
+      "code": "U0011",
       "source": "escher",
       "match_level": "reaction_reference",
       "license": "CC0-1.0",
@@ -511,7 +511,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "3928f6d477efa2f22e46989b",
+      "source_structure": "4590a11b77ff048bbecdbaf0",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -531,8 +531,8 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "d0031bc7d33a9b419f72d837",
-      "code": "U0004",
+      "structure_id": "bee463ed50b4ae60148e680a",
+      "code": "U0010",
       "source": "escher",
       "match_level": "reaction_reference",
       "license": "CC0-1.0",
@@ -568,7 +568,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "98d732015ac0be39f55872e9",
+      "source_structure": "3befb02748b08f38323d4655",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -591,8 +591,8 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "24d29880e9ec2643d20ae478",
-      "code": "U0007",
+      "structure_id": "94c054f906d21f0a2087dc53",
+      "code": "U0008",
       "source": "escher",
       "match_level": "reaction_reference",
       "license": "CC0-1.0",
@@ -627,7 +627,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -649,7 +649,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -685,7 +685,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -707,7 +707,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -743,7 +743,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -765,7 +765,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -812,7 +812,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -834,7 +834,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -868,7 +868,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "98d732015ac0be39f55872e9",
+      "source_structure": "3befb02748b08f38323d4655",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -888,8 +888,8 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "24d29880e9ec2643d20ae478",
-      "code": "U0007",
+      "structure_id": "94c054f906d21f0a2087dc53",
+      "code": "U0008",
       "source": "escher",
       "match_level": "reaction_reference",
       "license": "CC0-1.0",
@@ -924,7 +924,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -946,7 +946,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -995,7 +995,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -1019,7 +1019,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -1066,7 +1066,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -1088,7 +1088,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -1124,7 +1124,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -1146,7 +1146,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -1194,7 +1194,7 @@
     "ambiguity": null,
     "structure": {
       "structure_id": "ae7651aad391d98b398baa0d",
-      "code": "U0010",
+      "code": "U0009",
       "source": "human_maps",
       "match_level": "geometry",
       "license": "CC-BY-4.0",
@@ -1227,7 +1227,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -1247,7 +1247,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -1294,7 +1294,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "39a80d6c9b49b7441bf36db4",
+      "source_structure": "06a2985ae5efb837af1991f3",
       "source_map": "4b63988fe370b86a460095c8",
       "source_kind": "escher",
       "source_species": "Saccharomyces cerevisiae",
@@ -1316,7 +1316,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "da5dc1ed9131ee6811efdccc",
+      "structure_id": "66e523bfda3063fb7bc3f362",
       "code": "U0002",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -1354,7 +1354,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -1378,7 +1378,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -1414,7 +1414,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "39a80d6c9b49b7441bf36db4",
+      "source_structure": "06a2985ae5efb837af1991f3",
       "source_map": "4b63988fe370b86a460095c8",
       "source_kind": "escher",
       "source_species": "Saccharomyces cerevisiae",
@@ -1436,7 +1436,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "da5dc1ed9131ee6811efdccc",
+      "structure_id": "66e523bfda3063fb7bc3f362",
       "code": "U0002",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -1470,7 +1470,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -1490,7 +1490,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -1535,7 +1535,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "7df7555093d5ca7edebfa0a5",
+      "source_structure": "cd614a3e56799c6ab19e3daf",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -1555,8 +1555,8 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "08a14bf4c89172150e7da931",
-      "code": "U0005",
+      "structure_id": "65b9b47c824e721a8fd8f1a3",
+      "code": "U0006",
       "source": "escher",
       "match_level": "reaction_reference",
       "license": "CC0-1.0",
@@ -1600,7 +1600,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -1620,7 +1620,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -1654,7 +1654,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "3928f6d477efa2f22e46989b",
+      "source_structure": "07b252b6ae7ab27e72f9ea6e",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -1674,8 +1674,8 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "d0031bc7d33a9b419f72d837",
-      "code": "U0004",
+      "structure_id": "f7d3b0457a3623f5dfa41644",
+      "code": "U0011",
       "source": "escher",
       "match_level": "reaction_reference",
       "license": "CC0-1.0",
@@ -1708,7 +1708,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -1728,7 +1728,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -1764,7 +1764,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -1786,7 +1786,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -1834,7 +1834,7 @@
     "ambiguity": null,
     "structure": {
       "structure_id": "ae7651aad391d98b398baa0d",
-      "code": "U0010",
+      "code": "U0009",
       "source": "human_maps",
       "match_level": "geometry",
       "license": "CC-BY-4.0",
@@ -1880,7 +1880,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "39a80d6c9b49b7441bf36db4",
+      "source_structure": "06a2985ae5efb837af1991f3",
       "source_map": "4b63988fe370b86a460095c8",
       "source_kind": "escher",
       "source_species": "Saccharomyces cerevisiae",
@@ -1902,7 +1902,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "da5dc1ed9131ee6811efdccc",
+      "structure_id": "66e523bfda3063fb7bc3f362",
       "code": "U0002",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -1938,7 +1938,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "39a80d6c9b49b7441bf36db4",
+      "source_structure": "06a2985ae5efb837af1991f3",
       "source_map": "4b63988fe370b86a460095c8",
       "source_kind": "escher",
       "source_species": "Saccharomyces cerevisiae",
@@ -1960,7 +1960,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "da5dc1ed9131ee6811efdccc",
+      "structure_id": "66e523bfda3063fb7bc3f362",
       "code": "U0002",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -1970,61 +1970,14 @@
   },
   {
     "reaction": "TPI",
-    "provenance": "expert_derived",
-    "identity_evidence": {
-      "kind": "stoichiometry_verified",
-      "verified": true,
-      "namespaces": [
-        "equation"
-      ],
-      "shared_ec": [
-        "5.3.1.1"
-      ],
-      "revoked": false,
-      "basis": "complete_equation"
-    },
-    "chemical_compatibility": {
-      "status": "compatible",
-      "difference_types": [
-        "exact_equation"
-      ],
-      "reason": "the complete equation maps onto the target reaction",
-      "factor": 1.0,
-      "direction_compatible": null,
-      "core_overlap": 1.0
-    },
-    "layout_provenance": "expert_exact",
-    "transfer": {
-      "mode": "exact",
-      "source_structure": "39a80d6c9b49b7441bf36db4",
-      "source_map": "4b63988fe370b86a460095c8",
-      "source_kind": "escher",
-      "source_species": "Saccharomyces cerevisiae",
-      "source_reaction": "TPI",
-      "basis": {
-        "shared_ec": [
-          "5.3.1.1"
-        ],
-        "core_overlap": 1.0,
-        "difference_types": [
-          "exact_equation"
-        ]
-      },
-      "adjustments": []
-    },
-    "context_compatibility": {
-      "incidence_fit": true,
-      "compartments_verified": true
-    },
+    "provenance": "generated",
+    "identity_evidence": null,
+    "chemical_compatibility": null,
+    "layout_provenance": "de_novo",
+    "transfer": null,
+    "context_compatibility": null,
     "ambiguity": null,
-    "structure": {
-      "structure_id": "da5dc1ed9131ee6811efdccc",
-      "code": "U0002",
-      "source": "escher",
-      "match_level": "reaction_reference",
-      "license": "CC0-1.0",
-      "partition": "open_core"
-    }
+    "structure": null
   },
   {
     "reaction": "EX_ac_e",
@@ -2039,14 +1992,57 @@
   },
   {
     "reaction": "EX_acald_e",
-    "provenance": "generated",
-    "identity_evidence": null,
-    "chemical_compatibility": null,
-    "layout_provenance": "de_novo",
-    "transfer": null,
-    "context_compatibility": null,
+    "provenance": "expert_derived",
+    "identity_evidence": {
+      "kind": "stoichiometry_verified",
+      "verified": true,
+      "namespaces": [
+        "equation"
+      ],
+      "shared_ec": [],
+      "revoked": false,
+      "basis": "complete_equation"
+    },
+    "chemical_compatibility": {
+      "status": "compatible",
+      "difference_types": [
+        "exact_equation"
+      ],
+      "reason": "the complete equation maps onto the target reaction",
+      "factor": 1.0,
+      "direction_compatible": true,
+      "core_overlap": 1.0
+    },
+    "layout_provenance": "expert_exact",
+    "transfer": {
+      "mode": "exact",
+      "source_structure": "4590a11b77ff048bbecdbaf0",
+      "source_map": "7c6b94063f4f96699811411b",
+      "source_kind": "escher",
+      "source_species": "Escherichia coli",
+      "source_reaction": "EX_acald_e",
+      "basis": {
+        "shared_ec": [],
+        "core_overlap": 1.0,
+        "difference_types": [
+          "exact_equation"
+        ]
+      },
+      "adjustments": []
+    },
+    "context_compatibility": {
+      "incidence_fit": true,
+      "compartments_verified": true
+    },
     "ambiguity": null,
-    "structure": null
+    "structure": {
+      "structure_id": "bee463ed50b4ae60148e680a",
+      "code": "U0010",
+      "source": "escher",
+      "match_level": "reaction_reference",
+      "license": "CC0-1.0",
+      "partition": "open_core"
+    }
   },
   {
     "reaction": "EX_akg_e",
@@ -2074,7 +2070,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -2094,7 +2090,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -2150,7 +2146,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "f000334968af9ed2962bae04",
+      "source_structure": "d02d34b0e6a1b03ede552807",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -2170,8 +2166,8 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ad1e63f63a1a945d61fd5fd4",
-      "code": "U0009",
+      "structure_id": "25c16d0297cc8e93b1baeac3",
+      "code": "U0004",
       "source": "escher",
       "match_level": "reaction_reference",
       "license": "CC0-1.0",
@@ -2204,7 +2200,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "8cb4f305d956103574fab0b2",
+      "source_structure": "e8777d3623634c9a78ddf099",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -2224,7 +2220,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "1b58b5bdca08f1a7bcffdf78",
+      "structure_id": "950ba90ccee27dee333492af",
       "code": "U0003",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -2258,7 +2254,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -2278,7 +2274,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -2312,7 +2308,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "954489273de4ecdf1ec923c0",
+      "source_structure": "8a3287d8c4fac2120df47aa4",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -2332,8 +2328,8 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "1c0bb5d12f134c4c808bcc26",
-      "code": "U0006",
+      "structure_id": "59a1c3aa06df23e5a6573925",
+      "code": "U0005",
       "source": "escher",
       "match_level": "reaction_reference",
       "license": "CC0-1.0",
@@ -2366,7 +2362,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -2386,7 +2382,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -2420,7 +2416,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -2440,7 +2436,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -2496,7 +2492,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "7df7555093d5ca7edebfa0a5",
+      "source_structure": "cd614a3e56799c6ab19e3daf",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -2516,8 +2512,8 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "08a14bf4c89172150e7da931",
-      "code": "U0005",
+      "structure_id": "65b9b47c824e721a8fd8f1a3",
+      "code": "U0006",
       "source": "escher",
       "match_level": "reaction_reference",
       "license": "CC0-1.0",
@@ -2526,57 +2522,14 @@
   },
   {
     "reaction": "EX_mal__L_e",
-    "provenance": "expert_derived",
-    "identity_evidence": {
-      "kind": "stoichiometry_verified",
-      "verified": true,
-      "namespaces": [
-        "equation"
-      ],
-      "shared_ec": [],
-      "revoked": false,
-      "basis": "complete_equation"
-    },
-    "chemical_compatibility": {
-      "status": "compatible",
-      "difference_types": [
-        "exact_equation"
-      ],
-      "reason": "the complete equation maps onto the target reaction",
-      "factor": 1.0,
-      "direction_compatible": true,
-      "core_overlap": 1.0
-    },
-    "layout_provenance": "expert_exact",
-    "transfer": {
-      "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
-      "source_map": "7c6b94063f4f96699811411b",
-      "source_kind": "escher",
-      "source_species": "Escherichia coli",
-      "source_reaction": "EX_mal__L_e",
-      "basis": {
-        "shared_ec": [],
-        "core_overlap": 1.0,
-        "difference_types": [
-          "exact_equation"
-        ]
-      },
-      "adjustments": []
-    },
-    "context_compatibility": {
-      "incidence_fit": true,
-      "compartments_verified": true
-    },
+    "provenance": "generated",
+    "identity_evidence": null,
+    "chemical_compatibility": null,
+    "layout_provenance": "de_novo",
+    "transfer": null,
+    "context_compatibility": null,
     "ambiguity": null,
-    "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
-      "code": "U0001",
-      "source": "escher",
-      "match_level": "reaction_reference",
-      "license": "CC0-1.0",
-      "partition": "open_core"
-    }
+    "structure": null
   },
   {
     "reaction": "EX_nh4_e",
@@ -2648,7 +2601,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -2668,7 +2621,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -2704,7 +2657,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "39a80d6c9b49b7441bf36db4",
+      "source_structure": "06a2985ae5efb837af1991f3",
       "source_map": "4b63988fe370b86a460095c8",
       "source_kind": "escher",
       "source_species": "Saccharomyces cerevisiae",
@@ -2726,7 +2679,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "da5dc1ed9131ee6811efdccc",
+      "structure_id": "66e523bfda3063fb7bc3f362",
       "code": "U0002",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -2763,7 +2716,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "8cb4f305d956103574fab0b2",
+      "source_structure": "e8777d3623634c9a78ddf099",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -2786,7 +2739,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "1b58b5bdca08f1a7bcffdf78",
+      "structure_id": "950ba90ccee27dee333492af",
       "code": "U0003",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -2820,7 +2773,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "f000334968af9ed2962bae04",
+      "source_structure": "d02d34b0e6a1b03ede552807",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -2840,8 +2793,8 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ad1e63f63a1a945d61fd5fd4",
-      "code": "U0009",
+      "structure_id": "25c16d0297cc8e93b1baeac3",
+      "code": "U0004",
       "source": "escher",
       "match_level": "reaction_reference",
       "license": "CC0-1.0",
@@ -2885,7 +2838,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -2905,7 +2858,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -2939,7 +2892,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "8cb4f305d956103574fab0b2",
+      "source_structure": "e8777d3623634c9a78ddf099",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -2959,7 +2912,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "1b58b5bdca08f1a7bcffdf78",
+      "structure_id": "950ba90ccee27dee333492af",
       "code": "U0003",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -2995,7 +2948,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -3017,7 +2970,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -3051,7 +3004,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -3071,7 +3024,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -3081,65 +3034,14 @@
   },
   {
     "reaction": "G6PDH2r",
-    "provenance": "expert_derived",
-    "identity_evidence": {
-      "kind": "stoichiometry_verified",
-      "verified": true,
-      "namespaces": [
-        "equation"
-      ],
-      "shared_ec": [
-        "1.1.1.363",
-        "1.1.1.49",
-        "3.1.1.31"
-      ],
-      "revoked": false,
-      "basis": "complete_equation"
-    },
-    "chemical_compatibility": {
-      "status": "compatible",
-      "difference_types": [
-        "exact_equation"
-      ],
-      "reason": "the complete equation maps onto the target reaction",
-      "factor": 1.0,
-      "direction_compatible": null,
-      "core_overlap": 1.0
-    },
-    "layout_provenance": "expert_exact",
-    "transfer": {
-      "mode": "exact",
-      "source_structure": "56c5d0fda73578319af0545f",
-      "source_map": "e63b0b880daf3cfba5d13db3",
-      "source_kind": "escher",
-      "source_species": "Escherichia coli",
-      "source_reaction": "G6PDH2r",
-      "basis": {
-        "shared_ec": [
-          "1.1.1.363",
-          "1.1.1.49",
-          "3.1.1.31"
-        ],
-        "core_overlap": 1.0,
-        "difference_types": [
-          "exact_equation"
-        ]
-      },
-      "adjustments": []
-    },
-    "context_compatibility": {
-      "incidence_fit": true,
-      "compartments_verified": true
-    },
+    "provenance": "bridge",
+    "identity_evidence": null,
+    "chemical_compatibility": null,
+    "layout_provenance": "de_novo",
+    "transfer": null,
+    "context_compatibility": null,
     "ambiguity": null,
-    "structure": {
-      "structure_id": "ebeeeab5abee4e62055a4540",
-      "code": "U0011",
-      "source": "escher",
-      "match_level": "reaction_reference",
-      "license": "CC0-1.0",
-      "partition": "open_core"
-    }
+    "structure": null
   },
   {
     "reaction": "GAPD",
@@ -3170,7 +3072,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "39a80d6c9b49b7441bf36db4",
+      "source_structure": "06a2985ae5efb837af1991f3",
       "source_map": "4b63988fe370b86a460095c8",
       "source_kind": "escher",
       "source_species": "Saccharomyces cerevisiae",
@@ -3193,7 +3095,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "da5dc1ed9131ee6811efdccc",
+      "structure_id": "66e523bfda3063fb7bc3f362",
       "code": "U0002",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -3227,7 +3129,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "954489273de4ecdf1ec923c0",
+      "source_structure": "8a3287d8c4fac2120df47aa4",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -3247,8 +3149,8 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "1c0bb5d12f134c4c808bcc26",
-      "code": "U0006",
+      "structure_id": "59a1c3aa06df23e5a6573925",
+      "code": "U0005",
       "source": "escher",
       "match_level": "reaction_reference",
       "license": "CC0-1.0",
@@ -3283,7 +3185,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -3305,7 +3207,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -3341,7 +3243,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -3363,7 +3265,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -3401,7 +3303,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -3425,7 +3327,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -3469,7 +3371,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -3499,7 +3401,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -3535,7 +3437,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -3557,7 +3459,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -3591,7 +3493,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -3611,7 +3513,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -3648,7 +3550,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "39a80d6c9b49b7441bf36db4",
+      "source_structure": "06a2985ae5efb837af1991f3",
       "source_map": "4b63988fe370b86a460095c8",
       "source_kind": "escher",
       "source_species": "Saccharomyces cerevisiae",
@@ -3671,7 +3573,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "da5dc1ed9131ee6811efdccc",
+      "structure_id": "66e523bfda3063fb7bc3f362",
       "code": "U0002",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -3718,7 +3620,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -3740,7 +3642,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -3776,7 +3678,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -3798,7 +3700,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -3835,7 +3737,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -3858,7 +3760,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -3894,7 +3796,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -3916,7 +3818,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -3950,7 +3852,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -3970,7 +3872,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -4007,7 +3909,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -4030,7 +3932,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -4067,7 +3969,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -4090,7 +3992,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -4127,7 +4029,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -4150,7 +4052,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",
@@ -4233,7 +4135,7 @@
     "layout_provenance": "expert_exact",
     "transfer": {
       "mode": "exact",
-      "source_structure": "690c9ede0285b7624f587a33",
+      "source_structure": "369facda4a68e5257088426a",
       "source_map": "7c6b94063f4f96699811411b",
       "source_kind": "escher",
       "source_species": "Escherichia coli",
@@ -4258,7 +4160,7 @@
     },
     "ambiguity": null,
     "structure": {
-      "structure_id": "ccdc9b32c395e30b382051b4",
+      "structure_id": "05a4558d51e0bf86849aae74",
       "code": "U0001",
       "source": "escher",
       "match_level": "reaction_reference",

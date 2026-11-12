@@ -2,8 +2,8 @@
   "policy": "Per-module source licenses are preserved; research-partition content keeps its own terms.",
   "layout_sources": [
     {
-      "id": "ccdc9b32c395e30b382051b4",
-      "template_id": "690c9ede0285b7624f587a33",
+      "id": "05a4558d51e0bf86849aae74",
+      "template_id": "369facda4a68e5257088426a",
       "map_id": "7c6b94063f4f96699811411b",
       "source": "escher",
       "lineage": "3722cda5d0793e3429bf7668",
@@ -11,11 +11,11 @@
       "partition": "open_core",
       "source_citation": null,
       "source_sha256": "2caf3c036ff93f487a12c601adeb74353c174c96fc144730cc528b304b1141bc",
-      "original_instance": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/escher/e_coli_core/e_coli_core.Core metabolism.json"
+      "original_instance": "data/source_inputs/module_observations.json.gz"
     },
     {
-      "id": "da5dc1ed9131ee6811efdccc",
-      "template_id": "39a80d6c9b49b7441bf36db4",
+      "id": "66e523bfda3063fb7bc3f362",
+      "template_id": "06a2985ae5efb837af1991f3",
       "map_id": "4b63988fe370b86a460095c8",
       "source": "escher",
       "lineage": "98eb39ce6951a9ccddb74e62",
@@ -23,11 +23,11 @@
       "partition": "open_core",
       "source_citation": null,
       "source_sha256": "6f73cdfcf7f1282798256065d30e757a5866d17792a229dd689d10ecaf25fa2f",
-      "original_instance": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/escher/iMM904/iMM904.Central carbon metabolism.json"
+      "original_instance": "data/source_inputs/module_observations.json.gz"
     },
     {
-      "id": "d0031bc7d33a9b419f72d837",
-      "template_id": "3928f6d477efa2f22e46989b",
+      "id": "950ba90ccee27dee333492af",
+      "template_id": "e8777d3623634c9a78ddf099",
       "map_id": "7c6b94063f4f96699811411b",
       "source": "escher",
       "lineage": "3722cda5d0793e3429bf7668",
@@ -35,31 +35,7 @@
       "partition": "open_core",
       "source_citation": null,
       "source_sha256": "2caf3c036ff93f487a12c601adeb74353c174c96fc144730cc528b304b1141bc",
-      "original_instance": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/escher/e_coli_core/e_coli_core.Core metabolism.json"
-    },
-    {
-      "id": "1b58b5bdca08f1a7bcffdf78",
-      "template_id": "8cb4f305d956103574fab0b2",
-      "map_id": "7c6b94063f4f96699811411b",
-      "source": "escher",
-      "lineage": "3722cda5d0793e3429bf7668",
-      "license": "CC0-1.0",
-      "partition": "open_core",
-      "source_citation": null,
-      "source_sha256": "2caf3c036ff93f487a12c601adeb74353c174c96fc144730cc528b304b1141bc",
-      "original_instance": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/escher/e_coli_core/e_coli_core.Core metabolism.json"
-    },
-    {
-      "id": "ebeeeab5abee4e62055a4540",
-      "template_id": "56c5d0fda73578319af0545f",
-      "map_id": "e63b0b880daf3cfba5d13db3",
-      "source": "escher",
-      "lineage": "bffa3f419844fce98eade412",
-      "license": "CC0-1.0",
-      "partition": "open_core",
-      "source_citation": null,
-      "source_sha256": "7953c04f54a00900371c114139cad6340de65a56be16511e93f40efde2450f17",
-      "original_instance": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/escher/iJO1366/iJO1366.Central metabolism.json"
+      "original_instance": "data/source_inputs/module_observations.json.gz"
     },
     {
       "id": "7b4797d4d68a0ba87acb08a7",
@@ -74,8 +50,8 @@
       "original_instance": "data/source_inputs/raw/wp/Homo_sapiens/Hs_Glycerol_metabolism_including_linked_IMDs_WP5570_20250731.gpml"
     },
     {
-      "id": "24d29880e9ec2643d20ae478",
-      "template_id": "98d732015ac0be39f55872e9",
+      "id": "94c054f906d21f0a2087dc53",
+      "template_id": "3befb02748b08f38323d4655",
       "map_id": "7c6b94063f4f96699811411b",
       "source": "escher",
       "lineage": "3722cda5d0793e3429bf7668",
@@ -83,11 +59,11 @@
       "partition": "open_core",
       "source_citation": null,
       "source_sha256": "2caf3c036ff93f487a12c601adeb74353c174c96fc144730cc528b304b1141bc",
-      "original_instance": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/escher/e_coli_core/e_coli_core.Core metabolism.json"
+      "original_instance": "data/source_inputs/module_observations.json.gz"
     },
     {
-      "id": "ad1e63f63a1a945d61fd5fd4",
-      "template_id": "f000334968af9ed2962bae04",
+      "id": "25c16d0297cc8e93b1baeac3",
+      "template_id": "d02d34b0e6a1b03ede552807",
       "map_id": "7c6b94063f4f96699811411b",
       "source": "escher",
       "lineage": "3722cda5d0793e3429bf7668",
@@ -95,11 +71,11 @@
       "partition": "open_core",
       "source_citation": null,
       "source_sha256": "2caf3c036ff93f487a12c601adeb74353c174c96fc144730cc528b304b1141bc",
-      "original_instance": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/escher/e_coli_core/e_coli_core.Core metabolism.json"
+      "original_instance": "data/source_inputs/module_observations.json.gz"
     },
     {
-      "id": "1c0bb5d12f134c4c808bcc26",
-      "template_id": "954489273de4ecdf1ec923c0",
+      "id": "59a1c3aa06df23e5a6573925",
+      "template_id": "8a3287d8c4fac2120df47aa4",
       "map_id": "7c6b94063f4f96699811411b",
       "source": "escher",
       "lineage": "3722cda5d0793e3429bf7668",
@@ -107,11 +83,11 @@
       "partition": "open_core",
       "source_citation": null,
       "source_sha256": "2caf3c036ff93f487a12c601adeb74353c174c96fc144730cc528b304b1141bc",
-      "original_instance": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/escher/e_coli_core/e_coli_core.Core metabolism.json"
+      "original_instance": "data/source_inputs/module_observations.json.gz"
     },
     {
-      "id": "08a14bf4c89172150e7da931",
-      "template_id": "7df7555093d5ca7edebfa0a5",
+      "id": "f7d3b0457a3623f5dfa41644",
+      "template_id": "07b252b6ae7ab27e72f9ea6e",
       "map_id": "7c6b94063f4f96699811411b",
       "source": "escher",
       "lineage": "3722cda5d0793e3429bf7668",
@@ -119,7 +95,31 @@
       "partition": "open_core",
       "source_citation": null,
       "source_sha256": "2caf3c036ff93f487a12c601adeb74353c174c96fc144730cc528b304b1141bc",
-      "original_instance": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/escher/e_coli_core/e_coli_core.Core metabolism.json"
+      "original_instance": "data/source_inputs/module_observations.json.gz"
+    },
+    {
+      "id": "bee463ed50b4ae60148e680a",
+      "template_id": "4590a11b77ff048bbecdbaf0",
+      "map_id": "7c6b94063f4f96699811411b",
+      "source": "escher",
+      "lineage": "3722cda5d0793e3429bf7668",
+      "license": "CC0-1.0",
+      "partition": "open_core",
+      "source_citation": null,
+      "source_sha256": "2caf3c036ff93f487a12c601adeb74353c174c96fc144730cc528b304b1141bc",
+      "original_instance": "data/source_inputs/module_observations.json.gz"
+    },
+    {
+      "id": "65b9b47c824e721a8fd8f1a3",
+      "template_id": "cd614a3e56799c6ab19e3daf",
+      "map_id": "7c6b94063f4f96699811411b",
+      "source": "escher",
+      "lineage": "3722cda5d0793e3429bf7668",
+      "license": "CC0-1.0",
+      "partition": "open_core",
+      "source_citation": null,
+      "source_sha256": "2caf3c036ff93f487a12c601adeb74353c174c96fc144730cc528b304b1141bc",
+      "original_instance": "data/source_inputs/module_observations.json.gz"
     },
     {
       "id": "ae7651aad391d98b398baa0d",
