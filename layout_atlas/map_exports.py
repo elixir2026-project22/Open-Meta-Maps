@@ -1101,8 +1101,6 @@ def celldesigner_ids(path):
 
 def coordinates_match(data, sbgn_path, tol=1.0):
     """True when every Escher metabolite/midmarker centre appears as a glyph centre within tol."""
-    from evaluation.reference_sbgn import read_sbgn_positions
-    # reference_sbgn flips y; compare absolute with our writer (no flip)
     root = ET.parse(sbgn_path).getroot()
 
     def local(tag):
