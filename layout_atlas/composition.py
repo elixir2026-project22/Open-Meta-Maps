@@ -388,11 +388,12 @@ def compose(model, scene, blocks, cur):
                 width=round(block_w), height=round(block_h), components=len(layout),
                 pocket=pocket_rep.get('placed', 0))
     report['gathered'] = report['moved_related']
-    # After related/independent moves: pull any still-exterior small components into
-    # the largest free regions of the main AABB (do not grow the canvas first).
+    # After related/independent moves: pull true exterior stubs into free regions
+    # of the main AABB. Keep this mild — aggressive teleports raise crossings and
+    # split curated structures (the initial pocket_pack already places most tiles).
     iter_reps = []
     prev_ids = None
-    for _it in range(3):
+    for _it in range(2):
         main_pts = np.array(
             [placed_pts[k] for i in main for k in cur_keys_of[i] if k in placed_pts], float)
         if len(main_pts) < 2:
@@ -405,20 +406,18 @@ def compose(model, scene, blocks, cur):
                 continue
             arr = np.array([placed_pts[k] for k in ks], float)
             clo, chi = arr.min(0), arr.max(0)
-            # Outside or barely overlapping the main content AABB.
             overlap_w = max(0.0, min(chi[0], mhi[0]) - max(clo[0], mlo[0]))
             overlap_h = max(0.0, min(chi[1], mhi[1]) - max(clo[1], mlo[1]))
             area = max(float((chi[0] - clo[0]) * (chi[1] - clo[1])), 1.0)
-            # Outside or barely overlapping the main AABB — pack into free regions
-            # inside main before growing the canvas. Small (≤4 rx) tiles in the
-            # outer 10% margin also count (far-right stubs / TR floaters).
             n_rx_i = len(comps[i]['reactions'])
+            # Only small stubs that barely touch main (or sit in the outer 8% margin).
             centre = 0.5 * (clo + chi)
-            core_lo = mlo + 0.10 * (mhi - mlo)
-            core_hi = mhi - 0.10 * (mhi - mlo)
+            core_lo = mlo + 0.08 * (mhi - mlo)
+            core_hi = mhi - 0.08 * (mhi - mlo)
             outside_core = (centre[0] < core_lo[0] or centre[0] > core_hi[0]
                             or centre[1] < core_lo[1] or centre[1] > core_hi[1])
-            if overlap_w * overlap_h >= 0.45 * area and not (n_rx_i <= 4 and outside_core):
+            barely = overlap_w * overlap_h < 0.20 * area
+            if not (barely or (n_rx_i <= 3 and outside_core and overlap_w * overlap_h < 0.55 * area)):
                 continue
             bw = float(max(chi[0] - clo[0], 40.0) + 60.0)
             bh = float(max(chi[1] - clo[1], 40.0) + 60.0)
@@ -445,12 +444,12 @@ def compose(model, scene, blocks, cur):
             origin = placed[i]
             old_c = clo + 0.5 * np.array([bw, bh], float)
             new_c = np.array([origin[0] + 0.5 * bw, origin[1] + 0.5 * bh], float)
-            # Only pull inward (or sideways without fleeing the main mass).
-            if float(np.hypot(*(new_c - prefer))) > float(np.hypot(*(old_c - prefer))) + 80.0:
+            if float(np.hypot(*(new_c - prefer))) > float(np.hypot(*(old_c - prefer))) + 40.0:
                 continue
             delta = np.array([origin[0], origin[1]], float) - clo
             dlen = float(np.hypot(*delta))
-            if dlen < 1.0:
+            # Cap single teleports — multi-thousand-px hops create spoke crossings.
+            if dlen < 1.0 or dlen > 1200.0:
                 continue
             moved_px += dlen
             move(i, delta)
@@ -586,14 +585,19 @@ def _find_pocket_origin(occ, size_w, size_h, prefer_c, content_lo=None, content_
                         + 0.05 * (max(0.0, content_lo[1] - y0) + max(0.0, (y0 + size_h) - content_hi[1])))
                 else:
                     aspect_pen = abs(math.log(max(nasp, 1e-9) / TARGET_ASPECT)) * 1e3
-            # Prefer near the main centre (pull TR floaters in). Among near ties,
-            # favour larger empty neighbourhoods for breathing room.
-            ring = 2
-            iy0 = max(0, iy - ring); iy1 = min(occ['ny'], iy + nh + ring)
-            ix0 = max(0, ix - ring); ix1 = min(occ['nx'], ix + nw + ring)
-            neigh = integ[iy1, ix1] - integ[iy0, ix1] - integ[iy1, ix0] + integ[iy0, ix0]
-            void_pen = -float(neigh)
-            score = (aspect_pen, expand_pen, dist, void_pen, iy, ix)
+            # Prefer slots tucked against occupied cells (true cracks beside the
+            # main mass), then near the main centre so TR floaters pull inward.
+            ring = 1
+            iy0b = max(0, iy - ring); iy1b = min(occ['ny'], iy + nh + ring)
+            ix0b = max(0, ix - ring); ix1b = min(occ['nx'], ix + nw + ring)
+            area_cells = (iy1b - iy0b) * (ix1b - ix0b)
+            empty_border = (integ[iy1b, ix1b] - integ[iy0b, ix1b]
+                            - integ[iy1b, ix0b] + integ[iy0b, ix0b])
+            border_empty = max(0, int(empty_border) - int(total))
+            border_cells = max(1, area_cells - nw * nh)
+            occupied_contact = border_cells - border_empty
+            tuck_pen = -float(occupied_contact)
+            score = (aspect_pen, expand_pen, tuck_pen, dist, iy, ix)
             if best is None or score < best[0]:
                 best = (score, x0, y0)
     if best is None:
