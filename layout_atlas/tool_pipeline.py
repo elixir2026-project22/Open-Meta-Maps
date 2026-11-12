@@ -1,4 +1,4 @@
-"""Upload-a-GEM pipeline: match the model to expert structures, build a skeleton from them, then complete the rest.
+"""Upload-a-GEM pipeline: match the model to curated structures, build a skeleton from them, then complete the rest.
 
 Runs one job in its own process (started by tool_server.py, or by hand):
 
@@ -8,7 +8,7 @@ Runs one job in its own process (started by tool_server.py, or by hand):
 A job folder holds `upload/model.xml|json` and `options.json`; the pipeline writes `job.json` (state polled by the
 server), `skeleton.json/svg`, `map.*`, `modules.json`, `report.json`, `licenses.json` and `views/`.
 
-Step 1 (skeleton) uses ONLY existing expert structures plus network bridges; step 2 completes everything else
+Step 1 (skeleton) uses ONLY existing curated structures plus network bridges; step 2 completes everything else
 algorithmically.  Reuses: semantic_transfer.Mapper (complete equations), retrieval.Library (id/geometry candidates),
 ec_channel (EC candidates, strong-first selection), retrieval.bridges, drawing.pack_modules/complete/export and
 micromap_experiment.draw_case (P0-compatible drawing with label avoidance and libavoid routing).
@@ -28,12 +28,10 @@ from core import *
 LIMITS = dict(max_bytes=25 * 1024 * 1024, max_reactions=20000, full_routed_max_reactions=150, whole_map_max_reactions=3000, view_size=50)
 SOURCE_PATHS = False  # reuse the curated map's original curves (Escher Bezier chains) for the edges of matched structures
 ORIENTATION = 'full'  # 'off' | 'sides' (currency copies on the substrate / product side) | 'full' (also reactions outside the curated structures between their substrates and products)
-LAYOUT_STYLE = 'curated'  # 'legacy' | 'curated' (V7: Bezier curves from curated-map constraints; no orthogonal polylines). Deprecated alias: 'expert' → 'curated'.
+LAYOUT_STYLE = 'curated'  # 'legacy' | 'curated' (V7: Bezier curves from curated-map constraints; no orthogonal polylines).
 
 def normalize_layout_style(value):
-    """Map user/API layout_style to the canonical value. 'expert' is a deprecated alias of 'curated'."""
-    if value in ('curated', 'expert'):
-        return 'curated'
+    """Map user/API layout_style to the canonical value."""
     if value == 'legacy':
         return 'legacy'
     return 'curated'
@@ -651,7 +649,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     # unstable on small / near-collinear modules after completion and is not the gate signal.
     axes = curated_axes.axes_report(blocks, scene=None)
     attempts = []
-    # Routing decision: expert style uses Bezier curves (edge_style), legacy uses libavoid
+    # Routing decision: curated style uses Bezier curves (edge_style), legacy uses libavoid
     # For large models (> ROUTING_THRESHOLD reactions), defer routing to avoid long build times
     skip_libavoid = (scalable or 
                      EDGE_ROUTING in ('hybrid', 'none') or 
@@ -731,7 +729,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         t_style = time.time()
         metric['edge_style'] = dict(edge_style.apply(data, skip_edges), seconds=round(time.time() - t_style, 1))
         if log:
-            log(f"  expert-style connections: {metric['edge_style']}")
+                log(f"  curated-style connections: {metric['edge_style']}")
         import label_placement
         t_labels = time.time()
         metric['label_placement'] = dict(label_placement.optimize(data), seconds=round(time.time() - t_labels, 1))
@@ -844,6 +842,26 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             # restore here (that would re-expand BiGG-internal voids against a
             # squeezed surrounding canvas).
             dump(folder / 'map.json', data)
+        # Shorten extreme empty axis-aligned corridors before hotspot so repair
+        # can clean crossings introduced by midmarker slides.
+        import composition as _comp_fit
+        spacing_now = composition_module.reaction_spacing_escher(data)
+        corridor = _comp_fit.compact_empty_corridors_escher(data, spacing=spacing_now)
+        # Whole-reaction corridor slides already keep private/EX partners attached;
+        # a broad arm sweep after that retargets many spokes and costs continuity.
+        # Collapse empty bands opened by the slide so neighbours can settle in.
+        if corridor.get('shortened'):
+            post_sq = composition_module.squeeze_escher(
+                data, max_gap=max(float(spacing_now or 150.0) * 1.25, 40.0))
+            corridor['post_squeeze'] = {
+                k: post_sq.get(k) for k in ('applied', 'dx', 'dy', 'max_gap')}
+        metric['empty_corridor_escher'] = corridor
+        if composition_report is not None:
+            composition_report['empty_corridor_escher'] = corridor
+        if log and corridor.get('shortened'):
+            log(f"  empty-corridor compact (escher): shortened {corridor['shortened']} "
+                f"max_gap={corridor.get('max_gap')} min_len={corridor.get('min_len')}")
+        dump(folder / 'map.json', data)
         # Rebuild algorithm Beziers against post-restore geometry on small maps
         # (early edge_style ran before absolute snap). Skip on mid/large — edge_style
         # alone is ~75 s on iIT341 and would blow the runtime gate.
@@ -853,33 +871,34 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             metric['edge_style_post_restore'] = dict(
                 _es_post.apply(data, skip_edges), seconds=round(time.time() - t_style2, 1))
             if log:
-                log(f"  expert-style connections (post-restore): {metric['edge_style_post_restore']}")
+                log(f"  curated-style connections (post-restore): {metric['edge_style_post_restore']}")
             dump(folder / 'map.json', data)
-        # Hotspot repair AFTER rigid restore + overlap clear + squeeze + restyle so
-        # accepted moves are not undone by absolute snap.
+        # Hotspot repair AFTER rigid restore + overlap clear + squeeze + corridor
+        # so accepted moves are not undone by absolute snap / padding slides.
         if os.environ.get('OPM_HOTSPOT_REPAIR', 'on') != 'off':
             import hotspot_repair
             codes_early = module_codes(blocks) if blocks else {}
-            expert_structures_early = [
+            curated_structures_early = [
                 dict(id=b.get('id') or b.get('template_id'), code=codes_early.get(b.get('id')),
                      reactions=list(b['reaction_ids']))
                 for b in blocks if len(b.get('reaction_ids') or []) >= 2]
-            data[0].setdefault('metadata', {})['expert_structures'] = expert_structures_early
+            data[0].setdefault('metadata', {})['expert_structures'] = curated_structures_early
             # After absolute rigid restore, more windows need search than the default
             # mass-scaled budget covers (e_coli formate cluster alone was 15 crossings).
             n_rx = len(model['reactions'])
-            hs_budget = 20.0 if n_rx < 200 else 45.0
-            hs_k = 8 if n_rx < 200 else 8
+            # Corridor slides can add a few local spoke crossings; give small maps
+            # enough search to recover the pre-corridor counted-crossing floor.
+            hs_budget = 35.0 if n_rx < 200 else 45.0
+            hs_k = 10 if n_rx < 200 else 8
             metric['hotspot_repair'] = hotspot_repair.repair(
                 data, model=model, scene=scene, blocks=blocks, skip_edges=skip_edges, log=log,
-                structures=expert_structures_early, k=hs_k, max_accepts=80, budget_s=hs_budget,
-                max_rounds=6)
+                structures=curated_structures_early, k=hs_k, max_accepts=100, budget_s=hs_budget,
+                max_rounds=8)
             if log:
                 hr = metric['hotspot_repair']
                 log('  hotspot repair: ' + str({k: hr.get(k) for k in ('accepted_count', 'tries', 'rounds', 'seconds', 'improved')}))
             dump(folder / 'map.json', data)
         # Shrink canvas to content so empty frame padding does not inflate blank/empty gates.
-        import composition as _comp_fit
         fit = _comp_fit.fit_canvas_to_content(data)
         metric['canvas_fit'] = fit
         if log and fit.get('applied'):

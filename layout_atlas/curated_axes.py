@@ -268,7 +268,9 @@ def _common_abs_scale(blocks, idxs, abs_lookups, abs_map=None):
 
 # Gaps longer than this × median segment length are treated as alignment padding.
 # Keep H/V alignment / order; collapse empty runs longer than ~one typical mid↔met span.
-PADDING_GAP_FACTOR = 0.8
+# Keep ≥1.0 so global remap does not eat BiGG axis/orderliness; empty corridors are
+# shortened separately by ``compress_empty_axis_edges``.
+PADDING_GAP_FACTOR = 1.0
 
 
 def _remap_from_breaks(breaks):
@@ -369,13 +371,36 @@ def compress_padding_xy(xy_by_key, max_gap=None, edge_lengths=None):
                 length_removed=round(rx['removed'] + ry['removed'], 2))
 
 
-def compress_empty_axis_edges(xy_by_key, edges, max_gap, axis_tol=10.0, margin=14.0):
+def _axis_aligned(dx, dy, axis_tol=28.0, angle_deg=8.0):
+    """True when a span is effectively vertical or horizontal (padding candidate)."""
+    length = float(math.hypot(dx, dy))
+    if length < 1e-9:
+        return False, False
+    # Pixel band OR small angle from the axis (BiGG columns are rarely exact).
+    vertical = (abs(dx) <= axis_tol and abs(dy) > abs(dx)) or (
+        abs(dy) >= abs(dx) and math.degrees(math.atan2(abs(dx), abs(dy))) <= angle_deg)
+    horizontal = (abs(dy) <= axis_tol and abs(dx) > abs(dy)) or (
+        abs(dx) >= abs(dy) and math.degrees(math.atan2(abs(dy), abs(dx))) <= angle_deg)
+    if vertical and horizontal:
+        # Prefer the dominant axis.
+        if abs(dy) >= abs(dx):
+            horizontal = False
+        else:
+            vertical = False
+    return vertical, horizontal
+
+
+def compress_empty_axis_edges(xy_by_key, edges, max_gap, axis_tol=28.0, margin=18.0,
+                              prefer_move=None):
     """Shorten axis-aligned mid↔met spans whose open corridor holds no other glyphs.
 
     Global axis remaps cannot collapse a long vertical when other modules occupy the
     same Y band at a different X.  When the thin corridor between the two endpoints
     is empty, length is free (shape and direction kept): pull the more peripheral
     endpoint toward its partner down to ``max_gap``.
+
+    Prefer moving metabolites (``m:`` keys, or ids in ``prefer_move``) over reaction
+    midmarkers so shared currency spokes stay anchored on the mid.
     """
     if not xy_by_key or not edges or max_gap is None:
         return dict(applied=False, shortened=0, length_removed=0.0)
@@ -383,6 +408,13 @@ def compress_empty_axis_edges(xy_by_key, edges, max_gap, axis_tol=10.0, margin=1
     if len(pts) < 2:
         return dict(applied=False, shortened=0, length_removed=0.0)
     centroid = np.mean(np.stack(list(pts.values())), axis=0)
+    prefer_move = set(prefer_move or ())
+    # How many corridor edges touch each key — leave high-degree hubs alone when possible.
+    degree = defaultdict(int)
+    for ka, kb in edges:
+        if ka in pts and kb in pts:
+            degree[ka] += 1
+            degree[kb] += 1
     # Longest empty corridors first so nested shortenings see freed space.
     scored = []
     for ka, kb in edges:
@@ -393,8 +425,7 @@ def compress_empty_axis_edges(xy_by_key, edges, max_gap, axis_tol=10.0, margin=1
         length = float(math.hypot(dx, dy))
         if length <= max_gap + 1e-6:
             continue
-        vertical = abs(dx) <= axis_tol and abs(dy) > axis_tol
-        horizontal = abs(dy) <= axis_tol and abs(dx) > axis_tol
+        vertical, horizontal = _axis_aligned(dx, dy, axis_tol=axis_tol)
         if not (vertical or horizontal):
             continue
         scored.append((length, ka, kb, vertical))
@@ -405,18 +436,26 @@ def compress_empty_axis_edges(xy_by_key, edges, max_gap, axis_tol=10.0, margin=1
     def _corridor_empty(a, b, vertical):
         lo = np.minimum(a, b)
         hi = np.maximum(a, b)
+        # Only the middle of the span is padding; local chemistry near either
+        # endpoint (currency spokes, etc.) must not block shortening.
+        span = float((hi[1] - lo[1]) if vertical else (hi[0] - lo[0]))
+        pad = max(span * 0.12, float(max_gap) * 0.5, 40.0)
+        cx = 0.5 * (a[0] + b[0])
+        cy = 0.5 * (a[1] + b[1])
+        # Strip width: margin plus half the endpoint offset (near-axis drift).
+        band = margin + 0.5 * (abs(float(a[0] - b[0])) if vertical else abs(float(a[1] - b[1])))
         for k, p in pts.items():
-            if p is a or p is b:
+            if np.allclose(p, a) or np.allclose(p, b):
                 continue
             if vertical:
-                if abs(p[0] - a[0]) > margin and abs(p[0] - b[0]) > margin:
+                if abs(p[0] - cx) > band:
                     continue
-                if lo[1] + 1e-6 < p[1] < hi[1] - 1e-6:
+                if lo[1] + pad < p[1] < hi[1] - pad:
                     return False
             else:
-                if abs(p[1] - a[1]) > margin and abs(p[1] - b[1]) > margin:
+                if abs(p[1] - cy) > band:
                     continue
-                if lo[0] + 1e-6 < p[0] < hi[0] - 1e-6:
+                if lo[0] + pad < p[0] < hi[0] - pad:
                     return False
         return True
 
@@ -427,10 +466,22 @@ def compress_empty_axis_edges(xy_by_key, edges, max_gap, axis_tol=10.0, margin=1
             continue
         if not _corridor_empty(a, b, vertical):
             continue
-        # Move the endpoint farther from the cloud centroid.
-        da = float(np.hypot(*(a - centroid)))
-        db = float(np.hypot(*(b - centroid)))
-        move_k, fixed = (ka, b) if da >= db else (kb, a)
+
+        def _move_score(key):
+            # Lower is better. Never yank shared metabolites (degree > 1) — move the
+            # midmarker toward them instead; private mets may move freely.
+            is_met = (isinstance(key, str) and key.startswith('m:')) or key in prefer_move
+            deg = degree.get(key, 0)
+            dist_c = float(np.hypot(*(pts[key] - centroid)))
+            if is_met and deg > 1:
+                return (2, deg, -dist_c)
+            if is_met:
+                return (0, deg, -dist_c)
+            return (1, deg, -dist_c)
+
+        move_k = min((ka, kb), key=_move_score)
+        fixed_k = kb if move_k == ka else ka
+        fixed = pts[fixed_k]
         movable = pts[move_k]
         vec = movable - fixed
         dist = float(np.hypot(*vec))
@@ -438,9 +489,25 @@ def compress_empty_axis_edges(xy_by_key, edges, max_gap, axis_tol=10.0, margin=1
             continue
         u = vec / dist
         new_xy = fixed + u * float(max_gap)
+        delta = new_xy - movable
         removed += dist - max_gap
         pts[move_k] = new_xy
         xy_by_key[move_k] = [float(new_xy[0]), float(new_xy[1])]
+        # If we moved a midmarker, drag its private (degree-1) spoke metabolites
+        # by the same delta so transport heads stay attached.
+        if not ((isinstance(move_k, str) and move_k.startswith('m:')) or move_k in prefer_move):
+            for ka2, kb2 in edges:
+                other = None
+                if ka2 == move_k:
+                    other = kb2
+                elif kb2 == move_k:
+                    other = ka2
+                if other is None or other not in pts or degree.get(other, 0) != 1:
+                    continue
+                if not ((isinstance(other, str) and other.startswith('m:')) or other in prefer_move):
+                    continue
+                pts[other] = pts[other] + delta
+                xy_by_key[other] = [float(pts[other][0]), float(pts[other][1])]
         shortened += 1
     return dict(applied=shortened > 0, shortened=shortened,
                 length_removed=round(removed, 2), max_gap=round(float(max_gap), 2))
@@ -527,11 +594,10 @@ def bake_same_map_positions(blocks, model_n_reactions=None):
             for i in idxs:
                 for k, xy in abs_lookups[i].items():
                     cloud[k] = list(xy)
-            pad = compress_padding_joint(
-                cloud,
-                edge_lengths=abs_map.get('edge_lengths'),
-                edges=abs_map.get('edges') or [],
-                rounds=4)
+            # Global H/V padding only at bake time (preserves BiGG axis/orderliness).
+            # Extreme empty corridors are shortened later on the Escher map by
+            # translating whole reaction units toward shared pools.
+            pad = compress_padding_xy(cloud, edge_lengths=abs_map.get('edge_lengths'))
             for i in idxs:
                 abs_lookups[i] = {k: list(cloud[k]) for k in abs_lookups[i] if k in cloud}
             # Rebuild every resolvable glyph from (compressed) absolute coords.

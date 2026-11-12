@@ -388,11 +388,12 @@ def compose(model, scene, blocks, cur):
                 width=round(block_w), height=round(block_h), components=len(layout),
                 pocket=pocket_rep.get('placed', 0))
     report['gathered'] = report['moved_related']
-    # After related/independent moves: pull any still-exterior small components into
-    # the largest free regions of the main AABB (do not grow the canvas first).
+    # After related/independent moves: pull true exterior stubs into free regions
+    # of the main AABB. Keep this mild — aggressive teleports raise crossings and
+    # split curated structures (the initial pocket_pack already places most tiles).
     iter_reps = []
     prev_ids = None
-    for _it in range(3):
+    for _it in range(2):
         main_pts = np.array(
             [placed_pts[k] for i in main for k in cur_keys_of[i] if k in placed_pts], float)
         if len(main_pts) < 2:
@@ -405,11 +406,18 @@ def compose(model, scene, blocks, cur):
                 continue
             arr = np.array([placed_pts[k] for k in ks], float)
             clo, chi = arr.min(0), arr.max(0)
-            # Outside or barely overlapping the main content AABB.
             overlap_w = max(0.0, min(chi[0], mhi[0]) - max(clo[0], mlo[0]))
             overlap_h = max(0.0, min(chi[1], mhi[1]) - max(clo[1], mlo[1]))
             area = max(float((chi[0] - clo[0]) * (chi[1] - clo[1])), 1.0)
-            if overlap_w * overlap_h >= 0.45 * area:
+            n_rx_i = len(comps[i]['reactions'])
+            # Only small stubs that barely touch main (or sit in the outer 8% margin).
+            centre = 0.5 * (clo + chi)
+            core_lo = mlo + 0.08 * (mhi - mlo)
+            core_hi = mhi - 0.08 * (mhi - mlo)
+            outside_core = (centre[0] < core_lo[0] or centre[0] > core_hi[0]
+                            or centre[1] < core_lo[1] or centre[1] > core_hi[1])
+            barely = overlap_w * overlap_h < 0.20 * area
+            if not (barely or (n_rx_i <= 3 and outside_core and overlap_w * overlap_h < 0.55 * area)):
                 continue
             bw = float(max(chi[0] - clo[0], 40.0) + 60.0)
             bh = float(max(chi[1] - clo[1], 40.0) + 60.0)
@@ -428,19 +436,30 @@ def compose(model, scene, blocks, cur):
             break
         prev_ids = ids
         moved_px = 0.0
+        accepted = 0
+        prefer = main_pts.mean(0)
         for i, bw, bh, clo in outliers:
             if i not in placed:
                 continue
             origin = placed[i]
+            old_c = clo + 0.5 * np.array([bw, bh], float)
+            new_c = np.array([origin[0] + 0.5 * bw, origin[1] + 0.5 * bh], float)
+            if float(np.hypot(*(new_c - prefer))) > float(np.hypot(*(old_c - prefer))) + 40.0:
+                continue
             delta = np.array([origin[0], origin[1]], float) - clo
-            moved_px += float(np.hypot(*delta))
+            dlen = float(np.hypot(*delta))
+            # Cap single teleports — multi-thousand-px hops create spoke crossings.
+            if dlen < 1.0 or dlen > 1200.0:
+                continue
+            moved_px += dlen
             move(i, delta)
+            accepted += 1
             report['arranged_independent'] += 1
-        iter_reps.append(dict(placed=len(placed), missed=len(boxes) - len(placed),
+        iter_reps.append(dict(placed=accepted, missed=len(boxes) - accepted,
                               moved_px=round(moved_px, 1),
                               **{k: v for k, v in prep.items()
                                  if k not in ('placed', 'missed')}))
-        if moved_px < 1.0:
+        if moved_px < 1.0 or accepted == 0:
             break
     if iter_reps:
         report['interior_repack'] = iter_reps
@@ -501,11 +520,14 @@ def _mark_rect_occupied(occ, x0, y0, w, h):
     grid[iy0:iy1, ix0:ix1] = 1
 
 
-def _find_pocket_origin(occ, size_w, size_h, prefer_c, content_lo=None, content_hi=None):
+def _find_pocket_origin(occ, size_w, size_h, prefer_c, content_lo=None, content_hi=None,
+                        prefer_void=False):
     """Top-left origin for a ``size_w×size_h`` box inside empty cells nearest ``prefer_c``.
 
     When ``content_lo/hi`` are set, prefer slots that pull the combined aspect toward
     the 4:3–16:9 band (widen a tall map, avoid growing height on an already-wide map).
+    ``prefer_void`` ranks large empty neighbourhoods before tuck/centre (safer when
+    packing many tiles on large maps).
     """
     if occ is None:
         return None
@@ -566,13 +588,27 @@ def _find_pocket_origin(occ, size_w, size_h, prefer_c, content_lo=None, content_
                         + 0.05 * (max(0.0, content_lo[1] - y0) + max(0.0, (y0 + size_h) - content_hi[1])))
                 else:
                     aspect_pen = abs(math.log(max(nasp, 1e-9) / TARGET_ASPECT)) * 1e3
-            # Prefer the largest free neighbourhood (big empty rects inside main AABB).
             ring = 2
             iy0 = max(0, iy - ring); iy1 = min(occ['ny'], iy + nh + ring)
             ix0 = max(0, ix - ring); ix1 = min(occ['nx'], ix + nw + ring)
             neigh = integ[iy1, ix1] - integ[iy0, ix1] - integ[iy1, ix0] + integ[iy0, ix0]
-            void_pen = -float(neigh)  # more empty neighbours → lower score
-            score = (aspect_pen, expand_pen, void_pen, dist, iy, ix)
+            void_pen = -float(neigh)
+            if prefer_void:
+                score = (aspect_pen, expand_pen, void_pen, dist, iy, ix)
+            else:
+                # Prefer slots tucked against occupied cells, then near the main
+                # centre so TR floaters pull inward (small-map / few-tile packs).
+                ring1 = 1
+                iy0b = max(0, iy - ring1); iy1b = min(occ['ny'], iy + nh + ring1)
+                ix0b = max(0, ix - ring1); ix1b = min(occ['nx'], ix + nw + ring1)
+                area_cells = (iy1b - iy0b) * (ix1b - ix0b)
+                empty_border = (integ[iy1b, ix1b] - integ[iy0b, ix1b]
+                                - integ[iy1b, ix0b] + integ[iy0b, ix0b])
+                border_empty = max(0, int(empty_border) - int(total))
+                border_cells = max(1, area_cells - nw * nh)
+                occupied_contact = border_cells - border_empty
+                tuck_pen = -float(occupied_contact)
+                score = (aspect_pen, expand_pen, tuck_pen, dist, iy, ix)
             if best is None or score < best[0]:
                 best = (score, x0, y0)
     if best is None:
@@ -580,7 +616,7 @@ def _find_pocket_origin(occ, size_w, size_h, prefer_c, content_lo=None, content_
     return best[1], best[2]
 
 
-def pack_into_main_pockets(boxes, main_pts, spacing, prefer_c=None):
+def pack_into_main_pockets(boxes, main_pts, spacing, prefer_c=None, prefer_void=False):
     """Place boxes into empty pockets inside/flush with the main AABB.
 
     ``boxes``: list of ``(id, size_w, size_h)`` largest-first preferred.
@@ -588,6 +624,8 @@ def pack_into_main_pockets(boxes, main_pts, spacing, prefer_c=None):
     """
     if not boxes or len(main_pts) < 2:
         return {}, dict(placed=0, missed=len(boxes))
+    if prefer_void is False and len(boxes) > 20:
+        prefer_void = True
     cell = max(float(spacing) * POCKET_CELL_FRAC, 20.0)
     # Search primarily inside the main AABB; only a small flush strip outside so
     # small components fill the largest free regions before the canvas grows.
@@ -623,7 +661,8 @@ def pack_into_main_pockets(boxes, main_pts, spacing, prefer_c=None):
     placed = {}
     for bid, bw, bh in boxes:
         origin = _find_pocket_origin(occ, bw, bh, prefer_c,
-                                    content_lo=content_lo, content_hi=content_hi)
+                                    content_lo=content_lo, content_hi=content_hi,
+                                    prefer_void=prefer_void)
         if origin is None:
             continue
         placed[bid] = origin
@@ -732,12 +771,21 @@ def reflow_landscape(model, scene, blocks, cur):
         return _scene_aspect(pos)[0]
 
     # Prefer pocket-packing movables into empty space flush with main before an external shelf.
+    # When already in-band, only pull far outliers in (not every non-main tile) — packing
+    # hundreds of tiles into pockets collapses large maps toward a square and raises empty/cross.
+    prefer_c = main_pts.mean(0)
+    span = max(float(np.hypot(*(mhi - mlo))), 1.0)
+    if in_band0:
+        pack_ids = [i for i in sizes
+                    if float(np.hypot(*(centres[i] - prefer_c))) > 0.32 * span]
+    else:
+        pack_ids = list(sizes)
     pocket_boxes = sorted(
-        [(i, sizes[i][0], sizes[i][1]) for i in sizes],
+        [(i, sizes[i][0], sizes[i][1]) for i in pack_ids],
         key=lambda t: (-t[1] * t[2], t[0]))
     pocket_tl, pocket_rep = pack_into_main_pockets(
         pocket_boxes, main_pts, max(spacing_from_main(main_pts), 40.0),
-        prefer_c=main_pts.mean(0))
+        prefer_c=prefer_c, prefer_void=len(pocket_boxes) > 20)
     if in_band0 and not pocket_tl:
         report.update(aspect_after=round(aspect0, 3), reason='already_in_band',
                       pocket=pocket_rep)
@@ -885,6 +933,189 @@ def fit_canvas_to_content(data, pad=40.0):
         height=(y1 - y0) + 2 * pad)
     return dict(applied=True, before=before, after=dict(data[1]['canvas']),
                 content=[round(x1 - x0, 1), round(y1 - y0, 1)])
+
+
+def compact_empty_corridors_escher(data, max_gap=None, spacing=None):
+    """Shorten extreme empty axis-aligned mid↔met edges on a finished Escher map.
+
+    For a long empty corridor to a *shared* metabolite, translate the whole
+    reaction unit (midmarker + private spoke metabolites) toward that shared
+    pool — never yank the shared glyph, and never leave private heads behind.
+    Private (degree-1) metabolites may move alone.
+    """
+    import curated_axes as ca
+    body = data[1]
+    nodes = body.get('nodes') or {}
+    reactions = body.get('reactions') or {}
+    # Metabolite node -> reaction bigg_ids that touch it.
+    holders = defaultdict(set)
+    rx_parts = {}  # rid -> (mid_id, [met_ids])
+    for rx in reactions.values():
+        rid = rx.get('bigg_id') or ''
+        mid_id = None
+        mets = []
+        for seg in (rx.get('segments') or {}).values():
+            for nid in (seg.get('from_node_id'), seg.get('to_node_id')):
+                n = nodes.get(str(nid)) or nodes.get(nid) or {}
+                sid = str(nid)
+                if n.get('node_type') == 'midmarker':
+                    mid_id = sid
+                elif n.get('node_type') == 'metabolite' and 'x' in n:
+                    mets.append(sid)
+                    holders[sid].add(rid)
+        if mid_id is not None:
+            rx_parts[rid] = (mid_id, mets)
+    edge_lens = []
+    candidates = []  # (length, rid, mid_id, met_id, vertical)
+    for rid, (mid_id, mets) in rx_parts.items():
+        mid = nodes.get(mid_id) or {}
+        if 'x' not in mid:
+            continue
+        for met_id in mets:
+            met = nodes.get(met_id) or {}
+            if 'x' not in met:
+                continue
+            dx = float(met['x'] - mid['x']); dy = float(met['y'] - mid['y'])
+            length = float(math.hypot(dx, dy))
+            if length < 1e-6:
+                continue
+            edge_lens.append(length)
+            vertical, horizontal = ca._axis_aligned(dx, dy)
+            if not (vertical or horizontal):
+                continue
+            candidates.append((length, rid, mid_id, met_id, vertical))
+    if not candidates:
+        return dict(applied=False, shortened=0)
+    if max_gap is None:
+        med = float(np.median(edge_lens)) if edge_lens else 150.0
+        max_gap = max(med * 2.2, float(spacing or med) * 1.5, 180.0)
+    # Extreme empty columns only — milder thresholds were tilting axis share and
+    # splitting curated structures via follow-up arm pulls.
+    min_len = float(max_gap) * 3.0
+    candidates = [c for c in candidates if c[0] >= min_len]
+    if not candidates:
+        return dict(applied=False, shortened=0, max_gap=round(float(max_gap), 2),
+                    min_len=round(min_len, 1))
+    # Corridor emptiness uses all mid+met points.
+    cloud = {str(nid): [float(n['x']), float(n['y'])]
+             for nid, n in nodes.items()
+             if n.get('node_type') in ('metabolite', 'midmarker') and 'x' in n}
+    shortened = 0
+    removed = 0.0
+    moved = set()
+    max_shorten = 2
+    candidates.sort(reverse=True)
+    for length, rid, mid_id, met_id, vertical in candidates:
+        if shortened >= max_shorten:
+            break
+        mid = nodes.get(mid_id); met = nodes.get(met_id)
+        if mid is None or met is None or 'x' not in mid or 'x' not in met:
+            continue
+        a = np.array([mid['x'], mid['y']], float)
+        b = np.array([met['x'], met['y']], float)
+        length = float(np.hypot(*(a - b)))
+        if length < min_len:
+            continue
+        # Middle-span emptiness (ignore endpoint-local chemistry).
+        lo, hi = np.minimum(a, b), np.maximum(a, b)
+        span = float((hi[1] - lo[1]) if vertical else (hi[0] - lo[0]))
+        pad = max(span * 0.12, float(max_gap) * 0.5, 40.0)
+        cx, cy = 0.5 * (a[0] + b[0]), 0.5 * (a[1] + b[1])
+        band = 18.0 + 0.5 * (abs(a[0] - b[0]) if vertical else abs(a[1] - b[1]))
+        blocked = False
+        for k, xy in cloud.items():
+            if k in (mid_id, met_id):
+                continue
+            p = np.asarray(xy, float)
+            if vertical:
+                if abs(p[0] - cx) > band:
+                    continue
+                if lo[1] + pad < p[1] < hi[1] - pad:
+                    blocked = True; break
+            else:
+                if abs(p[1] - cy) > band:
+                    continue
+                if lo[0] + pad < p[0] < hi[0] - pad:
+                    blocked = True; break
+        if blocked:
+            continue
+        shared = len(holders.get(met_id, ())) > 1
+        if shared and not vertical:
+            # Horizontal shared corridors are often inter-block metabolic links;
+            # collapsing them splits structures and costs continuity.
+            continue
+        if shared:
+            # Translate the whole reaction unit toward the shared pool: mid + every
+            # other metabolite on this reaction (including shared _e/_p partners).
+            # Companion EX/uptake reactions that only hold those moved partners are
+            # dragged by the same delta so their spokes stay short.
+            # Leave a little more than max_gap so the mid does not dive into the
+            # dense chemistry around the shared pool (extra spoke crossings).
+            target_len = max(float(max_gap) * 1.35, 320.0)
+            target_len = min(target_len, length - 1.0)
+            target = b + (a - b) * (target_len / length)
+            delta = target - a
+            move_ids = {mid_id}
+            partner_shared = []
+            for sid in rx_parts[rid][1]:
+                if sid == met_id:
+                    continue
+                move_ids.add(sid)
+                if len(holders.get(sid, ())) > 1:
+                    partner_shared.append(sid)
+            for sid in partner_shared:
+                for other_rid in holders.get(sid, ()):
+                    if other_rid == rid or other_rid not in rx_parts:
+                        continue
+                    omid, omets = rx_parts[other_rid]
+                    # Simple EX/uptake companions only (≤3 metabolite heads).
+                    if len(omets) > 3:
+                        continue
+                    move_ids.add(omid)
+                    for o in omets:
+                        if o != met_id:
+                            move_ids.add(o)
+            for sid in move_ids:
+                n = nodes.get(sid)
+                if n is None or 'x' not in n:
+                    continue
+                ox, oy = float(n['x']), float(n['y'])
+                n['x'] = ox + float(delta[0]); n['y'] = oy + float(delta[1])
+                if 'label_x' in n:
+                    n['label_x'] = float(n.get('label_x', ox) + delta[0])
+                    n['label_y'] = float(n.get('label_y', oy) + delta[1])
+                cloud[sid] = [n['x'], n['y']]
+                moved.add(sid)
+            # Keep reaction labels on moved midmarkers.
+            for r in reactions.values():
+                if r.get('bigg_id') in (rid,) or (
+                        r.get('bigg_id') and rx_parts.get(r.get('bigg_id'), (None,))[0] in move_ids):
+                    mid_moved = rx_parts.get(r.get('bigg_id'), (None,))[0]
+                    if mid_moved in move_ids and 'label_x' in r:
+                        r['label_x'] = float(nodes[mid_moved]['x'])
+                        r['label_y'] = float(nodes[mid_moved]['y'])
+            removed += length - target_len
+            shortened += 1
+        else:
+            # Private met: slide it toward the mid.
+            target = a + (b - a) * (float(max_gap) / length)
+            ox, oy = float(met['x']), float(met['y'])
+            met['x'], met['y'] = float(target[0]), float(target[1])
+            if 'label_x' in met:
+                met['label_x'] = float(met.get('label_x', ox) + (met['x'] - ox))
+                met['label_y'] = float(met.get('label_y', oy) + (met['y'] - oy))
+            cloud[met_id] = [met['x'], met['y']]
+            moved.add(met_id)
+            removed += length - float(max_gap)
+            shortened += 1
+    for rx in reactions.values():
+        for seg in (rx.get('segments') or {}).values():
+            if str(seg.get('from_node_id')) in moved or str(seg.get('to_node_id')) in moved:
+                seg['b1'] = None
+                seg['b2'] = None
+    return dict(applied=shortened > 0, shortened=shortened,
+                length_removed=round(removed, 2), max_gap=round(float(max_gap), 2),
+                min_len=round(min_len, 1), moved_nodes=len(moved))
 
 
 def _link_key(a, b):

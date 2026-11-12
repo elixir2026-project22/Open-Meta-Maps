@@ -1,4 +1,6 @@
 """Translation-only curated axes + whole-block relocate_sub."""
+import math
+
 import numpy as np
 
 import curated_axes as CA
@@ -256,6 +258,19 @@ def test_compress_empty_axis_edges_shortens_empty_corridor():
     assert abs(cloud['m:top'][1] - cloud['r:V'][1]) <= 150.0 + 1e-6
     # Side column untouched.
     assert cloud['r:S3'][1] == 800.0
+
+
+def test_compress_empty_axis_edges_accepts_near_vertical_drift():
+    # BiGG columns often have a few px of X drift (MALt2 was ~11 px); still compress.
+    cloud = {
+        'r:V': [0.0, 0.0], 'm:top': [11.0, 1600.0],
+        'r:S': [400.0, 0.0], 'r:S2': [400.0, 800.0], 'r:S3': [400.0, 1600.0],
+    }
+    edges = [('r:V', 'm:top')]
+    out = CA.compress_empty_axis_edges(cloud, edges, max_gap=180.0)
+    assert out['applied'] and out['shortened'] == 1
+    assert math.hypot(cloud['m:top'][0] - cloud['r:V'][0],
+                      cloud['m:top'][1] - cloud['r:V'][1]) <= 180.0 + 1e-6
 
 
 def test_compress_padding_joint_exposes_breaks():
