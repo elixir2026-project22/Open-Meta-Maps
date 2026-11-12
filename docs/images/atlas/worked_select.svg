@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 310" width="720" height="310" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif">
+<rect width="720" height="310" fill="#fff"/>
+<text x="20" y="24" font-size="13" font-weight="700" fill="#111">Compact selection among overlapping candidates</text>
+<rect x="40" y="44" width="160" height="160" rx="8" fill="#f5f5f5" stroke="#9ca3af" stroke-width="1.5"/>
+<line x1="62.40" y1="78.50" x2="62.40" y2="91.43" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="62.40" y1="78.50" x2="62.40" y2="68.78" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="83.53" y1="68.78" x2="62.40" y2="68.78" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="83.53" y1="68.78" x2="101.02" y2="68.78" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="116.87" y1="68.78" x2="101.02" y2="68.78" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="116.87" y1="68.78" x2="132.55" y2="68.78" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="148.24" y1="68.78" x2="164.74" y2="68.78" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="148.24" y1="68.78" x2="132.55" y2="68.78" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="159.07" y1="79.53" x2="164.74" y2="68.78" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="159.07" y1="79.53" x2="151.70" y2="91.27" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="170.82" y1="79.86" x2="164.74" y2="68.78" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="170.82" y1="79.86" x2="177.35" y2="91.12" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="177.60" y1="108.26" x2="62.59" y2="179.22" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="177.60" y1="108.26" x2="177.35" y2="91.12" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="177.60" y1="108.26" x2="152.22" y2="119.28" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="177.60" y1="108.26" x2="151.70" y2="91.27" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="109.42" y1="91.40" x2="62.59" y2="179.22" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="109.42" y1="91.40" x2="121.74" y2="107.05" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="109.42" y1="91.40" x2="151.70" y2="91.27" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="109.42" y1="91.40" x2="62.40" y2="91.43" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<circle cx="62.40" cy="91.43" r="1.9" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="62.40" cy="68.78" r="1.9" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="101.02" cy="68.78" r="1.9" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="132.55" cy="68.78" r="1.9" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="164.74" cy="68.78" r="1.9" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="151.70" cy="91.27" r="1.9" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="177.35" cy="91.12" r="1.9" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="152.22" cy="119.28" r="1.9" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="121.74" cy="107.05" r="1.9" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="62.59" cy="179.22" r="1.9" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="62.40" cy="78.50" r="1.9" fill="#111111"/>
+<circle cx="83.53" cy="68.78" r="1.9" fill="#111111"/>
+<circle cx="116.87" cy="68.78" r="1.9" fill="#111111"/>
+<circle cx="148.24" cy="68.78" r="1.9" fill="#111111"/>
+<circle cx="159.07" cy="79.53" r="1.9" fill="#111111"/>
+<circle cx="170.82" cy="79.86" r="1.9" fill="#111111"/>
+<circle cx="177.60" cy="108.26" r="1.9" fill="#111111"/>
+<circle cx="109.42" cy="91.40" r="1.9" fill="#111111"/>
+<text x="120.0" y="220" text-anchor="middle" font-size="11" font-weight="600" fill="#111">Lower density (dropped)</text>
+<text x="120.0" y="236" text-anchor="middle" font-size="10" fill="#4b5563">iMM904.Central carbon metab…</text>
+<text x="120.0" y="250" text-anchor="middle" font-size="10" fill="#6b7280">8 reactions · density 3.42</text>
+<rect x="300" y="44" width="160" height="160" rx="8" fill="#e7f4ee" stroke="#3f8f6b" stroke-width="1.5"/>
+<line x1="398.58" y1="84.73" x2="415.30" y2="84.73" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="398.58" y1="84.73" x2="387.60" y2="84.73" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="322.40" y1="95.71" x2="322.40" y2="108.38" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="322.40" y1="95.71" x2="322.40" y2="84.73" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="406.01" y1="97.40" x2="415.30" y2="84.73" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="406.01" y1="97.40" x2="397.57" y2="109.22" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="362.10" y1="124.42" x2="397.57" y2="109.22" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="362.10" y1="124.42" x2="397.57" y2="162.85" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="362.10" y1="124.42" x2="322.40" y2="108.38" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="362.10" y1="124.42" x2="322.40" y2="163.27" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="427.97" y1="98.24" x2="415.30" y2="84.73" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="427.97" y1="98.24" x2="437.60" y2="109.22" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="343.68" y1="84.73" x2="322.40" y2="84.73" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="343.68" y1="84.73" x2="360.57" y2="84.73" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="416.99" y1="121.04" x2="397.57" y2="109.22" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="416.99" y1="121.04" x2="432.53" y2="135.40" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="416.99" y1="121.04" x2="400.78" y2="135.40" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="416.99" y1="121.04" x2="437.60" y2="109.22" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="371.55" y1="84.73" x2="387.60" y2="84.73" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="371.55" y1="84.73" x2="360.57" y2="84.73" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<circle cx="387.60" cy="84.73" r="1.9" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="415.30" cy="84.73" r="1.9" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="322.40" cy="84.73" r="1.9" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="322.40" cy="108.38" r="1.9" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="432.53" cy="135.40" r="1.9" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="400.78" cy="135.40" r="1.9" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="397.57" cy="162.85" r="1.9" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="397.57" cy="109.22" r="1.9" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="322.40" cy="163.27" r="1.9" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="437.60" cy="109.22" r="1.9" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="360.57" cy="84.73" r="1.9" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="398.58" cy="84.73" r="1.9" fill="#111111"/>
+<circle cx="322.40" cy="95.71" r="1.9" fill="#111111"/>
+<circle cx="406.01" cy="97.40" r="1.9" fill="#111111"/>
+<circle cx="362.10" cy="124.42" r="1.9" fill="#111111"/>
+<circle cx="427.97" cy="98.24" r="1.9" fill="#111111"/>
+<circle cx="343.68" cy="84.73" r="1.9" fill="#111111"/>
+<circle cx="416.99" cy="121.04" r="1.9" fill="#111111"/>
+<circle cx="371.55" cy="84.73" r="1.9" fill="#111111"/>
+<text x="380.0" y="220" text-anchor="middle" font-size="11" font-weight="600" fill="#111">Higher density (kept)</text>
+<text x="380.0" y="236" text-anchor="middle" font-size="10" fill="#4b5563">e_coli_core.Core metabolism</text>
+<text x="380.0" y="250" text-anchor="middle" font-size="10" fill="#6b7280">8 reactions · density 4.49</text>
+<path d="M250 124 L300 124 L300 116 L318 128 L300 140 L300 132 L250 132 Z" fill="#6b7280"/>
+<text x="20" y="294" font-size="11" fill="#4b5563">Same source and identical reaction set; coverage still ranks first. Density = matched nodes / bounding-box area.</text>
+</svg>

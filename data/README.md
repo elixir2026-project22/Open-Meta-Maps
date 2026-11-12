@@ -1,20 +1,20 @@
 # Data
 
-Everything in this directory is read by the tool at run time. The Atlas (the structure database) is built from curated community maps; sources, versions and licences are in [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md) and [`docs/licensing_audit.md`](../docs/licensing_audit.md). **Authoritative module counts:** [`atlas_registry.json`](atlas_registry.json) (About page: `python3 layout_atlas/navigation.py`).
+Everything in this directory is read by the tool at run time. The Atlas (the structure database) is built from curated community maps; sources, versions and licences are in [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md) and [`docs/licensing_audit.md`](../docs/licensing_audit.md). **Authoritative module counts:** [`atlas_registry.json`](atlas_registry.json) (About page: `python3 layout_atlas/navigation.py`). Dedup / overlap stats and figures: `PYTHONPATH=layout_atlas python3 tools/atlas_module_figures.py all`.
 
 ## In this repository
 
 | Path | Content |
 |---|---|
-| `extensions/human_maps/` | Human-maps modules (CC BY 4.0; 8,540 modules from 130 official Escher JSON maps). |
+| `extensions/human_maps/` | Human-maps modules (CC BY 4.0; 4,690 modules from 130 official Escher JSON maps; Stage B recut). |
 | `extensions/brenda/` | BRENDA pathway modules (CC BY 4.0; 11,703 modules). Loaded with the default Atlas; layout provenance possibly automatic. Source SVG under `references/brenda/` (not tracked). |
-| `extensions/wikipathways_geometry/` | WikiPathways geometry-only windows (CC0; 29,673 modules from release 20261110). Loaded by default; kept out of `open_core.sqlite` for size. |
-| `extensions/metabolismregulation/` | Metabolism Regulation gallery SBGN-ML modules (CC BY 4.0; hand-drawn). Loaded by default via `layout_atlas/sbgn.py`. Raw `.sbgn` under `source_inputs/raw/metabolismregulation/`. |
-| `extensions/panther/` | PANTHER Pathway CellDesigner modules (CC BY 4.0; 8 maps / 238 modules). Labels via `identity_labels`; raw XML under `source_inputs/raw/panther/`. |
-| `extensions/ich360/` | iCH360 custom Escher modules (MIT; 10 maps / 858 modules; `compressed_map.json` excluded). Raw JSON under `source_inputs/raw/ich360/`. |
-| `open_core.sqlite` | the open-core Atlas (schema v1 via `meta.schema_version`): **17,697** modules and **89,598** reactions (Escher 13,047; Reactome 3,405; WikiPathways semantic 1,245; source label `escher`). Default extensions under `data/extensions/` (BRENDA, Human-maps, WikiPathways geometry-only, Metabolism Regulation, PANTHER, iCH360) bring the default load to **69,132** modules — see `atlas_registry.json`. Modules store core nodes, appendages, coordinates, paths, reactions and ports as compressed JSON (read with `database.unpack`). On first run it is copied to `atlas.sqlite`, which is the file the tool reads |
-| `atlas_registry.json` | machine-readable build/registry summary (counts, licences, input manifest and source-registry hashes); rebuilt by `layout_atlas/atlas_registry.py`; single source for counts quoted in README / About / docs |
-| `source_inputs/` | source data used to build the Atlas: `raw/escher/` (original Escher map JSON), `raw/wp/` (pinned WikiPathways GPML (release 20261110)), `module_observations.json.gz` and `map_observations.json.gz` (observations with original identifiers, families, geometry and provenance chains), `archives/` and `terms/` (source packages and licence snapshots), `origin.json` and `source_registry.json` (versions and hashes) |
+| `extensions/wikipathways_geometry/` | WikiPathways geometry-only windows (CC0; 15,611 modules from release 20261110; Stage B recut). Loaded by default; kept out of `open_core.sqlite` for size. |
+| `extensions/metabolismregulation/` | Metabolism Regulation gallery SBGN-ML modules (CC BY 4.0; 229 modules). Loaded by default via `layout_atlas/sbgn.py`. Raw `.sbgn` under `source_inputs/raw/metabolismregulation/`. |
+| `extensions/panther/` | PANTHER Pathway CellDesigner modules (CC BY 4.0; 8 maps / 138 modules). Labels via `identity_labels`; raw XML under `source_inputs/raw/panther/`. |
+| `extensions/ich360/` | iCH360 custom Escher modules (MIT; 10 maps / 436 modules). Raw JSON under `source_inputs/raw/ich360/`. |
+| `open_core.sqlite` | the open-core Atlas (schema v1 via `meta.schema_version`): **15,527** modules and **75,279** reactions (Escher 13,047 via in-repo `escher_community_windows`; Reactome 1,811; WikiPathways semantic 669). Default extensions under `data/extensions/` bring the default load to **48,334** modules — see `atlas_registry.json`. Modules store core nodes, appendages, coordinates, paths, reactions, ports and an `extraction` provenance block as compressed JSON (read with `database.unpack`). On first run it is copied to `atlas.sqlite`, which is the file the tool reads |
+| `atlas_registry.json` | machine-readable build/registry summary (counts, licences, per-source extraction methods, input manifest and source-registry hashes); rebuilt by `layout_atlas/atlas_registry.py`; single source for counts quoted in README / About / docs |
+| `source_inputs/` | source data used to build the Atlas: `raw/escher/` (original Escher map JSON), `raw/wp/` (pinned WikiPathways GPML (release 20261110)), `raw/ich360/` and other raw inputs, `crosswalks/` (e.g. Human-GEM reaction id remap), `module_observations.json.gz` and `map_observations.json.gz` (legacy observations; Escher open-core is rebuilt from the in-repo cutter), `archives/` and `terms/` (source packages and licence snapshots), `origin.json` and `source_registry.json` (versions, hashes, extraction methods) |
 | `input_manifest.json`, `acquisition.json` | SHA-256 of the required inputs and how they were obtained |
 | `rhea/` | Rhea release 143 reactions, directions and identity mappings (CC BY 4.0, copyright statement kept) |
 | `reactome/` | Reactome v97 pathway diagrams and graphs |
@@ -26,14 +26,15 @@ Everything in this directory is read by the tool at run time. The Atlas (the str
 | `identifier_bridge.json` | BiGG metabolite → ChEBI and BiGG reaction → EC tables, each entry with the models it was found in (built by `tools/build_identifier_bridge.py`) |
 | `packages.json` | manifest of the optional data packages |
 
-The number of module instances or source files is not the number of independent curated drawings: several modules can come from the same map.
+Several modules can come from the same source map. Totals in README / About count cut windows; unique-after-dedup counts are in `docs/images/atlas/atlas_overlap.json`.
 
-## Not in this repository: optional data packages
+## Optional data packages
 
+Default Atlas extensions (BRENDA, Human-maps, WikiPathways geometry, Metabolism Regulation, PANTHER, iCH360) ship in-tree. The optional `atlas-full` package is listed in `packages.json`.
 
 ```sh
 python3 project.py data list
 python3 project.py data fetch atlas-full
 ```
 
-Details and terms: [`docs/data_packages.md`](../docs/data_packages.md). BRENDA and Human-maps ship as default extensions in-tree; a normal run needs no optional package. Atlas provenance/schema checks: `python3 layout_atlas/test_atlas_provenance.py`.
+Details and terms: [`docs/data_packages.md`](../docs/data_packages.md). Atlas provenance/schema checks: `python3 layout_atlas/test_atlas_provenance.py`.

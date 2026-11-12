@@ -1,0 +1,401 @@
+{
+  "also_in_examples": [
+    {
+      "module_ids": [
+        "01070b10788a8f1a9f143f03",
+        "a0bbeb5d9af7c70fda208610"
+      ],
+      "n_reactions": 4,
+      "sources": [
+        "escher",
+        "ich360"
+      ]
+    },
+    {
+      "module_ids": [
+        "0145abe5757d9cccc0dad629",
+        "9a04441f89f3730118b87388",
+        "a39b24e97fbae7d409e37c83",
+        "3aebece30e51e95b81106d00"
+      ],
+      "n_reactions": 4,
+      "sources": [
+        "escher",
+        "ich360"
+      ]
+    },
+    {
+      "module_ids": [
+        "035df35b5603b485d70f46ae",
+        "c525d9dfdd99b8c0da22eacb"
+      ],
+      "n_reactions": 4,
+      "sources": [
+        "escher",
+        "human_maps"
+      ]
+    },
+    {
+      "module_ids": [
+        "0c8efb6591b69f2046bae69e",
+        "7a1cecb393ffdb65dfeb3621",
+        "f96609c9c9bb6f8311fda498"
+      ],
+      "n_reactions": 4,
+      "sources": [
+        "escher",
+        "human_maps"
+      ]
+    },
+    {
+      "module_ids": [
+        "0ee12fcc2d4f8cc8a2c8f5e9",
+        "0ba179f52b04b94484a88102"
+      ],
+      "n_reactions": 8,
+      "sources": [
+        "escher",
+        "human_maps"
+      ]
+    },
+    {
+      "module_ids": [
+        "16e97d4cce1d32c904d0e787",
+        "28ec4ae37a14867157948469"
+      ],
+      "n_reactions": 4,
+      "sources": [
+        "escher",
+        "human_maps"
+      ]
+    },
+    {
+      "module_ids": [
+        "1932af48a6f93ae0d2c51aa0",
+        "365f0ad61151e2e453a1f004",
+        "e61f518722f0129920c868ea",
+        "83e51f57185c940bf152bf03"
+      ],
+      "n_reactions": 4,
+      "sources": [
+        "escher",
+        "ich360"
+      ]
+    },
+    {
+      "module_ids": [
+        "194aac5231d0ce26bd7f9ae5",
+        "8a2c8c88b5d34adf023a79be",
+        "aafb05edd7683805291511a5",
+        "615d99672fa93df83dd76975"
+      ],
+      "n_reactions": 8,
+      "sources": [
+        "escher",
+        "human_maps"
+      ]
+    },
+    {
+      "module_ids": [
+        "1ec5139f7c5c10f2c5e0978e",
+        "0cfe3f1ed5f3d5af932a6d7a"
+      ],
+      "n_reactions": 4,
+      "sources": [
+        "escher",
+        "ich360"
+      ]
+    },
+    {
+      "module_ids": [
+        "274c62743825e504fafaa77c",
+        "f3e6aaa31b618f807946dd0f"
+      ],
+      "n_reactions": 4,
+      "sources": [
+        "escher",
+        "ich360"
+      ]
+    },
+    {
+      "module_ids": [
+        "2f2639cedc04b5039e3913ec",
+        "70c65ff70545b198f2f7d364",
+        "d887dd77d2c82155e4034565"
+      ],
+      "n_reactions": 8,
+      "sources": [
+        "escher",
+        "human_maps"
+      ]
+    },
+    {
+      "module_ids": [
+        "307f4e2412684dc221da0686",
+        "ec3f7d915bbf3194a53d1a87"
+      ],
+      "n_reactions": 4,
+      "sources": [
+        "escher",
+        "human_maps"
+      ]
+    },
+    {
+      "module_ids": [
+        "30aba367c6a4f3bde9a0dc8f",
+        "7cb2eca4d72c527909c298f6"
+      ],
+      "n_reactions": 4,
+      "sources": [
+        "escher",
+        "ich360"
+      ]
+    },
+    {
+      "module_ids": [
+        "314b6816bb042f9679c26ac0",
+        "e0640f4fa4c9bc991cafcf61",
+        "e8b5560131047edff90a40c0",
+        "ba199ffb31e6a301f667b69f"
+      ],
+      "n_reactions": 4,
+      "sources": [
+        "escher",
+        "ich360"
+      ]
+    },
+    {
+      "module_ids": [
+        "36f4b0055fe7d783e3ce625e",
+        "423300a4db112f59b8c2febc",
+        "8280f345c59965e40c742982",
+        "91201b1906f01eb3e586f43d"
+      ],
+      "n_reactions": 8,
+      "sources": [
+        "escher",
+        "human_maps"
+      ]
+    },
+    {
+      "module_ids": [
+        "43c906183821d683e2660aee",
+        "c69d9d36a48841c28fbd8abe",
+        "d3d3f944d594a0706f65189d"
+      ],
+      "n_reactions": 8,
+      "sources": [
+        "escher",
+        "ich360"
+      ]
+    },
+    {
+      "module_ids": [
+        "48e8d9f2cfa0f5e4d7440981",
+        "e8826f26d23fb6aa109c7912"
+      ],
+      "n_reactions": 4,
+      "sources": [
+        "escher",
+        "human_maps"
+      ]
+    },
+    {
+      "module_ids": [
+        "4d55bae3d238d1724bd00380",
+        "9aa9e7a634fcbc3245fa597d"
+      ],
+      "n_reactions": 4,
+      "sources": [
+        "escher",
+        "human_maps"
+      ]
+    },
+    {
+      "module_ids": [
+        "7e4c1280c8de71e7ce48066f",
+        "e186710c44f67bff4abc3b5f"
+      ],
+      "n_reactions": 4,
+      "sources": [
+        "escher",
+        "human_maps"
+      ]
+    },
+    {
+      "module_ids": [
+        "85dab00116abed6e72b386f2",
+        "a4c15d361dd1d768c9b1c8dc",
+        "bac85ab89123bd0d0e606c78",
+        "b9d61ca3938818efc400ffeb"
+      ],
+      "n_reactions": 8,
+      "sources": [
+        "escher",
+        "human_maps"
+      ]
+    }
+  ],
+  "by_source": {
+    "brenda": {
+      "exact_duplicate_extra": 1790,
+      "modules": 11703,
+      "nested_in_larger": 11362,
+      "unique_reaction_sets": 9913
+    },
+    "escher": {
+      "exact_duplicate_extra": 2421,
+      "modules": 13047,
+      "nested_in_larger": 11500,
+      "unique_reaction_sets": 10626
+    },
+    "human_maps": {
+      "exact_duplicate_extra": 139,
+      "modules": 4690,
+      "nested_in_larger": 3170,
+      "unique_reaction_sets": 4551
+    },
+    "ich360": {
+      "exact_duplicate_extra": 10,
+      "modules": 436,
+      "nested_in_larger": 341,
+      "unique_reaction_sets": 426
+    },
+    "metabolismregulation": {
+      "exact_duplicate_extra": 57,
+      "modules": 229,
+      "nested_in_larger": 118,
+      "unique_reaction_sets": 172
+    },
+    "panther": {
+      "exact_duplicate_extra": 22,
+      "modules": 138,
+      "nested_in_larger": 104,
+      "unique_reaction_sets": 116
+    },
+    "reactome": {
+      "exact_duplicate_extra": 11,
+      "modules": 1811,
+      "nested_in_larger": 1240,
+      "unique_reaction_sets": 1800
+    },
+    "wikipathways": {
+      "exact_duplicate_extra": 104,
+      "modules": 669,
+      "nested_in_larger": 474,
+      "unique_reaction_sets": 565
+    },
+    "wikipathways_geometry": {
+      "exact_duplicate_extra": 7122,
+      "modules": 15611,
+      "nested_in_larger": 0,
+      "unique_reaction_sets": 8489
+    }
+  },
+  "cross_source_identical_sets": 552,
+  "dedup_key": "canonical reaction-id set; geometry_fingerprint for WikiPathways geometry-only",
+  "modules_nested_in_larger_global": 28587,
+  "pairwise_identical_sets": {
+    "brenda": {
+      "brenda": 0,
+      "escher": 0,
+      "human_maps": 0,
+      "ich360": 0,
+      "metabolismregulation": 0,
+      "panther": 0,
+      "reactome": 0,
+      "wikipathways": 0,
+      "wikipathways_geometry": 0
+    },
+    "escher": {
+      "brenda": 0,
+      "escher": 0,
+      "human_maps": 390,
+      "ich360": 154,
+      "metabolismregulation": 0,
+      "panther": 0,
+      "reactome": 0,
+      "wikipathways": 0,
+      "wikipathways_geometry": 0
+    },
+    "human_maps": {
+      "brenda": 0,
+      "escher": 390,
+      "human_maps": 0,
+      "ich360": 3,
+      "metabolismregulation": 0,
+      "panther": 0,
+      "reactome": 0,
+      "wikipathways": 1,
+      "wikipathways_geometry": 0
+    },
+    "ich360": {
+      "brenda": 0,
+      "escher": 154,
+      "human_maps": 3,
+      "ich360": 0,
+      "metabolismregulation": 0,
+      "panther": 0,
+      "reactome": 0,
+      "wikipathways": 0,
+      "wikipathways_geometry": 0
+    },
+    "metabolismregulation": {
+      "brenda": 0,
+      "escher": 0,
+      "human_maps": 0,
+      "ich360": 0,
+      "metabolismregulation": 0,
+      "panther": 0,
+      "reactome": 0,
+      "wikipathways": 10,
+      "wikipathways_geometry": 0
+    },
+    "panther": {
+      "brenda": 0,
+      "escher": 0,
+      "human_maps": 0,
+      "ich360": 0,
+      "metabolismregulation": 0,
+      "panther": 0,
+      "reactome": 0,
+      "wikipathways": 0,
+      "wikipathways_geometry": 0
+    },
+    "reactome": {
+      "brenda": 0,
+      "escher": 0,
+      "human_maps": 0,
+      "ich360": 0,
+      "metabolismregulation": 0,
+      "panther": 0,
+      "reactome": 0,
+      "wikipathways": 0,
+      "wikipathways_geometry": 0
+    },
+    "wikipathways": {
+      "brenda": 0,
+      "escher": 0,
+      "human_maps": 1,
+      "ich360": 0,
+      "metabolismregulation": 10,
+      "panther": 0,
+      "reactome": 0,
+      "wikipathways": 0,
+      "wikipathways_geometry": 0
+    },
+    "wikipathways_geometry": {
+      "brenda": 0,
+      "escher": 0,
+      "human_maps": 0,
+      "ich360": 0,
+      "metabolismregulation": 0,
+      "panther": 0,
+      "reactome": 0,
+      "wikipathways": 0,
+      "wikipathways_geometry": 0
+    }
+  },
+  "total_modules": 48334,
+  "unique_reaction_sets_global": 36103
+}

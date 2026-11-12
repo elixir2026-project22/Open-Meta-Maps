@@ -1,0 +1,754 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 670 878" width="670" height="878" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif">
+<title>Example Atlas modules</title>
+<rect width="670" height="878" fill="#ffffff"/>
+<rect x="18" y="18" width="148" height="148" rx="8" fill="#fafafa" stroke="#3f8f6b" stroke-width="1.2"/>
+<line x1="131.90" y1="130.63" x2="145.28" y2="130.63" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="131.90" y1="130.63" x2="121.87" y2="130.63" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="69.02" y1="130.63" x2="89.76" y2="130.63" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="69.02" y1="130.63" x2="52.97" y2="130.63" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="98.46" y1="130.63" x2="89.76" y2="130.63" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="98.46" y1="130.63" x2="113.17" y2="138.66" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="98.46" y1="130.63" x2="121.87" y2="130.63" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="45.14" y1="130.63" x2="38.72" y2="130.56" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="45.14" y1="130.63" x2="52.97" y2="130.63" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="117.19" y1="134.64" x2="121.87" y2="130.63" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="117.19" y1="134.64" x2="113.17" y2="138.66" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="78.39" y1="76.78" x2="72.37" y2="64.07" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="78.39" y1="76.78" x2="52.97" y2="130.63" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="78.39" y1="76.78" x2="83.74" y2="86.82" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="78.39" y1="76.78" x2="76.38" y2="48.69" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="64.34" y1="52.03" x2="72.37" y2="64.07" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="64.34" y1="52.03" x2="48.95" y2="64.74" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="64.34" y1="52.03" x2="49.62" y2="45.34" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="64.34" y1="52.03" x2="76.38" y2="48.69" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="55.91" y1="80.39" x2="72.37" y2="64.07" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="55.91" y1="80.39" x2="48.95" y2="64.74" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="55.91" y1="80.39" x2="52.97" y2="130.63" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="55.91" y1="80.39" x2="48.29" y2="77.45" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<circle cx="121.87" cy="130.63" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="145.28" cy="130.63" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="38.72" cy="130.56" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="52.97" cy="130.63" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="89.76" cy="130.63" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="113.17" cy="138.66" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="49.62" cy="45.34" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="48.29" cy="77.45" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="76.38" cy="48.69" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="48.95" cy="64.74" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="83.74" cy="86.82" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="72.37" cy="64.07" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="131.90" cy="130.63" r="2.0" fill="#111111"/>
+<circle cx="69.02" cy="130.63" r="2.0" fill="#111111"/>
+<circle cx="98.46" cy="130.63" r="2.0" fill="#111111"/>
+<circle cx="45.14" cy="130.63" r="2.0" fill="#111111"/>
+<circle cx="117.19" cy="134.64" r="2.0" fill="#111111"/>
+<circle cx="78.39" cy="76.78" r="2.0" fill="#111111"/>
+<circle cx="64.34" cy="52.03" r="2.0" fill="#111111"/>
+<circle cx="55.91" cy="80.39" r="2.0" fill="#111111"/>
+<text x="92.0" y="180" text-anchor="middle" font-size="11" font-weight="600" fill="#111">Escher</text>
+<text x="92.0" y="194" text-anchor="middle" font-size="10" fill="#374151">RECON1.Glycolysis TCA</text>
+<text x="92.0" y="206" text-anchor="middle" font-size="10" fill="#374151">PPP</text>
+<text x="92.0" y="218" text-anchor="middle" font-size="10" fill="#6b7280">8 reactions</text>
+<rect x="180" y="18" width="148" height="148" rx="8" fill="#fafafa" stroke="#3f8f6b" stroke-width="1.2"/>
+<line x1="300.81" y1="55.16" x2="295.04" y2="60.95" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="300.81" y1="55.16" x2="306.58" y2="49.39" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="262.65" y1="134.61" x2="294.36" y2="128.27" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="262.65" y1="134.61" x2="221.61" y2="118.07" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="261.72" y1="127.59" x2="294.36" y2="128.27" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="261.72" y1="127.59" x2="221.61" y2="118.07" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="200.72" y1="127.80" x2="221.61" y2="118.07" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="217.53" y1="103.79" x2="216.85" y2="87.47" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="217.53" y1="103.79" x2="221.61" y2="118.07" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="302.52" y1="72.51" x2="295.04" y2="60.95" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="302.52" y1="72.51" x2="307.28" y2="84.75" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="261.04" y1="51.36" x2="295.04" y2="60.95" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="261.04" y1="51.36" x2="228.41" y2="61.63" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="305.67" y1="107.32" x2="294.36" y2="128.27" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="305.67" y1="107.32" x2="307.28" y2="84.75" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<circle cx="294.36" cy="128.27" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="221.61" cy="118.07" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="216.85" cy="87.47" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="295.04" cy="60.95" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="307.28" cy="84.75" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="306.58" cy="49.39" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="228.41" cy="61.63" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="300.81" cy="55.16" r="2.0" fill="#111111"/>
+<circle cx="262.65" cy="134.61" r="2.0" fill="#111111"/>
+<circle cx="261.72" cy="127.59" r="2.0" fill="#111111"/>
+<circle cx="200.72" cy="127.80" r="2.0" fill="#111111"/>
+<circle cx="217.53" cy="103.79" r="2.0" fill="#111111"/>
+<circle cx="302.52" cy="72.51" r="2.0" fill="#111111"/>
+<circle cx="261.04" cy="51.36" r="2.0" fill="#111111"/>
+<circle cx="305.67" cy="107.32" r="2.0" fill="#111111"/>
+<text x="254.0" y="180" text-anchor="middle" font-size="11" font-weight="600" fill="#111">Escher</text>
+<text x="254.0" y="194" text-anchor="middle" font-size="10" fill="#374151">iMM904.Central carbon</text>
+<text x="254.0" y="206" text-anchor="middle" font-size="10" fill="#374151">metabolism</text>
+<text x="254.0" y="218" text-anchor="middle" font-size="10" fill="#6b7280">8 reactions</text>
+<rect x="342" y="18" width="148" height="148" rx="8" fill="#fafafa" stroke="#3f8f6b" stroke-width="1.2"/>
+<line x1="362.72" y1="123.76" x2="362.72" y2="119.58" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="362.72" y1="123.76" x2="362.72" y2="130.03" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="433.76" y1="114.98" x2="362.72" y2="130.03" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="433.76" y1="114.98" x2="433.76" y2="98.69" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="433.76" y1="81.97" x2="433.76" y2="88.24" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="433.76" y1="81.97" x2="433.76" y2="77.79" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="414.12" y1="67.34" x2="433.76" y2="67.34" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="414.12" y1="67.34" x2="398.24" y2="67.34" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="362.72" y1="113.31" x2="362.72" y2="119.58" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="362.72" y1="113.31" x2="362.72" y2="109.13" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="378.60" y1="67.34" x2="398.24" y2="67.34" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="378.60" y1="67.34" x2="362.72" y2="67.34" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="433.76" y1="58.15" x2="433.76" y2="67.34" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="433.76" y1="58.15" x2="433.76" y2="53.97" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="422.90" y1="98.69" x2="416.63" y2="98.69" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="422.90" y1="98.69" x2="433.76" y2="98.69" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="449.64" y1="67.34" x2="433.76" y2="67.34" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="449.64" y1="67.34" x2="469.28" y2="67.34" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="433.76" y1="92.42" x2="433.76" y2="98.69" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="433.76" y1="92.42" x2="433.76" y2="88.24" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="433.76" y1="71.52" x2="433.76" y2="67.34" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="433.76" y1="71.52" x2="433.76" y2="77.79" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="398.24" y1="109.13" x2="362.72" y2="119.58" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="398.24" y1="109.13" x2="398.24" y2="98.69" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<circle cx="398.24" cy="98.69" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="469.28" cy="67.34" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="362.72" cy="119.58" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="433.76" cy="67.34" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="416.63" cy="98.69" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="362.72" cy="109.13" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="362.72" cy="67.34" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="362.72" cy="130.03" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="398.24" cy="67.34" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="433.76" cy="53.97" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="433.76" cy="88.24" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="433.76" cy="77.79" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="433.76" cy="98.69" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="362.72" cy="123.76" r="2.0" fill="#111111"/>
+<circle cx="433.76" cy="114.98" r="2.0" fill="#111111"/>
+<circle cx="433.76" cy="81.97" r="2.0" fill="#111111"/>
+<circle cx="414.12" cy="67.34" r="2.0" fill="#111111"/>
+<circle cx="362.72" cy="113.31" r="2.0" fill="#111111"/>
+<circle cx="378.60" cy="67.34" r="2.0" fill="#111111"/>
+<circle cx="433.76" cy="58.15" r="2.0" fill="#111111"/>
+<circle cx="422.90" cy="98.69" r="2.0" fill="#111111"/>
+<circle cx="449.64" cy="67.34" r="2.0" fill="#111111"/>
+<circle cx="433.76" cy="92.42" r="2.0" fill="#111111"/>
+<circle cx="433.76" cy="71.52" r="2.0" fill="#111111"/>
+<circle cx="398.24" cy="109.13" r="2.0" fill="#111111"/>
+<text x="416.0" y="180" text-anchor="middle" font-size="11" font-weight="600" fill="#111">Escher</text>
+<text x="416.0" y="194" text-anchor="middle" font-size="10" fill="#374151">RECON1.LIPID_METABOLI…</text>
+<text x="416.0" y="206" text-anchor="middle" font-size="10" fill="#6b7280">12 reactions</text>
+<rect x="504" y="18" width="148" height="148" rx="8" fill="#fafafa" stroke="#4a6fa5" stroke-width="1.2"/>
+<line x1="578.22" y1="52.38" x2="566.53" y2="38.72" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="578.22" y1="52.38" x2="566.59" y2="67.38" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="577.33" y1="83.01" x2="566.59" y2="67.38" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="577.33" y1="83.01" x2="566.59" y2="91.52" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="577.46" y1="103.60" x2="566.59" y2="91.52" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="577.46" y1="103.60" x2="563.54" y2="114.65" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="578.48" y1="131.17" x2="563.54" y2="114.65" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="578.48" y1="131.17" x2="578.92" y2="145.28" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="554.97" y1="52.51" x2="566.59" y2="67.38" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="554.97" y1="52.51" x2="566.53" y2="38.72" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="555.86" y1="82.88" x2="566.59" y2="91.52" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="555.86" y1="82.88" x2="566.59" y2="67.38" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="556.36" y1="103.72" x2="563.54" y2="114.65" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="556.36" y1="103.72" x2="566.59" y2="91.52" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="592.96" y1="50.73" x2="566.53" y2="38.72" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="592.96" y1="50.73" x2="601.03" y2="42.60" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="592.96" y1="50.73" x2="593.28" y2="68.14" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="592.96" y1="50.73" x2="566.59" y2="67.38" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<circle cx="566.53" cy="38.72" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="566.59" cy="67.38" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="566.59" cy="91.52" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="563.54" cy="114.65" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="578.92" cy="145.28" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="593.28" cy="68.14" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="601.03" cy="42.60" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="578.22" cy="52.38" r="2.0" fill="#111111"/>
+<circle cx="577.33" cy="83.01" r="2.0" fill="#111111"/>
+<circle cx="577.46" cy="103.60" r="2.0" fill="#111111"/>
+<circle cx="578.48" cy="131.17" r="2.0" fill="#111111"/>
+<circle cx="554.97" cy="52.51" r="2.0" fill="#111111"/>
+<circle cx="555.86" cy="82.88" r="2.0" fill="#111111"/>
+<circle cx="556.36" cy="103.72" r="2.0" fill="#111111"/>
+<circle cx="592.96" cy="50.73" r="2.0" fill="#111111"/>
+<text x="578.0" y="180" text-anchor="middle" font-size="11" font-weight="600" fill="#111">Reactome</text>
+<text x="578.0" y="194" text-anchor="middle" font-size="10" fill="#374151">Glucose metabolism</text>
+<text x="578.0" y="206" text-anchor="middle" font-size="10" fill="#6b7280">8 reactions</text>
+<rect x="18" y="232" width="148" height="148" rx="8" fill="#fafafa" stroke="#4a6fa5" stroke-width="1.2"/>
+<line x1="40.03" y1="307.37" x2="84.20" y2="290.80" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="40.03" y1="307.37" x2="67.92" y2="316.17" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="40.03" y1="307.37" x2="38.72" y2="324.00" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="135.57" y1="329.31" x2="135.68" y2="313.77" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="135.57" y1="329.31" x2="128.08" y2="335.48" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="67.23" y1="280.17" x2="53.52" y2="276.52" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="67.23" y1="280.17" x2="67.40" y2="300.29" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="67.23" y1="280.17" x2="59.40" y2="286.92" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="115.57" y1="303.49" x2="135.68" y2="313.77" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="115.57" y1="303.49" x2="67.40" y2="300.29" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="115.57" y1="303.49" x2="67.92" y2="316.17" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="115.57" y1="303.49" x2="125.91" y2="299.49" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="57.63" y1="306.23" x2="57.92" y2="315.37" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="57.63" y1="306.23" x2="67.92" y2="316.17" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="57.63" y1="306.23" x2="57.86" y2="294.69" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="57.63" y1="306.23" x2="67.40" y2="300.29" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="139.57" y1="299.37" x2="135.68" y2="313.77" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="139.57" y1="299.37" x2="145.28" y2="314.00" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="139.57" y1="299.37" x2="125.91" y2="299.49" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="139.57" y1="299.37" x2="130.25" y2="295.26" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="61.52" y1="304.17" x2="57.86" y2="294.69" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="61.52" y1="304.17" x2="67.40" y2="300.29" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="61.52" y1="304.17" x2="57.92" y2="315.37" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="61.52" y1="304.17" x2="67.92" y2="316.17" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="84.03" y1="310.23" x2="67.92" y2="316.17" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="84.03" y1="310.23" x2="84.14" y2="324.51" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="84.03" y1="310.23" x2="84.20" y2="290.80" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="84.03" y1="310.23" x2="67.40" y2="300.29" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<circle cx="128.08" cy="335.48" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="53.52" cy="276.52" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="59.40" cy="286.92" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="135.68" cy="313.77" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="67.40" cy="300.29" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="125.91" cy="299.49" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="67.92" cy="316.17" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="38.72" cy="324.00" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="57.92" cy="315.37" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="57.86" cy="294.69" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="145.28" cy="314.00" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="130.25" cy="295.26" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="84.14" cy="324.51" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="84.20" cy="290.80" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="40.03" cy="307.37" r="2.0" fill="#111111"/>
+<circle cx="135.57" cy="329.31" r="2.0" fill="#111111"/>
+<circle cx="67.23" cy="280.17" r="2.0" fill="#111111"/>
+<circle cx="115.57" cy="303.49" r="2.0" fill="#111111"/>
+<circle cx="57.63" cy="306.23" r="2.0" fill="#111111"/>
+<circle cx="139.57" cy="299.37" r="2.0" fill="#111111"/>
+<circle cx="61.52" cy="304.17" r="2.0" fill="#111111"/>
+<circle cx="84.03" cy="310.23" r="2.0" fill="#111111"/>
+<text x="92.0" y="394" text-anchor="middle" font-size="11" font-weight="600" fill="#111">Reactome</text>
+<text x="92.0" y="408" text-anchor="middle" font-size="10" fill="#374151">Aspartate and</text>
+<text x="92.0" y="420" text-anchor="middle" font-size="10" fill="#374151">asparagine metabolism</text>
+<text x="92.0" y="432" text-anchor="middle" font-size="10" fill="#6b7280">8 reactions</text>
+<rect x="180" y="232" width="148" height="148" rx="8" fill="#fafafa" stroke="#4a6fa5" stroke-width="1.2"/>
+<line x1="218.13" y1="293.49" x2="241.34" y2="327.85" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="218.13" y1="293.49" x2="231.17" y2="303.29" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="218.13" y1="293.49" x2="217.98" y2="281.43" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="267.11" y1="309.32" x2="241.34" y2="327.85" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="267.11" y1="309.32" x2="274.12" y2="316.40" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="267.11" y1="309.32" x2="281.66" y2="294.09" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="280.98" y1="282.64" x2="281.66" y2="294.09" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="280.98" y1="282.64" x2="280.98" y2="269.98" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="280.98" y1="282.64" x2="293.79" y2="276.31" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="240.89" y1="338.25" x2="241.34" y2="327.85" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="240.89" y1="338.25" x2="241.34" y2="349.56" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="293.94" y1="308.26" x2="241.34" y2="327.85" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="293.94" y1="308.26" x2="274.12" y2="316.40" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="293.94" y1="308.26" x2="307.28" y2="293.79" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="307.05" y1="282.79" x2="307.28" y2="293.79" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="307.05" y1="282.79" x2="307.05" y2="269.68" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="307.05" y1="282.79" x2="293.79" y2="276.31" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="210.29" y1="310.07" x2="200.72" y2="302.76" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="210.29" y1="310.07" x2="201.32" y2="317.23" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="210.29" y1="310.07" x2="241.34" y2="327.85" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="273.44" y1="278.27" x2="281.66" y2="294.09" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="273.44" y1="278.27" x2="272.16" y2="262.44" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<circle cx="217.98" cy="281.43" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="231.17" cy="303.29" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="281.66" cy="294.09" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="274.12" cy="316.40" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="280.98" cy="269.98" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="293.79" cy="276.31" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="241.34" cy="349.56" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="307.28" cy="293.79" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="307.05" cy="269.68" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="272.16" cy="262.44" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="201.32" cy="317.23" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="200.72" cy="302.76" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="241.34" cy="327.85" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="218.13" cy="293.49" r="2.0" fill="#111111"/>
+<circle cx="267.11" cy="309.32" r="2.0" fill="#111111"/>
+<circle cx="280.98" cy="282.64" r="2.0" fill="#111111"/>
+<circle cx="240.89" cy="338.25" r="2.0" fill="#111111"/>
+<circle cx="293.94" cy="308.26" r="2.0" fill="#111111"/>
+<circle cx="307.05" cy="282.79" r="2.0" fill="#111111"/>
+<circle cx="210.29" cy="310.07" r="2.0" fill="#111111"/>
+<circle cx="273.44" cy="278.27" r="2.0" fill="#111111"/>
+<text x="254.0" y="394" text-anchor="middle" font-size="11" font-weight="600" fill="#111">Reactome</text>
+<text x="254.0" y="408" text-anchor="middle" font-size="10" fill="#374151">Arachidonate</text>
+<text x="254.0" y="420" text-anchor="middle" font-size="10" fill="#374151">metabolism</text>
+<text x="254.0" y="432" text-anchor="middle" font-size="10" fill="#6b7280">8 reactions</text>
+<rect x="342" y="232" width="148" height="148" rx="8" fill="#fafafa" stroke="#6a8f3f" stroke-width="1.2"/>
+<line x1="438.01" y1="359.28" x2="415.80" y2="359.28" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="438.01" y1="359.28" x2="459.18" y2="359.28" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="413.46" y1="346.85" x2="411.12" y2="334.42" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="413.46" y1="346.85" x2="415.80" y2="359.28" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="430.38" y1="299.07" x2="419.95" y2="286.88" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="430.38" y1="299.07" x2="436.13" y2="311.26" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="397.95" y1="276.99" x2="372.82" y2="279.44" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="397.95" y1="276.99" x2="419.94" y2="275.84" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="402.64" y1="281.86" x2="372.82" y2="279.44" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="402.64" y1="281.86" x2="419.95" y2="286.88" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="372.82" y1="266.08" x2="372.82" y2="252.72" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="372.82" y1="266.08" x2="372.82" y2="279.44" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="390.90" y1="322.10" x2="411.12" y2="334.42" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="390.90" y1="322.10" x2="380.06" y2="308.47" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="428.32" y1="323.50" x2="436.13" y2="311.26" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="428.32" y1="323.50" x2="411.12" y2="334.42" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<circle cx="411.12" cy="334.42" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="419.95" cy="286.88" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="419.94" cy="275.84" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="436.13" cy="311.26" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="380.06" cy="308.47" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="459.18" cy="359.28" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="372.82" cy="279.44" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="372.82" cy="252.72" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="415.80" cy="359.28" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="438.01" cy="359.28" r="2.0" fill="#111111"/>
+<circle cx="413.46" cy="346.85" r="2.0" fill="#111111"/>
+<circle cx="430.38" cy="299.07" r="2.0" fill="#111111"/>
+<circle cx="397.95" cy="276.99" r="2.0" fill="#111111"/>
+<circle cx="402.64" cy="281.86" r="2.0" fill="#111111"/>
+<circle cx="372.82" cy="266.08" r="2.0" fill="#111111"/>
+<circle cx="390.90" cy="322.10" r="2.0" fill="#111111"/>
+<circle cx="428.32" cy="323.50" r="2.0" fill="#111111"/>
+<text x="416.0" y="394" text-anchor="middle" font-size="11" font-weight="600" fill="#111">WikiPathways</text>
+<text x="416.0" y="408" text-anchor="middle" font-size="10" fill="#374151">Biomarkers for urea</text>
+<text x="416.0" y="420" text-anchor="middle" font-size="10" fill="#374151">cycle disorders</text>
+<text x="416.0" y="432" text-anchor="middle" font-size="10" fill="#6b7280">8 reactions</text>
+<rect x="504" y="232" width="148" height="148" rx="8" fill="#fafafa" stroke="#6a8f3f" stroke-width="1.2"/>
+<line x1="563.77" y1="290.10" x2="563.77" y2="281.84" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="563.77" y1="290.10" x2="563.77" y2="298.36" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="605.51" y1="290.10" x2="600.71" y2="298.36" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="605.51" y1="290.10" x2="600.71" y2="281.84" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="600.71" y1="290.10" x2="600.71" y2="281.84" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="600.71" y1="290.10" x2="600.71" y2="298.36" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="582.24" y1="281.84" x2="563.77" y2="281.84" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="582.24" y1="281.84" x2="600.71" y2="281.84" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="563.77" y1="276.07" x2="563.77" y2="281.84" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="563.77" y1="276.07" x2="563.77" y2="270.31" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="524.72" y1="320.02" x2="524.72" y2="312.57" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="524.72" y1="320.02" x2="524.72" y2="327.47" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="546.65" y1="305.47" x2="563.77" y2="298.36" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="546.65" y1="305.47" x2="524.72" y2="312.57" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="600.71" y1="305.47" x2="600.71" y2="298.36" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="600.71" y1="305.47" x2="600.71" y2="312.57" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="614.93" y1="312.57" x2="600.71" y2="312.57" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="614.93" y1="312.57" x2="631.28" y2="312.57" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="525.05" y1="284.91" x2="525.17" y2="270.17" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="525.05" y1="284.91" x2="524.93" y2="299.66" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="524.72" y1="334.65" x2="524.72" y2="327.47" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="524.72" y1="334.65" x2="524.72" y2="341.83" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="524.83" y1="306.12" x2="524.93" y2="299.66" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="524.83" y1="306.12" x2="524.72" y2="312.57" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<circle cx="631.28" cy="312.57" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="600.71" cy="298.36" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="563.77" cy="281.84" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="563.77" cy="270.31" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="524.72" cy="341.83" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="524.93" cy="299.66" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="524.72" cy="327.47" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="525.17" cy="270.17" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="524.72" cy="312.57" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="600.71" cy="281.84" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="600.71" cy="312.57" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="563.77" cy="298.36" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="563.77" cy="290.10" r="2.0" fill="#111111"/>
+<circle cx="605.51" cy="290.10" r="2.0" fill="#111111"/>
+<circle cx="600.71" cy="290.10" r="2.0" fill="#111111"/>
+<circle cx="582.24" cy="281.84" r="2.0" fill="#111111"/>
+<circle cx="563.77" cy="276.07" r="2.0" fill="#111111"/>
+<circle cx="524.72" cy="320.02" r="2.0" fill="#111111"/>
+<circle cx="546.65" cy="305.47" r="2.0" fill="#111111"/>
+<circle cx="600.71" cy="305.47" r="2.0" fill="#111111"/>
+<circle cx="614.93" cy="312.57" r="2.0" fill="#111111"/>
+<circle cx="525.05" cy="284.91" r="2.0" fill="#111111"/>
+<circle cx="524.72" cy="334.65" r="2.0" fill="#111111"/>
+<circle cx="524.83" cy="306.12" r="2.0" fill="#111111"/>
+<text x="578.0" y="394" text-anchor="middle" font-size="11" font-weight="600" fill="#111">WikiPathways</text>
+<text x="578.0" y="408" text-anchor="middle" font-size="10" fill="#374151">Biomarkers for</text>
+<text x="578.0" y="420" text-anchor="middle" font-size="10" fill="#374151">pyrimidine metabolism…</text>
+<text x="578.0" y="432" text-anchor="middle" font-size="10" fill="#6b7280">12 reactions</text>
+<rect x="18" y="446" width="148" height="148" rx="8" fill="#fafafa" stroke="#7a9a55" stroke-width="1.2"/>
+<line x1="92.36" y1="498.77" x2="145.28" y2="498.77" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="92.36" y1="498.77" x2="39.44" y2="498.77" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="92.36" y1="498.77" x2="39.44" y2="498.77" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="92.36" y1="498.77" x2="145.28" y2="498.77" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="92.00" y1="521.49" x2="145.28" y2="521.49" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="92.00" y1="521.49" x2="38.72" y2="521.49" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="92.00" y1="521.49" x2="38.72" y2="521.49" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="92.00" y1="521.49" x2="145.28" y2="521.49" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="39.44" y1="488.59" x2="39.44" y2="478.41" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="39.44" y1="488.59" x2="39.44" y2="498.77" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="39.08" y1="510.13" x2="39.44" y2="498.77" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="39.08" y1="510.13" x2="38.72" y2="521.49" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="38.72" y1="541.54" x2="38.72" y2="521.49" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="38.72" y1="541.54" x2="38.72" y2="561.59" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="92.36" y1="478.41" x2="39.44" y2="478.41" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="92.36" y1="478.41" x2="145.28" y2="478.41" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<circle cx="38.72" cy="561.59" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="39.44" cy="478.41" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="145.28" cy="498.77" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="145.28" cy="478.41" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="145.28" cy="521.49" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="38.72" cy="521.49" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="39.44" cy="498.77" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="92.36" cy="498.77" r="2.0" fill="#111111"/>
+<circle cx="92.36" cy="498.77" r="2.0" fill="#111111"/>
+<circle cx="92.00" cy="521.49" r="2.0" fill="#111111"/>
+<circle cx="92.00" cy="521.49" r="2.0" fill="#111111"/>
+<circle cx="39.44" cy="488.59" r="2.0" fill="#111111"/>
+<circle cx="39.08" cy="510.13" r="2.0" fill="#111111"/>
+<circle cx="38.72" cy="541.54" r="2.0" fill="#111111"/>
+<circle cx="92.36" cy="478.41" r="2.0" fill="#111111"/>
+<text x="92.0" y="608" text-anchor="middle" font-size="11" font-weight="600" fill="#111">WP geometry</text>
+<text x="92.0" y="622" text-anchor="middle" font-size="10" fill="#374151">7-oxo-C and 7-beta-HC</text>
+<text x="92.0" y="634" text-anchor="middle" font-size="10" fill="#374151">pathways</text>
+<text x="92.0" y="646" text-anchor="middle" font-size="10" fill="#6b7280">8 reactions</text>
+<rect x="180" y="446" width="148" height="148" rx="8" fill="#fafafa" stroke="#b07a45" stroke-width="1.2"/>
+<line x1="236.45" y1="509.49" x2="236.45" y2="528.37" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="236.45" y1="509.49" x2="236.45" y2="490.62" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="267.50" y1="516.62" x2="294.85" y2="528.37" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="267.50" y1="516.62" x2="236.45" y2="528.37" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="267.50" y1="516.62" x2="267.50" y2="507.80" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="257.17" y1="550.43" x2="236.45" y2="573.28" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="257.17" y1="550.43" x2="236.45" y2="528.37" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="257.17" y1="550.43" x2="265.46" y2="558.72" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="213.15" y1="560.36" x2="236.45" y2="573.28" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="213.15" y1="560.36" x2="236.45" y2="528.37" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="236.45" y1="549.04" x2="236.45" y2="573.28" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="236.45" y1="549.04" x2="236.45" y2="528.37" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="218.72" y1="478.59" x2="218.72" y2="466.72" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="218.72" y1="478.59" x2="236.45" y2="490.62" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="294.85" y1="509.49" x2="294.85" y2="490.62" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="294.85" y1="509.49" x2="294.85" y2="528.37" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="255.67" y1="478.59" x2="236.45" y2="490.62" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="255.67" y1="478.59" x2="255.67" y2="466.72" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<circle cx="255.67" cy="466.72" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="294.85" cy="490.62" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="236.45" cy="528.37" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="236.45" cy="490.62" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="218.72" cy="466.72" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="267.50" cy="507.80" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="294.85" cy="528.37" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="265.46" cy="558.72" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="236.45" cy="573.28" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="236.45" cy="509.49" r="2.0" fill="#111111"/>
+<circle cx="267.50" cy="516.62" r="2.0" fill="#111111"/>
+<circle cx="257.17" cy="550.43" r="2.0" fill="#111111"/>
+<circle cx="213.15" cy="560.36" r="2.0" fill="#111111"/>
+<circle cx="236.45" cy="549.04" r="2.0" fill="#111111"/>
+<circle cx="218.72" cy="478.59" r="2.0" fill="#111111"/>
+<circle cx="294.85" cy="509.49" r="2.0" fill="#111111"/>
+<circle cx="255.67" cy="478.59" r="2.0" fill="#111111"/>
+<text x="254.0" y="608" text-anchor="middle" font-size="11" font-weight="600" fill="#111">Human-maps</text>
+<text x="254.0" y="622" text-anchor="middle" font-size="10" fill="#374151">Glycolysis /</text>
+<text x="254.0" y="634" text-anchor="middle" font-size="10" fill="#374151">Gluconeogenesis…</text>
+<text x="254.0" y="646" text-anchor="middle" font-size="10" fill="#6b7280">8 reactions</text>
+<rect x="342" y="446" width="148" height="148" rx="8" fill="#fafafa" stroke="#b07a45" stroke-width="1.2"/>
+<line x1="382.21" y1="504.48" x2="398.47" y2="504.48" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="382.21" y1="504.48" x2="373.09" y2="499.65" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="382.21" y1="504.48" x2="362.72" y2="515.26" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="382.21" y1="515.26" x2="398.47" y2="504.48" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="382.21" y1="515.26" x2="373.09" y2="520.08" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="382.21" y1="515.26" x2="362.72" y2="515.26" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="417.88" y1="504.48" x2="422.70" y2="509.32" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="417.88" y1="504.48" x2="435.10" y2="504.48" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="417.88" y1="504.48" x2="398.47" y2="504.48" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="453.02" y1="504.48" x2="457.85" y2="509.31" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="453.02" y1="504.48" x2="435.10" y2="504.48" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="453.02" y1="504.48" x2="469.28" y2="504.48" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="362.72" y1="527.87" x2="362.72" y2="515.26" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="362.72" y1="527.87" x2="362.72" y2="540.35" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="434.72" y1="540.35" x2="449.23" y2="540.35" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="434.72" y1="540.35" x2="425.61" y2="535.52" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="434.72" y1="540.35" x2="419.22" y2="540.35" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="406.72" y1="540.35" x2="390.84" y2="540.35" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="406.72" y1="540.35" x2="419.22" y2="540.35" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="406.72" y1="540.35" x2="397.60" y2="535.52" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="378.10" y1="540.35" x2="368.98" y2="535.52" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="378.10" y1="540.35" x2="390.84" y2="540.35" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="378.10" y1="540.35" x2="362.72" y2="540.35" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<circle cx="449.23" cy="540.35" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="425.61" cy="535.52" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="419.22" cy="540.35" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="397.60" cy="535.52" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="390.84" cy="540.35" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="368.98" cy="535.52" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="398.47" cy="504.48" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="422.70" cy="509.32" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="435.10" cy="504.48" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="362.72" cy="515.26" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="373.09" cy="499.65" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="457.85" cy="509.31" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="469.28" cy="504.48" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="373.09" cy="520.08" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="362.72" cy="540.35" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="382.21" cy="504.48" r="2.0" fill="#111111"/>
+<circle cx="382.21" cy="515.26" r="2.0" fill="#111111"/>
+<circle cx="417.88" cy="504.48" r="2.0" fill="#111111"/>
+<circle cx="453.02" cy="504.48" r="2.0" fill="#111111"/>
+<circle cx="362.72" cy="527.87" r="2.0" fill="#111111"/>
+<circle cx="434.72" cy="540.35" r="2.0" fill="#111111"/>
+<circle cx="406.72" cy="540.35" r="2.0" fill="#111111"/>
+<circle cx="378.10" cy="540.35" r="2.0" fill="#111111"/>
+<text x="416.0" y="608" text-anchor="middle" font-size="11" font-weight="600" fill="#111">Human-maps</text>
+<text x="416.0" y="622" text-anchor="middle" font-size="10" fill="#374151">Cholesterol</text>
+<text x="416.0" y="634" text-anchor="middle" font-size="10" fill="#374151">biosynthesis 1 (Bloch…</text>
+<text x="416.0" y="646" text-anchor="middle" font-size="10" fill="#6b7280">8 reactions</text>
+<rect x="504" y="446" width="148" height="148" rx="8" fill="#fafafa" stroke="#5a6670" stroke-width="1.2"/>
+<line x1="585.99" y1="524.47" x2="595.05" y2="524.47" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="585.99" y1="524.47" x2="576.93" y2="524.47" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="585.99" y1="524.47" x2="591.42" y2="520.33" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="585.99" y1="524.47" x2="591.42" y2="528.61" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="533.78" y1="501.55" x2="539.21" y2="505.69" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="533.78" y1="501.55" x2="542.84" y2="501.55" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="533.78" y1="501.55" x2="524.72" y2="501.55" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="533.78" y1="501.55" x2="528.34" y2="497.41" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="551.89" y1="501.55" x2="542.84" y2="501.55" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="551.89" y1="501.55" x2="560.95" y2="501.55" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="551.89" y1="501.55" x2="546.46" y2="505.69" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="551.89" y1="501.55" x2="557.33" y2="505.69" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="604.11" y1="524.47" x2="595.05" y2="524.47" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="604.11" y1="524.47" x2="613.16" y2="524.47" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="604.11" y1="524.47" x2="609.54" y2="528.61" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="622.22" y1="524.47" x2="627.66" y2="528.61" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="622.22" y1="524.47" x2="631.28" y2="524.47" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="622.22" y1="524.47" x2="613.16" y2="524.47" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="622.22" y1="524.47" x2="616.79" y2="528.61" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="540.70" y1="533.53" x2="544.84" y2="538.96" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="540.70" y1="533.53" x2="540.70" y2="524.47" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="540.70" y1="533.53" x2="536.56" y2="528.09" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="540.70" y1="533.53" x2="548.98" y2="529.13" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="540.70" y1="533.53" x2="540.70" y2="542.59" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="549.76" y1="524.47" x2="542.84" y2="501.55" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="549.76" y1="524.47" x2="555.19" y2="528.61" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="549.76" y1="524.47" x2="558.81" y2="524.47" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="549.76" y1="524.47" x2="540.70" y2="524.47" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="567.87" y1="524.47" x2="576.93" y2="524.47" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="567.87" y1="524.47" x2="558.81" y2="524.47" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<circle cx="609.54" cy="528.61" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="613.16" cy="524.47" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="627.66" cy="528.61" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="616.79" cy="528.61" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="631.28" cy="524.47" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="540.70" cy="542.59" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="540.70" cy="524.47" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="544.84" cy="538.96" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="536.56" cy="528.09" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="548.98" cy="529.13" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="555.19" cy="528.61" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="558.81" cy="524.47" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="542.84" cy="501.55" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="576.93" cy="524.47" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="595.05" cy="524.47" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="591.42" cy="520.33" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="591.42" cy="528.61" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="539.21" cy="505.69" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="528.34" cy="497.41" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="524.72" cy="501.55" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="546.46" cy="505.69" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="557.33" cy="505.69" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="560.95" cy="501.55" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="585.99" cy="524.47" r="2.0" fill="#111111"/>
+<circle cx="533.78" cy="501.55" r="2.0" fill="#111111"/>
+<circle cx="551.89" cy="501.55" r="2.0" fill="#111111"/>
+<circle cx="604.11" cy="524.47" r="2.0" fill="#111111"/>
+<circle cx="622.22" cy="524.47" r="2.0" fill="#111111"/>
+<circle cx="540.70" cy="533.53" r="2.0" fill="#111111"/>
+<circle cx="549.76" cy="524.47" r="2.0" fill="#111111"/>
+<circle cx="567.87" cy="524.47" r="2.0" fill="#111111"/>
+<text x="578.0" y="608" text-anchor="middle" font-size="11" font-weight="600" fill="#111">iCH360</text>
+<text x="578.0" y="622" text-anchor="middle" font-size="10" fill="#374151">Amino-acid</text>
+<text x="578.0" y="634" text-anchor="middle" font-size="10" fill="#374151">biosynthesis</text>
+<text x="578.0" y="646" text-anchor="middle" font-size="10" fill="#6b7280">8 reactions</text>
+<rect x="18" y="660" width="148" height="148" rx="8" fill="#fafafa" stroke="#5a6670" stroke-width="1.2"/>
+<line x1="45.65" y1="727.94" x2="38.72" y2="727.94" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="45.65" y1="727.94" x2="52.59" y2="727.94" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="45.65" y1="727.94" x2="49.81" y2="724.77" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="45.65" y1="727.94" x2="41.49" y2="731.11" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="45.65" y1="727.94" x2="41.49" y2="724.77" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="59.52" y1="727.94" x2="63.68" y2="731.11" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="59.52" y1="727.94" x2="52.59" y2="727.94" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="59.52" y1="727.94" x2="66.45" y2="727.94" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="73.38" y1="727.94" x2="69.22" y2="731.11" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="73.38" y1="727.94" x2="78.89" y2="727.88" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="73.38" y1="727.94" x2="78.67" y2="724.27" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="73.38" y1="727.94" x2="66.45" y2="727.94" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="85.82" y1="727.88" x2="89.71" y2="730.03" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="85.82" y1="727.88" x2="92.75" y2="727.88" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="85.82" y1="727.88" x2="78.89" y2="727.88" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="92.75" y1="720.94" x2="95.10" y2="715.82" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="92.75" y1="720.94" x2="89.58" y2="725.10" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="92.75" y1="720.94" x2="92.75" y2="714.01" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="92.75" y1="720.94" x2="94.91" y2="725.10" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="92.75" y1="720.94" x2="92.75" y2="727.88" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="106.48" y1="713.67" x2="112.23" y2="717.84" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="106.48" y1="713.67" x2="92.75" y2="714.01" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="106.48" y1="713.67" x2="97.56" y2="717.23" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="106.48" y1="713.67" x2="116.71" y2="713.86" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="106.48" y1="713.67" x2="112.51" y2="710.62" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="106.48" y1="713.67" x2="114.57" y2="716.14" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="106.48" y1="713.67" x2="98.04" y2="710.59" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="106.48" y1="713.67" x2="100.57" y2="717.07" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="123.64" y1="713.86" x2="116.71" y2="713.86" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="123.64" y1="713.86" x2="119.48" y2="717.03" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="123.64" y1="713.86" x2="127.81" y2="710.04" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="123.64" y1="713.86" x2="130.17" y2="713.86" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="137.10" y1="713.86" x2="142.75" y2="709.22" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="137.10" y1="713.86" x2="145.28" y2="713.96" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="137.10" y1="713.86" x2="132.94" y2="717.03" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="137.10" y1="713.86" x2="130.17" y2="713.86" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="92.75" y1="734.81" x2="95.92" y2="738.97" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="92.75" y1="734.81" x2="95.72" y2="731.40" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="92.75" y1="734.81" x2="92.75" y2="741.74" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="92.75" y1="734.81" x2="92.75" y2="727.88" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="92.75" y1="734.81" x2="90.40" y2="731.33" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="92.75" y1="748.68" x2="92.75" y2="755.61" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="92.75" y1="748.68" x2="89.58" y2="752.83" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="92.75" y1="748.68" x2="92.75" y2="741.74" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="99.68" y1="755.61" x2="106.62" y2="755.61" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="99.68" y1="755.61" x2="92.75" y2="755.61" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="99.68" y1="755.61" x2="95.52" y2="758.78" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="113.55" y1="755.61" x2="106.62" y2="755.61" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="113.55" y1="755.61" x2="120.48" y2="755.61" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="113.55" y1="755.61" x2="117.71" y2="752.44" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<circle cx="38.72" cy="727.94" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="52.59" cy="727.94" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="49.81" cy="724.77" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="41.49" cy="724.77" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="41.49" cy="731.11" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="66.45" cy="727.94" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="63.68" cy="731.11" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="69.22" cy="731.11" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="78.89" cy="727.88" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="78.67" cy="724.27" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="89.71" cy="730.03" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="92.75" cy="727.88" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="89.58" cy="725.10" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="94.91" cy="725.10" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="95.10" cy="715.82" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="92.75" cy="714.01" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="114.57" cy="716.14" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="97.56" cy="717.23" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="98.04" cy="710.59" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="112.51" cy="710.62" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="116.71" cy="713.86" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="100.57" cy="717.07" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="112.23" cy="717.84" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="127.81" cy="710.04" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="119.48" cy="717.03" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="130.17" cy="713.86" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="142.75" cy="709.22" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="132.94" cy="717.03" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="145.28" cy="713.96" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="95.72" cy="731.40" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="92.75" cy="741.74" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="95.92" cy="738.97" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="90.40" cy="731.33" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="92.75" cy="755.61" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="89.58" cy="752.83" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="106.62" cy="755.61" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="95.52" cy="758.78" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="120.48" cy="755.61" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="117.71" cy="752.44" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="45.65" cy="727.94" r="2.0" fill="#111111"/>
+<circle cx="59.52" cy="727.94" r="2.0" fill="#111111"/>
+<circle cx="73.38" cy="727.94" r="2.0" fill="#111111"/>
+<circle cx="85.82" cy="727.88" r="2.0" fill="#111111"/>
+<circle cx="92.75" cy="720.94" r="2.0" fill="#111111"/>
+<circle cx="106.48" cy="713.67" r="2.0" fill="#111111"/>
+<circle cx="123.64" cy="713.86" r="2.0" fill="#111111"/>
+<circle cx="137.10" cy="713.86" r="2.0" fill="#111111"/>
+<circle cx="92.75" cy="734.81" r="2.0" fill="#111111"/>
+<circle cx="92.75" cy="748.68" r="2.0" fill="#111111"/>
+<circle cx="99.68" cy="755.61" r="2.0" fill="#111111"/>
+<circle cx="113.55" cy="755.61" r="2.0" fill="#111111"/>
+<text x="92.0" y="822" text-anchor="middle" font-size="11" font-weight="600" fill="#111">iCH360</text>
+<text x="92.0" y="836" text-anchor="middle" font-size="10" fill="#374151">Nucleotide</text>
+<text x="92.0" y="848" text-anchor="middle" font-size="10" fill="#374151">biosynthesis</text>
+<text x="92.0" y="860" text-anchor="middle" font-size="10" fill="#6b7280">12 reactions</text>
+<rect x="180" y="660" width="148" height="148" rx="8" fill="#fafafa" stroke="#8a6a9a" stroke-width="1.2"/>
+<line x1="258.11" y1="749.32" x2="273.87" y2="749.32" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="258.11" y1="749.32" x2="243.40" y2="749.32" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="228.60" y1="741.86" x2="200.72" y2="741.86" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="258.11" y1="749.32" x2="258.11" y2="727.48" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="258.11" y1="718.68" x2="258.11" y2="727.48" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="238.85" y1="727.48" x2="258.11" y2="727.48" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="238.85" y1="727.48" x2="226.99" y2="727.48" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="228.60" y1="741.86" x2="258.11" y2="727.48" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="228.93" y1="718.68" x2="215.01" y2="718.68" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="228.93" y1="718.68" x2="243.62" y2="718.68" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="258.11" y1="718.68" x2="243.62" y2="718.68" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="283.24" y1="718.68" x2="270.14" y2="718.68" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="258.11" y1="718.68" x2="270.14" y2="718.68" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="283.24" y1="718.68" x2="295.69" y2="718.68" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="307.28" y1="718.68" x2="295.69" y2="718.68" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="307.28" y1="718.68" x2="307.28" y2="724.67" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="307.28" y1="730.35" x2="307.28" y2="724.67" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="307.28" y1="730.35" x2="307.28" y2="736.53" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<circle cx="226.99" cy="727.48" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="238.85" cy="727.48" r="2.0" fill="#111111"/>
+<circle cx="258.11" cy="727.48" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="200.72" cy="741.86" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="243.40" cy="749.32" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="258.11" cy="749.32" r="2.0" fill="#111111"/>
+<circle cx="273.87" cy="749.32" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="307.28" cy="730.35" r="2.0" fill="#111111"/>
+<circle cx="307.28" cy="736.53" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="307.28" cy="724.67" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="307.28" cy="718.68" r="2.0" fill="#111111"/>
+<circle cx="295.69" cy="718.68" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="283.24" cy="718.68" r="2.0" fill="#111111"/>
+<circle cx="258.11" cy="718.68" r="2.0" fill="#111111"/>
+<circle cx="270.14" cy="718.68" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="243.62" cy="718.68" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="228.93" cy="718.68" r="2.0" fill="#111111"/>
+<circle cx="215.01" cy="718.68" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="228.60" cy="741.86" r="2.0" fill="#111111"/>
+<text x="254.0" y="822" text-anchor="middle" font-size="11" font-weight="600" fill="#111">BRENDA</text>
+<text x="254.0" y="836" text-anchor="middle" font-size="10" fill="#374151">(S)-reticuline</text>
+<text x="254.0" y="848" text-anchor="middle" font-size="10" fill="#374151">biosynthesis</text>
+<text x="254.0" y="860" text-anchor="middle" font-size="10" fill="#6b7280">8 reactions</text>
+<rect x="342" y="660" width="148" height="148" rx="8" fill="#fafafa" stroke="#3f8a8a" stroke-width="1.2"/>
+<line x1="364.95" y1="715.08" x2="364.95" y2="696.17" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="364.95" y1="715.08" x2="364.95" y2="734.00" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="367.17" y1="752.92" x2="364.95" y2="734.00" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="367.17" y1="752.92" x2="364.95" y2="771.83" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="362.72" y1="752.92" x2="364.95" y2="771.83" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="362.72" y1="752.92" x2="364.95" y2="734.00" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="417.11" y1="729.88" x2="364.95" y2="734.00" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="417.11" y1="729.88" x2="469.28" y2="734.00" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<circle cx="364.95" cy="715.08" r="2.0" fill="#111111"/>
+<circle cx="367.17" cy="752.92" r="2.0" fill="#111111"/>
+<circle cx="362.72" cy="752.92" r="2.0" fill="#111111"/>
+<circle cx="417.11" cy="729.88" r="2.0" fill="#111111"/>
+<circle cx="364.95" cy="771.83" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="469.28" cy="734.00" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="364.95" cy="696.17" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="364.95" cy="734.00" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<text x="416.0" y="822" text-anchor="middle" font-size="11" font-weight="600" fill="#111">Metabolism Reg.</text>
+<text x="416.0" y="836" text-anchor="middle" font-size="10" fill="#374151">Glycolysis</text>
+<text x="416.0" y="848" text-anchor="middle" font-size="10" fill="#6b7280">4 reactions</text>
+<rect x="504" y="660" width="148" height="148" rx="8" fill="#fafafa" stroke="#9a5a6a" stroke-width="1.2"/>
+<line x1="572.71" y1="693.82" x2="572.75" y2="682.23" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="572.71" y1="693.82" x2="572.67" y2="705.41" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="548.69" y1="724.01" x2="572.67" y2="705.41" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="548.69" y1="724.01" x2="524.72" y2="742.61" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="601.97" y1="725.77" x2="572.67" y2="705.41" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="601.97" y1="725.77" x2="631.28" y2="746.13" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="552.60" y1="764.19" x2="524.72" y2="742.61" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<line x1="552.60" y1="764.19" x2="580.48" y2="785.77" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
+<circle cx="572.75" cy="682.23" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="572.67" cy="705.41" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="524.72" cy="742.61" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="580.48" cy="785.77" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="631.28" cy="746.13" r="2.0" fill="#ffffff" stroke="#111111" stroke-width="1.05"/>
+<circle cx="572.71" cy="693.82" r="2.0" fill="#111111"/>
+<circle cx="548.69" cy="724.01" r="2.0" fill="#111111"/>
+<circle cx="601.97" cy="725.77" r="2.0" fill="#111111"/>
+<circle cx="552.60" cy="764.19" r="2.0" fill="#111111"/>
+<text x="578.0" y="822" text-anchor="middle" font-size="11" font-weight="600" fill="#111">PANTHER</text>
+<text x="578.0" y="836" text-anchor="middle" font-size="10" fill="#374151">De novo purine</text>
+<text x="578.0" y="848" text-anchor="middle" font-size="10" fill="#374151">biosynthesis</text>
+<text x="578.0" y="860" text-anchor="middle" font-size="10" fill="#6b7280">4 reactions</text>
+</svg>

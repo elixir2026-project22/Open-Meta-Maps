@@ -9,7 +9,7 @@
    "sha256": "33850a35084f1f97275e6d89a77d03404119220ffe5577b93308a4058ddf5481",
    "bytes": 48347021,
    "files": 2,
-   "licence": "Open-core Atlas modules (WikiPathways CC0, Reactome CC0, Escher maps CC0). BRENDA pathway modules (CC BY 4.0) ship as data/extensions/brenda/ and load with the default Atlas.",
+   "licence": "Default Atlas modules mix CC0 (Escher, WikiPathways, Reactome data), CC BY 4.0 (BRENDA, Human-maps, Metabolism Regulation, PANTHER) and MIT (iCH360). Keep attributions in THIRD_PARTY_NOTICES.md.",
    "marker": "atlas.sqlite",
    "notice": "package_notices/atlas-full.md"
   }
