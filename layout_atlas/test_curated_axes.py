@@ -116,7 +116,7 @@ def test_bake_same_map_absolute_rigid_from_sha(tmp_path, monkeypatch):
     abs_map = dict(reactions={'R1': [0.0, 0.0], 'R2': [100.0, 0.0],
                               'R3': [0.0, 200.0], 'R4': [100.0, 200.0]},
                    metabolites={'a': [50.0, 0.0], 'b': [50.0, 200.0]}, path='test',
-                   edge_lengths=[200.0] * 30)
+                   edge_lengths=[400.0] * 30)
     monkeypatch.setattr(CA, 'absolute_source_coords', lambda s: abs_map if s == sha else None)
     blocks = [
         dict(id='a', map_id='M', source_sha256=sha, reaction_ids=['R1', 'R2'],
@@ -242,3 +242,35 @@ def test_whole_block_unit_covers_all_reactions():
     assert set(unit['reactions']) == {'EX_mal_e', 'MALt2_2', 'FUM'}
     assert 'r:EX_mal_e' in unit['keys'] and 'r:FUM' in unit['keys']
     assert unit['whole_block'] is True
+
+
+def test_compress_empty_axis_edges_shortens_empty_corridor():
+    # Vertical mid↔met with empty corridor; a second column occupies the same Y band.
+    cloud = {
+        'r:V': [0.0, 0.0], 'm:top': [0.0, 800.0],
+        'r:S': [400.0, 0.0], 'r:S2': [400.0, 400.0], 'r:S3': [400.0, 800.0],
+    }
+    edges = [('r:V', 'm:top')]
+    out = CA.compress_empty_axis_edges(cloud, edges, max_gap=150.0)
+    assert out['applied'] and out['shortened'] == 1
+    assert abs(cloud['m:top'][1] - cloud['r:V'][1]) <= 150.0 + 1e-6
+    # Side column untouched.
+    assert cloud['r:S3'][1] == 800.0
+
+
+def test_compress_padding_joint_exposes_breaks():
+    cloud = {
+        'r:A': [0.0, 0.0], 'r:B': [0.0, 100.0],
+        'r:C': [0.0, 1000.0], 'r:D': [0.0, 1100.0],
+        'm:x': [0.0, 0.0],
+    }
+    edges = [('r:A', 'r:C')]  # keys must exist; use r-r as synthetic
+    # Use proper r/m pair
+    cloud = {
+        'r:A': [0.0, 0.0], 'm:t': [0.0, 1000.0],
+        'r:B': [300.0, 0.0], 'r:C': [300.0, 500.0], 'r:D': [300.0, 1000.0],
+    }
+    edges = [('r:A', 'm:t')]
+    rep = CA.compress_padding_joint(cloud, edge_lengths=[100.0]*20, edges=edges, rounds=3)
+    assert rep['applied']
+    assert 'breaks_x' in rep and 'breaks_y' in rep

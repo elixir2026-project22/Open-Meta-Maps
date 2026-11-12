@@ -159,10 +159,16 @@ def test_squeeze_force_collapses_empty_when_aspect_held_by_void():
     assert C.ASPECT_MIN <= before_w / before_h <= C.ASPECT_MAX
     out = C.squeeze_escher(data, max_gap=200.0)
     assert out['applied']
-    assert out['mode'].startswith('force_empty_')
-    assert out['dx'] > 1000
+    # Prefer collapsing the void while staying in 4:3–16:9 (force_partial_*) when a
+    # full force_empty_* pass would leave the band; either mode must shrink width.
+    assert out['mode'].startswith('force_')
+    assert out['dx'] > 400
     xs = [n['x'] for n in data[1]['nodes'].values()]
-    assert max(xs) - min(xs) < before_w - 1000
+    ys = [n['y'] for n in data[1]['nodes'].values()]
+    new_w = max(xs) - min(xs)
+    new_h = max(ys) - min(ys)
+    assert new_w < before_w - 400
+    assert C.ASPECT_MIN - 0.05 <= new_w / max(new_h, 1e-9) <= C.ASPECT_MAX + 0.05
 
 
 def test_compact_long_arms_escher_shortens_transport():

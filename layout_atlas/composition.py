@@ -388,6 +388,55 @@ def compose(model, scene, blocks, cur):
                 width=round(block_w), height=round(block_h), components=len(layout),
                 pocket=pocket_rep.get('placed', 0))
     report['gathered'] = report['moved_related']
+    # After related/independent moves: pull any still-exterior small components into
+    # the largest free regions of the main AABB (do not grow the canvas first).
+    iter_reps = []
+    for _it in range(3):
+        main_pts = np.array(
+            [placed_pts[k] for i in main for k in cur_keys_of[i] if k in placed_pts], float)
+        if len(main_pts) < 2:
+            break
+        mlo, mhi = main_pts.min(0), main_pts.max(0)
+        mw = float(mhi[0] - mlo[0]); mh = float(mhi[1] - mlo[1])
+        outliers = []
+        for i in movable_idx:
+            ks = [k for k in cur_keys_of[i] if k in placed_pts]
+            if len(ks) < 1:
+                continue
+            arr = np.array([placed_pts[k] for k in ks], float)
+            clo, chi = arr.min(0), arr.max(0)
+            # Outside or barely overlapping the main content AABB.
+            overlap_w = max(0.0, min(chi[0], mhi[0]) - max(clo[0], mlo[0]))
+            overlap_h = max(0.0, min(chi[1], mhi[1]) - max(clo[1], mlo[1]))
+            area = max(float((chi[0] - clo[0]) * (chi[1] - clo[1])), 1.0)
+            if overlap_w * overlap_h >= 0.45 * area:
+                continue
+            bw = float(max(chi[0] - clo[0], 40.0) + 60.0)
+            bh = float(max(chi[1] - clo[1], 40.0) + 60.0)
+            outliers.append((i, bw, bh, clo.copy()))
+        if not outliers:
+            break
+        boxes = sorted([(i, bw, bh) for i, bw, bh, _ in outliers],
+                       key=lambda t: (-t[1] * t[2], t[0]))
+        placed, prep = pack_into_main_pockets(
+            boxes, main_pts, spacing, prefer_c=main_pts.mean(0))
+        if not placed:
+            iter_reps.append(dict(placed=0, missed=len(boxes), **prep))
+            break
+        for i, bw, bh, clo in outliers:
+            if i not in placed:
+                continue
+            origin = placed[i]
+            delta = np.array([origin[0], origin[1]], float) - clo
+            move(i, delta)
+            report['arranged_independent'] += 1
+        iter_reps.append(dict(placed=len(placed), missed=len(boxes) - len(placed),
+                              **{k: v for k, v in prep.items()
+                                 if k not in ('placed', 'missed')}))
+        if prep.get('missed', 0) == len(boxes):
+            break
+    if iter_reps:
+        report['interior_repack'] = iter_reps
     # Final landscape reflow: translation-only skyline of rigid visual components so the
     # content bbox lands in 4:3–16:9 even when related-pulls left a tall column.
     scene, reflow = reflow_landscape(model, scene, blocks, cur)
@@ -484,6 +533,7 @@ def _find_pocket_origin(occ, size_w, size_h, prefer_c, content_lo=None, content_
             dist = (cx - prefer_c[0]) ** 2 + (cy - prefer_c[1]) ** 2
             aspect_pen = 0.0
             expand_pen = 0.0
+            void_pen = 0.0
             if content_lo is not None and content_hi is not None:
                 nlo0 = min(content_lo[0], x0)
                 nhi0 = max(content_hi[0], x0 + size_w)
@@ -509,7 +559,13 @@ def _find_pocket_origin(occ, size_w, size_h, prefer_c, content_lo=None, content_
                         + 0.05 * (max(0.0, content_lo[1] - y0) + max(0.0, (y0 + size_h) - content_hi[1])))
                 else:
                     aspect_pen = abs(math.log(max(nasp, 1e-9) / TARGET_ASPECT)) * 1e3
-            score = (aspect_pen, expand_pen, dist, iy, ix)
+            # Prefer the largest free neighbourhood (big empty rects inside main AABB).
+            ring = 2
+            iy0 = max(0, iy - ring); iy1 = min(occ['ny'], iy + nh + ring)
+            ix0 = max(0, ix - ring); ix1 = min(occ['nx'], ix + nw + ring)
+            neigh = integ[iy1, ix1] - integ[iy0, ix1] - integ[iy1, ix0] + integ[iy0, ix0]
+            void_pen = -float(neigh)  # more empty neighbours → lower score
+            score = (aspect_pen, expand_pen, void_pen, dist, iy, ix)
             if best is None or score < best[0]:
                 best = (score, x0, y0)
     if best is None:
@@ -526,11 +582,11 @@ def pack_into_main_pockets(boxes, main_pts, spacing, prefer_c=None):
     if not boxes or len(main_pts) < 2:
         return {}, dict(placed=0, missed=len(boxes))
     cell = max(float(spacing) * POCKET_CELL_FRAC, 20.0)
-    # Flush-adjacent strip only (not a full tile-width halo — that inflated blank).
+    # Search primarily inside the main AABB; only a small flush strip outside so
+    # small components fill the largest free regions before the canvas grows.
     pts = np.asarray(main_pts, float)
     lo, hi = pts.min(0), pts.max(0)
-    max_box = max(max(b[1], b[2]) for b in boxes)
-    pad = min(SHELF_STANDOFF + 0.35 * max_box, float(spacing) * 3.0 + SHELF_GAP)
+    pad = min(float(spacing) * 1.25 + SHELF_GAP, 0.08 * max(float(hi[0] - lo[0]), float(hi[1] - lo[1]), 1.0))
     # Seed occupancy with main points only; pocket search covers the padded AABB.
     seed = []
     for x, y in pts:
@@ -1182,10 +1238,41 @@ def squeeze_escher(data, max_gap):
             frac = max(max_empty_x / max(before_w, 1e-9), max_empty_y / max(before_h, 1e-9))
             if frac >= SQUEEZE_FORCE_EMPTY_FRAC:
                 force_empty = True
-                # Prefer most collapse, then closer to TARGET aspect.
-                for c in candidates:
-                    collapse = (before_w - c['w']) + (before_h - c['h'])
-                    c['score'] = (0, -collapse, abs(math.log(max(c['aspect'], 1e-9) / TARGET_ASPECT)))
+                # Prefer densest collapse that still stays in-band; only leave the
+                # band when no in-band candidate exists (then stop at ASPECT_MIN).
+                band_ok = [c for c in candidates
+                           if ASPECT_MIN - 1e-3 <= c['aspect'] <= ASPECT_MAX + 1e-3]
+                if band_ok:
+                    for c in band_ok:
+                        collapse = (before_w - c['w']) + (before_h - c['h'])
+                        c['score'] = (0, -collapse, abs(math.log(max(c['aspect'], 1e-9) / TARGET_ASPECT)))
+                    candidates = band_ok
+                else:
+                    # Partial collapse toward the nearer band edge.
+                    partial = None
+                    if before_aspect > ASPECT_MIN and fx is not None:
+                        room = before_w - ASPECT_MIN * before_h
+                        if room > 1.0:
+                            fx_p = build_axis_remap(xs, max_gap, max_shift=room)
+                            if fx_p is not None:
+                                trial, w, h, asp = _trial_remap(data, fx_p, None)
+                                partial = dict(trial=trial, w=w, h=h, aspect=asp, tag='force_partial_x',
+                                               score=(0, 0, 0), use_x=True, use_y=False)
+                    if partial is None and before_aspect < ASPECT_MAX and fy is not None:
+                        room = before_h - before_w / ASPECT_MAX
+                        if room > 1.0:
+                            fy_p = build_axis_remap(ys, max_gap, max_shift=room)
+                            if fy_p is not None:
+                                trial, w, h, asp = _trial_remap(data, None, fy_p)
+                                partial = dict(trial=trial, w=w, h=h, aspect=asp, tag='force_partial_y',
+                                               score=(0, 0, 0), use_x=False, use_y=True)
+                    if partial is not None:
+                        candidates = [partial]
+                    else:
+                        for c in candidates:
+                            collapse = (before_w - c['w']) + (before_h - c['h'])
+                            c['score'] = (0, -collapse,
+                                          abs(math.log(max(c['aspect'], 1e-9) / TARGET_ASPECT)))
             else:
                 # Partial squeeze on the long axis: collapse only as far as the
                 # nearer band edge so landscape stays in 4:3–16:9.
