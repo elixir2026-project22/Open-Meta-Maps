@@ -66,44 +66,60 @@ def obstacles(data):
     return np.array(rects, float).reshape(-1, 4), owner
 
 
-def _hits(p, q, rects, pad=0.0):
-    """Boolean per rect: does the segment p-q cross it (box grown by pad)?  Slab test, vectorised."""
+def _hits_many(P, Q, rects, pad=0.0):
+    """Boolean [segment, rect]: does segment P[i]-Q[i] cross the rect (box grown by pad)?  Slab test, vectorised."""
+    P, Q = np.asarray(P, float).reshape(-1, 2), np.asarray(Q, float).reshape(-1, 2)
     x0, y0, x1, y1 = rects[:, 0] - pad, rects[:, 1] - pad, rects[:, 2] + pad, rects[:, 3] + pad
-    d = np.array(q, float) - np.array(p, float)
-    tmin, tmax = np.zeros(len(rects)), np.ones(len(rects))
-    ok = np.ones(len(rects), bool)
+    d = Q - P
+    shape = (len(P), len(rects))
+    tmin, tmax = np.zeros(shape), np.ones(shape)
+    ok = np.ones(shape, bool)
     for ax, lo, hi in ((0, x0, x1), (1, y0, y1)):
-        if abs(d[ax]) < 1e-9:
-            ok &= (p[ax] >= lo) & (p[ax] <= hi)
-        else:
-            a, b = (lo - p[ax]) / d[ax], (hi - p[ax]) / d[ax]
-            tmin = np.maximum(tmin, np.minimum(a, b))
-            tmax = np.minimum(tmax, np.maximum(a, b))
+        flat = (np.abs(d[:, ax]) < 1e-9)[:, None]
+        p = P[:, ax, None]
+        ok &= ~flat | ((p >= lo) & (p <= hi))
+        with np.errstate(divide='ignore', invalid='ignore'):
+            a, b = (lo - p) / d[:, ax, None], (hi - p) / d[:, ax, None]
+        tmin = np.where(flat, tmin, np.maximum(tmin, np.minimum(a, b)))
+        tmax = np.where(flat, tmax, np.minimum(tmax, np.maximum(a, b)))
     return ok & (tmin <= tmax)
 
 
-def _near(p, rects, pad):
-    """Boolean per rect: is the point inside the box grown by pad (an obstacle right at the end of a connection cannot be avoided)?"""
-    return (rects[:, 0] - pad <= p[0]) & (p[0] <= rects[:, 2] + pad) & (rects[:, 1] - pad <= p[1]) & (p[1] <= rects[:, 3] + pad)
+def _hits(p, q, rects, pad=0.0):
+    """Boolean per rect: does the segment p-q cross it (box grown by pad)?"""
+    return _hits_many(p, q, rects, pad)[0]
+
+
+def _near_many(P, rects, pad):
+    """Boolean [point, rect]: is the point inside the box grown by pad (an obstacle right at the end of a connection cannot be avoided)?"""
+    x, y = P[:, 0, None], P[:, 1, None]
+    return (rects[:, 0] - pad <= x) & (x <= rects[:, 2] + pad) & (rects[:, 1] - pad <= y) & (y <= rects[:, 3] + pad)
+
+
+def _blocked_many(P, Q, rects, pad):
+    """Boolean [segment, rect]: does P[i]-Q[i] cross a box that is not sitting on one of its two ends?"""
+    P, Q = np.asarray(P, float).reshape(-1, 2), np.asarray(Q, float).reshape(-1, 2)
+    if not len(rects):
+        return np.zeros((len(P), 0), bool)
+    return _hits_many(P, Q, rects, pad) & ~(_near_many(P, rects, END_PAD) | _near_many(Q, rects, END_PAD))
 
 
 def _blocked(p, q, rects, pad):
     """Does p-q cross a box that is not sitting on one of its two ends?"""
-    if not len(rects):
-        return np.zeros(0, bool)
-    return _hits(p, q, rects, pad) & ~(_near(p, rects, END_PAD) | _near(q, rects, END_PAD))
+    return _blocked_many(p, q, rects, pad)[0]
 
 
 def _seg_cross(a, b, S):
-    """Number of segments in S [k,4] (x1,y1,x2,y2) properly crossed by a-b."""
+    """Number of proper crossings between the pieces a[i]-b[i] (one piece or an array of them) and the segments in S [k,4] (x1,y1,x2,y2)."""
     if not len(S):
         return 0
-    p, r = np.array(a, float), np.array(b, float) - np.array(a, float)
+    p = np.asarray(a, float).reshape(-1, 2)
+    r = np.asarray(b, float).reshape(-1, 2) - p
     q, s = S[:, :2], S[:, 2:] - S[:, :2]
-    den = r[0] * s[:, 1] - r[1] * s[:, 0]
+    den = r[:, 0, None] * s[:, 1] - r[:, 1, None] * s[:, 0]
     with np.errstate(divide='ignore', invalid='ignore'):
-        t = ((q[:, 0] - p[0]) * s[:, 1] - (q[:, 1] - p[1]) * s[:, 0]) / den
-        u = ((q[:, 0] - p[0]) * r[1] - (q[:, 1] - p[1]) * r[0]) / den
+        t = ((q[:, 0] - p[:, 0, None]) * s[:, 1] - (q[:, 1] - p[:, 1, None]) * s[:, 0]) / den
+        u = ((q[:, 0] - p[:, 0, None]) * r[:, 1, None] - (q[:, 1] - p[:, 1, None]) * r[:, 0, None]) / den
     return int(np.sum((np.abs(den) > 1e-9) & (t > 1e-3) & (t < 1 - 1e-3) & (u > 1e-3) & (u < 1 - 1e-3)))
 
 
@@ -114,10 +130,8 @@ def _astar(start, goal, corners, rects, bend_cost, pad):
     goal_i = 1
 
     def visible(i):
-        out = np.zeros(n, bool)
-        for j in range(n):
-            if j != i:
-                out[j] = not _blocked(pts[i], pts[j], rects, CLEAR).any()
+        out = ~_blocked_many(np.broadcast_to(pts[i], pts.shape), pts, rects, CLEAR).any(axis=1)
+        out[i] = False
         return out
     import heapq
     start_state = (0, -1)
@@ -250,7 +264,7 @@ def route(data, skip_edges=()):
                 path = _astar(p, q, corners, window, bend_cost, pad)
                 if path is None:
                     continue
-                crossings = sum(_seg_cross(u, w, S_all) for u, w in zip(path[:-1], path[1:]))
+                crossings = _seg_cross(path[:-1], path[1:], S_all)
                 length = sum(float(np.hypot(*(np.array(w) - u))) for u, w in zip(path[:-1], path[1:]))
                 score = (crossings, len(path) - 2, length)
                 if best is None or score < best[0]:

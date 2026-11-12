@@ -112,36 +112,44 @@ def _absolute_from_escher(body, path):
     return dict(reactions=rx, metabolites=met_xy, path=path, edge_lengths=edge_lengths, edges=edges)
 
 
+@lru_cache(maxsize=1)
+def _observed_maps():
+    """Source-map observations by source_sha256 (first observation wins), read once per process."""
+    from core import source_maps
+    out = {}
+    for m in source_maps():
+        out.setdefault(m.get('source_sha256'), m)
+    return out
+
+
 @lru_cache(maxsize=8)
 def _absolute_from_observations(source_sha256):
-    from core import source_maps
-    for m in source_maps():
-        if m.get('source_sha256') != source_sha256:
-            continue
-        rx, met_xy = {}, {}
-        edge_lengths = []
-        glyphs = m.get('glyphs') or {}
-        if isinstance(glyphs, list):
-            glyphs = {g['key']: g for g in glyphs if isinstance(g, dict) and 'key' in g}
-        for g in glyphs.values() if isinstance(glyphs, dict) else []:
-            if g.get('kind') == 'metabolite' and g.get('entity') and g.get('xy'):
-                # Prefer primary when present.
-                ent = g['entity']
-                if ent not in met_xy or g.get('primary', True):
-                    met_xy[ent] = list(g['xy'])
-        for r in m.get('reactions') or []:
-            if isinstance(r, dict) and r.get('id') and r.get('xy'):
-                rx[r['id']] = list(r['xy'])
-                for gid in r.get('glyphs') or []:
-                    g = glyphs.get(gid) if isinstance(glyphs, dict) else None
-                    if not g or g.get('kind') != 'metabolite' or not g.get('xy'):
-                        continue
-                    d = float(np.hypot(r['xy'][0] - g['xy'][0], r['xy'][1] - g['xy'][1]))
-                    if d > 1e-6:
-                        edge_lengths.append(d)
-        return dict(reactions=rx, metabolites=met_xy, path=m.get('name') or 'map_observations',
-                    edge_lengths=edge_lengths)
-    return None
+    m = _observed_maps().get(source_sha256)
+    if m is None:
+        return None
+    rx, met_xy = {}, {}
+    edge_lengths = []
+    glyphs = m.get('glyphs') or {}
+    if isinstance(glyphs, list):
+        glyphs = {g['key']: g for g in glyphs if isinstance(g, dict) and 'key' in g}
+    for g in glyphs.values() if isinstance(glyphs, dict) else []:
+        if g.get('kind') == 'metabolite' and g.get('entity') and g.get('xy'):
+            # Prefer primary when present.
+            ent = g['entity']
+            if ent not in met_xy or g.get('primary', True):
+                met_xy[ent] = list(g['xy'])
+    for r in m.get('reactions') or []:
+        if isinstance(r, dict) and r.get('id') and r.get('xy'):
+            rx[r['id']] = list(r['xy'])
+            for gid in r.get('glyphs') or []:
+                g = glyphs.get(gid) if isinstance(glyphs, dict) else None
+                if not g or g.get('kind') != 'metabolite' or not g.get('xy'):
+                    continue
+                d = float(np.hypot(r['xy'][0] - g['xy'][0], r['xy'][1] - g['xy'][1]))
+                if d > 1e-6:
+                    edge_lengths.append(d)
+    return dict(reactions=rx, metabolites=met_xy, path=m.get('name') or 'map_observations',
+                edge_lengths=edge_lengths)
 
 
 def enrich_absolute_source_xy(items):

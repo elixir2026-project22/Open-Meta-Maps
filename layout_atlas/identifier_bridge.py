@@ -144,9 +144,10 @@ def name_key(name):
     return _normalize(name)
 
 
+@lru_cache(maxsize=None)
 def name_keys(name):
     """Stereo-stripped key plus a key that keeps stereo descriptors (racemases stay two metabolites)."""
-    return {_normalize(name), _normalize(name, stereo=True)}
+    return frozenset((_normalize(name), _normalize(name, stereo=True)))
 
 
 def expand_names(names):
