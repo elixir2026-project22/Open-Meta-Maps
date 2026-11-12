@@ -16,12 +16,30 @@ This module corrects both after the scene exists (the hashed drawing files are n
 
 Expert structures are never moved: their reaction points and their glyph copies (`copy:` keys) stay where the expert drew them.
 The orientation uses the stoichiometric sign of the participants (substrate = negative coefficient), not the flux direction.
+
+Currency side-glyph length is adaptive from local free space:
+``distance = clip(k · d_nn, d_min, 50)`` with ``k ≈ 0.27``. The floor ``d_min`` follows the map's 10th-percentile
+reaction clearance: maps with a heavy tight-pair tail (small p10) may shorten more to cut crossings; maps whose
+nearest neighbours are already farther keep longer spokes to avoid curves-through-nodes. Spread and
+``instances.separate`` side_gap track the chosen length. Multi-currency fans open toward the freer half-plane
+only at full spoke length.
 """
 import math
 
 import numpy as np
 
 from core import currency
+
+SIDE_K = 0.27
+SIDE_MIN = 32.0
+SIDE_MIN_DENSE = 45.0
+SIDE_MAX = 50.0
+SIDE_SPREAD_MAX = 30.0
+SIDE_GAP_RATIO = 26.0 / 50.0
+SIDE_GAP_FLOOR = 18.0
+# d_min = clip(SIDE_P10_A + SIDE_P10_B * p10_clearance, SIDE_MIN, SIDE_MIN_DENSE)
+SIDE_P10_A = 20.0
+SIDE_P10_B = 0.324
 
 
 def _expert_reactions(blocks):
@@ -33,9 +51,141 @@ def _split(reaction, participants, positions, cur, only_core=True):
     for mid, coefficient in reaction['metabolites'].items():
         if only_core and mid in cur:
             continue
-        key = participants[reaction['id'], mid]
+        key = participants.get((reaction['id'], mid))
+        if key is None or key not in positions:
+            continue
         (subs if coefficient < 0 else prods).append(np.array(positions[key], float))
     return subs, prods
+
+
+def _axis(subs, prods, here):
+    if subs and prods:
+        u = np.mean(prods, axis=0) - np.mean(subs, axis=0)
+    elif subs:
+        u = here - np.mean(subs, axis=0)
+    elif prods:
+        u = np.mean(prods, axis=0) - here
+    else:
+        u = np.array([1.0, 0.0])
+    n = float(np.hypot(*u))
+    return np.array([1.0, 0.0]) if n < 1e-6 else u / n
+
+
+def spoke_length(clearance, k=SIDE_K, dmin=SIDE_MIN, dmax=SIDE_MAX, spread_max=SIDE_SPREAD_MAX):
+    distance = float(np.clip(k * max(clearance, 0.0), dmin, dmax))
+    return distance, distance * (spread_max / dmax)
+
+
+def side_gap_for(distance):
+    return max(SIDE_GAP_FLOOR, float(distance) * SIDE_GAP_RATIO)
+
+
+def _reaction_xy(positions):
+    return {k[2:]: np.array(v, float) for k, v in positions.items() if k.startswith('r:')}
+
+
+def _unrelated_segments(model, scene, cur):
+    pos, parts = scene['positions'], scene['participants']
+    out = []
+    for r in model['reactions']:
+        here = np.array(pos['r:' + r['id']], float)
+        for mid in r['metabolites']:
+            if mid in cur:
+                continue
+            key = parts.get((r['id'], mid))
+            if key is None or key not in pos:
+                continue
+            out.append((r['id'], here, np.array(pos[key], float)))
+    return out
+
+
+def local_clearance(here, rid, rx_xy, segments=None):
+    best = min((float(np.hypot(*(xy - here))) for other, xy in rx_xy.items() if other != rid), default=float('inf'))
+    return best if np.isfinite(best) else SIDE_MAX / SIDE_K
+
+
+def map_spoke_floor(clearances):
+    """Floor from the map's 10th-percentile reaction clearance.
+
+    Maps without a tight-pair tail (high p10) keep the full SIDE_MAX spoke — shortening
+    there cuts crossings little but raises curves-through-nodes / overlaps.
+    """
+    finite = [c for c in clearances if np.isfinite(c)]
+    if not finite:
+        return SIDE_MIN
+    p10 = float(np.percentile(finite, 10))
+    if p10 >= 65.0:
+        return SIDE_MAX
+    return float(np.clip(SIDE_P10_A + SIDE_P10_B * p10, SIDE_MIN, SIDE_MIN_DENSE))
+
+
+def _freer_perp(here, u, rid, segments, radius):
+    perp = np.array([-u[1], u[0]])
+    plus = minus = 0
+    for owner, a, b in segments:
+        if owner == rid:
+            continue
+        mid = 0.5 * (a + b)
+        d = mid - here
+        if float(np.hypot(*d)) > radius:
+            continue
+        if float(d @ perp) >= 0.0:
+            plus += 1
+        else:
+            minus += 1
+    return -1.0 if plus > minus else 1.0
+
+
+def reaction_spoke_params(model, scene, cur=None):
+    """Per-reaction adaptive (distance, spread, gap). Shared by sides / display_scene / separate."""
+    cur = currency(model) if cur is None else cur
+    positions = scene['positions']
+    rx_xy = _reaction_xy(positions)
+    clearances = {rid: local_clearance(np.array(positions['r:' + rid], float), rid, rx_xy) for rid in rx_xy}
+    dmin = map_spoke_floor(list(clearances.values()))
+    out = {}
+    for r in model['reactions']:
+        rid = r['id']
+        clearance = clearances[rid]
+        distance, spread = spoke_length(clearance, dmin=dmin)
+        out[rid] = dict(distance=distance, spread=spread, gap=side_gap_for(distance), clearance=clearance, floor=dmin)
+    return out
+
+
+def place_side_glyphs(model, positions, participants, cur, params=None, fixed_distance=None, fixed_spread=None):
+    cur = currency(model) if cur is None else cur
+    scene = dict(positions=positions, participants=participants)
+    fixed = fixed_distance is not None
+    params = ({r['id']: dict(distance=float(fixed_distance),
+                             spread=float(SIDE_SPREAD_MAX if fixed_spread is None else fixed_spread),
+                             gap=side_gap_for(float(fixed_distance)), clearance=None)
+               for r in model['reactions']} if fixed else (params or reaction_spoke_params(model, scene, cur)))
+    segments = [] if fixed else _unrelated_segments(model, scene, cur)
+    moved = 0
+    for r in model['reactions']:
+        here = np.array(positions['r:' + r['id']], float)
+        subs, prods = _split(r, participants, positions, cur)
+        u = _axis(subs, prods, here)
+        p = params[r['id']]
+        dist, spr = p['distance'], p['spread']
+        if fixed or dist < SIDE_MAX - 0.5:
+            side = 1.0
+        else:
+            side = _freer_perp(here, u, r['id'], segments, radius=max(2.0 * dist, 80.0))
+        perp = side * np.array([-u[1], u[0]])
+        groups = {-1: [], 1: []}
+        for mid, coefficient in r['metabolites'].items():
+            if mid not in cur:
+                continue
+            key = participants.get((r['id'], mid))
+            if key is not None and key.startswith('side:'):
+                groups[-1 if coefficient < 0 else 1].append(key)
+        for sign, keys in groups.items():
+            for i, key in enumerate(keys):
+                offset = (i - (len(keys) - 1) / 2) * spr
+                positions[key] = (here + sign * u * dist + perp * offset).tolist()
+                moved += 1
+    return moved, params
 
 
 def free_reactions(model, scene, blocks, blend=1.0, max_shift=600.0):
@@ -63,38 +213,20 @@ def free_reactions(model, scene, blocks, blend=1.0, max_shift=600.0):
     return scene
 
 
-def sides(model, scene, blocks, distance=50.0, spread=30.0):
-    """Currency substrates on the substrate side, currency products on the product side (`side:` glyphs only; they are not expert geometry)."""
+def sides(model, scene, blocks, distance=None, spread=None):
+    """Currency substrates on the substrate side, currency products on the product side (`side:` glyphs only; they are not expert geometry).
+
+    Spoke length defaults to adaptive local clearance. Passing ``distance``/``spread`` keeps a fixed offset (tests / ablations).
+    """
     cur = currency(model)
     scene = dict(scene, positions={k: list(v) for k, v in scene['positions'].items()})
-    positions = scene['positions']
-    moved = 0
-    for r in model['reactions']:
-        here = np.array(positions['r:' + r['id']], float)
-        subs, prods = _split(r, scene['participants'], positions, cur)
-        if subs and prods:
-            u = np.mean(prods, axis=0) - np.mean(subs, axis=0)
-        elif subs:
-            u = here - np.mean(subs, axis=0)
-        elif prods:
-            u = np.mean(prods, axis=0) - here
-        else:
-            u = np.array([1.0, 0.0])
-        n = float(np.hypot(*u))
-        u = np.array([1.0, 0.0]) if n < 1e-6 else u / n
-        perp = np.array([-u[1], u[0]])
-        groups = {-1: [], 1: []}
-        for mid, coefficient in r['metabolites'].items():
-            if mid in cur:
-                key = scene['participants'][r['id'], mid]
-                if key.startswith('side:'):
-                    groups[-1 if coefficient < 0 else 1].append(key)
-        for sign, keys in groups.items():
-            for i, key in enumerate(keys):
-                offset = (i - (len(keys) - 1) / 2) * spread
-                positions[key] = (here + sign * u * distance + perp * offset).tolist()
-                moved += 1
+    moved, params = place_side_glyphs(model, scene['positions'], scene['participants'], cur,
+                                      fixed_distance=distance, fixed_spread=spread)
     scene['orientation_sides_moved'] = moved
+    if distance is None:
+        scene['orientation_spoke_params'] = {
+            rid: {k: (None if v is None else round(float(v), 2)) for k, v in p.items()} for rid, p in params.items()
+        }
     return scene
 
 
