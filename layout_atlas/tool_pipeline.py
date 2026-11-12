@@ -1378,6 +1378,20 @@ def merge_tiles(model, folder, view_ids, selected_count):
     (folder / 'map.svg').write_text('\n'.join(parts))
 
 
+def _write_map_exports(job, folder, model, upload):
+    """Write SBGN-ML, SBML Layout and CellDesigner SBML beside map.json (layout unchanged)."""
+    try:
+        import map_exports
+        written = map_exports.write_all_exports(folder, model_path=upload, model=model)
+        titles = {name: title for name, _kind, title in map_exports.EXPORT_FILES}
+        kinds = {name: kind for name, kind, _title in map_exports.EXPORT_FILES}
+        for name in written:
+            job.add_file(name, titles.get(name, name), kinds.get(name, 'xml'))
+        if written:
+            job.log('Export formats: ' + ', '.join(written))
+    except Exception as e:
+        job.warn('export_formats_failed', f'Map exports could not be written: {type(e).__name__}: {str(e)[:180]}')
+
 
 def check_integrity(model, original_hash, upload, map_path):
     """Three levels (the map may repeat reactions/metabolites as visual copies; it must never invent or alter biochemistry).
@@ -1809,6 +1823,7 @@ def run_job(folder):
             data = read(folder / 'map.json')
             data[0].setdefault('metadata', {})['reaction_provenance'] = prov_kinds
             dump(folder / 'map.json', data)
+            _write_map_exports(job, folder, model, upload)
         integrity = check_integrity(model, original, upload, folder / 'map.json' if (folder / 'map.json').exists() else None)
         job.log('Integrity: ' + ', '.join(f"{k}={v['passed']}" for k, v in integrity.items()))
         best = {}

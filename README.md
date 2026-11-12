@@ -32,13 +32,15 @@ python3 project.py tool
 # or: ./start_tool.command
 ```
 
-Open <http://127.0.0.1:8765/tool/index.html>. Upload an SBML or COBRA JSON model, or pick an example (`e_coli_core`, `iIT341`, `iMM904`, `iML1515`). The viewer supports pan, wheel/pinch zoom and a minimap. The server exits when the last browser tab closes (~8 s grace); pass `--keep-running` to disable that. The same server also serves **Atlas Browser** (`/atlas_browser/index.html`) to search curated modules and download Escher JSON with a provenance/licence manifest (search index built on first use under `data/cache/`).
+Open <http://127.0.0.1:8765/tool/index.html>. Upload an SBML or COBRA JSON model, or pick an example (`e_coli_core`, `iIT341`, `iMM904`, `iML1515`). The viewer supports pan, wheel/pinch zoom and a minimap. Download the finished map as SVG, PNG, Escher JSON, SBGN-ML, SBML Layout or CellDesigner SBML. The server exits when the last browser tab closes (~8 s grace); pass `--keep-running` to disable that. The same server also serves **Atlas Browser** (`/atlas_browser/index.html`) to search curated modules and download Escher JSON with a provenance/licence manifest (search index built on first use under `data/cache/`).
 
 ### Command line
 
 ```sh
 python3 project.py compose --gem examples/e_coli_core.xml --out results/e_coli_core/ --source-paths
 ```
+
+Outputs include `map.json` (Escher), `map.sbgn` (SBGN-ML Process Description), `map.sbml` (input SBML with Layout package), and `map.celldesigner.xml` (CellDesigner 4.x annotations). The Map Generator download row offers the same formats next to SVG/PNG.
 
 Rebuild after a small model edit while keeping the previous layout: pass `--previous` with the prior `map.json`. Matched reaction midmarkers and primary metabolites are pinned by stable id; when at least 80% of reactions are already placed, module packing is skipped and the previous Escher geometry is reused. New reactions are grafted on the chord between drawn substrate/product participants (opposite sides); leftovers without anchors are still parked so coverage stays complete. A local nudge of grafted midmarkers is kept when crossings do not worsen.
 
@@ -217,6 +219,9 @@ Layout targets (including backlog) stay on Detailed metrics; non-targets under D
 | Output | Description |
 |---|---|
 | `map.json` | Editable Escher map |
+| `map.sbgn` | SBGN-ML 0.3 Process Description (species, process glyphs with ports, arcs, compartments, clone markers) |
+| `map.sbml` | Input SBML with Layout package v1 (and Render when available); model ids and stoichiometry unchanged |
+| `map.celldesigner.xml` | CellDesigner 4.x SBML (`speciesAlias` bounds, base reactants/products, edit points) |
 | `map.svg` | Vector visualisation |
 | `report.json` | Coverage and layout-quality measures |
 | `reaction_provenance.json` | Per-reaction provenance and matching evidence |

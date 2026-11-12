@@ -31,7 +31,9 @@ Open Meta Maps publishes **processed structures**: the module graphs, reaction i
 | Component | Licence as recorded |
 |---|---|
 | **Escher** map schema (`data/escher_schema/`, used unchanged) | MIT (licence kept next to the file) |
-| **libSBML** (`python-libsbml`, SBML reader; installed as a dependency, not redistributed) | LGPL 2.1 |
+| **libSBGN SBGN-ML 0.3 XSD** (`data/sbgn_schema/SBGN.xsd`, `render.xsd`; used to validate exported SBGN-ML) | LGPL 2.1 or Apache 2.0 (dual); licence kept in `data/sbgn_schema/LICENSE.txt`; upstream <https://github.com/sbgn/libsbgn> |
+| **libSBML** (`python-libsbml`, SBML reader/writer and Layout package; installed as a dependency, not redistributed) | LGPL 2.1 |
+| **lxml** (SBGN-ML XSD validation; installed as a dependency, not redistributed) | BSD-3-Clause |
 | **adaptagrams / libavoid** (edge routing, `data/routing/`) | LGPL; exact terms **to be confirmed**, notice to be added |
 | **layout-benchmark** pathway metrics (adapted into `layout_atlas/evaluation/`, not a runtime dependency) | MIT; see `layout_atlas/evaluation/ATTRIBUTION.md` and <https://github.com/elixir2026-project22/layout-benchmark> |
 | **gdMetriX** (optional import for general graph-drawing metrics in `evaluate`) | GPL-3.0; **not vendored**; install via `layout_atlas/requirements-eval.txt` if needed |
