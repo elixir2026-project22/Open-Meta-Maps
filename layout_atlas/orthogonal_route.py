@@ -22,6 +22,7 @@ consistency and edge length deviation do not worsen.
 from __future__ import annotations
 
 import math
+import re
 from collections import defaultdict
 from pathlib import Path
 
@@ -31,7 +32,6 @@ import numpy as np
 import edge_routing as er
 import line_render
 from core import CURRENCY
-import re
 
 # Local accept gates (same directions as official layout-benchmark 837067d).
 # angular_resolution is Purchase deviation (lower better); participant_consistency
@@ -45,6 +45,11 @@ LONG_EDGE = 160.0        # px: long algorithm edges always get orthogonal routes
 SNAP_TOL = 18.0          # px: treat as already axis-aligned / snap band
 ORTHO_CANDIDATES = 12    # hard budget of path candidates per edge
 FIT_EXTEND_TRIALS = 24   # hard budget of post-prefix keep trials (large maps)
+# Binary-search steps for the per-edge length ceiling: enough to shrink the
+# [chord, Manhattan] window below LENGTH_CEILING_TOL for edges up to ~1e5 px
+# (ceil(log2(1e5 * √2 / 0.05)) ≈ 22; 24 leaves a small margin).
+LENGTH_CEILING_ITERS = 24
+LENGTH_CEILING_TOL = 0.05  # px: stop when the lo/hi length window is this tight
 # Chord must lie within 30° of H/V (min/max ≤ tan30°) so an L-leave stays in the
 # metabolite half-plane and participant_consistency does not fall.
 AXIS_ALIGN_RATIO = 3 ** -0.5
@@ -57,7 +62,7 @@ def _is_cur(bigg):
 
 
 def _curated_reactions(data):
-    """Reaction ids listed under metadata ``expert_structures`` (pre-existing key)."""
+    """Reaction ids of curated Atlas modules recorded in metadata ``expert_structures``."""
     out = set()
     for st in (data[0].get('metadata') or {}).get('expert_structures') or []:
         out.update(st.get('reactions') or st.get('reaction_ids') or [])
@@ -611,7 +616,7 @@ def apply_orthogonal(data, skip_edges=(), only=None, bezier_stub_fn=None, gem_pa
         # Ceiling: Manhattan upper bound for ≤2-bend ortho paths.
         lo, hi = float(old_L), float(old_L) * 1.41421356237 + 1.0
         best = float(old_L)
-        for _ in range(24):
+        for _ in range(LENGTH_CEILING_ITERS):
             mid = 0.5 * (lo + hi)
             trial = list(lengths)
             trial[idx] = mid
@@ -620,7 +625,7 @@ def apply_orthogonal(data, skip_edges=(), only=None, bezier_stub_fn=None, gem_pa
                 lo = mid
             else:
                 hi = mid
-            if hi - lo < 0.05:
+            if hi - lo < LENGTH_CEILING_TOL:
                 break
         return best
 
