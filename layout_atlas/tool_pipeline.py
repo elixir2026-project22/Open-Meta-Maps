@@ -1162,7 +1162,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         ]
         dump(folder / 'map.json', data)
     # Final orthogonal polylines after curated source-path waypoints are present.
-    if LAYOUT_STYLE == 'curated' and os.environ.get('OPM_ORTHOGONAL', 'on') != 'off':
+    if LAYOUT_STYLE == 'curated':
         import edge_style as _es_final
         t_orth = time.time()
         # draw_map writes into <job>/full; the uploaded GEM lives in <job>/upload.
