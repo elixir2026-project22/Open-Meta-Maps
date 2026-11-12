@@ -338,3 +338,10 @@ class TestEscherExportAndThumbnail:
         assert 'object-fit:contain' in html
         assert 'reactionLabel' in html
         assert 'size_label' in html
+        # Card thumbs must reset main img margin/border and .th dark background,
+        # so the #fafafa frame is uniform in light and dark mode.
+        assert '.ab-th img.th{' in html
+        assert 'margin:0' in html
+        assert 'background:transparent' in html
+        assert '.ab-detail img.th{' in html
+        assert html.split('.ab-detail img.th{')[1].split('}')[0].find('background:#fafafa') >= 0
