@@ -649,7 +649,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     # unstable on small / near-collinear modules after completion and is not the gate signal.
     axes = curated_axes.axes_report(blocks, scene=None)
     attempts = []
-    # Routing decision: expert style uses Bezier curves (edge_style), legacy uses libavoid
+    # Routing decision: curated style uses Bezier curves (edge_style), legacy uses libavoid
     # For large models (> ROUTING_THRESHOLD reactions), defer routing to avoid long build times
     skip_libavoid = (scalable or 
                      EDGE_ROUTING in ('hybrid', 'none') or 
@@ -729,7 +729,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         t_style = time.time()
         metric['edge_style'] = dict(edge_style.apply(data, skip_edges), seconds=round(time.time() - t_style, 1))
         if log:
-            log(f"  expert-style connections: {metric['edge_style']}")
+                log(f"  curated-style connections: {metric['edge_style']}")
         import label_placement
         t_labels = time.time()
         metric['label_placement'] = dict(label_placement.optimize(data), seconds=round(time.time() - t_labels, 1))
@@ -871,7 +871,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             metric['edge_style_post_restore'] = dict(
                 _es_post.apply(data, skip_edges), seconds=round(time.time() - t_style2, 1))
             if log:
-                log(f"  expert-style connections (post-restore): {metric['edge_style_post_restore']}")
+                log(f"  curated-style connections (post-restore): {metric['edge_style_post_restore']}")
             dump(folder / 'map.json', data)
         # Hotspot repair AFTER rigid restore + overlap clear + squeeze + corridor
         # so accepted moves are not undone by absolute snap / padding slides.
