@@ -134,15 +134,13 @@ def _in_window(x, y, win, pad=0.0):
 
 
 def _move_node(n, dx, dy):
-    n['x'] = round(float(n['x'] + dx), 2)
-    n['y'] = round(float(n['y'] + dy), 2)
-    if 'label_x' in n:
-        n['label_x'] = round(float(n['label_x'] + dx), 2)
-        n['label_y'] = round(float(n['label_y'] + dy), 2)
+    from map_edit import translate_node
+    translate_node(n, dx, dy, digits=2)
 
 
 def _set_xy(n, x, y):
-    _move_node(n, x - n['x'], y - n['y'])
+    from map_edit import set_node_xy
+    set_node_xy(n, x, y, digits=2)
 
 
 def _reflect(px, py, cx, cy, axis):

@@ -86,6 +86,36 @@ EDIT_SCHEMA = {
 }
 
 
+def translate_node(n, dx, dy, digits=2):
+    """Move a glyph by ``(dx, dy)`` and keep ``label_x``/``label_y`` attached.
+
+    Stages that relocate metabolites or midmarkers must use this (or
+    ``set_node_xy``) so text never drifts from its node.  Midmarkers without a
+    label are still translated; reaction labels are updated separately via
+    ``translate_reaction_label``.
+    """
+    dx, dy = float(dx), float(dy)
+    n['x'] = round(float(n['x']) + dx, digits)
+    n['y'] = round(float(n['y']) + dy, digits)
+    if 'label_x' in n:
+        n['label_x'] = round(float(n['label_x']) + dx, digits)
+        n['label_y'] = round(float(n['label_y']) + dy, digits)
+    return dx, dy
+
+
+def set_node_xy(n, x, y, digits=2):
+    """Set absolute glyph coordinates while preserving the label offset."""
+    return translate_node(n, float(x) - float(n['x']), float(y) - float(n['y']), digits=digits)
+
+
+def translate_reaction_label(rx, dx, dy, digits=2):
+    """Translate a reaction's label with the same delta as its midmarker."""
+    if 'label_x' not in rx:
+        return
+    rx['label_x'] = round(float(rx['label_x']) + float(dx), digits)
+    rx['label_y'] = round(float(rx['label_y']) + float(dy), digits)
+
+
 def validate_edit(edit):
     """Raise jsonschema.ValidationError when the edit patch is not valid."""
     if not isinstance(edit, dict):
