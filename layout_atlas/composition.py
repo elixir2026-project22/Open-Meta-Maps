@@ -586,20 +586,14 @@ def _find_pocket_origin(occ, size_w, size_h, prefer_c, content_lo=None, content_
                         + 0.05 * (max(0.0, content_lo[1] - y0) + max(0.0, (y0 + size_h) - content_hi[1])))
                 else:
                     aspect_pen = abs(math.log(max(nasp, 1e-9) / TARGET_ASPECT)) * 1e3
-            # Prefer slots tucked against occupied cells (true cracks beside the
-            # main mass). Vast empty fringe voids park floaters farther out.
-            ring = 1
-            iy0b = max(0, iy - ring); iy1b = min(occ['ny'], iy + nh + ring)
-            ix0b = max(0, ix - ring); ix1b = min(occ['nx'], ix + nw + ring)
-            area_cells = (iy1b - iy0b) * (ix1b - ix0b)
-            empty_border = (integ[iy1b, ix1b] - integ[iy0b, ix1b]
-                            - integ[iy1b, ix0b] + integ[iy0b, ix0b])
-            border_empty = max(0, int(empty_border) - int(total))
-            border_cells = max(1, area_cells - nw * nh)
-            occupied_contact = border_cells - border_empty
-            tuck_pen = -float(occupied_contact)
-            # Dist to main centre beats raw void size so TR floaters pull inward.
-            score = (aspect_pen, expand_pen, tuck_pen, dist, iy, ix)
+            # Prefer near the main centre (pull TR floaters in). Among near ties,
+            # favour larger empty neighbourhoods for breathing room.
+            ring = 2
+            iy0 = max(0, iy - ring); iy1 = min(occ['ny'], iy + nh + ring)
+            ix0 = max(0, ix - ring); ix1 = min(occ['nx'], ix + nw + ring)
+            neigh = integ[iy1, ix1] - integ[iy0, ix1] - integ[iy1, ix0] + integ[iy0, ix0]
+            void_pen = -float(neigh)
+            score = (aspect_pen, expand_pen, dist, void_pen, iy, ix)
             if best is None or score < best[0]:
                 best = (score, x0, y0)
     if best is None:
@@ -1028,7 +1022,11 @@ def compact_empty_corridors_escher(data, max_gap=None, spacing=None):
             # other metabolite on this reaction (including shared _e/_p partners).
             # Companion EX/uptake reactions that only hold those moved partners are
             # dragged by the same delta so their spokes stay short.
-            target = b + (a - b) * (float(max_gap) / length)
+            # Leave a little more than max_gap so the mid does not dive into the
+            # dense chemistry around the shared pool (extra spoke crossings).
+            target_len = max(float(max_gap) * 1.35, 320.0)
+            target_len = min(target_len, length - 1.0)
+            target = b + (a - b) * (target_len / length)
             delta = target - a
             move_ids = {mid_id}
             partner_shared = []
@@ -1069,7 +1067,7 @@ def compact_empty_corridors_escher(data, max_gap=None, spacing=None):
                     if mid_moved in move_ids and 'label_x' in r:
                         r['label_x'] = float(nodes[mid_moved]['x'])
                         r['label_y'] = float(nodes[mid_moved]['y'])
-            removed += length - float(max_gap)
+            removed += length - target_len
             shortened += 1
         else:
             # Private met: slide it toward the mid.
