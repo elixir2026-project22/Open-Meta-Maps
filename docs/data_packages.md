@@ -15,4 +15,4 @@ python3 project.py data fetch all --from DIR # install from a local folder or an
 
 - Each archive is checked against `data/packages.json` before anything is installed. An existing file is kept as `<name>.bak`; symlinks are never touched.
 - With every package installed, `data/` has exactly the same files as the developer database, and the example map generated from a fresh clone is identical.
-- Respect each package's terms (see `package_notices/<name>.md` after installing).
+- Respect each package's terms (written under `data/package_notices/<name>.md` by the package install).

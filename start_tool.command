@@ -11,9 +11,8 @@ for PY in "$HOME/.local/opm-venv/bin/python3" "$PWD/.venv/bin/python3" "/private
   PY=""
 done
 if [ -z "$PY" ]; then
-  echo "没有找到装有 PIL、jsonschema、scipy、networkx、numpy 的 Python。"
   echo "Python with PIL, jsonschema, scipy, networkx and numpy was not found."
-  read -r -p "按回车关闭 / press Return to close " _; exit 1
+  read -r -p "press Return to close " _; exit 1
 fi
 
 echo "Python: $PY"
@@ -24,7 +23,7 @@ trap 'kill $SERVER 2>/dev/null' EXIT INT TERM HUP
 # wait until the server answers, then open the page (the server may pick another port if $PORT belongs to a different program)
 for i in $(seq 1 40); do
   sleep 0.5
-  kill -0 $SERVER 2>/dev/null || { echo "服务没有启动 / the server did not start"; read -r -p "按回车关闭 / press Return to close " _; exit 1; }
+  kill -0 $SERVER 2>/dev/null || { echo "the server did not start"; read -r -p "press Return to close " _; exit 1; }
   for P in $(seq "$PORT" $((PORT + 29))); do
     if curl -s -m 1 "http://127.0.0.1:$P/api/health" | grep -q open-pathway-maps; then
       open "http://127.0.0.1:$P/tool/index.html"; break 2
@@ -32,4 +31,4 @@ for i in $(seq 1 40); do
   done
 done
 wait $SERVER
-echo "工具已停止 / the tool has stopped."
+echo "The tool has stopped."

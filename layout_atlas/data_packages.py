@@ -1,12 +1,13 @@
-"""Optional data packages: fetch, verify and install the parts of the structure database that are published as separate downloads.
+"""Optional data packages: fetch, verify and install release snapshots published separately from the git checkout.
 
-The repository contains the open-core Atlas (`data/open_core.sqlite`).  The developer's full database has more: the BRENDA extension, the
-reference map sources and a `maps` table that lists them.  Those parts have their own licences, so they are released as separate packages (each with a notice and its
-licence text inside) instead of being mixed into the code repository.  This command downloads a package, checks its SHA-256 against `data/packages.json` and extracts it
-into `data/`.  Nothing is overwritten silently: an existing file is moved to `<name>.bak` first, and symlinks are never touched.
+The default Atlas is already in the repository: `data/open_core.sqlite` plus the in-tree extensions under
+`data/extensions/` (BRENDA, Human-maps, WikiPathways geometry, Metabolism Regulation, PANTHER, iCH360). The only
+optional package is `atlas-full` (a full local `atlas.sqlite` snapshot). This command downloads a package, checks its
+SHA-256 against `data/packages.json` and extracts it into `data/`. Nothing is overwritten silently: an existing file is
+moved to `<name>.bak` first, and symlinks are never touched.
 
   python3 project.py data list                      # packages, size, licence, installed or not
-  python3 project.py data fetch brenda              # download + verify + install one package
+  python3 project.py data fetch atlas-full          # download + verify + install
   python3 project.py data fetch all                 # all packages
   python3 project.py data fetch all --from DIR      # install from a local directory (or a base URL / file:// URL) instead of the default release
 """

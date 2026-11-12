@@ -58,4 +58,4 @@ Excluded (not redistributed): Yeast-maps / original yeast map (GPL-3.0); MicroMa
 2. Confirm the exact LGPL terms for adaptagrams/libavoid and keep the notice next to `data/routing/` (MIT for the project code is compatible with linking a locally built LGPL binary).
 3. Add Rhea and Human-GEM citations; keep every upstream `LICENSE` next to its data.
 
-Done (kept as current facts, not a backlog): Yeast-maps excluded; Human-maps admitted under CC BY 4.0 via official Escher JSON; former `sbml2escher` dependency removed (`layout_atlas/model_io.py` + `data/currency_metabolites.json`); code is MIT and Atlas data / generated maps are CC BY 4.0 with source attribution; PANTHER pilot imported as a default extension.
+Done (kept as current facts, not a backlog): Yeast-maps excluded; Human-maps admitted under CC BY 4.0 via official Escher JSON; former `sbml2escher` dependency removed (`layout_atlas/model_io.py` + `data/currency_metabolites.json`); code is MIT and Atlas data / generated maps mix CC0, CC BY 4.0 and MIT (iCH360) with source attribution; PANTHER and iCH360 imported as default extensions.

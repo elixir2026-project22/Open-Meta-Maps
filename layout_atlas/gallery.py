@@ -4,7 +4,6 @@ from core import *
 import database,ui,gallery_detail,gallery_method
 
 PER_PAGE=80
-ZH={"Independent structures only": "只显示独立结构", "Independent structure = a module not contained in a larger module of the same source map; the others are overlapping windows": "独立结构 = 不被同一来源图中更大模块包含的模块；其余是重叠窗口", "independent": "独立结构", "independent structure: not contained in a larger module of the same source map": "独立结构：不被同一来源图中更大的模块包含", "contained in a larger module of the same source map (overlapping window)": "被同一来源图中更大的模块包含（重叠窗口）", "contained in {c}": "包含于 {c}", "{n} contained in a larger module": "{n} 个被更大模块包含", "{n} by size tier": "{n} 个因规模分级", "hidden": "已隐藏", "counts follow the filters above; the summary cards count all modules": "计数随上方筛选变化；汇总卡片统计全部模块", "In the current selection: {f} families, {v} layout variants (over all modules: {F} families, {V} layout variants)": "当前选择中：{f} 个家族、{v} 个布局变体（全部模块：{F} 个家族、{V} 个布局变体）","reaction set drawn in ≥2 maps": "同一组反应在 ≥2 张图中出现", "Modules whose exact set of reactions is also drawn in at least one other source map (lower bound)": "完全相同的反应集合在至少另一张来源图中也被画过（下限值）", "same reactions drawn in more than one source map": "同一组反应在多张来源图中被画过", "same reactions · {n} maps": "同组反应 · {n} 张图","Size tier": "规模分级", "Show all": "显示全部", "Showing {a} of {b} module instances": "显示 {a} / {b} 个模块实例", " (micro hidden: {c})": "（已隐藏微型：{c}）", "counts follow the tier selection above; the summary cards count all tiers": "计数随上方分级选择变化；上方汇总卡片统计全部分级", "micro · 1 reaction": "微型 · 1 个反应", "small · 2–3 reactions": "小型 · 2–3 个反应", "structure · ≥4 reactions": "结构单元 · ≥4 个反应", "micro: stored for provenance and statistics, not used for retrieval": "微型：仅为来源记录与统计保存，不参与检索", "small: used only to fill gaps": "小型：只用于补缺", "structure: reusable local layout": "结构单元：可复用的局部布局","Only layout":"唯一画法","Same connectivity shape: {a} instances · only layout":"同连接形状 {a} 个实例 · 唯一画法","Open detail view":"打开详情页","module id":"模块ID","source map id":"来源图ID","Technical details (original IDs)":"技术细节（原始ID）","Module code":"模块编号","Same colour = same connectivity shape (family; reactions and metabolites can differ); variants = different layouts of that shape.": "相同颜色 = 相同连接形状（家族，反应和代谢物可以不同）；变体 = 该形状的不同画法。", "What do these terms mean?": "这些术语是什么意思？", "Show all families": "显示全部家族", "Family · variant": "家族 · 变体", "Family = modules with the same connectivity shape (reactions and metabolites can differ; only the connection pattern is the same). Variant = a different drawn layout of that shape.": "家族 = 连接形状相同的模块（反应和代谢物可以不同，只是连接模式相同）；变体（画法）= 该形状的不同布局画法。", "geometry only, no reaction IDs": "仅几何，无反应ID", "Click to show only this family": "点击仅显示该家族", "Variant {a} of {b}": "画法 {a} / {b}", "Same connectivity shape: {a} instances · {b} layout variants": "同连接形状 {a} 个实例 · {b} 种画法", "Showing one family only": "仅显示一个家族", "{a} of {b} layout variants match": "{a} / {b} 个布局变体匹配", " (first {n} shown)": "（显示前 {n} 个）","Layout": "布局缩略图", "Module and reactions": "模块与反应", "Family · variant": "家族 · 变体", "Order": "排序", "Group by family": "按家族分组", "Size (large first)": "规模（大者在前）", "Name A–Z": "名称 A–Z", "name, species, family or reaction id": "名称、物种、家族或反应ID", "name, species, family id or reaction id": "名称、物种、家族或反应ID","Shape":"形状","chain":"链","cycle":"环","fork":"叉","Appendix":"附属反应","shape: chain, cycle or fork":"形状：链、环或叉","Structure-unit reuse (experimental)":"结构单元复用（实验性）","Units never overlap, so there is no redundancy index; each unit belongs to exactly one source map.":"单元互不重叠，所以没有冗余索引；每个单元只属于一张来源图。","Expert metabolic-map structure units (non-overlapping, 3–12 reactions) cut once from Escher maps, WikiPathways and Reactome. Experimental: the tool uses pathway-fragment reuse by default.":"从 Escher 社区地图、WikiPathways 和 Reactome 各切一次得到的专家代谢图结构单元（互不重叠，3–12 个反应）。实验性：工具默认使用通路片段复用。","Structure-unit catalog":"结构单元图录","Units by shape":"按形状统计的单元","{n} appendix reactions":"{n} 个附属反应","pseudo-reactions (drawn interactions), no reaction IDs":"伪反应（画出的交互），无反应ID"}
 SRC_COLOR={'escher':'#2d8f6f','wikipathways':'#3b77b8','reactome':'#a8559a'}
 
 def rx_ids(m):return [r['id'] for r in m['reactions']]
@@ -14,12 +13,12 @@ def rx_summary(m,k=5):
 
 def rx_html(m,k=5):
  ids=rx_ids(m)
- if not ids:return ui.bi('geometry only, no reaction IDs','仅几何，无反应ID')
- return '<span class="dn">'+html.escape(', '.join(ids[:k]))+'</span>'+(' '+ui.bi(f'+{len(ids)-k} more',f'另有 {len(ids)-k} 个') if len(ids)>k else '')
+ if not ids:return ui.bi('geometry only, no reaction IDs')
+ return '<span class="dn">'+html.escape(', '.join(ids[:k]))+'</span>'+(' '+ui.bi(f'+{len(ids)-k} more') if len(ids)>k else '')
 
 def map_html(m):
  n=m['name'];e=html.escape
- if m['source']=='escher' and '.' in n:return ui.bi('Escher map','Escher 地图')+' '+e(n.split('.',1)[0])+' · <span class="dn">'+e(n.split('.',1)[1])+'</span>'
+ if m['source']=='escher' and '.' in n:return ui.bi('Escher map')+' '+e(n.split('.',1)[0])+' · <span class="dn">'+e(n.split('.',1)[1])+'</span>'
  if m['source']=='reactome':return 'Reactome '+e(m['lineage'].split(':',1)[-1])+' · <span class="dn">'+e(n)+'</span>'
  return e(m['source'] if m['source']!='wikipathways' else 'WikiPathways')+' · <span class="dn">'+e(n)+'</span>'
 
@@ -30,23 +29,23 @@ def map_line(m):
  if m['source']=='wikipathways':return 'WikiPathways · '+n
  return m['source']+' · '+n
 
-TIERS=[('micro','微型',1,'1 reaction','1 个反应','micro: stored for provenance and statistics, not used for retrieval','微型：仅为来源记录与统计保存，不参与检索'),('small','小型',2,'2–3 reactions','2–3 个反应','small: used only to fill gaps','小型：只用于补缺'),('structure','结构单元',4,'≥4 reactions','≥4 个反应','structure: reusable local layout','结构单元：可复用的局部布局')]
+TIERS=[('micro',1,'1 reaction','micro: stored for provenance and statistics, not used for retrieval'),('small',2,'2–3 reactions','small: used only to fill gaps'),('structure',4,'≥4 reactions','structure: reusable local layout')]
 
 def tier(size):return 0 if size<=1 else (1 if size<=3 else 2)
 
 def tier_badge(size):
- en,zh,_,ren,rzh,ten,tzh=TIERS[tier(size)]
- return f'<span class="tag tier t{tier(size)}" title="{html.escape(ten)}">'+ui.bi(f'{en} · {ren}',f'{zh} · {rzh}')+'</span>'
+ en,_,ren,ten=TIERS[tier(size)]
+ return f'<span class="tag tier t{tier(size)}" title="{html.escape(ten)}">'+ui.bi(f'{en} · {ren}')+'</span>'
 
 CODES={};GROUPS={};RED={};CUR=['windows']
-SHAPE_ZH={'chain':'链','cycle':'环','fork':'叉'};SHAPE_COLOR={'chain':'#3b77b8','cycle':'#2d8f6f','fork':'#b66b28'}
+SHAPE_COLOR={'chain':'#3b77b8','cycle':'#2d8f6f','fork':'#b66b28'}
 
 def is_units():return CUR[0]=='units'
 
 def shape_tags(m):
  s=m.get('shape_type','');a=len(m.get('appendix_reactions',[]))
- h=f'<span class="tag" title="shape: chain, cycle or fork">'+ui.bi(s,SHAPE_ZH.get(s,s))+'</span>'
- if a:h+='<span class="tag">'+ui.bi(f'+{a} appendix',f'+{a} 个附属反应')+'</span>'
+ h=f'<span class="tag" title="shape: chain, cycle or fork">'+ui.bi(s)+'</span>'
+ if a:h+='<span class="tag">'+ui.bi(f'+{a} appendix')+'</span>'
  return h
 
 def load_redundancy(mods,codes):
@@ -70,12 +69,12 @@ def load_redundancy(mods,codes):
 
 def red_badge(r):
  if not r:return ''
- if r['mx']>0:return '<span class="tag ind" title="independent structure: not contained in a larger module of the same source map">'+ui.bi('independent','独立结构')+'</span>'
- return '<a class="tag cont" href="module.html?id='+r['link']+'" title="contained in a larger module of the same source map (overlapping window)">'+ui.bi('contained in '+r['cont'],'包含于 '+r['cont'])+'</a>'
+ if r['mx']>0:return '<span class="tag ind" title="independent structure: not contained in a larger module of the same source map">'+ui.bi('independent')+'</span>'
+ return '<a class="tag cont" href="module.html?id='+r['link']+'" title="contained in a larger module of the same source map (overlapping window)">'+ui.bi('contained in '+r['cont'])+'</a>'
 
 def group_badge(gp):
  if not gp or not gp['cross']:return ''
- n=gp['nmaps'];return '<span class="tag grp" title="same reactions drawn in more than one source map">'+ui.bi(f'same reactions · {n} maps',f'同组反应 · {n} 张图')+'</span>'
+ n=gp['nmaps'];return '<span class="tag grp" title="same reactions drawn in more than one source map">'+ui.bi(f'same reactions · {n} maps')+'</span>'
 
 def assign_codes(mods,families,fp='F',mp='M'):
  """Display-only codes: F0001.. by (instances desc, id); variants by (instances desc, id); M00001.. by (source, family, variant, id)."""
@@ -136,10 +135,10 @@ def card(m,count,source_support,row,vno,finst=0,fvar=0):
   f'<h2 class="dn"><a href="module.html?id={mc}">{e(m["name"])}</a></h2><p class="meta" title="source map id {e(m["map_id"])}">{map_html(m)}</p><a class="svgl" href="module.html?id={mc}" title="Open detail view">{"".join(svg)}</a>'
   f'<p class="rx"><span class="fam" style="--h:{hue(m["core_family"])}" title="family id {e(m["core_family"])} · variant id {e(m["variant"])}">{vc}</span> {rx_html(m)}</p>'
   f'<div class="tags"><span class="tag src-{e(m["source"])}">{e(m["source"])}</span><span class="tag">{e(m["species"])}</span><span class="tag">{e(m["quality"])}</span><span class="tag lic">{e(m["license"])}</span>{shape_tags(m) if is_units() else tier_badge(m["size"])+group_badge(GROUPS.get(m["id"]))+red_badge(RED.get(m["id"]))}</div>'
-  f'<p class="meta">'+ui.bi(f'{m["size"]} reactions / route steps · {count} instance(s) · {source_support} source layout(s), not independent authors · {len(m["ports"])} ports · {len(m["attachments"])} attachments',f'{m["size"]} 个反应／路径步 · {count} 个实例 · {source_support} 个来源布局（并非独立作者） · {len(m["ports"])} 个端口 · {len(m["attachments"])} 个附件')+'</p>'
-  f'<dl class="kv"><dt>Module code</dt><dd><code>{mc}</code></dd><dt>Family</dt><dd>{fc} · '+(ui.bi(f'Same connectivity shape: {finst} instances · {fvar} layout variants',f'同连接形状 {finst} 个实例 · {fvar} 种画法') if fvar>1 else ui.bi(f'Same connectivity shape: {finst} instances · only layout',f'同连接形状 {finst} 个实例 · 唯一画法'))+f'</dd><dt>Variant</dt><dd>'+(ui.bi(f'Variant {vno} of {fvar}',f'画法 {vno} / {fvar}') if fvar>1 else ui.bi('Only layout','唯一画法'))+f' ({vc})</dd><dt>Source map</dt><dd>{map_html(m)}</dd><dt>Licence</dt><dd>{e(m["license"])}</dd></dl>'
+  f'<p class="meta">'+ui.bi(f'{m["size"]} reactions / route steps · {count} instance(s) · {source_support} source layout(s) · {len(m["ports"])} ports · {len(m["attachments"])} attachments')+'</p>'
+  f'<dl class="kv"><dt>Module code</dt><dd><code>{mc}</code></dd><dt>Family</dt><dd>{fc} · '+(ui.bi(f'Same connectivity shape: {finst} instances · {fvar} layout variants') if fvar>1 else ui.bi(f'Same connectivity shape: {finst} instances · only layout'))+f'</dd><dt>Variant</dt><dd>'+(ui.bi(f'Variant {vno} of {fvar}') if fvar>1 else ui.bi('Only layout'))+f' ({vc})</dd><dt>Source map</dt><dd>{map_html(m)}</dd><dt>Licence</dt><dd>{e(m["license"])}</dd></dl>'
   f'<details><summary>Technical details (original IDs)</summary><pre>{e(json.dumps(dict(row,display_module=mc,display_family=fc,display_variant=vc),ensure_ascii=False,indent=2))}</pre>'
-  f'<p>'+ui.bi('Full coordinates, paths and roles:','完整坐标、路径与角色：')+f' <code>modules.json.gz</code> '+ui.bi(f'record {m["id"]}.',f'中的记录 {m["id"]}。')+' '+ui.bi('Automatic evidence-based validation; no human certification claimed.','基于证据的自动验证；不声称经过人工认证。')+'</p></details></article>')
+  f'<p>'+ui.bi('Full coordinates, paths and roles:')+f' <code>modules.json.gz</code> '+ui.bi(f'record {m["id"]}.')+' '+ui.bi('Provenance is recorded automatically from the source map.')+'</p></details></article>')
 
 PAGE_JS='''<script>
 (function(){var q=document.getElementById('q'),s=document.getElementById('src'),k=document.getElementById('cnt'),cs=[].slice.call(document.querySelectorAll('.card'));
@@ -206,10 +205,10 @@ def make(library='windows'):
   return '<div class="pager">'+f'<a href="index.html">Overview</a>'+''.join(parts)+'</div>'
  for i in range(pages):
   chunk=rows[i*PER_PAGE:(i+1)*PER_PAGE];cards=''.join(card(*r) for r in chunk)
-  body=('<div class="note">Solid points are observed in the source layout; pale points are derived. Circles = metabolites, lines = reactions (as in the expert maps). Families ignore side attachments; chemical equivalence is a separate index.</div>'
+  body=('<div class="note">Solid points are observed in the source layout; pale points are derived. Circles = metabolites, lines = reactions (as in the curated community maps). Families ignore side attachments; chemical equivalence is a separate index.</div>'
    '<div class="filters"><label>Filter this page<input id="q" type="search" placeholder="name, species, family or reaction id"></label><label>Source<select id="src"><option value="">all</option>'+''.join(f'<option>{s}</option>' for s in SRC_COLOR)+'</select></label><span id="cnt" class="count"></span></div>'
    +pager(i+1)+f'<div class="grid">{cards}</div>'+pager(i+1))
-  ui.write(dest/f'page-{i+1}.html',(f'Catalog page {i+1} of {pages}',f'图录第 {i+1} / {pages} 页') if not U else (f'Structure-unit catalog page {i+1} of {pages}',f'结构单元图录第 {i+1} / {pages} 页'),body,section='catalog',zh=ZH,script=PAGE_JS,lead=ui.bi(f'Variants {i*PER_PAGE+1}–{i*PER_PAGE+len(chunk)} of {len(rows):,}, ordered by family code (F0001 = largest family).',f'第 {i*PER_PAGE+1}–{i*PER_PAGE+len(chunk)} 个变体，共 {len(rows):,} 个，按家族编号排序（F0001 为最大家族）。'),crumbs=[('Catalog','index.html'),((f'Page {i+1}',f'第 {i+1} 页'),None)])
+  ui.write(dest/f'page-{i+1}.html',f'Catalog page {i+1} of {pages}' if not U else f'Structure-unit catalog page {i+1} of {pages}',body,section='catalog',script=PAGE_JS,lead=ui.bi(f'Variants {i*PER_PAGE+1}–{i*PER_PAGE+len(chunk)} of {len(rows):,}, ordered by family code (F0001 = largest family).'),crumbs=[('Catalog','index.html'),(f'Page {i+1}',None)])
  with gzip.open(dest/'modules.json.gz','wt') as f:json.dump(mods,f,ensure_ascii=False)
  dump(dest/'index.json',index)
  data=[[m['id'],m['name'],m['source'],m['species'],m['quality'],m['size'],c,s,i//PER_PAGE+1,m['core_family'],m['license'],' '.join([m['name'],m['species'],m['source'],m['core_family'],m['id'],codes['f'][m['core_family']],codes['f'][m['core_family']]+'-v%d'%v,codes['m'][m['id']]]+([m['shape_type']] if U else [])+rx_ids(m)).lower(),rx_summary(m),len(m['reactions']),codes['f'][m['core_family']],v,map_line(m),thumb(m),hue(m['core_family']),fi,fv,codes['m'][m['id']],m['map_id'],tier(m['size']),(groups[m['id']]['nmaps'] if m['id'] in groups and groups[m['id']]['cross'] else 0),groups[m['id']]['code'] if m['id'] in groups else '',(redinfo[m['id']]['mx'] if m['id'] in redinfo else c),redinfo[m['id']]['cont'] if m['id'] in redinfo else '',redinfo[m['id']]['link'] if m['id'] in redinfo else '']+([m['shape_type'],len(m['appendix_reactions'])] if U else []) for i,(m,c,s,r,v,fi,fv) in enumerate(rows)]
@@ -226,12 +225,12 @@ def make(library='windows'):
  by_inst=Counter(m['source'] for m in mods);by_var=Counter(r['source'] for r in index);species=Counter(r['species'] for r in index);quality=Counter(m['quality'] for m in mods);licences=sorted({r['license'] for r in index})
  singles=sum(len(v)==1 for v in families.values())
  if U:
-  stats='<div class="stats">'+ui.stat(f'{len(mods):,}','structure units','结构单元')+ui.stat(f'{len(families):,}','structural families')+ui.stat(f'{len(index):,}','layout variants')+ui.stat(f'{pages}','catalog pages')+ui.stat(f'{len(species)}','species')+ui.stat(f'{singles:,}','singleton families')+'</div>'
-  stats+='<p class="legendline">'+ui.bi('Units never overlap, so there is no redundancy index and no size-tier filter; the table follows the filters below.','单元互不重叠，所以没有冗余索引，也没有规模分级筛选；下方表格遵循筛选条件。')+'</p>'
+  stats='<div class="stats">'+ui.stat(f'{len(mods):,}','structure units')+ui.stat(f'{len(families):,}','structural families')+ui.stat(f'{len(index):,}','layout variants')+ui.stat(f'{pages}','catalog pages')+ui.stat(f'{len(species)}','species')+ui.stat(f'{singles:,}','singleton families')+'</div>'
+  stats+='<p class="legendline">'+ui.bi('Units never overlap, so there is no redundancy index and no size-tier filter; the table follows the filters below.')+'</p>'
  else:
   stats='<div class="stats">'+ui.stat(f'{len(mods):,}','module instances')+ui.stat(f'{len(families):,}','structural families')+ui.stat(f'{len(index):,}','layout variants')+ui.stat(f'{pages}','catalog pages')+ui.stat(f'{len(species)}','species')+ui.stat(f'{singles:,}','singleton families')+'</div>'
-  stats+='<p class="legendline">'+ui.bi('Summary cards count all modules; the table below follows the filters (by default: independent structures only, micro hidden).','汇总卡片统计全部模块；下方表格遵循筛选条件（默认：只显示独立结构，隐藏微型）。')+'</p>'
- breakdown=('<div class="grid"><section class="panel"><h3>Module instances by source</h3>'+bar(by_inst)+'</section><section class="panel"><h3>Layout variants by source</h3>'+bar(by_var)+'</section><section class="panel"><h3>Provenance and licence</h3><p class="meta">'+ui.bi('; '.join(f'{k} {v:,} instances' for k,v in quality.most_common())+f'. Licences: {", ".join(licences)}. Every card lists its source, licence and map id; the full record is in modules.json.gz.','; '.join(f'{k} {v:,} 个实例' for k,v in quality.most_common())+f'。许可：{", ".join(licences)}。每张卡片都列出来源、许可和来源图；完整记录见 modules.json.gz。')+'</p></section></div>')
+  stats+='<p class="legendline">'+ui.bi('Summary cards count all modules; the table below follows the filters (by default: independent structures only, micro hidden).')+'</p>'
+ breakdown=('<div class="grid"><section class="panel"><h3>Module instances by source</h3>'+bar(by_inst)+'</section><section class="panel"><h3>Layout variants by source</h3>'+bar(by_var)+'</section><section class="panel"><h3>Provenance and licence</h3><p class="meta">'+ui.bi('; '.join(f'{k} {v:,} instances' for k,v in quality.most_common())+f'. Licences: {", ".join(licences)}. Every card lists its source, licence and map id; the full record is in modules.json.gz.')+'</p></section></div>')
  filters=('<h2>Search the variants</h2><div class="filters"><label>Search<input id="q" type="search" placeholder="name, species, family id or reaction id"></label>'
   '<label>Source<select id="src"><option value="">all</option>'+''.join(f'<option value="{s}">{s} ({by_var[s]:,})</option>' for s in SRC_COLOR)+'</select></label>'
   '<label>Species<select id="sp"><option value="">all</option>'+''.join(f'<option value="{html.escape(k)}">{html.escape(k)} ({v:,})</option>' for k,v in species.most_common())+'</select></label>'
@@ -240,14 +239,14 @@ def make(library='windows'):
   (UNIT_HIDDEN if U else '<fieldset class="tiers"><legend>Size tier</legend><label><input type="checkbox" id="t0" value="0"> <span title="micro: stored for provenance and statistics, not used for retrieval">micro · 1 reaction</span></label><label><input type="checkbox" id="t1" value="1" checked> <span title="small: used only to fill gaps">small · 2–3 reactions</span></label><label><input type="checkbox" id="t2" value="2" checked> <span title="structure: reusable local layout">structure · ≥4 reactions</span></label><label class="rgf"><span><input type="checkbox" id="ind" checked> <span title="Independent structure = a module not contained in a larger module of the same source map; the others are overlapping windows">Independent structures only</span></span></label><button id="tall" type="button">Show all</button></fieldset><label class="rgf"><span><input type="checkbox" id="rg"> <span title="Modules whose exact set of reactions is also drawn in at least one other source map (lower bound)">reaction set drawn in ≥2 maps</span></span></label>')+'<label>Min size<input id="mn" type="number" min="0" style="min-width:90px;width:90px"></label><label>Max size<input id="mx" type="number" min="0" style="min-width:90px;width:90px"></label><label>Order<select id="od"><option value="family">Group by family</option><option value="size">Size (large first)</option><option value="name">Name A–Z</option></select></label><button id="reset" type="button">Reset</button></div>'
   '<p class="legendline">Same colour = same connectivity shape (family; reactions and metabolites can differ); variants = different layouts of that shape. <a href="'+ui.rel(dest/'index.html','index.html')+'#definitions">What do these terms mean?</a></p><div id="fchip" class="fchip" style="display:none"><span id="ftxt"></span><button id="fclear" type="button">Show all families</button></div><div id="cnt" class="count"></div><div id="cnt2" class="count"></div><div id="cnt3" class="count"></div><div class="tablewrap"><table><thead><tr><th>Layout</th><th>Module and reactions</th><th title="Family = modules with the same connectivity shape (reactions and metabolites can differ; only the connection pattern is the same). Variant = a different drawn layout of that shape.">Family · variant</th><th>Source</th><th>Quality</th><th>Size</th><th>Instances</th><th>Licence</th></tr></thead><tbody id="hits"></tbody></table></div>')
  if U:
-  shp=Counter(m['shape_type'] for m in mods);breakdown=breakdown[:-6]+'<section class="panel"><h3>'+ui.bi('Units by shape','按形状统计的单元')+'</h3>'+bar(shp,SHAPE_COLOR)+'<p class="meta">'+ui.bi('chain = unbranched path; cycle = shortest rings (fused into ladders); fork = branch point with its arms. Appendix reactions are fragments of fewer than 3 reactions attached to a neighbouring unit.','链 = 无分支路径；环 = 最短环（可融合成梯形）；叉 = 分支点及其臂。附属反应 = 不足 3 个反应、并入相邻单元的碎片。')+'</p></section></div>'
+  shp=Counter(m['shape_type'] for m in mods);breakdown=breakdown[:-6]+'<section class="panel"><h3>'+ui.bi('Units by shape')+'</h3>'+bar(shp,SHAPE_COLOR)+'<p class="meta">'+ui.bi('chain = unbranched path; cycle = shortest rings (fused into ladders); fork = branch point with its arms. Appendix reactions are fragments of fewer than 3 reactions attached to a neighbouring unit.')+'</p></section></div>'
  browse='<h2>Browse all pages</h2>'+pager(0).replace('<a href="index.html">Overview</a>','')
  files='<p>Downloads: <a href="modules.json.gz">complete JSON exchange (modules.json.gz)</a> · <a href="index.json">variant index (index.json)</a></p>'
  Wf=gallery_method.window_facts(mods if not U else database.modules());Uf=gallery_method.unit_facts(mods if U else units_library.load())
  head=gallery_method.switch(library);method=gallery_method.section(library,Wf,Uf)
- title='Layout atlas v0.3' if not U else ('Structure-unit reuse (experimental)','结构单元复用（实验性）')
- lead_units=ui.bi('Expert metabolic-map structure units (non-overlapping, 3–12 reactions) cut once from Escher maps, WikiPathways and Reactome. Experimental: the tool uses pathway-fragment reuse by default.','从 Escher 社区地图、WikiPathways 和 Reactome 各切一次得到的专家代谢图结构单元（互不重叠，3–12 个反应）。实验性：工具默认使用通路片段复用。')
- ui.write(dest/'index.html',title,head+stats+method+breakdown+filters+browse+files,section='catalog',zh=ZH,script=INDEX_JS.replace('%(total)d',str(len(mods))).replace('%(micro)d',str(tiers[0])).replace('%(fams)d',str(len(families))).replace('%(un)d',str(int(U))),lead=lead_units if U else ui.bi('Expert metabolic-map modules from Escher maps, WikiPathways and Reactome. Observed source layouts do not prove independent designers; results of the search link straight to the module card.','来自 Escher 社区地图、WikiPathways 和 Reactome 的专家代谢图模块。观测到的来源布局不能证明是独立设计者；搜索结果直接链接到对应模块卡片。'))
+ title='Pathway-fragment catalog' if not U else 'Structure-unit reuse (experimental)'
+ lead_units=ui.bi('Curated metabolic-map structure units (non-overlapping, 3–12 reactions) cut once from Escher maps, WikiPathways and Reactome. Experimental: the tool uses pathway-fragment reuse by default.')
+ ui.write(dest/'index.html',title,head+stats+method+breakdown+filters+browse+files,section='catalog',script=INDEX_JS.replace('%(total)d',str(len(mods))).replace('%(micro)d',str(tiers[0])).replace('%(fams)d',str(len(families))).replace('%(un)d',str(int(U))),lead=lead_units if U else ui.bi('Curated metabolic-map modules from open-core Escher, WikiPathways and Reactome maps (not the full default Atlas extensions). Search results link directly to the module card.'))
  return dict(instances=len(mods),families=len(families),variants=len(index),pages=pages)
 if __name__=='__main__':
  import sys
