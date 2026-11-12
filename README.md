@@ -124,19 +124,23 @@ Matched geometry is kept as drawn (translated only). Everything else is placed b
 
 `tool_pipeline.draw_map` / `draw_global_map`. Small models (≤150 reactions) take the full path; mid-size (≤3 000) use a global plan then the same curated Bézier pass; larger models keep a skeleton and draw ~50-reaction views on demand.
 
-| Stage | What it does | Main code |
-|---|---|---|
-| **Rigid curated skeleton** | Scale matched structures; pack rigid blocks with shared metabolites as junctions; network bridges as anchors | `drawing.py`, `geometry.py` |
-| **Complete uncovered reactions** | Place free nodes around fixed anchors; optional context for currency-only reactions | `completion.py`, `context.py`, `completion_context.py` |
-| **Metabolite instances** | Extra visual copies of non-currency metabolites to shorten long edges; currency stays private `side:` glyphs | `instances.py`, `drawing.py` |
-| **Orientation** | Put free reactions between substrates and products; currency copies on the correct side | `orientation.py` |
-| **Composition & peripherals** | Pull related components in; shelf independents; attach exchange/transport; optional relocation inside large curated blocks | `composition.py`, `peripheral.py`, `block_relocation.py` |
-| **Spacing / relaxation** | Soft-preserve curated shape; shorten edges; minimum node spacing | `geometry.py`, `global_layout.py` |
-| **Bézier connections** | Cubic Béziers from reaction templates; optional `--source-paths` for original Escher curves | `edge_style.py`, `source_paths.py`, `routing.py` |
-| **Labels** | Move labels among candidates to cut collisions | `label_placement.py` |
-| **Integrity** | Model hash, every reaction drawn, visual stoichiometry; protected shared glyphs must not split | `tool_pipeline.py` |
+| Stage | What it does | Optimises | Main code |
+|---|---|---|---|
+| **Rigid curated skeleton** | Scale matched structures; pack rigid blocks with shared metabolites as junctions; network bridges as anchors | Curated-structure continuity (with matching) | `drawing.py`, `geometry.py` |
+| **Complete uncovered reactions** | Place free nodes around fixed anchors; optional context for currency-only reactions | — | `completion.py`, `context.py`, `completion_context.py` |
+| **Metabolite instances** | Extra visual copies of non-currency metabolites to shorten long edges; currency stays private `side:` glyphs | Long lines; cofactor clones | `instances.py`, `drawing.py` |
+| **Orientation** | Put free reactions between substrates and products; currency copies on the correct side | Participant placement | `orientation.py` |
+| **Composition & peripherals** | Pull related components in; shelf independents; attach exchange/transport; optional relocation inside large curated blocks | Long lines; cofactor clones; exchange on periphery; aspect; blank space | `composition.py`, `peripheral.py`, `block_relocation.py` |
+| **Spacing / relaxation** | Soft-preserve curated shape; shorten edges; minimum node spacing | Connection crossings; unrelated overlaps | `geometry.py`, `global_layout.py` |
+| **Bézier connections** | Cubic Béziers from reaction templates; optional `--source-paths` for original Escher curves | Connection crossings; unrelated overlaps; detours, hooks, bends; quality gate | `edge_style.py`, `source_paths.py`, `routing.py` |
+| **Labels** | Move labels among candidates to cut collisions | — | `label_placement.py` |
+| **Integrity** | Model hash, every reaction drawn, visual stoichiometry; protected shared glyphs must not split | — | `tool_pipeline.py` |
 
 **Determinism:** fixed layout seed `20261105` (`core.SEEDS`), ELK/fCoSE seeds, `PYTHONHASHSEED=0` on re-exec. Displacement measured by `evaluate --compare-map` only.
+
+`--previous map.json` pins matched nodes and grafts leftovers.
+
+**Known gaps** ([docs/limitations.md](docs/limitations.md)): 2D component packing, harder orientation (incl. transporters), compartment-aware packing, stronger currency/biomass handling, crossing-aware composition acceptance, compose seed flag. Experimental off by default: `OPM_REGIONS`, `OPM_LOWCONF`, whole-block `OPM_BLOCK_RELOC`.
 
 ### Example output
 
@@ -178,22 +182,7 @@ Compose writes `layout_quality.evaluate` into `layout_issues.json` / `report.jso
 | **Stability** | Reproducibility across runs; displacement and Procrustes disparity against a previous map (`--previous`) | `stability.py` |
 | **Reference similarity** | Procrustes, distance correlation and kNN preservation against a reference SBGN map | `reference_sbgn.py` |
 
-### Optimisation targets
-
-| Target | Optimising stage(s) |
-|---|---|
-| Connection crossings; unrelated overlaps | Bézier routing · quality gate; spacing / relaxation |
-| Detour, hooks, bends | Bézier routing |
-| Long lines; cofactor clones | Instances · composition · peripherals |
-| Participant placement | Orientation |
-| Curated-structure continuity | Matching / rigid skeleton |
-| Exchange on periphery; aspect; blank space | Composition & packing |
-| Axis-aligned segments / axes; grid metabolites; chain turns; cycle placement; compartment packing | **Not yet optimised** |
-| Build-on-previous / Procrustes displacement | `--previous` pin/graft path; measure with `evaluate --compare-map` / layout-benchmark |
-
 Layout targets (including backlog) stay on Detailed metrics; non-targets under Debug (including main flow-direction share).
-
-**Known gaps** ([docs/limitations.md](docs/limitations.md)): 2D component packing, harder orientation (incl. transporters), compartment-aware packing, stronger currency/biomass handling, crossing-aware composition acceptance, compose seed flag. Experimental off by default: `OPM_REGIONS`, `OPM_LOWCONF`, whole-block `OPM_BLOCK_RELOC`.
 
 ### Layout rules (status)
 
@@ -204,7 +193,12 @@ Layout targets (including backlog) stay on Detailed metrics; non-targets under D
 | Avoid long lines | Partial | Instances, composition, peripherals help; currency/biomass spokes remain |
 | Place participants consistently | Partial | Orientation on by default; share still below curated reference maps |
 | Respect compartments | Not yet | Used in packing/shelves; cross-compartment species metric still high |
+| Compartment packing | Not yet | |
 | Aspect / compactness | Partial | Shelf aspect target; independent components still linear shelves |
+| Axis-aligned segments / axes | Not yet | |
+| Grid metabolites | Not yet | |
+| Chain turns | Not yet | |
+| Cycle placement | Not yet | |
 | Reproducibility | Partial | Fixed seeds; no compose seed CLI |
 | Build on previous layout | Partial | `--previous map.json` reuses matched geometry and grafts leftovers |
 | Scale to GEMs | Partial | Global ≤3 000 + tiled views; large maps start routing-degraded |
