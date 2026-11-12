@@ -1,49 +1,5 @@
-"""Build-on-previous anchors and robust curated matching helpers."""
-import os
-from pathlib import Path
-
+"""Build-on-previous anchors and graft helpers."""
 import previous_layout as prev
-import retrieval as R
-
-
-def test_max_missing_reactions_off_by_default():
-    # Default path matches main: no partial curated frames (avoids overlap regression).
-    assert R.max_missing_reactions(2) == 0
-    assert R.max_missing_reactions(40) == 0
-
-
-def test_max_missing_reactions_scales_when_opt_in(monkeypatch):
-    monkeypatch.setenv('OPM_PARTIAL_MATCH', 'on')
-    assert R.max_missing_reactions(2) == 0
-    assert R.max_missing_reactions(7) == 0
-    assert R.max_missing_reactions(8) == 1
-    assert R.max_missing_reactions(40) == 5
-    assert R.max_missing_reactions(24) == 3
-
-
-def test_clip_atlas_module_drops_missing_keeps_frame():
-    mod = dict(
-        id='m1', size=4, source='escher',
-        reactions=[
-            dict(key='r:1', id='A'), dict(key='r:2', id='B'),
-            dict(key='r:3', id='C'), dict(key='r:4', id='D'),
-        ],
-        nodes=[
-            dict(key='r:1', role='reaction'), dict(key='r:2', role='reaction'),
-            dict(key='r:3', role='reaction'), dict(key='r:4', role='reaction'),
-            dict(key='m1', role='metabolite'), dict(key='m2', role='metabolite'),
-        ],
-        edges=[
-            dict(a='r:1', b='m1'), dict(a='r:2', b='m1'),
-            dict(a='r:3', b='m2'), dict(a='r:4', b='m2'),
-        ],
-    )
-    clipped = R.clip_atlas_module(mod, {'A', 'B', 'C'})
-    assert clipped['size'] == 3
-    assert {r['id'] for r in clipped['reactions']} == {'A', 'B', 'C'}
-    assert clipped['missing_source_reactions'] == ['D']
-    assert clipped['partial_source_size'] == 4
-    assert 'r:4' not in {n['key'] for n in clipped['nodes']}
 
 
 def test_load_previous_anchors_filters_to_model(tmp_path):
@@ -89,35 +45,6 @@ def test_pin_scene_and_blocks():
     assert n == 2
     assert blocks[0]['positions']['r:A'] == [1.0, 2.0]
     assert blocks[0]['positions']['r:C'] == [5.0, 5.0]
-
-
-def test_robust_match_keeps_large_core_block_on_e_coli_rm3():
-    """With OPM_PARTIAL_MATCH=on, removing a few Core reactions must not shatter the window."""
-    import copy
-    import pytest
-    if os.environ.get('OPM_PARTIAL_MATCH', 'off') != 'on':
-        pytest.skip('partial curated matching is opt-in (OPM_PARTIAL_MATCH=on)')
-    from model_io import load_model
-    from core import model_graph, ROOT
-    import database
-
-    model = load_model(ROOT / 'examples/e_coli_core.xml')
-    remove = {'ME1', 'PPCK', 'FRD7'}
-    reduced = copy.deepcopy(model)
-    reduced['reactions'] = [r for r in reduced['reactions'] if r['id'] not in remove]
-    lib = R.Library(database.modules())
-    selected = R.select(lib.candidates(model_graph(reduced), model=reduced, max_roots=120)[0])
-    sizes = sorted((len(p['reaction_ids']) for p in selected), reverse=True)
-    assert sizes[0] >= 30, sizes[:5]
-
-
-def test_annotation_seed_uses_stable_ids_not_names():
-    """Robust partial match must key off reaction references, not display names."""
-    import inspect
-    src = inspect.getsource(R.Library.candidates)
-    assert 'reverse[' in src
-    assert 'max_missing_reactions' in src
-    assert 'clip_atlas_module' in src
 
 
 def test_filter_previous_map_drops_removed_reactions(tmp_path):
@@ -224,7 +151,6 @@ def test_graft_new_reactions_places_midmarker_between_sides():
     bigg = {rx['bigg_id'] for rx in out[1]['reactions'].values()}
     assert bigg == {'KEEP', 'NEW', 'SOLO'}
     assert out[1]['nodes']['2']['x'] == 10.0
-    # NEW midmarker sits on the a_c → b_c chord (x≈10).
     new_rx = next(rx for rx in out[1]['reactions'].values() if rx['bigg_id'] == 'NEW')
     mid = out[1]['nodes'][next(iter(new_rx['segments'].values()))['from_node_id']]
     assert abs(mid['x'] - 10.0) < 1e-6

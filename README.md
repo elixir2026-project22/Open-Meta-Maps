@@ -40,7 +40,7 @@ Open <http://127.0.0.1:8765/tool/index.html>. Upload an SBML or COBRA JSON model
 python3 project.py compose --gem examples/e_coli_core.xml --out results/e_coli_core/ --source-paths
 ```
 
-Rebuild after a small model edit while keeping the previous layout: pass `--previous` with the prior `map.json`. Matched reaction midmarkers and primary metabolites are pinned by stable id; when at least 80% of reactions are already placed, module packing is skipped and the previous Escher geometry is reused. New reactions are grafted on the chord between drawn substrate/product participants (opposite sides); leftovers without anchors are still parked so coverage stays complete. A local nudge of grafted midmarkers is kept when crossings do not worsen. Partial curated matching (Atlas modules missing a few source reactions) is off by default (`OPM_PARTIAL_MATCH=on` to opt in) so the default compose path stays aligned with main on official metrics.
+Rebuild after a small model edit while keeping the previous layout: pass `--previous` with the prior `map.json`. Matched reaction midmarkers and primary metabolites are pinned by stable id; when at least 80% of reactions are already placed, module packing is skipped and the previous Escher geometry is reused. New reactions are grafted on the chord between drawn substrate/product participants (opposite sides); leftovers without anchors are still parked so coverage stays complete. A local nudge of grafted midmarkers is kept when crossings do not worsen.
 
 ```sh
 python3 project.py compose --gem examples/e_coli_core_edited.xml --out results/e_coli_core_edited/ --source-paths --previous results/e_coli_core/map.json
@@ -142,7 +142,7 @@ Matched geometry is kept as drawn (translated only). Everything else is placed b
 | Respect compartments | Not yet | Used in packing/shelves; cross-compartment species metric still high |
 | Aspect / compactness | Partial | Shelf aspect target; independent components still linear shelves |
 | Reproducibility | Partial | Fixed seeds; no compose seed CLI |
-| Build on previous layout | Partial | `--previous map.json` reuses matched geometry and grafts leftovers; partial Atlas match is opt-in |
+| Build on previous layout | Partial | `--previous map.json` reuses matched geometry and grafts leftovers |
 | Scale to GEMs | Partial | Global ≤3 000 + tiled views; large maps start routing-degraded |
 
 ### Evaluation
