@@ -100,7 +100,7 @@ tr.same td{border-top:0}
 .vctrl button{font:inherit;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:3px 10px;cursor:pointer;min-width:34px}
 .vctrl button[aria-pressed=true]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset}
 .vctrl .egap{flex:1;min-width:8px}
-.vctrl button.danger{color:#a33}
+.vctrl button:disabled{opacity:.45;cursor:not-allowed}.vctrl button.danger{color:#a33}
 .vbox.editing>svg{cursor:default}
 .vbox.editing>svg.spacepan,.vbox.editing>svg.spacepan:active{cursor:grab}
 .vbox.editing .edithandle{fill:rgba(11,114,133,.12);stroke:var(--accent);stroke-width:1.2;cursor:move;pointer-events:all}
@@ -329,6 +329,11 @@ function panzoom(box,svg,mm){if(!svg.getAttribute('viewBox')){svg.setAttribute('
 function fileFetchFail(el){return checkHealth().then(function(ok){if(!ok){dlFail();if(el)el.innerHTML='<p class="note err">'+esc(tr('Cannot download: the tool server is not reachable. Restart it with start_tool.command (or python3 project.py tool), then try again.'))+'</p>';return false}if(el)el.innerHTML='<p class="meta">'+tr('Not available yet.')+'</p>';return true})}
 function loadSvg(name,into,cb){var keep=[].slice.call(into.querySelectorAll(':scope > .minimap'));into.innerHTML='<p class="meta">'+tr('Loading…')+'</p>';keep.forEach(function(n){into.appendChild(n)});fetch(url(name)).then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(t){var s=sanitize(t);if(!s)throw 0;keep=[].slice.call(into.querySelectorAll(':scope > .minimap'));into.innerHTML='';into.appendChild(s);keep.forEach(function(n){into.appendChild(n)});cb(s)}).catch(function(){fileFetchFail(into).then(function(){keep.forEach(function(n){if(!n.parentNode)into.appendChild(n)})})})}
 var EDIT_LOCK_LABELS=true,OPM_EDIT_GEN=0;
+var LAB_SCALE=1,LAB_STEP=1.2,LAB_MIN=0.4,LAB_MAX=3;
+function applyLabScale(svg){if(!svg)return;svg.querySelectorAll('text[data-rk],text[data-nl]').forEach(function(el){if(!el.dataset.fs0){el.dataset.fs0=el.getAttribute('font-size')||'12';el.dataset.sw0=el.getAttribute('stroke-width')||'3'}el.setAttribute('font-size',+el.dataset.fs0*LAB_SCALE);el.setAttribute('stroke-width',+el.dataset.sw0*LAB_SCALE)});syncLabBtns()}
+function syncLabBtns(){document.querySelectorAll('button[id$="plabp"]').forEach(function(b){b.disabled=LAB_SCALE>=LAB_MAX-1e-9});document.querySelectorAll('button[id$="plabm"]').forEach(function(b){b.disabled=LAB_SCALE<=LAB_MIN+1e-9})}
+function bumpLabScale(dir,svg,pz){LAB_SCALE=Math.min(LAB_MAX,Math.max(LAB_MIN,LAB_SCALE*(dir>0?LAB_STEP:1/LAB_STEP)));applyLabScale(svg);if(pz&&pz.rebuildMM)pz.rebuildMM()}
+
 function mapEditor(box,svg,pz){
  var editGen=++OPM_EDIT_GEN;
  var NS='http://www.w3.org/2000/svg',data=null,baseGeom=null,dirty=false,hist=[],hI=-1,sel={},drag=null,active=false,alive=true;
@@ -447,11 +452,14 @@ function svgTab(name,note,legend,extra){var bys=(job.summary.modules&&job.summar
   +'<button type="button" id="'+PX+'pfit">'+tr('Fit')+'</button>'
   +'<button type="button" id="'+PX+'pmm" aria-pressed="true">'+tr('Minimap')+'</button>'
   +'<button type="button" id="'+PX+'pcof" aria-pressed="true">'+tr('Show cofactors')+'</button>'
+  +'<button type="button" id="'+PX+'plabp" title="'+tr('Larger labels')+'">A+</button>'
+  +'<button type="button" id="'+PX+'plabm" title="'+tr('Smaller labels')+'">A−</button>'
   +'<button type="button" id="'+PX+'pfull">'+tr('Full screen')+'</button>'
   +(canEdit?'<span class="egap"></span><button type="button" id="pedit" aria-pressed="false">'+tr('Edit')+'</button><span id="peditacts" hidden><button type="button" id="plock" aria-pressed="'+(EDIT_LOCK_LABELS?'true':'false')+'">'+tr('Lock labels')+'</button><button type="button" id="pendo" disabled>'+tr('Undo')+'</button><button type="button" id="psave" disabled>'+tr('Save')+'</button><button type="button" id="preset" hidden disabled>'+tr('Reset to original')+'</button><button type="button" id="pcancel" class="danger" disabled>'+tr('Cancel')+'</button></span>':'')
   +'</div><div class="vbox tall" id="'+PX+'pbox"><div class="minimap" id="'+PX+'mm" aria-label="'+tr('Minimap')+'"></div></div></div>'+provLeg+(extra||'');
- loadSvg(name,$(PX+'pbox'),function(s){var box=$(PX+'pbox'),mm=$(PX+'mm');var pz=panzoom(box,s,mm);if(!PX){window.OPM_PZ=pz;window.OPM_SVG=s}
+ loadSvg(name,$(PX+'pbox'),function(s){var box=$(PX+'pbox'),mm=$(PX+'mm');applyLabScale(s);var pz=panzoom(box,s,mm);if(!PX){window.OPM_PZ=pz;window.OPM_SVG=s}
   $(PX+'pfit').onclick=function(){pz.fit()};$(PX+'zin').onclick=function(){pz.zoomBy(-1)};$(PX+'zout').onclick=function(){pz.zoomBy(1)};
+  $(PX+'plabp').onclick=function(){bumpLabScale(1,s,pz)};$(PX+'plabm').onclick=function(){bumpLabScale(-1,s,pz)};
   $(PX+'pmm').onclick=function(){var on=mm.hidden;mm.hidden=!on;this.setAttribute('aria-pressed',on?'true':'false')};
   $(PX+'pcof').onclick=function(){var on=this.getAttribute('aria-pressed')!=='true';this.setAttribute('aria-pressed',on?'true':'false');box.classList.toggle('hidecof',!on)};
   hiliteSame(box,s);var v=box.parentNode;var overlay=function(on){v.classList.toggle('full',on);setTimeout(pz.fit,120)};
