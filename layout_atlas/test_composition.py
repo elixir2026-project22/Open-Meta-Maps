@@ -242,3 +242,25 @@ def test_pack_into_main_pockets_places_beside_main():
     x, y = placed[1]
     # Within a modest halo of the main AABB.
     assert -80 <= x <= 160 and -80 <= y <= 160
+
+
+def test_fit_canvas_to_content_shrinks_frame():
+    data = [
+        {},
+        {
+            'nodes': {
+                'a': {'node_type': 'metabolite', 'x': 100.0, 'y': 200.0},
+                'b': {'node_type': 'metabolite', 'x': 400.0, 'y': 500.0},
+            },
+            'reactions': {},
+            'text_labels': {},
+            'canvas': {'x': 0, 'y': 0, 'width': 5000, 'height': 4000},
+        },
+    ]
+    out = C.fit_canvas_to_content(data, pad=40.0)
+    assert out['applied']
+    can = data[1]['canvas']
+    assert abs(can['x'] - 60.0) < 1e-6
+    assert abs(can['y'] - 160.0) < 1e-6
+    assert abs(can['width'] - 380.0) < 1e-6
+    assert abs(can['height'] - 380.0) < 1e-6

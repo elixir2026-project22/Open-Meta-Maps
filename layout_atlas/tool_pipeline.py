@@ -824,6 +824,15 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             squeeze = composition_module.squeeze_escher(data, max_gap=k * spacing)
             squeeze['spacing_px'] = round(spacing, 1)
             squeeze['k'] = k
+            # If the first pass found nothing to collapse, try a tighter gap so
+            # remaining BiGG alignment voids still shrink (empty-rect / long-p90).
+            if not squeeze.get('applied'):
+                squeeze2 = composition_module.squeeze_escher(data, max_gap=max(spacing * 1.5, 40.0))
+                if squeeze2.get('applied'):
+                    squeeze2['spacing_px'] = round(spacing, 1)
+                    squeeze2['k'] = round(1.5, 2)
+                    squeeze2['fallback'] = True
+                    squeeze = squeeze2
             metric['squeeze'] = squeeze
             if composition_report is not None:
                 composition_report['squeeze'] = squeeze
@@ -867,6 +876,13 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
                 hr = metric['hotspot_repair']
                 log('  hotspot repair: ' + str({k: hr.get(k) for k in ('accepted_count', 'tries', 'rounds', 'seconds', 'improved')}))
             dump(folder / 'map.json', data)
+        # Shrink canvas to content so empty frame padding does not inflate blank/empty gates.
+        import composition as _comp_fit
+        fit = _comp_fit.fit_canvas_to_content(data)
+        metric['canvas_fit'] = fit
+        if log and fit.get('applied'):
+            log(f"  canvas fit to content: {fit.get('content')} pad=40")
+        dump(folder / 'map.json', data)
     elif not scalable and len(model['reactions']) <= 400:
         import edge_routing
         er = dict(mode=EDGE_ROUTING, before=edge_routing.measure(data, skip_edges))

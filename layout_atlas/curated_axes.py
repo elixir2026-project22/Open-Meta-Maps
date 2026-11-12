@@ -264,8 +264,8 @@ def _common_abs_scale(blocks, idxs, abs_lookups, abs_map=None):
 
 
 # Gaps longer than this × median segment length are treated as alignment padding.
-# Keep H/V alignment; only collapse empty runs longer than ~one typical mid↔met span.
-PADDING_GAP_FACTOR = 1.05
+# Keep H/V alignment / order; collapse empty runs longer than ~one typical mid↔met span.
+PADDING_GAP_FACTOR = 0.9
 
 
 def _remap_from_breaks(breaks):

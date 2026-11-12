@@ -28,10 +28,10 @@ ROW_WIDTH_MIN = 2000.0  # floor only; actual row width follows main-network size
 TARGET_ASPECT = 1.55   # target width/height for shelf + packers (centre of 4:3–16:9)
 ASPECT_MIN = 4.0 / 3.0
 ASPECT_MAX = 16.0 / 9.0
-SQUEEZE_K = 2.5
+SQUEEZE_K = 1.75
 # Collapse empty corridors even when that leaves the aspect band, if an empty run
 # is at least this fraction of the content bbox on that axis (fake landscape from voids).
-SQUEEZE_FORCE_EMPTY_FRAC = 0.12
+SQUEEZE_FORCE_EMPTY_FRAC = 0.08
 # Flush shelf standoff (was 400 px and created a huge empty corridor beside main).
 SHELF_STANDOFF = SHELF_GAP
 LINK_COST = 1.8   # once aspect is in-band, prefer chemically linked tiles sitting adjacent
@@ -445,8 +445,12 @@ def _mark_rect_occupied(occ, x0, y0, w, h):
     grid[iy0:iy1, ix0:ix1] = 1
 
 
-def _find_pocket_origin(occ, size_w, size_h, prefer_c):
-    """Top-left origin for a ``size_w×size_h`` box inside empty cells nearest ``prefer_c``."""
+def _find_pocket_origin(occ, size_w, size_h, prefer_c, content_lo=None, content_hi=None):
+    """Top-left origin for a ``size_w×size_h`` box inside empty cells nearest ``prefer_c``.
+
+    When ``content_lo/hi`` are set, prefer slots that pull the combined aspect toward
+    the 4:3–16:9 band (widen a tall map, avoid growing height on an already-wide map).
+    """
     if occ is None:
         return None
     grid, lo, cell = occ['grid'], occ['lo'], occ['cell']
@@ -454,28 +458,47 @@ def _find_pocket_origin(occ, size_w, size_h, prefer_c):
     nh = max(1, int(math.ceil(size_h / cell)))
     if nw >= occ['nx'] or nh >= occ['ny']:
         return None
-    # Integral image for empty (=0) counts.
     empty = (grid == 0).astype(np.int32)
     integ = np.pad(empty, ((1, 0), (1, 0)), mode='constant')
     integ = integ.cumsum(0).cumsum(1)
     best = None
-    # Stride search; denser near prefer_c.
     step = 1 if occ['nx'] * occ['ny'] < 40_000 else 2
-    px = (prefer_c[0] - lo[0]) / cell
-    py = (prefer_c[1] - lo[1]) / cell
+    want_wide = False
+    want_tall = False
+    if content_lo is not None and content_hi is not None:
+        cw = float(content_hi[0] - content_lo[0])
+        ch = float(content_hi[1] - content_lo[1])
+        asp = cw / max(ch, 1e-9)
+        want_wide = asp < ASPECT_MIN - 1e-3
+        want_tall = asp > ASPECT_MAX + 1e-3
     for iy in range(0, occ['ny'] - nh + 1, step):
         for ix in range(0, occ['nx'] - nw + 1, step):
             total = (integ[iy + nh, ix + nw] - integ[iy, ix + nw]
                      - integ[iy + nh, ix] + integ[iy, ix])
             if total < nw * nh:
                 continue
-            cx = lo[0] + (ix + nw / 2.0) * cell
-            cy = lo[1] + (iy + nh / 2.0) * cell
+            x0 = lo[0] + ix * cell
+            y0 = lo[1] + iy * cell
+            cx = x0 + size_w / 2.0
+            cy = y0 + size_h / 2.0
             dist = (cx - prefer_c[0]) ** 2 + (cy - prefer_c[1]) ** 2
-            # Prefer pockets still overlapping the main search window (already true).
-            score = (dist, iy, ix)
+            aspect_pen = 0.0
+            if content_lo is not None and content_hi is not None:
+                nlo0 = min(content_lo[0], x0)
+                nhi0 = max(content_hi[0], x0 + size_w)
+                nlo1 = min(content_lo[1], y0)
+                nhi1 = max(content_hi[1], y0 + size_h)
+                nasp = (nhi0 - nlo0) / max(nhi1 - nlo1, 1e-9)
+                if want_wide:
+                    # Prefer growing width (east/west of content), penalise growing height.
+                    aspect_pen = max(0.0, ASPECT_MIN - nasp) * 1e6 + max(0.0, (y0 + size_h) - content_hi[1]) * 10
+                elif want_tall:
+                    aspect_pen = max(0.0, nasp - ASPECT_MAX) * 1e6 + max(0.0, (x0 + size_w) - content_hi[0]) * 10
+                else:
+                    aspect_pen = abs(math.log(max(nasp, 1e-9) / TARGET_ASPECT)) * 1e3
+            score = (aspect_pen, dist, iy, ix)
             if best is None or score < best[0]:
-                best = (score, lo[0] + ix * cell, lo[1] + iy * cell)
+                best = (score, x0, y0)
     if best is None:
         return None
     return best[1], best[2]
@@ -519,15 +542,23 @@ def pack_into_main_pockets(boxes, main_pts, spacing, prefer_c=None):
                         if 0 <= jx < occ['nx'] and 0 <= jy < occ['ny']:
                             occ['grid'][jy, jx] = 1
     prefer_c = prefer_c if prefer_c is not None else pts.mean(0)
+    content_lo, content_hi = lo.copy(), hi.copy()
     placed = {}
     for bid, bw, bh in boxes:
-        origin = _find_pocket_origin(occ, bw, bh, prefer_c)
+        origin = _find_pocket_origin(occ, bw, bh, prefer_c,
+                                    content_lo=content_lo, content_hi=content_hi)
         if origin is None:
             continue
         placed[bid] = origin
         _mark_rect_occupied(occ, origin[0], origin[1], bw, bh)
+        content_lo[0] = min(content_lo[0], origin[0])
+        content_lo[1] = min(content_lo[1], origin[1])
+        content_hi[0] = max(content_hi[0], origin[0] + bw)
+        content_hi[1] = max(content_hi[1], origin[1] + bh)
     return placed, dict(placed=len(placed), missed=len(boxes) - len(placed),
-                        cell=round(cell, 1), search_pad=round(pad, 1))
+                        cell=round(cell, 1), search_pad=round(pad, 1),
+                        aspect_after=round(float((content_hi[0] - content_lo[0])
+                                                 / max(content_hi[1] - content_lo[1], 1e-9)), 3))
 
 
 def reflow_landscape(model, scene, blocks, cur):
@@ -641,28 +672,53 @@ def reflow_landscape(model, scene, blocks, cur):
         aspect_p = _apply_placed(pocket_placed, (0.0, 0.0))
         leftover = [i for i in sizes if i not in pocket_tl]
         report['pocket'] = dict(pocket_rep, leftover=len(leftover))
-        if not leftover or in_band0:
-            # In-band maps: pocket-pack only (no external re-shelf that would reopen gaps).
+        aspect_p_in = ASPECT_MIN - 1e-3 <= aspect_p <= ASPECT_MAX + 1e-3
+
+        def _pocket_done(reason, left):
             report.update(applied=bool(pocket_tl), aspect_after=round(aspect_p, 3),
-                          reason='main_pocket_pack' if not leftover else 'main_pocket_pack_partial',
-                          pack=dict(side='pocket', movable=len(pocket_tl), leftover=len(leftover),
-                                    aspect=round(aspect_p, 3),
+                          reason=reason,
+                          pack=dict(side='pocket', movable=len(pocket_tl) - len(left),
+                                    leftover=len(left), aspect=round(aspect_p, 3),
                                     in_band=ASPECT_MIN - 1e-3 <= aspect_p <= ASPECT_MAX + 1e-3))
             return scene, report
-        sizes = {i: sizes[i] for i in leftover}
-        centres = {i: centres[i] for i in leftover}
-        keys_of = {i: keys_of[i] for i in leftover}
-        w_use = {k: v for k, v in w_use.items() if k[0] in sizes and k[1] in sizes}
-        main_pts = np.array(
-            [pos[k] for i in main for k in comps[i]['keys']
-             if k in pos and not k.startswith('side:')]
-            + [pos[k] for i, ks in pocket_keys.items() for k in ks if k in pos],
-            float)
-        if len(main_pts) >= 2:
-            mlo, mhi = main_pts.min(0), main_pts.max(0)
-            main_w, main_h = float(mhi[0] - mlo[0]), float(mhi[1] - mlo[1])
-        origin_centres = {i: np.asarray(centres[i], float).copy() for i in centres}
-        origin_pos = {k: list(v) for k, v in pos.items()}
+
+        # If every movable fitted in a pocket but the frame is still tall/narrow,
+        # peel the largest pocketed tiles onto an east shelf so width can catch up
+        # to 4:3 without reopening empty corridors inside main.
+        if not leftover and not aspect_p_in and aspect_p < ASPECT_MIN - 1e-3:
+            peel_order = sorted(pocket_tl, key=lambda i: (-sizes[i][1] * sizes[i][0], i))
+            peel_n = max(1, (len(peel_order) + 2) // 3)
+            leftover = peel_order[:peel_n]
+            keep = {i for i in pocket_tl if i not in set(leftover)}
+            pocket_placed = {i: pocket_tl[i] for i in keep}
+            aspect_p = _apply_placed(pocket_placed, (0.0, 0.0))
+            report['pocket'] = dict(pocket_rep, leftover=len(leftover), peeled=len(leftover))
+            pocket_keys = {i: list(keys_of[i]) for i in keep}
+        elif aspect_p_in and not leftover:
+            return _pocket_done('main_pocket_pack', [])
+        elif in_band0 and not leftover:
+            # Started in-band; pocket-pack only (no external re-shelf that reopens gaps).
+            return _pocket_done('main_pocket_pack', [])
+        elif not leftover:
+            return _pocket_done('main_pocket_pack', [])
+
+        if leftover:
+            sizes = {i: sizes[i] for i in leftover}
+            centres = {i: centres[i] for i in leftover}
+            keys_of = {i: keys_of[i] for i in leftover}
+            w_use = {k: v for k, v in w_use.items() if k[0] in sizes and k[1] in sizes}
+            main_pts = np.array(
+                [pos[k] for i in main for k in comps[i]['keys']
+                 if k in pos and not k.startswith('side:')]
+                + [pos[k] for i, ks in pocket_keys.items() for k in ks if k in pos],
+                float)
+            if len(main_pts) >= 2:
+                mlo, mhi = main_pts.min(0), main_pts.max(0)
+                main_w, main_h = float(mhi[0] - mlo[0]), float(mhi[1] - mlo[1])
+            origin_centres = {i: np.asarray(centres[i], float).copy() for i in centres}
+            origin_pos = {k: list(v) for k, v in pos.items()}
+        else:
+            return _pocket_done('main_pocket_pack', [])
 
     # Binary-search shelf width; try right/left/below/above origins; pick best combined aspect.
     widest = max(w for w, h in sizes.values()) + SHELF_GAP
@@ -733,6 +789,25 @@ def spacing_from_main(main_pts):
     if len(pts) < 3:
         return 100.0
     return float(np.median(cKDTree(pts).query(pts, k=2)[0][:, 1])) or 100.0
+
+
+def fit_canvas_to_content(data, pad=40.0):
+    """Shrink ``data[1]['canvas']`` to the content bbox plus ``pad`` on each side.
+
+    Translation-free: only the canvas frame changes, so map units stay absolute.
+    """
+    xs, ys = _coord_lists(data[1])
+    if not xs:
+        return dict(applied=False)
+    x0, x1 = min(xs), max(xs)
+    y0, y1 = min(ys), max(ys)
+    before = dict(data[1].get('canvas') or {})
+    data[1]['canvas'] = dict(
+        x=x0 - pad, y=y0 - pad,
+        width=(x1 - x0) + 2 * pad,
+        height=(y1 - y0) + 2 * pad)
+    return dict(applied=True, before=before, after=dict(data[1]['canvas']),
+                content=[round(x1 - x0, 1), round(y1 - y0, 1)])
 
 
 def _link_key(a, b):
