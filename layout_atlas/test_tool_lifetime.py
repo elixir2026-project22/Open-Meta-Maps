@@ -67,6 +67,16 @@ class LifetimeConstants(unittest.TestCase):
         self.assertNotIn('无法下载：工具服务器不可用', html)
         self.assertNotIn('id="lang"', html)
         self.assertNotIn('data-zh', html)
+        # Settings / labels audit (English-only, correct report keys, curated wording).
+        self.assertIn('brenda_pathway_maps', html)
+        self.assertIn('Core library (CC0 / CC BY / MIT)', html)
+        self.assertIn("human_maps:'Human maps'", html)
+        self.assertIn("panther:'PANTHER'", html)
+        self.assertIn("ich360:'iCH360'", html)
+        self.assertIn("metabolismregulation:'Metabolism Regulation'", html)
+        self.assertIn("expert_exact:'curated exact'", html)
+        self.assertIn("expert_adapted:'curated adapted'", html)
+        self.assertNotRegex(html, r'[\u4e00-\u9fff]')
         self.assertIn("visibilitychange", html)
         self.assertIn("visibilityState==='visible'", html)
         # bye only on pagehide/unload — not on download clicks
