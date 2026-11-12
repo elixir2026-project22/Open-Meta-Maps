@@ -219,8 +219,10 @@ class Library:
      for e in m['edges']:
       if e.get('a') not in mp or e.get('b') not in mp:continue
       a,b=mp[e['a']],mp[e['b']]
-      if e.get('flow') in ('substrate','product') and tg.edges[a,b].get('role'):
-       flow_cost+=e['flow']!=tg.edges[a,b]['role'];count+=1
+      role=tg.edges[a,b].get('role')
+      if e.get('flow') in ('substrate','product') and role:
+       # Dual-role target edges match either substrate or product flow.
+       flow_cost+=0 if role=='both' or e['flow']==role else 1;count+=1
      spread=float(np.std(xy[:,0])+np.std(xy[:,1]));features=[len(rs),biol,abs(ports-srcports),flow_cost/max(1,count),float(extent[0]/max(extent[1],.05)),len(tg)/area,float(axis),len(self.support[m['core_family']]),initial,sum(targetports.values())*float(extent[0]/max(extent[1],.05)),ports/max(len(tg),1)*spread]
      p=dict(id=uid([m['id'],rs,sorted(mp.items())]),template_id=m['id'],map_id=m['map_id'],lineage=m['lineage'],source=m['source'],species=m['species'],layout_origin=m.get('layout_origin'),license=m.get('license'),source_citation=m.get('source_citation'),geometry_fingerprint=m['geometry_fingerprint'],reaction_ids=[r[2:] for r in rs],node_mapping=mp,reaction_mapping=rmap,positions={k:np.array(v).tolist() for k,v in positions.items()},source_xy=source_xy,source_to_initial_frame=frame,position_origins={mp[k]:source[k]['position_origin'] for k in mp},match_level=['geometry','partial_reference','complete_equation','reaction_reference'][biol],complete_chemical_equation_verified=biol>=2 and bool(mapping_checks) and all(x['complete_equation'] for x in mapping_checks),complete_equation_verified=biol>=2 and bool(mapping_checks) and all(x['complete_equation'] and x['compartments_verified'] for x in mapping_checks),mapping_evidence=mapping_checks,features=features,ports=targetports,score=2*len(rs)+.6*biol-.1*features[2]-.2*features[3]-.2*initial+layout_priority(m),expert_query_coordinates_used=False,template_quality=m['quality'],match_mode='core_subgraph' if partial_mode else 'exact_core',unmapped_target_nodes=sorted(set(tg)-set(mp.values())))
      pool.append(p)

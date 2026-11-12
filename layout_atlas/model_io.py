@@ -200,8 +200,9 @@ def load_model(path):
                 bag[mid] = bag.get(mid, 0) + value
         # Net stoichiometry for chemistry; keep coefficient 0 when both sides cancel so gross
         # participation still lists the species (A -> A and A + B -> A + C).
+        # Iterate in SBML reactant-then-product order (not set union hash order).
         coefficients = {}
-        for mid in set(consumed) | set(produced):
+        for mid in {**consumed, **produced}:
             s = float(consumed.get(mid, 0.0))
             p = float(produced.get(mid, 0.0))
             net = p - s

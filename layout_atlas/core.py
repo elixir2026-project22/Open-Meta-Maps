@@ -58,8 +58,7 @@ def participation_roles(coefficient):
  both substrate and product (gross participation, not net stoichiometry).
  """
  c=float(coefficient)
- if c<0:return (c,)
- if c>0:return (c,)
+ if c:return (c,)
  return (-1.0,1.0)
 
 def model_graph(model):

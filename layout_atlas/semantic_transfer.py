@@ -92,6 +92,10 @@ def unique_equation_mapping(coefficients, target, options, target_compartments):
     first=entities[0];factors=sorted({round(target['metabolites'][m]/coefficients[first],12) for m in options[first] if m in target['metabolites']})
     answers=[]
     for factor in factors:
+        # Factor 0 would match any curated stoichiometry onto a target coefficient-0
+        # species (A -> A); skip so a one-participant curated reaction cannot record
+        # reversed_recording against that target.
+        if not factor:continue
         choices={k:[m for m in options[k] if m in target['metabolites'] and abs(target['metabolites'][m]-coefficients[k]*factor)<1e-8] for k in entities}
         if any(not v for v in choices.values()):continue
         def visit(i,mapping,used,roles,reverse):
