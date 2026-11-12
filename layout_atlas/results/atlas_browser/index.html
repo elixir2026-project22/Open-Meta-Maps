@@ -109,8 +109,9 @@ button.lnk{font:inherit;background:none;border:0;color:var(--accent);cursor:poin
 .ab-th::before{content:"Loading…";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--mute);pointer-events:none;z-index:1}
 .ab-th.is-ready::before,.ab-th.is-error::before{content:none}
 .ab-th.is-error::after{content:"Preview unavailable";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--mute);background:#fafafa}
-.ab-th img.th{position:absolute;inset:0;display:block;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:contain!important;object-position:center;opacity:0;transition:opacity .15s ease}
+.ab-th img.th{position:absolute;inset:0;display:block;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:contain!important;object-position:center;margin:0;border:0;border-radius:0;background:transparent;opacity:0;transition:opacity .15s ease}
 .ab-th.is-ready img.th{opacity:1}
+.ab-detail img.th{display:block;width:100%;height:240px;max-width:none;max-height:none;object-fit:contain;margin:0;background:#fafafa;border:1px solid var(--line);border-radius:8px}
 .ab-empty{color:var(--mute);padding:24px 0}
 .ab-detail{display:none}.ab-detail.on{display:block}
 .ab-list.on{display:none}
@@ -308,7 +309,7 @@ function openDetail(id){
     +d.variants.map(function(v){return '<tr><td>'+esc(v.source)+'</td><td>'+esc(v.name)+'</td><td>'+esc(v.license)+'</td><td>'+esc(v.attribution||'')+'</td></tr>'}).join('')
     +'</tbody></table></div>'}
   var spRow=d.species?'<dt>Species</dt><dd>'+esc(d.species)+'</dd>':'';
-  $('detail').innerHTML='<div class="detail-grid"><div><img class="th" style="height:240px;width:100%;object-fit:contain;background:var(--bg);border:1px solid var(--line);border-radius:8px" src="'+esc(d.thumbnail)+'" alt="">'
+  $('detail').innerHTML='<div class="detail-grid"><div><img class="th" src="'+esc(d.thumbnail)+'" alt="">'
    +'</div><div><dl class="kv">'
    +'<dt>Source</dt><dd>'+esc(d.source)+'</dd>'
    +'<dt>Map</dt><dd>'+esc(d.name)+' <span class="muted">'+esc(d.map_id)+'</span></dd>'
