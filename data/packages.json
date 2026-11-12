@@ -1,13 +1,13 @@
 {
  "version": "data-v1",
- "base_url": "https://github.com/yangziwei96/OpenMetaMaps/releases/download/data-v1/",
+ "base_url": "https://github.com/elixir2026-project22/Open-Meta-Maps/releases/download/data-v1/",
  "packages": [
   {
    "name": "atlas-full",
    "title": "Full local Atlas database (atlas.sqlite)",
    "file": "openmetamaps-atlas-full-data-v1.tar.gz",
-   "sha256": "33850a35084f1f97275e6d89a77d03404119220ffe5577b93308a4058ddf5481",
-   "bytes": 48347021,
+   "sha256": "426d022e02f26dbbd28722a122b82418d48715421e7d13bb1dc5b17d489a7db8",
+   "bytes": 38166377,
    "files": 2,
    "licence": "Default Atlas modules mix CC0 (Escher, WikiPathways, Reactome data), CC BY 4.0 (BRENDA, Human-maps, Metabolism Regulation, PANTHER) and MIT (iCH360). Keep attributions in THIRD_PARTY_NOTICES.md.",
    "marker": "atlas.sqlite",

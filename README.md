@@ -17,8 +17,8 @@ Every reaction and metabolite of the model appears in the map. Stoichiometry and
 Requirements: Python 3.11+, Node.js with npm, a C++ compiler (`clang++`) and network access for the first setup. SBML via libSBML; COBRA / BiGG JSON also supported.
 
 ```sh
-git clone https://github.com/yangziwei96/OpenMetaMaps.git
-cd OpenMetaMaps
+git clone https://github.com/elixir2026-project22/Open-Meta-Maps.git
+cd Open-Meta-Maps
 
 python3 -m pip install -r layout_atlas/requirements.txt
 npm ci --prefix layout_atlas/runtime
