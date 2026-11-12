@@ -2,11 +2,14 @@
 
 Index fields are derived generically from module payloads and registry/provenance
 (no per-source hardcoding). Curated coordinates are never rotated or mirrored.
+The search index is built on first use under data/cache/ and rebuilt when
+data/atlas_registry.json changes.
 """
 from __future__ import annotations
 
 import csv
 import gzip
+import hashlib
 import io
 import json
 import re
@@ -16,17 +19,35 @@ import zipfile
 from collections import Counter
 from datetime import date
 from pathlib import Path
+from xml.sax.saxutils import escape as xml_escape
 
-from core import DATA, ROOT, dump, read
-from atlas_registry import ATTRIBUTION, DEFAULT_EXTENSIONS, OPEN_CORE, unpack
+from core import DATA, ROOT, dump, read, sha
+from atlas_registry import ATTRIBUTION, DEFAULT_EXTENSIONS, OPEN_CORE, REGISTRY_PATH, unpack
 
-INDEX_PATH = DATA / 'atlas_browser_index.json.gz'
-INDEX_SCHEMA = 1
+CACHE_DIR = DATA / 'cache' / 'atlas_browser'
+INDEX_PATH = CACHE_DIR / 'index.json.gz'
+META_PATH = CACHE_DIR / 'meta.json'
+INDEX_SCHEMA = 2
 # Admit CC0 / CC BY / MIT only (reject BY-SA, NC, ND, etc.).
 ALLOWED_LICENSE = re.compile(
     r'(?i)^(CC0(?:-1\.0)?(?:-data)?|CC-?BY(?:-4\.0)?|MIT)$'
 )
 PAGE_DEFAULT = 24
+CANON_NS = ('bigg.reaction', 'metanetx.reaction', 'rhea', 'ec-code')
+QUALITY_INFO = {
+    'semantic_transfer': (
+        'Curated reaction layout',
+        'Geometry from a curated source map with reaction identities attached.',
+    ),
+    'geometry_only': (
+        'Geometry only',
+        'Drawn layout without reaction identifiers (shape cut from the map).',
+    ),
+    'annotated_topology': (
+        'Annotated topology',
+        'Reaction topology with annotations; the layout may be automatic.',
+    ),
+}
 SOURCE_COLORS = {
     'escher': '#2d8f6f',
     'wikipathways': '#3b77b8',
@@ -49,8 +70,32 @@ def license_ok(lic):
     return bool(ALLOWED_LICENSE.match(s))
 
 
+def attribution_string(value, source=''):
+    """Normalise attribution to plain text (some sources store a dict)."""
+    if isinstance(value, dict):
+        parts = [value.get('title') or value.get('attribution') or value.get('text') or '']
+        if value.get('paper'):
+            parts.append(str(value['paper']))
+        if value.get('doi'):
+            parts.append('doi:' + str(value['doi']))
+        if value.get('url'):
+            parts.append(str(value['url']))
+        text = '; '.join(p for p in parts if p)
+        return text or ATTRIBUTION.get(source, '')
+    text = str(value or '').strip()
+    return text or ATTRIBUTION.get(source, '')
+
+
+def quality_label(code):
+    label, tip = QUALITY_INFO.get(code or '', (None, None))
+    if label:
+        return dict(code=code or '', label=label, tip=tip)
+    if not code:
+        return dict(code='', label='Unknown', tip='No quality tag on this module.')
+    return dict(code=code, label=str(code).replace('_', ' ').capitalize(), tip='Stored quality tag from the Atlas payload.')
+
+
 def _extension_paths():
-    """Default extension module dumps, same membership as database.modules()."""
     out = []
     for name in DEFAULT_EXTENSIONS:
         path = DATA / 'extensions' / name / 'modules.json.gz'
@@ -101,8 +146,48 @@ def _reaction_ec_bridge():
         return {}
 
 
+def _vals(refs, ns):
+    vals = (refs or {}).get(ns) or []
+    if isinstance(vals, (str, int, float)):
+        vals = [vals]
+    return [str(v) for v in vals if v is not None and str(v).strip()]
+
+
+def canonical_reaction_ids(module):
+    """Stable chemical identity tokens for one module (generic over namespaces)."""
+    out = []
+    for r in module.get('reactions') or []:
+        refs = r.get('references') or {}
+        picked = None
+        for ns in CANON_NS:
+            vals = _vals(refs, ns)
+            if vals:
+                picked = f'{ns}:{vals[0]}'
+                break
+        if picked is None:
+            for ns in sorted(refs):
+                if ns in CANON_NS:
+                    continue
+                vals = _vals(refs, ns)
+                if vals:
+                    picked = f'{ns}:{vals[0]}'
+                    break
+        if picked is None and r.get('id'):
+            picked = f"id:{r['id']}"
+        if picked:
+            out.append(picked)
+    return tuple(sorted(set(out)))
+
+
+def reaction_set_signature(module):
+    ids = canonical_reaction_ids(module)
+    if not ids:
+        # Geometry-only: do not collapse distinct drawings together.
+        return ''
+    return hashlib.sha1('\n'.join(ids).encode()).hexdigest()[:16]
+
+
 def _collect_ids(module, bridge_ec):
-    """Gather searchable reaction / EC / metabolite tokens from a module payload."""
     rx, ec, met = set(), set(), set()
     for r in module.get('reactions') or []:
         rid = r.get('id')
@@ -142,15 +227,19 @@ def record_from_module(module, bridge_ec=None, attribution_fallback=None, store=
     lic = module.get('license') or module.get('licence') or ''
     if not license_ok(lic):
         return None
-    attr = module.get('attribution') or module.get('source_citation') or ''
-    if not attr:
-        attr = (attribution_fallback or {}).get(module.get('source')) or ATTRIBUTION.get(module.get('source'), '')
+    source = module.get('source') or ''
+    attr = attribution_string(
+        module.get('attribution') or module.get('source_citation') or '',
+        source,
+    )
+    if not attr and attribution_fallback:
+        attr = attribution_string(attribution_fallback.get(source), source)
     rx, ec, met = _collect_ids(module, bridge_ec)
     name = module.get('name') or ''
     map_id = module.get('map_id') or ''
     lineage = module.get('lineage') or ''
-    source = module.get('source') or ''
     map_tokens = sorted(set(_tokens(name, map_id, lineage, source, *name.split('.'))))
+    rx_canon = list(canonical_reaction_ids(module))
     return dict(
         id=module['id'],
         store=store,
@@ -161,8 +250,10 @@ def record_from_module(module, bridge_ec=None, attribution_fallback=None, store=
         species=module.get('species') or '',
         license=lic,
         attribution=attr,
-        size=int(module.get('size') or len(module.get('reactions') or []) or 0),
+        size=int(module.get('size') or len(module.get('reactions') or []) or len(rx_canon) or 0),
         quality=module.get('quality') or '',
+        rx_sig=reaction_set_signature(module),
+        rx_canon=rx_canon,
         rx=rx,
         ec=ec,
         met=met,
@@ -170,8 +261,15 @@ def record_from_module(module, bridge_ec=None, attribution_fallback=None, store=
     )
 
 
+def registry_fingerprint():
+    path = Path(REGISTRY_PATH) if REGISTRY_PATH else DATA / 'atlas_registry.json'
+    if not path.is_file():
+        return ''
+    return sha(path.read_bytes())
+
+
 def build_index(path=None, modules=None):
-    """Build and write the compact browser index. Returns summary dict."""
+    """Build and write the compact browser index under data/cache/. Returns summary dict."""
     path = Path(path or INDEX_PATH)
     bridge = _reaction_ec_bridge()
     records = []
@@ -192,10 +290,13 @@ def build_index(path=None, modules=None):
         records.append(rec)
         sources[rec['source']] += 1
         licences[rec['license']] += 1
-    records.sort(key=lambda r: (-r['size'], r['source'], r['name'], r['id']))
+    # Larger / more complete modules first.
+    records.sort(key=lambda r: (-r['size'], -len(r.get('rx_canon') or []), r['source'], r['name'], r['id']))
+    reg_sha = registry_fingerprint()
     payload = dict(
         schema_version=INDEX_SCHEMA,
         generated=str(date.today()),
+        registry_sha256=reg_sha,
         module_count=len(records),
         skipped_license=skipped,
         sources=dict(sources),
@@ -206,6 +307,15 @@ def build_index(path=None, modules=None):
     raw = json.dumps(payload, ensure_ascii=False, separators=(',', ':')).encode()
     with gzip.open(path, 'wb', compresslevel=6) as f:
         f.write(raw)
+    dump(META_PATH if path == INDEX_PATH else path.with_name('meta.json'), dict(
+        schema_version=INDEX_SCHEMA,
+        generated=payload['generated'],
+        registry_sha256=reg_sha,
+        modules=len(records),
+        bytes=path.stat().st_size,
+    ))
+    global _index
+    _index = None
     return dict(
         path=str(path.relative_to(ROOT)) if str(path).startswith(str(ROOT)) else str(path),
         modules=len(records),
@@ -213,18 +323,45 @@ def build_index(path=None, modules=None):
         bytes=path.stat().st_size,
         uncompressed=len(raw),
         seconds=round(time.time() - t0, 2),
+        registry_sha256=reg_sha,
         sources=dict(sources),
         licences=dict(licences),
     )
 
 
+def _index_is_fresh(path=None):
+    path = Path(path or INDEX_PATH)
+    if not path.is_file():
+        return False
+    meta_path = META_PATH if path == INDEX_PATH else path.with_name('meta.json')
+    try:
+        with gzip.open(path, 'rt', encoding='utf-8') as f:
+            head = json.load(f)
+        if int(head.get('schema_version') or 0) != INDEX_SCHEMA:
+            return False
+        want = registry_fingerprint()
+        got = head.get('registry_sha256') or ''
+        if want and got and want != got:
+            return False
+        if meta_path.is_file():
+            meta = read(meta_path)
+            if want and meta.get('registry_sha256') and meta['registry_sha256'] != want:
+                return False
+        return True
+    except Exception:
+        return False
+
+
 def load_index(path=None, force=False):
+    """Load index from disk. `force` only bypasses the in-memory cache (does not rebuild)."""
     global _index
     path = Path(path or INDEX_PATH)
     if _index is not None and not force and _index.get('_path') == str(path):
         return _index
-    if not path.is_file():
-        build_index(path)
+    if path == INDEX_PATH:
+        ensure_index(path)
+    elif not path.is_file():
+        raise FileNotFoundError(path)
     with gzip.open(path, 'rt', encoding='utf-8') as f:
         data = json.load(f)
     data['_path'] = str(path)
@@ -235,9 +372,9 @@ def load_index(path=None, force=False):
 
 def ensure_index(path=None):
     path = Path(path or INDEX_PATH)
-    if not path.is_file():
-        return build_index(path)
-    return dict(path=str(path), modules=None, bytes=path.stat().st_size, status='present')
+    if _index_is_fresh(path):
+        return dict(path=str(path), modules=None, bytes=path.stat().st_size, status='present')
+    return build_index(path)
 
 
 def _match_list(values, query):
@@ -250,8 +387,45 @@ def _match_list(values, query):
     return False
 
 
+def _truthy(v):
+    if isinstance(v, bool):
+        return v
+    return str(v or '').strip().lower() in ('1', 'true', 'yes', 'on', 'all')
+
+
+def _quality_rank(code):
+    order = {'semantic_transfer': 0, 'annotated_topology': 1, 'geometry_only': 2}
+    return order.get(code or '', 9)
+
+
+def _group_key(m):
+    sig = m.get('rx_sig') or ''
+    return sig if sig else f"id:{m['id']}"
+
+
+def _collapse(hits):
+    """Collapse identical canonical reaction sets; keep larger/better representative first."""
+    groups = {}
+    order = []
+    for m in hits:
+        key = _group_key(m)
+        if key not in groups:
+            groups[key] = []
+            order.append(key)
+        groups[key].append(m)
+    out = []
+    for key in order:
+        members = groups[key]
+        members.sort(key=lambda r: (-r['size'], _quality_rank(r.get('quality')), r['source'], r['id']))
+        rep = members[0]
+        out.append((rep, members))
+    # Rank groups by representative size (more complete first).
+    out.sort(key=lambda pair: (-pair[0]['size'], -len(pair[1]), _quality_rank(pair[0].get('quality')), pair[0]['name'], pair[0]['id']))
+    return out
+
+
 def search(filters=None, page=1, per_page=PAGE_DEFAULT, index=None):
-    """Filter modules. All filter values are optional substring / equality matches."""
+    """Filter modules. Dedup by canonical reaction set unless variants=1."""
     filters = filters or {}
     idx = index or load_index()
     rows = idx['modules']
@@ -262,6 +436,7 @@ def search(filters=None, page=1, per_page=PAGE_DEFAULT, index=None):
     met = filters.get('metabolite') or filters.get('metabolite_id') or ''
     mmap = filters.get('map') or filters.get('map_id') or filters.get('model') or ''
     q = filters.get('q') or filters.get('query') or ''
+    show_variants = _truthy(filters.get('variants') or filters.get('show_variants'))
 
     hits = []
     for m in rows:
@@ -284,25 +459,44 @@ def search(filters=None, page=1, per_page=PAGE_DEFAULT, index=None):
                 continue
         hits.append(m)
 
+    if show_variants:
+        # Already size-desc from index build; keep that order.
+        items = [(m, [m]) for m in hits]
+    else:
+        items = _collapse(hits)
+
     per_page = max(1, min(int(per_page or PAGE_DEFAULT), 100))
     page = max(1, int(page or 1))
-    total = len(hits)
+    total = len(items)
     pages = max(1, (total + per_page - 1) // per_page)
     if page > pages:
         page = pages
     start = (page - 1) * per_page
-    slice_ = hits[start:start + per_page]
+    slice_ = items[start:start + per_page]
     return dict(
         total=total,
         page=page,
         per_page=per_page,
         pages=pages,
-        results=[public_card(m) for m in slice_],
-        filters={k: v for k, v in filters.items() if v},
+        deduped=not show_variants,
+        results=[public_card(rep, variants=members) for rep, members in slice_],
+        filters={k: v for k, v in filters.items() if v not in (None, '')},
     )
 
 
-def public_card(m):
+def public_card(m, variants=None):
+    variants = variants or [m]
+    sources = sorted({v['source'] for v in variants})
+    maps = sorted({(v['source'], v.get('name') or v.get('map_id') or '') for v in variants})
+    also = None
+    if len(variants) > 1:
+        also = dict(
+            modules=len(variants),
+            sources=len(sources),
+            maps=len(maps),
+            label=f"also in: {len(sources)} sources / {len(maps)} maps",
+        )
+    q = quality_label(m.get('quality'))
     return dict(
         id=m['id'],
         source=m['source'],
@@ -310,9 +504,19 @@ def public_card(m):
         map_id=m['map_id'],
         species=m.get('species') or '',
         license=m['license'],
-        attribution=m.get('attribution') or '',
+        attribution=attribution_string(m.get('attribution'), m.get('source') or ''),
         size=m['size'],
         quality=m.get('quality') or '',
+        quality_label=q['label'],
+        quality_tip=q['tip'],
+        rx_sig=m.get('rx_sig') or '',
+        also_in=also,
+        variants=[dict(
+            id=v['id'], source=v['source'], name=v['name'], map_id=v.get('map_id') or '',
+            license=v.get('license') or '',
+            attribution=attribution_string(v.get('attribution'), v.get('source') or ''),
+            size=v.get('size') or 0,
+        ) for v in variants],
         thumbnail=f"/api/atlas/modules/{m['id']}/thumbnail.svg",
     )
 
@@ -323,9 +527,10 @@ def meta(index=None):
         schema_version=idx.get('schema_version'),
         generated=idx.get('generated'),
         module_count=idx.get('module_count'),
+        registry_sha256=idx.get('registry_sha256'),
         sources=sorted((idx.get('sources') or {}).items()),
         licences=sorted((idx.get('licences') or {}).items()),
-        filters=['q', 'ec', 'reaction', 'metabolite', 'map', 'source', 'license'],
+        filters=['q', 'ec', 'reaction', 'metabolite', 'map', 'source', 'license', 'variants'],
     )
 
 
@@ -355,7 +560,7 @@ def load_module(module_id, index=None):
 def module_detail(module_id, index=None):
     idx = index or load_index()
     card = (idx.get('_by_id') or {}).get(module_id)
-    mod = load_module(module_id)
+    mod = load_module(module_id, index=idx)
     if mod is None:
         return None
     if not license_ok(mod.get('license') or mod.get('licence') or (card or {}).get('license')):
@@ -371,6 +576,27 @@ def module_detail(module_id, index=None):
         ))
     bridge = _reaction_ec_bridge()
     rec = card or record_from_module(mod, bridge) or {}
+    q = quality_label(mod.get('quality') or rec.get('quality'))
+    # Same reaction-set siblings for provenance listing.
+    sig = rec.get('rx_sig') or ''
+    siblings = []
+    if sig:
+        for m in idx['modules']:
+            if m.get('rx_sig') == sig:
+                siblings.append(dict(
+                    id=m['id'], source=m['source'], name=m['name'], map_id=m.get('map_id') or '',
+                    license=m.get('license') or '', attribution=m.get('attribution') or '', size=m.get('size') or 0,
+                ))
+    else:
+        siblings = [dict(
+            id=mod['id'], source=mod.get('source'), name=mod.get('name'), map_id=mod.get('map_id') or '',
+            license=mod.get('license') or '', attribution=rec.get('attribution') or '', size=rec.get('size') or 0,
+        )]
+    layout = mod.get('layout_origin') or {}
+    layout_label = None
+    if isinstance(layout, dict) and layout.get('status'):
+        st = str(layout['status'])
+        layout_label = st.replace('_', ' ')
     return dict(
         id=mod['id'],
         source=mod.get('source'),
@@ -379,12 +605,15 @@ def module_detail(module_id, index=None):
         lineage=mod.get('lineage'),
         species=mod.get('species'),
         license=mod.get('license') or mod.get('licence'),
-        attribution=rec.get('attribution') or mod.get('attribution') or ATTRIBUTION.get(mod.get('source'), ''),
+        attribution=attribution_string(rec.get('attribution') or mod.get('attribution'), mod.get('source') or ''),
         size=rec.get('size') or mod.get('size'),
         quality=mod.get('quality'),
+        quality_label=q['label'],
+        quality_tip=q['tip'],
         source_sha256=mod.get('source_sha256'),
         original_instance=mod.get('original_instance'),
-        layout_origin=mod.get('layout_origin'),
+        layout_origin=layout,
+        layout_origin_label=layout_label,
         extraction=mod.get('extraction'),
         core_family=mod.get('core_family'),
         variant=mod.get('variant'),
@@ -393,18 +622,72 @@ def module_detail(module_id, index=None):
         ports=mod.get('ports') or [],
         node_count=len(mod.get('nodes') or []),
         edge_count=len(mod.get('edges') or []),
+        also_in=dict(
+            modules=len(siblings),
+            sources=len({s['source'] for s in siblings}),
+            maps=len({(s['source'], s['name']) for s in siblings}),
+            label=f"{len({s['source'] for s in siblings})} sources / {len({(s['source'], s['name']) for s in siblings})} maps",
+        ) if len(siblings) > 1 else None,
+        variants=[dict(s, attribution=attribution_string(s.get('attribution'), s.get('source') or '')) for s in siblings],
         thumbnail=f"/api/atlas/modules/{mod['id']}/thumbnail.svg",
     )
 
 
-def thumbnail_svg(module, width=220, height=140):
-    """Reuse the Map Generator thumbnail style; uniform scale, no rotate/mirror."""
-    from tool_pipeline import thumbnail_svg as _thumb
+def thumbnail_svg(module, width=240, height=160):
+    """Curated drawing preview: metabolite circles, reaction midmarkers, connecting lines.
+
+    Uniform scale + translate only (no rotate/mirror). Fit-to-box with padding; no cropping.
+    """
+    usable = [n for n in (module.get('nodes') or []) if n.get('xy') is not None]
+    if not usable:
+        return (
+            f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}">'
+            f'<text x="12" y="{height // 2}" fill="#5b7480" font-size="12">No geometry</text></svg>'
+        )
+    xs = [n['xy'][0] for n in usable]
+    ys = [n['xy'][1] for n in usable]
+    min_x, max_x = min(xs), max(xs)
+    min_y, max_y = min(ys), max(ys)
+    bw = (max_x - min_x) or 1.0
+    bh = (max_y - min_y) or 1.0
+    pad = 14.0
+    scale = min((width - 2 * pad) / bw, (height - 2 * pad) / bh)
+    # Center content inside the box.
+    ox = (width - bw * scale) / 2
+    oy = (height - bh * scale) / 2
     color = SOURCE_COLORS.get(module.get('source'), '#128781')
-    return _thumb(module, color, width=width, height=height) or (
-        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}">'
-        f'<text x="12" y="{height // 2}" fill="#5b7480" font-size="12">No geometry</text></svg>'
-    )
+
+    def pt(n):
+        return (round(ox + (n['xy'][0] - min_x) * scale, 2), round(oy + (n['xy'][1] - min_y) * scale, 2))
+
+    by_key = {n['key']: n for n in usable}
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}" '
+        f'role="img" aria-label="{xml_escape(str(module.get("name") or module.get("id") or "module"))}">'
+    ]
+    for e in module.get('edges') or []:
+        a, b = by_key.get(e.get('a')), by_key.get(e.get('b'))
+        if not a or not b:
+            continue
+        (ax, ay), (bx, by) = pt(a), pt(b)
+        parts.append(f'<line x1="{ax}" y1="{ay}" x2="{bx}" y2="{by}" stroke="#9baab4" stroke-width="1.4" stroke-linecap="round"/>')
+    for n in usable:
+        if n.get('role') == 'reaction':
+            continue
+        x, y = pt(n)
+        title = xml_escape(str(n.get('label') or n.get('entity') or ''))
+        parts.append(
+            f'<circle cx="{x}" cy="{y}" r="4.2" fill="#fff" stroke="#167e83" stroke-width="1.6">'
+            f'<title>{title}</title></circle>'
+        )
+    for n in usable:
+        if n.get('role') != 'reaction':
+            continue
+        x, y = pt(n)
+        # Midmarker (small square), matching the map-preview reaction glyph.
+        parts.append(f'<rect x="{x - 3}" y="{y - 3}" width="6" height="6" fill="{color}" rx="0.5"/>')
+    parts.append('</svg>')
+    return ''.join(parts)
 
 
 def module_to_escher(module):
@@ -412,13 +695,11 @@ def module_to_escher(module):
     nodes_in = module.get('nodes') or []
     edges = module.get('edges') or []
     reactions_in = {str(r.get('key') or ('r:' + str(r.get('id')))): r for r in (module.get('reactions') or [])}
-    # Prefer stored xy; drop nodes without coordinates.
     usable = [n for n in nodes_in if n.get('xy') is not None]
     if not usable:
         raise ValueError('module has no drawable coordinates')
     xs = [n['xy'][0] for n in usable]
     ys = [n['xy'][1] for n in usable]
-    # Uniform scale to a readable canvas, preserving aspect (no mirror).
     min_x, min_y = min(xs), min(ys)
     span = max(max(xs) - min_x, max(ys) - min_y, 1e-9)
     scale = 400.0 / span
@@ -455,7 +736,6 @@ def module_to_escher(module):
         segs = {}
         mets = []
         coeffs = rx.get('coefficients') or {}
-        # Fall back to edge flow when coefficients are absent.
         seen_met = set()
         for e in edges:
             a, b = e.get('a'), e.get('b')
@@ -510,7 +790,6 @@ def module_to_escher(module):
 
 
 def attribution_text(module_or_card):
-    """CC BY (and other) attribution line for manifests."""
     lic = module_or_card.get('license') or ''
     attr = module_or_card.get('attribution') or ATTRIBUTION.get(module_or_card.get('source'), '')
     name = module_or_card.get('name') or module_or_card.get('id')
@@ -526,7 +805,6 @@ def attribution_text(module_or_card):
 
 
 def download_manifest(module_ids, index=None, fmt='json'):
-    """Build provenance/licence manifest rows for selected modules."""
     idx = index or load_index()
     by = idx.get('_by_id') or {m['id']: m for m in idx['modules']}
     rows = []
@@ -567,7 +845,6 @@ def download_manifest(module_ids, index=None, fmt='json'):
 
 
 def build_download_zip(module_ids, index=None):
-    """Zip of one Escher JSON per module plus JSON and CSV manifests."""
     idx = index or load_index()
     manifest_json, rows, missing = download_manifest(module_ids, index=idx, fmt='json')
     manifest_csv, _, _ = download_manifest(module_ids, index=idx, fmt='csv')
@@ -576,7 +853,7 @@ def build_download_zip(module_ids, index=None):
         zf.writestr('manifest.json', manifest_json)
         zf.writestr('manifest.csv', manifest_csv)
         for row in rows:
-            mod = load_module(row['module_id'])
+            mod = load_module(row['module_id'], index=idx)
             if mod is None:
                 missing.append(row['module_id'])
                 continue
@@ -601,13 +878,15 @@ def page_html():
 .ab-card{position:relative;cursor:pointer}
 .ab-card.sel{outline:2px solid var(--accent)}
 .ab-card .chk{position:absolute;top:10px;right:10px;z-index:2}
-.ab-card img.th,.ab-card object.th{display:block;width:100%;height:140px;object-fit:contain;background:var(--bg);border-radius:8px;margin-bottom:10px;border:1px solid var(--line)}
+.ab-card img.th{display:block;width:100%;height:150px;object-fit:contain;background:var(--bg);border-radius:8px;margin-bottom:10px;border:1px solid var(--line)}
 .ab-empty{color:var(--mute);padding:24px 0}
 .ab-detail{display:none}.ab-detail.on{display:block}
 .ab-list.on{display:none}
 .ab-rx{max-height:280px;overflow:auto;font:12px/1.45 ui-monospace,Menlo,monospace}
 button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
 .filters .grow{flex:1;min-width:min(280px,100%)}
+.ab-also{font-size:12px;color:var(--mute);margin:0 0 6px}
+.tip{border-bottom:1px dotted var(--mute);cursor:help}
 </style>'''
     body = css_extra + '''
 <div id="listView" class="ab-list">
@@ -624,6 +903,7 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
 </form>
 <div class="ab-toolbar">
 <label class="sel"><input type="checkbox" id="selPage"> Select all on page</label>
+<label class="sel"><input type="checkbox" id="showVariants"> Show all layout variants</label>
 <span class="count" id="count">Loading index…</span>
 <button type="button" id="dlSel" disabled>Download selected</button>
 </div>
@@ -638,9 +918,9 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
 <script>
 (function(){
 var $=function(id){return document.getElementById(id)};
-var state={page:1,per:24,selected:{},lastIds:[],detail:null};
+var state={page:1,per:24,selected:{},lastIds:[],detail:null,cards:{}};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
-function params(){var f=$('filters'),o={};['q','ec','reaction','metabolite','map','source','license'].forEach(function(k){var v=f[k].value.trim();if(v)o[k]=v});o.page=state.page;o.per_page=state.per;return o}
+function params(){var f=$('filters'),o={};['q','ec','reaction','metabolite','map','source','license'].forEach(function(k){var v=f[k].value.trim();if(v)o[k]=v});o.page=state.page;o.per_page=state.per;if($('showVariants').checked)o.variants='1';return o}
 function qs(o){return Object.keys(o).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(o[k])}).join('&')}
 function selCount(){return Object.keys(state.selected).length}
 function syncDl(){$('dlSel').disabled=!selCount();$('dlSel').textContent=selCount()?'Download selected ('+selCount()+')':'Download selected'}
@@ -653,18 +933,21 @@ function loadMeta(){
  }).catch(function(){$('count').textContent='Could not load Atlas index. Is the tool server running?'})}
 function card(m){
  var checked=state.selected[m.id]?' checked':'';
+ var also=m.also_in?'<p class="ab-also">'+esc(m.also_in.label)+'</p>':'';
  return '<article class="card ab-card'+(state.selected[m.id]?' sel':'')+'" data-id="'+esc(m.id)+'">'
   +'<label class="chk" onclick="event.stopPropagation()"><input type="checkbox" data-id="'+esc(m.id)+'"'+checked+'></label>'
   +'<img class="th" loading="lazy" alt="" src="'+esc(m.thumbnail)+'">'
   +'<h2 class="dn">'+esc(m.name||m.id)+'</h2>'
-  +'<p class="meta">'+esc(m.source)+' · '+esc(m.name||m.map_id)+'</p>'
+  +'<p class="meta">'+esc(m.source)+' · '+esc(m.name||m.map_id)+'</p>'+also
   +'<div class="tags"><span class="tag src-'+esc(m.source)+'">'+esc(m.source)+'</span>'
   +'<span class="tag">'+esc(m.size)+' reactions</span>'
   +'<span class="tag lic">'+esc(m.license)+'</span></div></article>'}
 function render(data){
  state.lastIds=(data.results||[]).map(function(m){return m.id});
+ state.cards={};(data.results||[]).forEach(function(m){state.cards[m.id]=m});
  $('grid').innerHTML=(data.results||[]).map(card).join('')||'<p class="ab-empty">No modules match these filters.</p>';
- $('count').textContent=data.total.toLocaleString()+' modules · page '+data.page+' / '+data.pages;
+ var kind=data.deduped===false?'layout variants':'modules';
+ $('count').textContent=data.total.toLocaleString()+' '+kind+' · page '+data.page+' / '+data.pages;
  var p=$('pager'),html='',i,start=Math.max(1,data.page-3),end=Math.min(data.pages,data.page+3);
  if(data.page>1)html+='<a href="#" data-p="'+(data.page-1)+'">‹</a>';
  for(i=start;i<=end;i++)html+=i===data.page?'<span>'+i+'</span>':'<a href="#" data-p="'+i+'">'+i+'</a>';
@@ -678,7 +961,8 @@ function search(){
  fetch('/api/atlas/search?'+qs(params())).then(function(r){return r.json()}).then(render)
   .catch(function(){$('count').textContent='Search failed.'})}
 $('filters').onsubmit=function(e){e.preventDefault();state.page=1;search()};
-$('reset').onclick=function(){['q','ec','reaction','metabolite','map'].forEach(function(k){$(k).value=''});$('source').value='';$('license').value='';state.page=1;search()};
+$('reset').onclick=function(){['q','ec','reaction','metabolite','map'].forEach(function(k){$(k).value=''});$('source').value='';$('license').value='';$('showVariants').checked=false;state.page=1;search()};
+$('showVariants').onchange=function(){state.page=1;search()};
 $('pager').onclick=function(e){var a=e.target.closest('[data-p]');if(!a)return;e.preventDefault();state.page=+a.getAttribute('data-p');search()};
 function toggleSel(cb){if(!cb)return;if(cb.checked)state.selected[cb.getAttribute('data-id')]=1;else delete state.selected[cb.getAttribute('data-id')];syncDl();var art=cb.closest('.ab-card');if(art)art.classList.toggle('sel',cb.checked)}
 $('grid').onclick=function(e){
@@ -689,7 +973,7 @@ $('grid').onchange=function(e){var cb=e.target.closest('input[type=checkbox][dat
 $('selPage').onchange=function(){
  state.lastIds.forEach(function(id){if($('selPage').checked)state.selected[id]=1;else delete state.selected[id]});
  Array.prototype.forEach.call(document.querySelectorAll('.ab-card'),function(art){
-  var id=art.getAttribute('data-id');var on=!!$('selPage').checked;art.classList.toggle('sel',on);
+  var on=!!$('selPage').checked;art.classList.toggle('sel',on);
   var cb=art.querySelector('input[type=checkbox]');if(cb)cb.checked=on});
  syncDl()};
 function openDetail(id){
@@ -700,7 +984,14 @@ function openDetail(id){
   var rx=(d.reactions||[]).map(function(r){
    var refs=Object.keys(r.references||{}).map(function(ns){return ns+':'+(r.references[ns]||[]).join(',')}).join('; ');
    return '<tr><td>'+esc(r.id||'')+'</td><td>'+esc(refs)+'</td></tr>'}).join('');
-  $('detail').innerHTML='<div class="detail-grid"><div><img class="th" style="height:240px;width:100%" src="'+esc(d.thumbnail)+'" alt="">'
+  var qTip=d.quality_tip?(' title="'+esc(d.quality_tip)+'"'):'';
+  var qLab=d.quality_label||d.quality||'';
+  var also='';
+  if(d.also_in&&d.variants&&d.variants.length>1){
+   also='<h2>Also drawn in</h2><p class="meta">'+esc(d.also_in.label)+'</p><div class="tablewrap"><table><thead><tr><th>Source</th><th>Map</th><th>Licence</th><th>Attribution</th></tr></thead><tbody>'
+    +d.variants.map(function(v){return '<tr><td>'+esc(v.source)+'</td><td>'+esc(v.name)+'</td><td>'+esc(v.license)+'</td><td>'+esc(v.attribution||'')+'</td></tr>'}).join('')
+    +'</tbody></table></div>'}
+  $('detail').innerHTML='<div class="detail-grid"><div><img class="th" style="height:240px;width:100%;object-fit:contain" src="'+esc(d.thumbnail)+'" alt="">'
    +'</div><div><dl class="kv">'
    +'<dt>Source</dt><dd>'+esc(d.source)+'</dd>'
    +'<dt>Map</dt><dd>'+esc(d.name)+' <span class="muted">'+esc(d.map_id)+'</span></dd>'
@@ -708,10 +999,12 @@ function openDetail(id){
    +'<dt>Licence</dt><dd>'+esc(d.license)+'</dd>'
    +'<dt>Attribution</dt><dd>'+esc(d.attribution||'')+'</dd>'
    +'<dt>Reactions</dt><dd>'+esc(d.size)+'</dd>'
-   +'<dt>Quality</dt><dd>'+esc(d.quality||'')+'</dd>'
-   +'<dt>SHA-256</dt><dd class="muted">'+esc(d.source_sha256||'')+'</dd>'
+   +'<dt>Layout quality</dt><dd><span class="tip"'+qTip+'>'+esc(qLab)+'</span></dd>'
+   +(d.layout_origin_label?'<dt>Layout origin</dt><dd>'+esc(d.layout_origin_label)+'</dd>':'')
+   +'<dt>Source file hash</dt><dd class="muted">'+esc(d.source_sha256||'')+'</dd>'
    +'</dl></div></div>'
    +'<h2>Member reactions</h2><div class="tablewrap"><table><thead><tr><th>ID</th><th>References</th></tr></thead><tbody class="ab-rx">'+rx+'</tbody></table></div>'
+   +also
    +(d.extraction?'<details class="det"><summary>Extraction provenance</summary><pre>'+esc(JSON.stringify(d.extraction,null,2))+'</pre></details>':'');
  }).catch(function(){alert('Could not load module')})}
 $('back').onclick=function(){$('listView').classList.remove('on');$('detailView').classList.remove('on');state.detail=null};
@@ -727,6 +1020,6 @@ loadMeta();
 </script>'''
     dest = ROOT / 'layout_atlas' / 'results' / 'atlas_browser'
     dest.mkdir(parents=True, exist_ok=True)
-    lead = ui.bi('Search curated Atlas modules by EC, reaction, metabolite, source map or licence, then download Escher JSON with a provenance manifest.')
+    lead = ui.bi('Search curated Atlas modules by EC, reaction, metabolite, source map or licence, then download Escher JSON with a provenance manifest. Identical reaction sets are collapsed by default.')
     ui.write(dest / 'index.html', 'Atlas Browser', body, section='atlas', lead=lead)
     return dest / 'index.html'

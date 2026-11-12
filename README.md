@@ -32,11 +32,7 @@ python3 project.py tool
 # or: ./start_tool.command
 ```
 
-Open <http://127.0.0.1:8765/tool/index.html>. Upload an SBML or COBRA JSON model, or pick an example (`e_coli_core`, `iIT341`, `iMM904`, `iML1515`). The viewer supports pan, wheel/pinch zoom and a minimap. The server exits when the last browser tab closes (~8 s grace); pass `--keep-running` to disable that.
-
-### Atlas Browser
-
-The same local server also serves **Atlas Browser** (`/atlas_browser/index.html`): search curated Atlas modules by EC number, reaction or metabolite ID, source map/model and licence, preview thumbnails, and download selected modules as Escher JSON (zipped) with a provenance/licence manifest (including CC BY attribution text). First use builds a compact search index; rebuild with `python3 tools/build_atlas_browser_index.py` (optional `--page` regenerates the HTML).
+Open <http://127.0.0.1:8765/tool/index.html>. Upload an SBML or COBRA JSON model, or pick an example (`e_coli_core`, `iIT341`, `iMM904`, `iML1515`). The viewer supports pan, wheel/pinch zoom and a minimap. The server exits when the last browser tab closes (~8 s grace); pass `--keep-running` to disable that. The same server also serves **Atlas Browser** (`/atlas_browser/index.html`) to search curated modules and download Escher JSON with a provenance/licence manifest (search index built on first use under `data/cache/`).
 
 ### Command line
 

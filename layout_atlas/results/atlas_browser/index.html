@@ -99,19 +99,21 @@ button.lnk{font:inherit;background:none;border:0;color:var(--accent);cursor:poin
 .vbox.tall{height:min(65vh,560px)}.vbox svg{touch-action:none;cursor:grab}.note.err{border-color:#c0392b;background:rgba(192,57,43,.1)}.lead2{color:var(--mute);max-width:90ch}
 .pdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}ul.checks{list-style:none;padding:0;margin:6px 0}ul.checks li{padding:2px 0}ul.checks .ok b{color:#2e7d32}ul.checks .bad b{color:#c0392b}details.det{margin:12px 0}details.det>summary{cursor:pointer;color:var(--accent)}
 @media(max-width:640px){.top{position:static}.grp+.grp{border-left:0;padding-left:0}.top nav{flex-direction:column;gap:4px}main{padding:20px 14px 40px}.top .in{padding:8px 14px}th,td{padding:8px 10px}.grid{grid-template-columns:1fr}.filters label,.filters input,.filters select{width:100%}}
-</style><header class="top"><div class="in"><a class="brand" href="../../../index.html">Open Meta Maps</a><nav aria-label="Site"><div class="grp"><a href="../tool/index.html">Map Generator</a><a href="index.html" aria-current="page">Atlas Browser</a><a href="../about/index.html">About / Provenance</a></div></nav></div></header><main><h1>Atlas Browser</h1><p class="lead">Search curated Atlas modules by EC, reaction, metabolite, source map or licence, then download Escher JSON with a provenance manifest.</p><style>
+</style><header class="top"><div class="in"><a class="brand" href="../../../index.html">Open Meta Maps</a><nav aria-label="Site"><div class="grp"><a href="../tool/index.html">Map Generator</a><a href="index.html" aria-current="page">Atlas Browser</a><a href="../about/index.html">About / Provenance</a></div></nav></div></header><main><h1>Atlas Browser</h1><p class="lead">Search curated Atlas modules by EC, reaction, metabolite, source map or licence, then download Escher JSON with a provenance manifest. Identical reaction sets are collapsed by default.</p><style>
 .ab-toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 12px}
 .ab-toolbar .sel{font-size:13px;color:var(--mute)}
 .ab-card{position:relative;cursor:pointer}
 .ab-card.sel{outline:2px solid var(--accent)}
 .ab-card .chk{position:absolute;top:10px;right:10px;z-index:2}
-.ab-card img.th,.ab-card object.th{display:block;width:100%;height:140px;object-fit:contain;background:var(--bg);border-radius:8px;margin-bottom:10px;border:1px solid var(--line)}
+.ab-card img.th{display:block;width:100%;height:150px;object-fit:contain;background:var(--bg);border-radius:8px;margin-bottom:10px;border:1px solid var(--line)}
 .ab-empty{color:var(--mute);padding:24px 0}
 .ab-detail{display:none}.ab-detail.on{display:block}
 .ab-list.on{display:none}
 .ab-rx{max-height:280px;overflow:auto;font:12px/1.45 ui-monospace,Menlo,monospace}
 button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
 .filters .grow{flex:1;min-width:min(280px,100%)}
+.ab-also{font-size:12px;color:var(--mute);margin:0 0 6px}
+.tip{border-bottom:1px dotted var(--mute);cursor:help}
 </style>
 <div id="listView" class="ab-list">
 <form class="filters" id="filters" autocomplete="off">
@@ -127,6 +129,7 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
 </form>
 <div class="ab-toolbar">
 <label class="sel"><input type="checkbox" id="selPage"> Select all on page</label>
+<label class="sel"><input type="checkbox" id="showVariants"> Show all layout variants</label>
 <span class="count" id="count">Loading index…</span>
 <button type="button" id="dlSel" disabled>Download selected</button>
 </div>
@@ -141,9 +144,9 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
 <script>
 (function(){
 var $=function(id){return document.getElementById(id)};
-var state={page:1,per:24,selected:{},lastIds:[],detail:null};
+var state={page:1,per:24,selected:{},lastIds:[],detail:null,cards:{}};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
-function params(){var f=$('filters'),o={};['q','ec','reaction','metabolite','map','source','license'].forEach(function(k){var v=f[k].value.trim();if(v)o[k]=v});o.page=state.page;o.per_page=state.per;return o}
+function params(){var f=$('filters'),o={};['q','ec','reaction','metabolite','map','source','license'].forEach(function(k){var v=f[k].value.trim();if(v)o[k]=v});o.page=state.page;o.per_page=state.per;if($('showVariants').checked)o.variants='1';return o}
 function qs(o){return Object.keys(o).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(o[k])}).join('&')}
 function selCount(){return Object.keys(state.selected).length}
 function syncDl(){$('dlSel').disabled=!selCount();$('dlSel').textContent=selCount()?'Download selected ('+selCount()+')':'Download selected'}
@@ -156,18 +159,21 @@ function loadMeta(){
  }).catch(function(){$('count').textContent='Could not load Atlas index. Is the tool server running?'})}
 function card(m){
  var checked=state.selected[m.id]?' checked':'';
+ var also=m.also_in?'<p class="ab-also">'+esc(m.also_in.label)+'</p>':'';
  return '<article class="card ab-card'+(state.selected[m.id]?' sel':'')+'" data-id="'+esc(m.id)+'">'
   +'<label class="chk" onclick="event.stopPropagation()"><input type="checkbox" data-id="'+esc(m.id)+'"'+checked+'></label>'
   +'<img class="th" loading="lazy" alt="" src="'+esc(m.thumbnail)+'">'
   +'<h2 class="dn">'+esc(m.name||m.id)+'</h2>'
-  +'<p class="meta">'+esc(m.source)+' · '+esc(m.name||m.map_id)+'</p>'
+  +'<p class="meta">'+esc(m.source)+' · '+esc(m.name||m.map_id)+'</p>'+also
   +'<div class="tags"><span class="tag src-'+esc(m.source)+'">'+esc(m.source)+'</span>'
   +'<span class="tag">'+esc(m.size)+' reactions</span>'
   +'<span class="tag lic">'+esc(m.license)+'</span></div></article>'}
 function render(data){
  state.lastIds=(data.results||[]).map(function(m){return m.id});
+ state.cards={};(data.results||[]).forEach(function(m){state.cards[m.id]=m});
  $('grid').innerHTML=(data.results||[]).map(card).join('')||'<p class="ab-empty">No modules match these filters.</p>';
- $('count').textContent=data.total.toLocaleString()+' modules · page '+data.page+' / '+data.pages;
+ var kind=data.deduped===false?'layout variants':'modules';
+ $('count').textContent=data.total.toLocaleString()+' '+kind+' · page '+data.page+' / '+data.pages;
  var p=$('pager'),html='',i,start=Math.max(1,data.page-3),end=Math.min(data.pages,data.page+3);
  if(data.page>1)html+='<a href="#" data-p="'+(data.page-1)+'">‹</a>';
  for(i=start;i<=end;i++)html+=i===data.page?'<span>'+i+'</span>':'<a href="#" data-p="'+i+'">'+i+'</a>';
@@ -181,7 +187,8 @@ function search(){
  fetch('/api/atlas/search?'+qs(params())).then(function(r){return r.json()}).then(render)
   .catch(function(){$('count').textContent='Search failed.'})}
 $('filters').onsubmit=function(e){e.preventDefault();state.page=1;search()};
-$('reset').onclick=function(){['q','ec','reaction','metabolite','map'].forEach(function(k){$(k).value=''});$('source').value='';$('license').value='';state.page=1;search()};
+$('reset').onclick=function(){['q','ec','reaction','metabolite','map'].forEach(function(k){$(k).value=''});$('source').value='';$('license').value='';$('showVariants').checked=false;state.page=1;search()};
+$('showVariants').onchange=function(){state.page=1;search()};
 $('pager').onclick=function(e){var a=e.target.closest('[data-p]');if(!a)return;e.preventDefault();state.page=+a.getAttribute('data-p');search()};
 function toggleSel(cb){if(!cb)return;if(cb.checked)state.selected[cb.getAttribute('data-id')]=1;else delete state.selected[cb.getAttribute('data-id')];syncDl();var art=cb.closest('.ab-card');if(art)art.classList.toggle('sel',cb.checked)}
 $('grid').onclick=function(e){
@@ -192,7 +199,7 @@ $('grid').onchange=function(e){var cb=e.target.closest('input[type=checkbox][dat
 $('selPage').onchange=function(){
  state.lastIds.forEach(function(id){if($('selPage').checked)state.selected[id]=1;else delete state.selected[id]});
  Array.prototype.forEach.call(document.querySelectorAll('.ab-card'),function(art){
-  var id=art.getAttribute('data-id');var on=!!$('selPage').checked;art.classList.toggle('sel',on);
+  var on=!!$('selPage').checked;art.classList.toggle('sel',on);
   var cb=art.querySelector('input[type=checkbox]');if(cb)cb.checked=on});
  syncDl()};
 function openDetail(id){
@@ -203,7 +210,14 @@ function openDetail(id){
   var rx=(d.reactions||[]).map(function(r){
    var refs=Object.keys(r.references||{}).map(function(ns){return ns+':'+(r.references[ns]||[]).join(',')}).join('; ');
    return '<tr><td>'+esc(r.id||'')+'</td><td>'+esc(refs)+'</td></tr>'}).join('');
-  $('detail').innerHTML='<div class="detail-grid"><div><img class="th" style="height:240px;width:100%" src="'+esc(d.thumbnail)+'" alt="">'
+  var qTip=d.quality_tip?(' title="'+esc(d.quality_tip)+'"'):'';
+  var qLab=d.quality_label||d.quality||'';
+  var also='';
+  if(d.also_in&&d.variants&&d.variants.length>1){
+   also='<h2>Also drawn in</h2><p class="meta">'+esc(d.also_in.label)+'</p><div class="tablewrap"><table><thead><tr><th>Source</th><th>Map</th><th>Licence</th><th>Attribution</th></tr></thead><tbody>'
+    +d.variants.map(function(v){return '<tr><td>'+esc(v.source)+'</td><td>'+esc(v.name)+'</td><td>'+esc(v.license)+'</td><td>'+esc(v.attribution||'')+'</td></tr>'}).join('')
+    +'</tbody></table></div>'}
+  $('detail').innerHTML='<div class="detail-grid"><div><img class="th" style="height:240px;width:100%;object-fit:contain" src="'+esc(d.thumbnail)+'" alt="">'
    +'</div><div><dl class="kv">'
    +'<dt>Source</dt><dd>'+esc(d.source)+'</dd>'
    +'<dt>Map</dt><dd>'+esc(d.name)+' <span class="muted">'+esc(d.map_id)+'</span></dd>'
@@ -211,10 +225,12 @@ function openDetail(id){
    +'<dt>Licence</dt><dd>'+esc(d.license)+'</dd>'
    +'<dt>Attribution</dt><dd>'+esc(d.attribution||'')+'</dd>'
    +'<dt>Reactions</dt><dd>'+esc(d.size)+'</dd>'
-   +'<dt>Quality</dt><dd>'+esc(d.quality||'')+'</dd>'
-   +'<dt>SHA-256</dt><dd class="muted">'+esc(d.source_sha256||'')+'</dd>'
+   +'<dt>Layout quality</dt><dd><span class="tip"'+qTip+'>'+esc(qLab)+'</span></dd>'
+   +(d.layout_origin_label?'<dt>Layout origin</dt><dd>'+esc(d.layout_origin_label)+'</dd>':'')
+   +'<dt>Source file hash</dt><dd class="muted">'+esc(d.source_sha256||'')+'</dd>'
    +'</dl></div></div>'
    +'<h2>Member reactions</h2><div class="tablewrap"><table><thead><tr><th>ID</th><th>References</th></tr></thead><tbody class="ab-rx">'+rx+'</tbody></table></div>'
+   +also
    +(d.extraction?'<details class="det"><summary>Extraction provenance</summary><pre>'+esc(JSON.stringify(d.extraction,null,2))+'</pre></details>':'');
  }).catch(function(){alert('Could not load module')})}
 $('back').onclick=function(){$('listView').classList.remove('on');$('detailView').classList.remove('on');state.detail=null};

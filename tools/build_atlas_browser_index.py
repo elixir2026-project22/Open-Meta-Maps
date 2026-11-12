@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""Build the compact Atlas Browser search index (reproducible).
+"""Build the compact Atlas Browser search index (local cache).
 
   python3 tools/build_atlas_browser_index.py
-  python3 tools/build_atlas_browser_index.py --out data/atlas_browser_index.json.gz
+  python3 tools/build_atlas_browser_index.py --page
 
-Reads open_core.sqlite + default extensions and writes a gzipped JSON index used by
-`layout_atlas/atlas_browser.py` and the tool server `/api/atlas/*` endpoints.
+Writes data/cache/atlas_browser/index.json.gz (gitignored). The tool server also
+builds this on first use and rebuilds when data/atlas_registry.json changes.
 """
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -19,7 +20,7 @@ sys.path.insert(0, str(ROOT / 'layout_atlas'))
 
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--out', type=Path, default=None, help='Output path (default: data/atlas_browser_index.json.gz)')
+    p.add_argument('--out', type=Path, default=None, help='Output path (default: data/cache/atlas_browser/index.json.gz)')
     p.add_argument('--page', action='store_true', help='Also regenerate the Atlas Browser HTML page')
     args = p.parse_args(argv)
     import atlas_browser
@@ -27,13 +28,8 @@ def main(argv=None):
     if args.page:
         path = atlas_browser.page_html()
         summary['page'] = str(path.relative_to(ROOT))
-    print(json_dumps(summary))
+    print(json.dumps(summary, ensure_ascii=False, indent=2))
     return 0
-
-
-def json_dumps(obj):
-    import json
-    return json.dumps(obj, ensure_ascii=False, indent=2)
 
 
 if __name__ == '__main__':

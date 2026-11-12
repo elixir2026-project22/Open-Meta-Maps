@@ -27,7 +27,6 @@ def _fmt(n):
 
 HOME_CSS = '<style>.hero{padding:18px 0 8px}.hero h1{font-size:clamp(28px,5vw,44px)}.cta{display:inline-block;background:var(--accent);color:var(--accent-ink);padding:12px 26px;border-radius:999px;text-decoration:none;font-weight:600;font-size:17px;margin:6px 10px 6px 0}.cta.alt{background:var(--soft);color:var(--ink)}.steps3{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin:24px 0}.steps3 .card b{display:block;color:var(--accent);font-size:13px;letter-spacing:.06em;text-transform:uppercase}.steps3 .card h3{margin:4px 0}.fig{margin:12px 0 8px}.fig img{max-width:100%;height:auto;border:1px solid var(--line,#d0d7de);border-radius:8px}.fig .meta{margin-top:6px}</style>'
 TOOL = 'layout_atlas/results/tool/index.html'
-ATLAS = 'layout_atlas/results/atlas_browser/index.html'
 
 def home():
     b = ui.bi

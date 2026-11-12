@@ -252,7 +252,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return self.send_json(200, atlas_browser.meta())
         if path == '/api/atlas/search':
             qs = parse_qs(urlparse(self.path).query)
-            filters = {k: (qs.get(k) or [''])[0] for k in ('q', 'ec', 'reaction', 'metabolite', 'map', 'source', 'license', 'licence', 'database', 'ec_number', 'reaction_id', 'metabolite_id', 'map_id', 'model')}
+            filters = {k: (qs.get(k) or [''])[0] for k in ('q', 'ec', 'reaction', 'metabolite', 'map', 'source', 'license', 'licence', 'database', 'ec_number', 'reaction_id', 'metabolite_id', 'map_id', 'model', 'variants', 'show_variants')}
             page = (qs.get('page') or ['1'])[0]
             per = (qs.get('per_page') or [str(atlas_browser.PAGE_DEFAULT)])[0]
             try:
