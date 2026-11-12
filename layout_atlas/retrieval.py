@@ -18,14 +18,21 @@ def layout_priority(m):
 
 FEATURES=['size','biochemical_level','port_mismatch','port_direction_cost','aspect','compactness','axis_fraction','source_support','initial_fit','external_degree_x_aspect','port_fraction_x_spread']
 
-# Large curated modules may still match when a few source reactions are absent from the
-# model: drop the missing reactions and keep the remaining frame.  Small windows stay exact.
+# Opt-in only: partial curated frames (missing source reactions) regress official
+# overlaps / participant_consistency on full models.  Default matches main (exact).
+# Set OPM_PARTIAL_MATCH=on for reduced-model experiments that need large-block survival.
 PARTIAL_MISS_MIN_SIZE = 8
 PARTIAL_MISS_MAX = 5
 
 
 def max_missing_reactions(size):
-    """How many source reactions a curated module of ``size`` may lack in the model."""
+    """How many source reactions a curated module of ``size`` may lack in the model.
+
+    Returns 0 unless ``OPM_PARTIAL_MATCH=on`` (keeps the default path aligned with main).
+    """
+    import os
+    if os.environ.get('OPM_PARTIAL_MATCH', 'off') != 'on':
+        return 0
     size = int(size or 0)
     if size < PARTIAL_MISS_MIN_SIZE:
         return 0

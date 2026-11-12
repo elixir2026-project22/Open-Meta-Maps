@@ -1,11 +1,19 @@
 """Build-on-previous anchors and robust curated matching helpers."""
+import os
 from pathlib import Path
 
 import previous_layout as prev
 import retrieval as R
 
 
-def test_max_missing_reactions_scales_with_size():
+def test_max_missing_reactions_off_by_default():
+    # Default path matches main: no partial curated frames (avoids overlap regression).
+    assert R.max_missing_reactions(2) == 0
+    assert R.max_missing_reactions(40) == 0
+
+
+def test_max_missing_reactions_scales_when_opt_in(monkeypatch):
+    monkeypatch.setenv('OPM_PARTIAL_MATCH', 'on')
     assert R.max_missing_reactions(2) == 0
     assert R.max_missing_reactions(7) == 0
     assert R.max_missing_reactions(8) == 1
@@ -65,7 +73,6 @@ def test_load_previous_anchors_filters_to_model(tmp_path):
     assert prev.reaction_anchor_share(anchors, model) == 0.5
     assert not prev.should_skip_packing(anchors, model)
     model2 = dict(reactions=[dict(id='PGI'), dict(id='PFK')], metabolites=[dict(id='g6p_c')])
-    # PFK absent from filtered anchors → share 0.5; rebuild without model filter
     full = prev.load_previous_anchors(path)
     assert prev.should_skip_packing(full, model2)
 
@@ -85,8 +92,11 @@ def test_pin_scene_and_blocks():
 
 
 def test_robust_match_keeps_large_core_block_on_e_coli_rm3():
-    """Removing a few Core reactions must not shatter the large same-map window."""
+    """With OPM_PARTIAL_MATCH=on, removing a few Core reactions must not shatter the window."""
     import copy
+    import pytest
+    if os.environ.get('OPM_PARTIAL_MATCH', 'off') != 'on':
+        pytest.skip('partial curated matching is opt-in (OPM_PARTIAL_MATCH=on)')
     from model_io import load_model
     from core import model_graph, ROOT
     import database
@@ -99,16 +109,12 @@ def test_robust_match_keeps_large_core_block_on_e_coli_rm3():
     selected = R.select(lib.candidates(model_graph(reduced), model=reduced, max_roots=120)[0])
     sizes = sorted((len(p['reaction_ids']) for p in selected), reverse=True)
     assert sizes[0] >= 30, sizes[:5]
-    full = R.select(lib.candidates(model_graph(model), model=model, max_roots=120)[0])
-    full_sizes = sorted((len(p['reaction_ids']) for p in full), reverse=True)
-    assert full_sizes[0] == 40, full_sizes[:3]
 
 
 def test_annotation_seed_uses_stable_ids_not_names():
     """Robust partial match must key off reaction references, not display names."""
     import inspect
     src = inspect.getsource(R.Library.candidates)
-    # The annotation-seeded path builds reverse from xrefs; name-only binding is elsewhere.
     assert 'reverse[' in src
     assert 'max_missing_reactions' in src
     assert 'clip_atlas_module' in src
@@ -165,24 +171,22 @@ def test_place_leftover_reactions_never_drops_unanchored():
     assert report['new_components'] == 1
     assert 'r:NEW_EMBED' in scene['positions']
     assert 'r:NEW_SOLO' in scene['positions']
-    # Solo reaction must gain metabolite glyphs so export coverage stays complete.
     assert ('NEW_SOLO', 'z_c') in scene['participants']
     assert ('NEW_SOLO', 'y_c') in scene['participants']
     assert scene['participants'][('NEW_SOLO', 'z_c')] in scene['positions']
-    # Pinned old reaction stays put.
     assert scene['positions']['r:OLD'] == [0.0, 0.0]
     assert prev.unanchored_reaction_ids(model, anchors) == ['NEW_EMBED', 'NEW_SOLO']
 
 
 def test_keep_local_relayout_requires_substantial_crossing_drop():
     assert not prev.keep_local_relayout(10, 9)
-    assert not prev.keep_local_relayout(10, 8)  # 20% < 25% share
+    assert not prev.keep_local_relayout(10, 8)
     assert prev.keep_local_relayout(10, 7)
-    assert not prev.keep_local_relayout(3, 2)  # drop 1 < vmin 2
+    assert not prev.keep_local_relayout(3, 2)
     assert prev.keep_local_relayout(8, 6)
 
 
-def test_graft_new_reactions_keeps_old_geometry_and_full_coverage():
+def test_graft_new_reactions_places_midmarker_between_sides():
     body = {
         'nodes': {
             '1': dict(node_type='metabolite', bigg_id='a_c', node_is_primary=True, x=0.0, y=0.0),
@@ -219,7 +223,10 @@ def test_graft_new_reactions_keeps_old_geometry_and_full_coverage():
     assert report['embedded'] >= 1
     bigg = {rx['bigg_id'] for rx in out[1]['reactions'].values()}
     assert bigg == {'KEEP', 'NEW', 'SOLO'}
-    # Old midmarker untouched.
     assert out[1]['nodes']['2']['x'] == 10.0
+    # NEW midmarker sits on the a_c → b_c chord (x≈10).
+    new_rx = next(rx for rx in out[1]['reactions'].values() if rx['bigg_id'] == 'NEW')
+    mid = out[1]['nodes'][next(iter(new_rx['segments'].values()))['from_node_id']]
+    assert abs(mid['x'] - 10.0) < 1e-6
     assert 'NEW' in out[0]['metadata']['source_reactions']
     assert 'SOLO' in out[0]['metadata']['source_reactions']

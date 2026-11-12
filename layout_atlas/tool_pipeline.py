@@ -432,20 +432,37 @@ def draw_map_from_previous(model, selected, folder, full_model=None, log=None):
     folder.mkdir(parents=True, exist_ok=True)
     data, report = prev.filter_previous_map(PREVIOUS_MAP_PATH, model)
     graft_report = None
+    previous_relayout = dict(crossings_before=None, crossings_after=None, kept=False)
     if report.get('new_reactions'):
         data, graft_report = prev.graft_new_reactions(data, model, report['new_reactions'])
         report = dict(report, graft=graft_report)
         if log:
             log(f"  previous layout: grafted {graft_report['placed']} new reaction(s) "
                 f"(embedded {graft_report['embedded']}, new components {graft_report['new_components']})")
+        # Local relax of grafted midmarkers only; keep when crossings do not get worse
+        # (and prefer a substantial drop when one is available).
+        import copy as _copy_graft
+        before_data = _copy_graft.deepcopy(data)
+        data, relax_report = prev.relax_grafted_midmarkers(data, graft_report.get('midmarkers') or {})
+        if not relax_report.get('kept', True):
+            data = before_data
+            relax_report = dict(relax_report, kept=False, reverted=True)
+        previous_relayout = dict(
+            crossings_before=relax_report.get('crossings_before'),
+            crossings_after=relax_report.get('crossings_after'),
+            kept=bool(relax_report.get('kept')),
+            moved=relax_report.get('moved', 0))
+        report = dict(report, graft_relax=relax_report)
+        if log:
+            log(f"  previous graft relax: crossings {relax_report.get('crossings_before')} -> "
+                f"{relax_report.get('crossings_after')} "
+                f"({'kept' if relax_report.get('kept') else 'reverted'}, "
+                f"moved {relax_report.get('moved', 0)})")
     if log:
         extra = '' if not graft_report else f", +{graft_report['placed']} grafted"
         log(f"  previous layout: reused map ({report['kept_reactions']} reactions, "
             f"{report['removed_reactions']} removed, {report['nodes']} nodes{extra}); "
             f"skipped packing/redraw")
-    # Optional local relayout gate: only accept if crossings drop substantially.
-    cross_before = int((layout_quality.evaluate(data)[0].get('core') or {}).get('crossings', {}).get('counted') or 0)
-    previous_relayout = dict(crossings_before=cross_before, crossings_after=cross_before, kept=False)
     dump(folder / 'map.json', data)
     try:
         Draft4Validator(read(ESCHER_SCHEMA)).validate(data)

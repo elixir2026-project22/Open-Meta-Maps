@@ -247,17 +247,45 @@ def scene_segment_crossings(model, scene):
     return int(drawing.crossings(pos, segments) or 0)
 
 
+def _graft_axis_and_mid(substrates, products, park, index):
+    """Place a midmarker so substrates and products leave on opposite sides when possible."""
+    def centroid(pts):
+        return np.mean(np.asarray(pts, float), axis=0)
+
+    if substrates and products:
+        s, p = centroid(substrates), centroid(products)
+        axis = p - s
+        nrm = float(np.hypot(*axis))
+        if nrm < 1e-6:
+            axis = np.array([1.0, 0.0])
+            nrm = 1.0
+        axis = axis / nrm
+        mid = (s + p) / 2.0
+        # Prefer sitting on the S→P chord; if S/P coincide spatially, offset slightly.
+        if float(np.hypot(*(p - s))) < 1e-3:
+            mid = s + np.array([-axis[1], axis[0]]) * 40.0
+        return mid, axis, 'embedded'
+    if substrates or products:
+        pts = substrates or products
+        c = centroid(pts)
+        axis = np.array([1.0, 0.0]) if products else np.array([-1.0, 0.0])
+        mid = c + axis * 55.0
+        return mid, axis, 'embedded' if len(pts) >= 2 else 'new_component'
+    mid = park + np.array([(index % 6) * 90.0, (index // 6) * 90.0])
+    return mid, np.array([1.0, 0.0]), 'new_component'
+
+
 def graft_new_reactions(data, model, new_reaction_ids, min_embed_anchors=2):
     """Add missing model reactions onto a filtered previous Escher map (pin-old / place-new).
 
-    Matched geometry is left untouched.  New reactions with enough drawn participants are
-    embedded beside them; otherwise they are parked as a new component.  Never skips a
-    leftover — coverage stays complete for ``assert_chemistry``.
+    Matched geometry is left untouched.  New reactions sit on the chord between drawn
+    substrate and product participants (opposite sides) when possible; otherwise they are
+    parked as a new component.  Never skips a leftover — coverage stays complete.
     """
     from core import currency as model_currency, uid
     new_reaction_ids = list(new_reaction_ids or [])
     if not new_reaction_ids:
-        return data, dict(placed=0, embedded=0, new_components=0, leftovers=[])
+        return data, dict(placed=0, embedded=0, new_components=0, leftovers=[], midmarkers={})
     header, body = data[0], data[1]
     nodes = dict(body.get('nodes') or {})
     reactions = dict(body.get('reactions') or {})
@@ -288,45 +316,60 @@ def graft_new_reactions(data, model, new_reaction_ids, min_embed_anchors=2):
             if nid not in nodes and nid not in reactions:
                 return nid
     embedded = new_components = 0
+    grafted_mids = {}
     for i, rid in enumerate(new_reaction_ids):
         r = rx_by_id[rid]
-        core = [m for m in r['metabolites'] if m not in cur]
-        anchor_xy = []
-        for mid in core:
+        sign = -1 if r.get('upper_bound', 0) <= 0 and r.get('lower_bound', 0) < 0 else 1
+        sub_pts, prod_pts = [], []
+        for mid, coeff in r['metabolites'].items():
+            if mid in cur:
+                continue
             nid = met_nodes.get(mid)
-            if nid and nid in nodes:
-                anchor_xy.append((mid, nid, np.array([nodes[nid]['x'], nodes[nid]['y']], float)))
-        if len(anchor_xy) >= max(1, int(min_embed_anchors)):
-            target = np.mean([p for _, _, p in anchor_xy], axis=0)
-            direction = np.array([0.0, 1.0])
-            if len(anchor_xy) >= 2:
-                delta = anchor_xy[0][2] - anchor_xy[1][2]
-                nrm = float(np.hypot(*delta))
-                if nrm > 1e-6:
-                    direction = np.array([-delta[1], delta[0]], float) / nrm
-            mid_xy = target + direction * 55.0
+            if not nid or nid not in nodes:
+                continue
+            xy = np.array([nodes[nid]['x'], nodes[nid]['y']], float)
+            if coeff * sign < 0:
+                sub_pts.append(xy)
+            else:
+                prod_pts.append(xy)
+        mid_xy, axis, kind = _graft_axis_and_mid(sub_pts, prod_pts, park, i)
+        both_sides = bool(sub_pts) and bool(prod_pts)
+        if both_sides and (len(sub_pts) + len(prod_pts)) >= max(1, int(min_embed_anchors)):
             embedded += 1
-        elif anchor_xy:
-            mid_xy = anchor_xy[0][2] + np.array([0.0, 70.0])
-            new_components += 1
         else:
-            mid_xy = park + np.array([(i % 6) * 90.0, (i // 6) * 90.0])
             new_components += 1
         mid_nid = fresh('r')
         nodes[mid_nid] = dict(node_type='midmarker', x=float(mid_xy[0]), y=float(mid_xy[1]))
-        sign = -1 if r.get('upper_bound', 0) <= 0 and r.get('lower_bound', 0) < 0 else 1
+        grafted_mids[rid] = mid_nid
         segs = {}
         sid = 0
-        for j, (mid, coeff) in enumerate(r['metabolites'].items()):
-            if mid in met_nodes and met_nodes[mid] in nodes:
+        sub_i = prod_i = 0
+        for mid, coeff in r['metabolites'].items():
+            role = 'substrate' if coeff * sign < 0 else 'product'
+            # Currency always gets a local side stub beside the midmarker (never a long
+            # spoke to a distant primary — those dominate add-back crossings).
+            reuse = (
+                mid not in cur
+                and mid in met_nodes
+                and met_nodes[mid] in nodes
+            )
+            if reuse:
                 met_nid = met_nodes[mid]
             else:
                 met_nid = fresh('m')
-                offset = np.array([30.0 * (j % 3 - 1), 50.0 + 20.0 * (j // 3)])
-                xy = mid_xy + offset
+                side = -1.0 if role == 'substrate' else 1.0
+                idx = sub_i if role == 'substrate' else prod_i
+                if role == 'substrate':
+                    sub_i += 1
+                else:
+                    prod_i += 1
+                perp = np.array([-axis[1], axis[0]])
+                # Currency stubs sit closer; new core mets a bit further out.
+                along = 28.0 if mid in cur else (50.0 + 12.0 * (idx % 3))
+                xy = mid_xy + axis * (side * along) + perp * (16.0 * ((idx // 3) - 0.5))
                 nodes[met_nid] = dict(
                     node_type='metabolite', bigg_id=mid, name=mid,
-                    node_is_primary=mid not in cur,
+                    node_is_primary=False if mid in cur else True,
                     x=float(xy[0]), y=float(xy[1]),
                     label_x=float(xy[0] + 10), label_y=float(xy[1] - 10))
                 if mid not in cur:
@@ -358,10 +401,8 @@ def graft_new_reactions(data, model, new_reaction_ids, min_embed_anchors=2):
             stoichiometry=r['metabolites'],
             lower_bound=r.get('lower_bound', 0),
             upper_bound=r.get('upper_bound', 0))
-    # Drop source_reactions entries for reactions no longer in the model.
     keep_rx = {r['id'] for r in model.get('reactions') or []}
     src = {k: v for k, v in src.items() if k in keep_rx}
-    # Ensure every kept reaction has source metadata (filter path may already have them).
     for r in model.get('reactions') or []:
         src.setdefault(r['id'], dict(
             stoichiometry=r['metabolites'],
@@ -374,7 +415,108 @@ def graft_new_reactions(data, model, new_reaction_ids, min_embed_anchors=2):
     out = [header, dict(body, nodes=nodes, reactions=reactions, canvas=canvas)]
     return out, dict(
         placed=len(new_reaction_ids), embedded=embedded, new_components=new_components,
-        leftovers=list(new_reaction_ids))
+        leftovers=list(new_reaction_ids), midmarkers=grafted_mids)
+
+
+def _escher_segment_list(data):
+    """Straight (from, to) node-id pairs for every reaction segment."""
+    body = data[1]
+    nodes = body.get('nodes') or {}
+    segs = []
+    for rx in (body.get('reactions') or {}).values():
+        for s in (rx.get('segments') or {}).values():
+            a, b = s.get('from_node_id'), s.get('to_node_id')
+            if a in nodes and b in nodes:
+                segs.append((str(a), str(b)))
+    return segs
+
+
+def escher_crossings(data):
+    """Straight-segment crossing count on an Escher map (local relax gate)."""
+    import drawing
+    body = data[1]
+    nodes = body.get('nodes') or {}
+    pos = {nid: [float(n['x']), float(n['y'])] for nid, n in nodes.items() if 'x' in n and 'y' in n}
+    segs = _escher_segment_list(data)
+    if len(segs) >= 1200:
+        return None
+    return int(drawing.crossings(pos, segs) or 0)
+
+
+def relax_grafted_midmarkers(data, grafted_mids, step=10.0, radii=(1, 2, 3, 4, 6)):
+    """Nudge grafted midmarkers (and their private currency stubs) to cut crossings.
+
+    Matched previous geometry is never moved.  Returns (data, report).
+    """
+    if not grafted_mids:
+        return data, dict(moved=0, crossings_before=None, crossings_after=None)
+    header, body = data[0], dict(data[1])
+    nodes = {nid: dict(n) for nid, n in (body.get('nodes') or {}).items()}
+    reactions = body.get('reactions') or {}
+    body['nodes'] = nodes
+    data = [header, body]
+    before = escher_crossings(data)
+    moved = 0
+    offsets = []
+    for r in radii:
+        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)):
+            offsets.append((dx * r * step, dy * r * step))
+    # Private nodes of a grafted reaction: metabolite ends that no other reaction uses.
+    used = {}
+    for rx in reactions.values():
+        for s in (rx.get('segments') or {}).values():
+            for nid in (s.get('from_node_id'), s.get('to_node_id')):
+                used[str(nid)] = used.get(str(nid), 0) + 1
+
+    def private_nodes(rid, mid_nid):
+        priv = set()
+        for rx in reactions.values():
+            if rx.get('bigg_id') != rid:
+                continue
+            for s in (rx.get('segments') or {}).values():
+                for nid in (s.get('from_node_id'), s.get('to_node_id')):
+                    nid = str(nid)
+                    if nid == mid_nid:
+                        continue
+                    n = nodes.get(nid) or {}
+                    if n.get('node_type') == 'metabolite' and used.get(nid, 0) == 1:
+                        priv.add(nid)
+        return priv
+
+    for rid, mid_nid in grafted_mids.items():
+        mid_nid = str(mid_nid)
+        if mid_nid not in nodes:
+            continue
+        priv = private_nodes(rid, mid_nid)
+        base = {nid: [nodes[nid]['x'], nodes[nid]['y']] for nid in [mid_nid, *priv]}
+        best = escher_crossings(data)
+        best_pos = {nid: list(xy) for nid, xy in base.items()}
+        improved = False
+        for dx, dy in offsets:
+            for nid, xy in base.items():
+                nodes[nid]['x'] = xy[0] + dx
+                nodes[nid]['y'] = xy[1] + dy
+            for rx in reactions.values():
+                if rx.get('bigg_id') == rid:
+                    rx['label_x'] = nodes[mid_nid]['x'] + 10
+                    rx['label_y'] = nodes[mid_nid]['y'] - 10
+            cur = escher_crossings(data)
+            if cur is not None and best is not None and cur < best:
+                best = cur
+                best_pos = {nid: [nodes[nid]['x'], nodes[nid]['y']] for nid in base}
+                improved = True
+        for nid, xy in best_pos.items():
+            nodes[nid]['x'], nodes[nid]['y'] = xy
+        for rx in reactions.values():
+            if rx.get('bigg_id') == rid:
+                rx['label_x'] = nodes[mid_nid]['x'] + 10
+                rx['label_y'] = nodes[mid_nid]['y'] - 10
+        if improved:
+            moved += 1
+    after = escher_crossings(data)
+    return data, dict(
+        moved=moved, crossings_before=before, crossings_after=after,
+        kept=(before is not None and after is not None and after <= before))
 
 
 def place_leftover_reactions(model, scene, anchors=None, cur=None, min_embed_anchors=2):
