@@ -1400,6 +1400,11 @@ def metric_details(path):
     hidden = set((data[0].get('metadata') or {}).get('hidden_metabolite_labels') or [])
     nodes = {k: v for k, v in content['nodes'].items() if v['node_type'] != 'multimarker'}
     xy = {k: [v['x'], v['y']] for k, v in nodes.items()}
+    reaction_of = {}  # node id -> first reaction (map order) with a segment on it
+    for r in content['reactions'].values():
+        for seg in r['segments'].values():
+            reaction_of.setdefault(seg['from_node_id'], r)
+            reaction_of.setdefault(seg['to_node_id'], r)
     boxes = {}
     for key, v in nodes.items():
         if v['node_type'] == 'metabolite':
@@ -1409,7 +1414,7 @@ def metric_details(path):
             x = v['label_x']
             y = v['label_y']
         else:
-            rx = next(r for r in content['reactions'].values() if any(s['from_node_id'] == key or s['to_node_id'] == key for s in r['segments'].values()))
+            rx = reaction_of[key]
             if rx.get('label_hidden'):
                 continue
             label = rx['bigg_id']
@@ -1417,34 +1422,34 @@ def metric_details(path):
             y = rx['label_y']
         b = drawing.FONT.getbbox(label)
         boxes[key] = [x, y - (b[3] - b[1]), x + drawing.FONT.getlength(label), y]
-    node_label = sum(b[0] < v[0] + 4 and b[2] > v[0] - 4 and b[1] < v[1] + 4 and b[3] > v[1] - 4
-                     for b in boxes.values() for v in xy.values())
     canvas = content['canvas']
     values = np.array(list(xy.values()))
-    segments = []
-    for r in content['reactions'].values():
-        segments.extend((s['from_node_id'], s['to_node_id']) for s in r['segments'].values())
+    box_keys = list(boxes)
+    B = np.array([boxes[k] for k in box_keys], float).reshape(-1, 4)
+    node_label = 0
+    for vx, vy in values:  # label box overlapping a node centre (±4 px)
+        node_label += int(np.count_nonzero((B[:, 0] < vx + 4) & (B[:, 2] > vx - 4) & (B[:, 1] < vy + 4) & (B[:, 3] > vy - 4)))
+    box_index = {k: i for i, k in enumerate(box_keys)}
     intersections = 0
-    for a, b in segments:
-        av = np.array([content['nodes'][a]['x'], content['nodes'][a]['y']])
-        bv = np.array([content['nodes'][b]['x'], content['nodes'][b]['y']])
-        delta = bv - av
-        for k, box in boxes.items():
-            if k in (a, b):
-                continue
-            lower = 0.
-            upper = 1.
+    for r in content['reactions'].values():
+        for seg in r['segments'].values():  # segment through a label box (slab test against every box)
+            a, b = seg['from_node_id'], seg['to_node_id']
+            av = np.array([content['nodes'][a]['x'], content['nodes'][a]['y']], float)
+            delta = np.array([content['nodes'][b]['x'], content['nodes'][b]['y']], float) - av
+            lower = np.zeros(len(B))
+            upper = np.ones(len(B))
             for axis in (0, 1):
                 if abs(delta[axis]) < 1e-9:
-                    if av[axis] <= box[axis] or av[axis] >= box[axis + 2]:
-                        upper = -1
-                        break
-                else:
-                    lo = (box[axis] - av[axis]) / delta[axis]
-                    hi = (box[axis + 2] - av[axis]) / delta[axis]
-                    lower = max(lower, min(lo, hi))
-                    upper = min(upper, max(lo, hi))
-            intersections += int(lower < upper - 1e-8)
+                    upper[(av[axis] <= B[:, axis]) | (av[axis] >= B[:, axis + 2])] = -1
+                    continue
+                lo = (B[:, axis] - av[axis]) / delta[axis]
+                hi = (B[:, axis + 2] - av[axis]) / delta[axis]
+                lower = np.maximum(lower, np.minimum(lo, hi))
+                upper = np.minimum(upper, np.maximum(lo, hi))
+            hit = lower < upper - 1e-8
+            for k in {a, b} & box_index.keys():
+                hit[box_index[k]] = False
+            intersections += int(np.count_nonzero(hit))
     return dict(visible_nodes=len(nodes), label_node_intersections=int(node_label),
                 segment_label_intersections=intersections,
                 canvas_width=canvas['width'], canvas_height=canvas['height'],

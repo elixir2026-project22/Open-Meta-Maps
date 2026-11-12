@@ -328,33 +328,35 @@ def layout_blocks(sizes, weights, seed=SEEDS[0], iterations=500, aspect=1.4, ini
 
 
 def _separate(xy, half, passes=3):
-    """Remove rectangle overlaps by pushing apart along the axis of smaller penetration."""
+    """Remove rectangle overlaps by pushing apart along the axis of smaller penetration (in place)."""
     n = len(xy)
+    P, H = xy.tolist(), half.tolist()  # plain floats: same arithmetic, no per-element array access
     for _ in range(passes):
         moved = False
-        order = np.argsort(xy[:, 0])
+        order = np.argsort(np.array([p[0] for p in P])).tolist()
         for ii in range(n):
-            i = order[ii]
+            pi, hi = P[order[ii]], H[order[ii]]
             for jj in range(ii + 1, n):
-                j = order[jj]
-                dx = xy[j, 0] - xy[i, 0]
-                if dx > half[i, 0] + half[j, 0]:
+                pj, hj = P[order[jj]], H[order[jj]]
+                dx = pj[0] - pi[0]
+                if dx > hi[0] + hj[0]:
                     break
-                dy = xy[j, 1] - xy[i, 1]
-                px = half[i, 0] + half[j, 0] - abs(dx)
-                py = half[i, 1] + half[j, 1] - abs(dy)
+                dy = pj[1] - pi[1]
+                px = hi[0] + hj[0] - abs(dx)
+                py = hi[1] + hj[1] - abs(dy)
                 if px > 0 and py > 0:
                     moved = True
                     if px < py:
                         sgn = 1.0 if dx >= 0 else -1.0
-                        xy[i, 0] -= sgn * px / 2
-                        xy[j, 0] += sgn * px / 2
+                        pi[0] -= sgn * px / 2
+                        pj[0] += sgn * px / 2
                     else:
                         sgn = 1.0 if dy >= 0 else -1.0
-                        xy[i, 1] -= sgn * py / 2
-                        xy[j, 1] += sgn * py / 2
+                        pi[1] -= sgn * py / 2
+                        pj[1] += sgn * py / 2
         if not moved:
             break
+    xy[:] = P
     return xy
 
 

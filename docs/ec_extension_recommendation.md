@@ -1,6 +1,6 @@
 # Should the EC similarity extension be on by default?
 
-Measured on **e_coli_core** and **iIT341** after the matching improvements and rebase onto open-licence Atlas + default BRENDA extension (iMM904 / iML1515 skipped for development). **EC off vs EC on**; defaults were **not** changed.
+Measured on **e_coli_core** and **iIT341** after the matching improvements and rebase onto open-licence Atlas + default BRENDA extension (iMM904 / iML1515 skipped for development). **EC off vs EC on**; defaults were **not** changed. Reproduce with `python3 layout_atlas/ec_extension_eval.py --run`.
 
 ## Summary table
 

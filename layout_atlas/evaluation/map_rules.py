@@ -623,9 +623,7 @@ def unrelated_overlaps_from_escher(data, edges: list[dict]) -> dict[str, Any]:
             if nid not in node_reaction:
                 node_xy[nid] = (float(n["x"]), float(n["y"]))
                 node_reaction[nid] = rid
-    # Sampled pieces for edge-through-node; chords for collinear (passed separately by
-    # putting chords first and using a cap — here we only pass chords for collinear speed,
-    # and sampled pieces for through-node via a two-pass call).
+    # Sampled pieces for edge-through-node; one chord per connection for collinear overlaps.
     chords = []
     pieces = []
     for e in edges:
@@ -635,20 +633,7 @@ def unrelated_overlaps_from_escher(data, edges: list[dict]) -> dict[str, Any]:
         chords.append((e["rid"], e["ends"][0], np.asarray(pts[0], float), np.asarray(pts[-1], float)))
         for a, b in zip(pts[:-1], pts[1:]):
             pieces.append((e["rid"], e["ends"][0], np.asarray(a, float), np.asarray(b, float)))
-    # Node overlaps + collinear on chords
-    base = unrelated_overlaps(node_xy, node_reaction, chords, related)
-    # Edge-through-node on sampled pieces (ignore collinear from this pass)
-    through = unrelated_overlaps(node_xy, node_reaction, pieces, related)
-    return {
-        "unrelated_node_overlaps": base["unrelated_node_overlaps"],
-        "unrelated_edge_through_node": through["unrelated_edge_through_node"],
-        "unrelated_collinear_edge_overlaps": base["unrelated_collinear_edge_overlaps"],
-        "unrelated_overlaps_total": float(
-            base["unrelated_node_overlaps"]
-            + through["unrelated_edge_through_node"]
-            + base["unrelated_collinear_edge_overlaps"]
-        ),
-    }
+    return unrelated_overlaps(node_xy, node_reaction, pieces, related, chords=chords)
 
 
 def content_bbox(body: dict, canvas: dict | None = None) -> dict[str, float | None]:

@@ -95,7 +95,7 @@ class Library:
    m['duplicate_signature']=duplicate_signature(m)
    self.support[m['core_family']].add(m['lineage'])
    # Up to 24 real variants per topology, interleaving sources for diversity.
-   sig=self.signature(database.graph(m));vk=(sig,m['geometry_fingerprint'])
+   sig=self.module_signature(m);vk=(sig,m['geometry_fingerprint'])
    if vk not in self.rep:
     self.rep[vk]=m;self.buckets[sig].append(m)
    for r in m['reactions']:
@@ -110,6 +110,13 @@ class Library:
     self.partial2.extend(self.buckets[sig][:3])
  @staticmethod
  def signature(g):return (len(g),g.number_of_edges(),sum(g.nodes[k]['role']=='reaction' for k in g),tuple(sorted(dict(g.degree()).values())))
+ @staticmethod
+ def module_signature(m):
+  """signature(database.graph(m)) straight from the module record (no graph build)."""
+  role={n['key']:n['role'] for n in m['nodes']};edges={frozenset((e['a'],e['b'])) for e in m['edges']};deg=dict.fromkeys(role,0)
+  for e in edges:
+   for k in e:deg[k]+=2 if len(e)==1 else 1
+  return (len(role),len(edges),sum(r=='reaction' for r in role.values()),tuple(sorted(deg.values())))
 
  def eligible(self,m,exclude_lineages,exclude_species,exclude_geometry):return m['lineage'] not in exclude_lineages and m['species']!=exclude_species and m.get('duplicate_signature',duplicate_signature(m)) not in exclude_geometry
 

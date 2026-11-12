@@ -75,21 +75,23 @@ def _turning(samples):
 
 
 def _count_hits(samples, others):
-    hits, n = 0, len(samples) - 1
-    for i, (a, b) in enumerate(zip(samples[:-1], samples[1:])):
-        if not len(others):
-            break
-        # an obstacle sitting on an end of the connection is not counted, but along the curve every touch is
-        hit = er._blocked(a, b, others, 2.0).any() if (i == 0 or i == n - 1) else er._hits(a, b, others, 2.0).any()
-        hits += int(hit)
-    return hits
+    """Sample pieces of a curve that touch an obstacle."""
+    if not len(others) or len(samples) < 2:
+        return 0
+    samples = np.asarray(samples, float)
+    A, B = samples[:-1], samples[1:]
+    hit = er._hits_many(A, B, others, 2.0)
+    # an obstacle sitting on an end of the connection is not counted, but along the curve every touch is
+    ends = [0, len(A) - 1]
+    hit[ends] = er._blocked_many(A[ends], B[ends], others, 2.0)
+    return int(np.count_nonzero(hit.any(axis=1)))
 
 
 def _evaluate(samples, rects, mine, S_other, label_rects=None, label_mine=None):
     """(glyph hits, crossings, anomaly, detour, label hits) of a sampled curve.  Glyph hits are hard; label hits are soft (the labels are moved afterwards)."""
     hits = _count_hits(samples, rects[~mine])
     label_hits = _count_hits(samples, label_rects[~label_mine]) if label_rects is not None and len(label_rects) else 0
-    cross = sum(er._seg_cross(a, b, S_other) for a, b in zip(samples[:-1], samples[1:]))
+    cross = er._seg_cross(samples[:-1], samples[1:], S_other)
     worst, total = _turning(samples)
     chord = float(np.hypot(*(samples[-1] - samples[0])))
     length = float(np.sum(np.hypot(*np.diff(samples, axis=0).T)))

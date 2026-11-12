@@ -210,7 +210,7 @@ def ec_values(reaction):
 
 # ------------------------------------------------------------------------------------------------ helpers
 def fixed_views(model, g, max_size=50):
-    """Same fixed display scopes as experiments.fixed_views (copied so the stage needs no sklearn import)."""
+    """Fixed display scopes: reactions grouped by compartment set in breadth-first order, max_size reactions per view."""
     metas = {m['id']: m for m in model['metabolites']}
     by_comp = defaultdict(list)
     for r in model['reactions']:
