@@ -24,9 +24,6 @@ RESULT_EXTS = (
 )
 _SAFE = re.compile(r'[^A-Za-z0-9._-]+')
 _RESULT_JSON = re.compile(r'^OpenMetaMaps_[A-Za-z0-9._-]+_result\.json$')
-_RESULT_ANY = re.compile(
-    r'^OpenMetaMaps_[A-Za-z0-9._-]+_result\.(?:json|sbgn|sbml|svg|png|celldesigner\.xml)$'
-)
 # Working map files inside scratch folders (not final downloads).
 _VIEW_SCRATCH = re.compile(r'^view-\d+$')
 
@@ -57,12 +54,8 @@ def result_filename(stem: str, ext: str) -> str:
     return f'{result_basename(stem)}.{ext}'
 
 
-def stem_from_original_name(original_name: str | None) -> str:
-    return sanitize_stem(original_name or 'model')
-
-
 def stem_from_folder(folder) -> str:
-    """Resolve the result stem from meta.json or an existing result file."""
+    """Resolve the result stem from meta.json original_name."""
     folder = Path(folder)
     meta = folder / 'meta.json'
     if meta.is_file():
@@ -72,20 +65,11 @@ def stem_from_folder(folder) -> str:
                 return sanitize_stem(name)
         except (OSError, json.JSONDecodeError, TypeError, ValueError):
             pass
-    for path in sorted(folder.glob(f'{RESULT_PREFIX}*{RESULT_SUFFIX}.json')):
-        name = path.name
-        mid = name[len(RESULT_PREFIX) : -len(RESULT_SUFFIX + '.json')]
-        if mid and not _SAFE.search(mid):
-            return mid
     return 'model'
 
 
 def is_result_map_json(name: str) -> bool:
     return bool(_RESULT_JSON.match(Path(name).name))
-
-
-def is_result_map_file(name: str) -> bool:
-    return bool(_RESULT_ANY.match(Path(name).name))
 
 
 def is_working_map_dir(folder) -> bool:
@@ -121,10 +105,7 @@ def find_map_json(folder) -> Path | None:
     """Locate the final Escher JSON in a finished job folder."""
     folder = Path(folder)
     path = map_json(folder)
-    if path.is_file():
-        return path
-    matches = sorted(folder.glob(f'{RESULT_PREFIX}*{RESULT_SUFFIX}.json'))
-    return matches[0] if len(matches) == 1 else None
+    return path if path.is_file() else None
 
 
 def clear_stale_results(folder) -> None:

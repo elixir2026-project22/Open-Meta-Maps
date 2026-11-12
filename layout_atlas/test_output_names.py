@@ -1,7 +1,6 @@
 """Unit tests for OpenMetaMaps_<stem>_result.<ext> naming."""
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import output_names
@@ -38,8 +37,8 @@ def test_working_dirs_keep_map_json(tmp_path: Path):
     assert output_names.map_svg(view) == view / 'map.svg'
 
 
-def test_is_result_map_file():
+def test_is_result_map_json():
     assert output_names.is_result_map_json('OpenMetaMaps_e_coli_core_result.json')
-    assert output_names.is_result_map_file('OpenMetaMaps_iIT341_result.celldesigner.xml')
     assert not output_names.is_result_map_json('map.json')
-    assert not output_names.is_result_map_file('report.json')
+    assert not output_names.is_result_map_json('OpenMetaMaps_iIT341_result.sbgn')
+    assert not output_names.is_result_map_json('report.json')

@@ -129,7 +129,7 @@ def about():
         + '<div><img src="' + e(ui.rel(about_path, 'docs/images/examples/e_coli_core.png')) + '" alt="' + b('Escherichia coli core map (e_coli_core, 95 reactions)') + '" width="700"/><p class="meta"><i>Escherichia coli</i> core (<code>e_coli_core</code>, 95 reactions)</p></div>'
         + '<div><img src="' + e(ui.rel(about_path, 'docs/images/examples/iIT341.png')) + '" alt="' + b('Helicobacter pylori iIT341 map (554 reactions)') + '" width="700"/><p class="meta"><i>Helicobacter pylori</i> iIT341 (554 reactions)</p></div>'
         + '</div>'
-        + '<p class="meta">' + b('Previews are cropped to content and draw every reaction and metabolite label of map.svg. Zoom in to read the labels.') + '</p>',
+        + '<p class="meta">' + b('Previews are cropped to content and draw every reaction and metabolite label of the result SVG. Zoom in to read the labels.') + '</p>',
     )
 
     s_eval = sec(
