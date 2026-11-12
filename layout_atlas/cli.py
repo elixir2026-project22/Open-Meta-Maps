@@ -23,6 +23,7 @@ def main():
  p.add_argument('--layout-style',choices=['legacy','curated','expert'],default='curated',help='curated = Bézier (default); expert = deprecated alias of curated; legacy = orthogonal libavoid')
  p.add_argument('--completion-context',choices=['auto','off'],default='auto')
  p.add_argument('--edge-routing',choices=['libavoid','hybrid','none'],default='libavoid')
+ p.add_argument('--previous',help='previous Escher map.json whose reaction/metabolite positions are pinned as anchors')
  p.add_argument('--map',help='Escher map.json for evaluate')
  p.add_argument('--reference',help='optional reference map for evaluate')
  p.add_argument('--compare-map',help='optional second map.json for reproducibility metrics')
@@ -31,7 +32,7 @@ def main():
  args=p.parse_args()
  if args.stage=='compose':
   if not args.gem:p.error('compose needs --gem MODEL.xml (SBML or COBRA JSON)')
-  import compose_cli;return compose_cli.run(args.gem,args.out or 'results/local_mvp',ec=args.ec,no_library=args.no_library,library=args.library,reaction_style=args.reaction_style,completion=args.completion,source_paths=args.source_paths,layout=args.layout,orientation=args.orientation,block_layout=args.block_layout,instances=args.instances,context=args.context,edge_routing=args.edge_routing,completion_context=args.completion_context,layout_style=args.layout_style)
+  import compose_cli;return compose_cli.run(args.gem,args.out or 'results/local_mvp',ec=args.ec,no_library=args.no_library,library=args.library,reaction_style=args.reaction_style,completion=args.completion,source_paths=args.source_paths,layout=args.layout,orientation=args.orientation,block_layout=args.block_layout,instances=args.instances,context=args.context,edge_routing=args.edge_routing,completion_context=args.completion_context,layout_style=args.layout_style,previous=args.previous)
  if args.stage=='evaluate':
   import evaluation.cli as evaluate_cli
   argv=[]

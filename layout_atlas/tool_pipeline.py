@@ -53,6 +53,10 @@ GLOBAL_FAILURE = ''
 GLOBAL_BUDGET_S = 1500
 COMPLETION = 'spaced'  # 'spaced' (free nodes keep a minimum distance) | 'classic' (drawing.complete only)
 REACTION_STYLE = 'line'  # 'line' (reactions are lines between metabolites, like the curated maps) | 'marker' (earlier style: a dot per reaction)
+PREVIOUS_ANCHORS = None  # optional pins from --previous map.json: {'r:id':[x,y], 'm:id':[x,y]}
+PREVIOUS_SKIP_PACK = False  # True when ≥80% of reactions are pinned (skip module packing / composition)
+PREVIOUS_REUSE_MAP = False  # True when every model reaction is already in the previous map
+PREVIOUS_MAP_PATH = None  # absolute path to the --previous map.json
 
 
 STEPS = [('parse', 'Parse the model'), ('map', 'Match library structures'),
@@ -409,6 +413,107 @@ def grid_skeleton_svg(model, blocks, path):
 
 
 
+def draw_map_from_previous(model, selected, folder, full_model=None, log=None):
+    """Rebuild from ``--previous`` when ≥80% of reactions are already drawn.
+
+    Keeps the previous Escher geometry for every matched reaction (no global relayout).
+    New / leftover reactions are grafted beside drawn participants when possible, or
+    parked as a new component — never dropped.  A local relax of free nodes is only
+    kept when it lowers crossings substantially (see ``keep_local_relayout``).
+    """
+    import previous_layout as prev
+    import layout_quality
+    from layout_quality import metric_details, assert_chemistry
+    from jsonschema import Draft4Validator
+    from xml.sax.saxutils import escape
+    full_model = full_model or model
+    original = uid(model)
+    folder = Path(folder)
+    folder.mkdir(parents=True, exist_ok=True)
+    data, report = prev.filter_previous_map(PREVIOUS_MAP_PATH, model)
+    graft_report = None
+    previous_relayout = dict(crossings_before=None, crossings_after=None, kept=False)
+    if report.get('new_reactions'):
+        data, graft_report = prev.graft_new_reactions(data, model, report['new_reactions'])
+        report = dict(report, graft=graft_report)
+        if log:
+            log(f"  previous layout: grafted {graft_report['placed']} new reaction(s) "
+                f"(embedded {graft_report['embedded']}, new components {graft_report['new_components']})")
+        # Local relax of grafted midmarkers only; keep when crossings do not get worse
+        # (and prefer a substantial drop when one is available).
+        import copy as _copy_graft
+        before_data = _copy_graft.deepcopy(data)
+        data, relax_report = prev.relax_grafted_midmarkers(data, graft_report.get('midmarkers') or {})
+        if not relax_report.get('kept', True):
+            data = before_data
+            relax_report = dict(relax_report, kept=False, reverted=True)
+        previous_relayout = dict(
+            crossings_before=relax_report.get('crossings_before'),
+            crossings_after=relax_report.get('crossings_after'),
+            kept=bool(relax_report.get('kept')),
+            moved=relax_report.get('moved', 0))
+        report = dict(report, graft_relax=relax_report)
+        if log:
+            log(f"  previous graft relax: crossings {relax_report.get('crossings_before')} -> "
+                f"{relax_report.get('crossings_after')} "
+                f"({'kept' if relax_report.get('kept') else 'reverted'}, "
+                f"moved {relax_report.get('moved', 0)})")
+    if log:
+        extra = '' if not graft_report else f", +{graft_report['placed']} grafted"
+        log(f"  previous layout: reused map ({report['kept_reactions']} reactions, "
+            f"{report['removed_reactions']} removed, {report['nodes']} nodes{extra}); "
+            f"skipped packing/redraw")
+    dump(folder / 'map.json', data)
+    try:
+        Draft4Validator(read(ESCHER_SCHEMA)).validate(data)
+    except Exception:
+        data[0].setdefault('metadata', {}).pop('protected_connections', None)
+        Draft4Validator(read(ESCHER_SCHEMA)).validate(data)
+        dump(folder / 'map.json', data)
+    # SVG: prefer line render when available; else a minimal placeholder from export-less path.
+    if REACTION_STYLE == 'line':
+        import line_render
+        line_render.render_file(folder / 'map.json', folder / 'map.svg', {})
+    else:
+        # Lightweight SVG so the job always has a preview.
+        (folder / 'map.svg').write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg"><text x="20" y="20">previous layout</text></svg>')
+    quality_summary, quality_issues = layout_quality.evaluate(data)
+    quality_summary['seconds'] = 0.0
+    quality_summary['layout_style'] = LAYOUT_STYLE
+    quality_summary['previous_layout'] = report
+    dump(folder / 'layout_issues.json', quality_issues)
+    metric = dict(
+        method='previous_layout', previous_layout=report,
+        layout_quality_final=quality_summary,
+        completion=dict(method='previous_filter_graft', **report),
+        previous_relayout=previous_relayout,
+        routing=dict(status='preserved_from_previous'),
+        routing_attempts=[], orientation_mode=ORIENTATION,
+        instance_optimization=dict(mode='off'), context_placement=dict(mode='off'),
+        completion_context=dict(mode='off', previous_leftovers=graft_report),
+        protected=dict(mode='off'),
+        node_overlap_kinds=None, expert_geometry=None, curated_axes=None,
+        constraints={}, peripheral=None,
+    )
+    metric.update(metric_details(folder / 'map.json'))
+    assert_chemistry(model, folder / 'map.json')
+    assert uid(model) == original
+    sources = [{k: b.get(k) for k in ('id', 'template_id', 'map_id', 'source', 'lineage', 'license', 'partition', 'source_citation', 'source_sha256', 'original_instance')} for b in (selected or [])]
+    dump(folder / 'source_licenses.json', dict(layout_sources=sources, policy='Original licenses preserved; research-partition content keeps its own terms'))
+    data = read(folder / 'map.json')
+    data[0].setdefault('metadata', {})['layout_sources'] = sources
+    dump(folder / 'map.json', data)
+    dump(folder / 'metrics.json', metric)
+    # Minimal skeleton so downstream report steps find anchors.
+    dump(folder / 'skeleton.json', dict(
+        schema=4, model=model['id'], target_model_hash=original, modules=selected or [],
+        bridges=[], containers=[], anchors={k: dict(xy=v) for k, v in (PREVIOUS_ANCHORS or {}).items()},
+        display_positions={}, participants=[], reaction_status={},
+        note='Map rebuilt from --previous; packing skipped; leftovers grafted.'))
+    return metric
+
+
 def draw_map(model, selected, folder, full_model=None, scalable=False, log=None, plan=None):
     """Same drawing pipeline as micromap_experiment.draw_case (P0-compatible), but robust: if routing fails or times out the map is
     re-exported with simpler routing and finally without routing instead of raising.  An empty `selected` draws the whole
@@ -417,17 +522,33 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     import geometry
     import interfaces
     import retrieval
+    import previous_layout as prev
     from layout_quality import metric_details, assert_chemistry
     from core import CanonicalGraph
     from jsonschema import Draft4Validator
     from xml.sax.saxutils import escape
     full_model = full_model or model
     original = uid(model)
+    # High previous coverage: pin matched geometry and graft leftovers (no global pack/redraw).
+    if PREVIOUS_SKIP_PACK and PREVIOUS_MAP_PATH and not scalable:
+        return draw_map_from_previous(model, selected, folder, full_model=full_model, log=log)
     g = CanonicalGraph(model_graph(model))
     bridges = retrieval.bridges(model, selected)
     # Prefer an explicit global plan (connection-aware packing) whenever provided — including
     # small curated models where translation-only fit_frame needs adjacent neighbour placement.
-    if plan is not None or scalable:
+    if PREVIOUS_SKIP_PACK and PREVIOUS_ANCHORS:
+        # High previous coverage: keep module metadata but pin every known glyph; skip packing search.
+        if plan is not None:
+            plan = copy.deepcopy(plan)
+            anchors, blocks, containers, routes = plan['anchors'], plan['blocks'], plan['containers'], plan['routes']
+        else:
+            anchors, blocks, containers, routes = drawing.pack_modules(model, copy.deepcopy(selected), bridges, physical_scale=True)
+        anchors = {k: list(v) for k, v in PREVIOUS_ANCHORS.items()}
+        blocks, n_prev = prev.apply_block_positions(blocks, PREVIOUS_ANCHORS)
+        if log:
+            log(f'  previous layout: pinned {len(PREVIOUS_ANCHORS)} anchors '
+                f'({prev.reaction_anchor_share(PREVIOUS_ANCHORS, model):.0%} of reactions); skipped packing')
+    elif plan is not None or scalable:
         import global_layout as gl_pack
         plan = copy.deepcopy(plan) if plan is not None else gl_pack.plan_global(model, selected, bridges, g, log=log)
         anchors, blocks, containers, routes = plan['anchors'], plan['blocks'], plan['containers'], plan['routes']
@@ -442,7 +563,8 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             if key in p:
                 b[key] = p[key]
     # Small-model path: re-pack above drops skeleton rigid bake — restore same-source group here.
-    if plan is None and not any(b.get('same_map_rigid') for b in blocks):
+    # Skip when previous pins already own the canvas (≥80% coverage).
+    if plan is None and not PREVIOUS_SKIP_PACK and not any(b.get('same_map_rigid') for b in blocks):
         import curated_axes
         blocks, same_map_bake = curated_axes.bake_same_map_positions(
             blocks, model_n_reactions=len(model.get('reactions') or []))
@@ -466,12 +588,23 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
                         met_acc[k].append(v)
             for k, vals in met_acc.items():
                 anchors[k] = np.mean(vals, axis=0).tolist()
-    for bridge in bridges:
-        a, c = anchors.get(bridge['nodes'][0]), anchors.get(bridge['nodes'][-1])
-        if a is None or c is None:
-            continue
-        for i, rid in enumerate(bridge['reaction_ids']):
-            anchors['r:' + rid] = (np.array(a) + (np.array(c) - a) * (i + 1) / (len(bridge['reaction_ids']) + 1)).tolist()
+    if not PREVIOUS_SKIP_PACK:
+        for bridge in bridges:
+            a, c = anchors.get(bridge['nodes'][0]), anchors.get(bridge['nodes'][-1])
+            if a is None or c is None:
+                continue
+            for i, rid in enumerate(bridge['reaction_ids']):
+                key = 'r:' + rid
+                if PREVIOUS_ANCHORS and key in PREVIOUS_ANCHORS:
+                    continue
+                anchors[key] = (np.array(a) + (np.array(c) - a) * (i + 1) / (len(bridge['reaction_ids']) + 1)).tolist()
+    # Pin previous-map anchors (overwrite) so complete_spaced treats them as fixed.
+    if PREVIOUS_ANCHORS and not PREVIOUS_SKIP_PACK:
+        anchors.update({k: list(v) for k, v in PREVIOUS_ANCHORS.items()})
+        blocks, _ = prev.apply_block_positions(blocks, PREVIOUS_ANCHORS)
+        if log:
+            log(f'  previous layout: pinned {len(PREVIOUS_ANCHORS)} anchors '
+                f'({prev.reaction_anchor_share(PREVIOUS_ANCHORS, model):.0%} of reactions)')
     timings = {}
     stamp = time.time()
 
@@ -481,6 +614,15 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         stamp = time.time()
         if log:
             log(f'  {name}: {timings[name]} s')
+
+    def _pin_previous(scene):
+        if not PREVIOUS_ANCHORS:
+            return scene
+        scene, n = prev.pin_scene(scene, PREVIOUS_ANCHORS)
+        if log and n:
+            log(f'  previous layout restore: {n} glyphs')
+        return scene
+
     if scalable:
         import completion
         import global_layout as gl
@@ -498,7 +640,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         core = drawing.complete(g, anchors, iterations=350)
         metric_completion = dict(method='classic')
     context_report, context_assign = None, {}
-    if CONTEXT == 'auto':
+    if CONTEXT == 'auto' and not PREVIOUS_SKIP_PACK:
         import context as context_module
         context_module.LAYOUT_STYLE_BACKBONE = (LAYOUT_STYLE == 'curated')
         covered = {rid for p in selected for rid in p['reaction_ids']} | {rid for b in bridges for rid in b['reaction_ids']}
@@ -517,12 +659,37 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         import completion_context as completion_context_module
         if context_report is not None:
             completion_skip = {rid for region in regions if len(region['reactions']) > 1 for rid in region['reactions']}
-        scene, completion_report = completion_context_module.place(model, scene, blocks, currency(model), completion_skip)
+        # With a previous map, embed a new reaction only when ≥2 participants are already drawn;
+        # otherwise leave it as a new component (do not pull onto a single metabolite).
+        min_anch = 2 if PREVIOUS_ANCHORS else 1
+        scene, completion_report = completion_context_module.place(
+            model, scene, blocks, currency(model), completion_skip, min_anchors=min_anch)
         if log:
             log(f"  anchor-driven placement: {completion_report['placed']} of {completion_report['candidates']} reactions placed {completion_report['tiers']}, attachment {completion_report['attachment_rate_before']['rate']} -> {completion_report['attachment_rate_after']['rate']}")
+        scene = _pin_previous(scene)
+        # Pin-old / place-new: never drop reactions that lack ≥2 anchors — park leftovers.
+        if PREVIOUS_ANCHORS:
+            scene, leftover_report = prev.place_leftover_reactions(
+                model, scene, anchors=PREVIOUS_ANCHORS, cur=currency(model), min_embed_anchors=2)
+            if completion_report is not None:
+                completion_report['previous_leftovers'] = leftover_report
+            if log and leftover_report.get('placed'):
+                log(f"  previous leftovers: placed {leftover_report['placed']} "
+                    f"(embedded {leftover_report['embedded']}, "
+                    f"new components {leftover_report['new_components']})")
+            scene = _pin_previous(scene)
+    elif PREVIOUS_ANCHORS:
+        scene, leftover_report = prev.place_leftover_reactions(
+            model, scene, anchors=PREVIOUS_ANCHORS, cur=currency(model), min_embed_anchors=2)
+        completion_report = dict(method='previous_leftovers_only', previous_leftovers=leftover_report)
+        if log and leftover_report.get('placed'):
+            log(f"  previous leftovers: placed {leftover_report['placed']} "
+                f"(embedded {leftover_report['embedded']}, "
+                f"new components {leftover_report['new_components']})")
+        scene = _pin_previous(scene)
     peripheral_report = None
     instance_report = None
-    if INSTANCES == 'auto':
+    if INSTANCES == 'auto' and not PREVIOUS_SKIP_PACK:
         import instances as instances_module
         scene, instance_report = instances_module.optimize(model, scene, blocks, currency(model))
         if log:
@@ -534,7 +701,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         if log:
             log('  regions: ' + str(regions_report))
     composition_report = None
-    if LAYOUT_STYLE == 'curated' and os.environ.get('OPM_COMPOSE', 'on') != 'off':
+    if LAYOUT_STYLE == 'curated' and os.environ.get('OPM_COMPOSE', 'on') != 'off' and not PREVIOUS_SKIP_PACK:
         import composition
         scene, composition_report = composition.compose(model, scene, blocks, currency(model))
         if log:
@@ -544,6 +711,9 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         scene, _rr = _ca.restore_rigid_group(scene, blocks)
         if log and _rr.get('restored'):
             log(f"  same-map rigid restore (after compose): {_rr['restored']} glyphs, n_rx={_rr.get('n_rx')}")
+        scene = _pin_previous(scene)
+    elif PREVIOUS_SKIP_PACK:
+        scene = _pin_previous(scene)
     # Sync curated block positions from the composed scene (composition translates tiles
     # in the scene without rewriting blocks[].positions).
     def _sync_blocks_from_scene(blocks, scene):
@@ -580,7 +750,9 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         long_links_before = completion_context_module.scene_longest_links(
             model, scene, currency(model), curated_rx, top=10)
         scene, completion_after = completion_context_module.place(
-            model, scene, blocks, currency(model), completion_skip, boundary_aware=True)
+            model, scene, blocks, currency(model), completion_skip, boundary_aware=True,
+            min_anchors=(2 if PREVIOUS_ANCHORS else 1))
+        scene = _pin_previous(scene)
         if completion_report is not None:
             completion_report['after_compose'] = {
                 k: completion_after.get(k)
@@ -612,13 +784,39 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         # instances.optimize here doubled runtime on iIT341 without cutting ac crossings.
     import orientation as orientation_module
     scene = orientation_module.apply(model, scene, blocks, ORIENTATION, 'before_relax')
+    previous_relayout = None
     if scalable:
         scene, audit = gl.scalable_scene_relax(model, scene, blocks, extra_groups=plan['groups'])
         lap('scene relaxation (sparse)')
+    elif PREVIOUS_ANCHORS:
+        # Local relayout of free nodes only when it lowers crossings substantially;
+        # otherwise keep the pinned previous geometry and leftover parking.
+        import copy as _copy_prev
+        before_scene = _copy_prev.deepcopy(scene)
+        cross_before = prev.scene_segment_crossings(model, scene)
+        scene, audit = geometry.complete_scene(model, scene, blocks)
+        scene = _pin_previous(scene)
+        scene, _ = prev.place_leftover_reactions(
+            model, scene, anchors=PREVIOUS_ANCHORS, cur=currency(model), min_embed_anchors=2)
+        scene = _pin_previous(scene)
+        cross_after = prev.scene_segment_crossings(model, scene)
+        keep = prev.keep_local_relayout(cross_before, cross_after)
+        previous_relayout = dict(
+            crossings_before=cross_before, crossings_after=cross_after, kept=keep)
+        if not keep:
+            scene = before_scene
+            scene = _pin_previous(scene)
+            audit = dict(audit or {}, previous_relayout_reverted=True)
+        # complete_scene stamps scene['anchors']; a reverted snapshot may lack it.
+        scene['anchors'] = {k: list(v) for k, v in (scene.get('anchors') or anchors).items()}
+        if log:
+            log(f"  previous local relayout: crossings {cross_before} -> {cross_after} "
+                f"({'kept' if keep else 'reverted'})")
     else:
         scene, audit = geometry.complete_scene(model, scene, blocks)
     scene = orientation_module.apply(model, scene, blocks, ORIENTATION, 'after_relax')
-    if INSTANCES == 'auto':
+    if INSTANCES == 'auto' and not PREVIOUS_SKIP_PACK:
+        import instances as instances_module
         scene = instances_module.separate(model, scene, blocks)
         if instance_report is not None:
             instance_report['instances_separated'] = scene.get('instances_separated')
@@ -626,12 +824,15 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     scene, _rr3 = _ca3.restore_rigid_group(scene, blocks)
     if log and _rr3.get('restored'):
         log(f"  same-map rigid restore (after relax): {_rr3['restored']} glyphs")
+    scene = _pin_previous(scene)
     scene, _ov = _ca3.clear_rigid_node_overlaps(scene, blocks)
     if log and _ov.get('moved'):
         log(f"  clear rigid node overlaps: moved {_ov['moved']} non-rigid glyphs")
+    scene = _pin_previous(scene)
     import layout_quality
     protected_report = None
     if completion_report is not None:
+        import completion_context as completion_context_module
         broken = completion_context_module.verify_protected(scene)
         recs = scene.get('protected', [])
         protected_report = dict(groups=len(recs), strict=sum(bool(r.get('strict')) for r in recs), conditional=sum(not r.get('strict') for r in recs),
@@ -640,7 +841,11 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
                                 moved=(instance_report or {}).get('protected_groups'))
         if broken:
             raise Failure('protected_split', 'A protected group of connections was split (%d groups).' % len(broken))
-    node_overlap_kinds = instances_module.overlap_breakdown(scene) if INSTANCES == 'auto' else None
+    if INSTANCES == 'auto' and not PREVIOUS_SKIP_PACK:
+        import instances as instances_module
+        node_overlap_kinds = instances_module.overlap_breakdown(scene)
+    else:
+        node_overlap_kinds = None
     if completion_report is not None:
         completion_report['attachment_rate_final'] = completion_context_module.attachment_rate(model, scene, currency(model), {rid for b in blocks for rid in b['reaction_ids']}, completion_skip)
     expert_geometry = layout_quality.expert_geometry(blocks, scene)
@@ -666,6 +871,12 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     sources = [{k: b.get(k) for k in ('id', 'template_id', 'map_id', 'source', 'lineage', 'license', 'partition', 'source_citation', 'source_sha256', 'original_instance')} for b in blocks]
     dump(folder / 'source_licenses.json', dict(layout_sources=sources, policy='Original licenses preserved; research-partition content keeps its own terms'))
     data = read(folder / 'map.json')
+    if PREVIOUS_ANCHORS:
+        data, n_pin = prev.pin_escher(data, PREVIOUS_ANCHORS)
+        if n_pin:
+            dump(folder / 'map.json', data)
+            if log:
+                log(f'  previous layout pin (escher): {n_pin} nodes')
     data[0]['metadata']['layout_sources'] = sources
     if plan is not None:
         metric['global'] = dict(plan=(plan or {}).get('stats'), scene_nodes=len(scene['positions']),
@@ -736,7 +947,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         if log:
             log(f"  label placement: {metric['label_placement']}")
         metric['edge_routing'] = dict(mode='curated (Bezier connections)')
-        if os.environ.get('OPM_PERIPHERAL', 'on') != 'off':   # the switch exists for before / after comparisons
+        if os.environ.get('OPM_PERIPHERAL', 'on') != 'off' and not PREVIOUS_SKIP_PACK:   # the switch exists for before / after comparisons
             import peripheral as peripheral_module
             import quality_gate
             _s, peripheral_report = peripheral_module.attach(model, scene, blocks, currency(model), apply=False)
@@ -776,7 +987,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             if log:
                 log('  block relocation: ' + str({k: v for k, v in reloc.items() if k != 'rows'}))
             dump(folder / 'map.json', data)
-        if os.environ.get('OPM_EXPERT_SUBMODULE', 'branch') in ('on', 'branch'):   # on by default: constrained relocation of exchange + transport modules inside big curated blocks; OPM_EXPERT_SUBMODULE=off disables it
+        if os.environ.get('OPM_EXPERT_SUBMODULE', 'branch') in ('on', 'branch') and not PREVIOUS_SKIP_PACK:   # on by default: constrained relocation of exchange + transport modules inside big curated blocks; OPM_EXPERT_SUBMODULE=off disables it
             import block_relocation
             n_rx = len(model['reactions'])
             sub_budget = 45.0 if n_rx < 200 else (60.0 if n_rx < 800 else 90.0)
@@ -788,7 +999,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             if log:
                 log('  expert sub-module relocation: ' + str({k: v for k, v in sub.items() if k not in ('rows', 'regenerated_expert_edges')}))
             dump(folder / 'map.json', data)
-        if os.environ.get('OPM_REGION_PLACE', 'off') == 'on':     # opt-in pathway-aware region placement
+        if os.environ.get('OPM_REGION_PLACE', 'off') == 'on' and not PREVIOUS_SKIP_PACK:     # opt-in pathway-aware region placement
             import region_placement
             data, rp = region_placement.place(data, model, scene, blocks, currency(model), skip_edges, log=log)
             metric['region_placement'] = rp
@@ -799,24 +1010,28 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             dump(folder / 'map.json', data)
         # Compact long transport/exchange arms after peripheral / submodule moves
         # (those passes can re-stretch arms that were shortened earlier on the scene).
-        import composition as composition_module
-        arm_escher = composition_module.compact_long_arms_escher(data, currency(model))
-        metric['compact_long_arms'] = arm_escher
-        if composition_report is not None:
-            composition_report['compact_long_arms_escher'] = arm_escher
-        if log and arm_escher.get('shortened'):
-            log(f"  compact long arms (escher): shortened {arm_escher['shortened']}")
+        if not PREVIOUS_SKIP_PACK:
+            import composition as composition_module
+            arm_escher = composition_module.compact_long_arms_escher(data, currency(model))
+            metric['compact_long_arms'] = arm_escher
+            if composition_report is not None:
+                composition_report['compact_long_arms_escher'] = arm_escher
+            if log and arm_escher.get('shortened'):
+                log(f"  compact long arms (escher): shortened {arm_escher['shortened']}")
         import curated_axes as _ca_es
-        data, _rr_es = _ca_es.restore_rigid_group_escher(data, blocks)
-        if log and _rr_es.get('restored'):
-            log(f"  same-map rigid restore (escher after arms): {_rr_es['restored']} nodes")
-        data, _ov_es = _ca_es.clear_rigid_node_overlaps_escher(data, blocks)
-        if log and _ov_es.get('moved'):
-            log(f"  clear rigid node overlaps (escher): moved {_ov_es['moved']} nodes")
-        dump(folder / 'map.json', data)
+        if not PREVIOUS_SKIP_PACK:
+            # Absolute same-map restore would overwrite --previous pins with source-map coords.
+            data, _rr_es = _ca_es.restore_rigid_group_escher(data, blocks)
+            if log and _rr_es.get('restored'):
+                log(f"  same-map rigid restore (escher after arms): {_rr_es['restored']} nodes")
+            data, _ov_es = _ca_es.clear_rigid_node_overlaps_escher(data, blocks)
+            if log and _ov_es.get('moved'):
+                log(f"  clear rigid node overlaps (escher): moved {_ov_es['moved']} nodes")
+            dump(folder / 'map.json', data)
         # Final empty-band squeeze: collapse corridors wider than K × median reaction spacing
         # (nodes, labels and Bezier controls move together; monotone remap cannot add crossings).
-        if os.environ.get('OPM_SQUEEZE', 'on') != 'off':
+        if not PREVIOUS_SKIP_PACK and os.environ.get('OPM_SQUEEZE', 'on') != 'off':
+            import composition as composition_module
             spacing = composition_module.reaction_spacing_escher(data)
             k = float(os.environ.get('OPM_SQUEEZE_K', composition_module.SQUEEZE_K))
             squeeze = composition_module.squeeze_escher(data, max_gap=k * spacing)
@@ -844,24 +1059,26 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             dump(folder / 'map.json', data)
         # Shorten extreme empty axis-aligned corridors before hotspot so repair
         # can clean crossings introduced by midmarker slides.
-        import composition as _comp_fit
-        spacing_now = composition_module.reaction_spacing_escher(data)
-        corridor = _comp_fit.compact_empty_corridors_escher(data, spacing=spacing_now)
-        # Whole-reaction corridor slides already keep private/EX partners attached;
-        # a broad arm sweep after that retargets many spokes and costs continuity.
-        # Collapse empty bands opened by the slide so neighbours can settle in.
-        if corridor.get('shortened'):
-            post_sq = composition_module.squeeze_escher(
-                data, max_gap=max(float(spacing_now or 150.0) * 1.25, 40.0))
-            corridor['post_squeeze'] = {
-                k: post_sq.get(k) for k in ('applied', 'dx', 'dy', 'max_gap')}
-        metric['empty_corridor_escher'] = corridor
-        if composition_report is not None:
-            composition_report['empty_corridor_escher'] = corridor
-        if log and corridor.get('shortened'):
-            log(f"  empty-corridor compact (escher): shortened {corridor['shortened']} "
-                f"max_gap={corridor.get('max_gap')} min_len={corridor.get('min_len')}")
-        dump(folder / 'map.json', data)
+        if not PREVIOUS_SKIP_PACK:
+            import composition as composition_module
+            import composition as _comp_fit
+            spacing_now = composition_module.reaction_spacing_escher(data)
+            corridor = _comp_fit.compact_empty_corridors_escher(data, spacing=spacing_now)
+            # Whole-reaction corridor slides already keep private/EX partners attached;
+            # a broad arm sweep after that retargets many spokes and costs continuity.
+            # Collapse empty bands opened by the slide so neighbours can settle in.
+            if corridor.get('shortened'):
+                post_sq = composition_module.squeeze_escher(
+                    data, max_gap=max(float(spacing_now or 150.0) * 1.25, 40.0))
+                corridor['post_squeeze'] = {
+                    k: post_sq.get(k) for k in ('applied', 'dx', 'dy', 'max_gap')}
+            metric['empty_corridor_escher'] = corridor
+            if composition_report is not None:
+                composition_report['empty_corridor_escher'] = corridor
+            if log and corridor.get('shortened'):
+                log(f"  empty-corridor compact (escher): shortened {corridor['shortened']} "
+                    f"max_gap={corridor.get('max_gap')} min_len={corridor.get('min_len')}")
+            dump(folder / 'map.json', data)
         # Rebuild algorithm Beziers against post-restore geometry on small maps
         # (early edge_style ran before absolute snap). Skip on mid/large — edge_style
         # alone is ~75 s on iIT341 and would blow the runtime gate.
@@ -875,7 +1092,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             dump(folder / 'map.json', data)
         # Hotspot repair AFTER rigid restore + overlap clear + squeeze + corridor
         # so accepted moves are not undone by absolute snap / padding slides.
-        if os.environ.get('OPM_HOTSPOT_REPAIR', 'on') != 'off':
+        if os.environ.get('OPM_HOTSPOT_REPAIR', 'on') != 'off' and not PREVIOUS_SKIP_PACK:
             import hotspot_repair
             codes_early = module_codes(blocks) if blocks else {}
             curated_structures_early = [
@@ -899,22 +1116,24 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
                 log('  hotspot repair: ' + str({k: hr.get(k) for k in ('accepted_count', 'tries', 'rounds', 'seconds', 'improved')}))
             dump(folder / 'map.json', data)
         # Shrink canvas to content so empty frame padding does not inflate blank/empty gates.
-        fit = _comp_fit.fit_canvas_to_content(data)
-        metric['canvas_fit'] = fit
-        if log and fit.get('applied'):
-            log(f"  canvas fit to content: {fit.get('content')} pad=40")
-        dump(folder / 'map.json', data)
-        # Final label pass after late geometry (rigid restore / overlap clear / squeeze /
-        # hotspot). Root-cause stages already translate labels with nodes; this pass
-        # re-anchors any residual detach and re-resolves text↔curve conflicts on the
-        # finished glyph positions (early label_placement ran before those moves).
-        import label_placement as _lp_final
-        t_re = time.time()
-        metric['label_placement_final'] = dict(
-            _lp_final.optimize(data), seconds=round(time.time() - t_re, 1))
-        if log:
-            log(f"  label placement (final): {metric['label_placement_final']}")
-        dump(folder / 'map.json', data)
+        if not PREVIOUS_SKIP_PACK:
+            import composition as _comp_fit
+            fit = _comp_fit.fit_canvas_to_content(data)
+            metric['canvas_fit'] = fit
+            if log and fit.get('applied'):
+                log(f"  canvas fit to content: {fit.get('content')} pad=40")
+            dump(folder / 'map.json', data)
+            # Final label pass after late geometry (rigid restore / overlap clear / squeeze /
+            # hotspot). Root-cause stages already translate labels with nodes; this pass
+            # re-anchors any residual detach and re-resolves text↔curve conflicts on the
+            # finished glyph positions (early label_placement ran before those moves).
+            import label_placement as _lp_final
+            t_re = time.time()
+            metric['label_placement_final'] = dict(
+                _lp_final.optimize(data), seconds=round(time.time() - t_re, 1))
+            if log:
+                log(f"  label placement (final): {metric['label_placement_final']}")
+            dump(folder / 'map.json', data)
     elif not scalable and len(model['reactions']) <= 400:
         import edge_routing
         er = dict(mode=EDGE_ROUTING, before=edge_routing.measure(data, skip_edges))
@@ -1020,6 +1239,8 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     metric['regions'] = regions_report
     metric['context_placement'] = context_report if context_report is not None else dict(mode='off')
     metric['completion_context'] = completion_report if completion_report is not None else dict(mode='off')
+    if previous_relayout is not None:
+        metric['previous_relayout'] = previous_relayout
     metric['protected'] = protected_report if protected_report is not None else dict(mode='off')
     metric['node_overlap_kinds'] = node_overlap_kinds
     if protected_report is not None:
@@ -1273,7 +1494,7 @@ def run_job(folder):
     libs = dict(core=True, ec=False)  # EC = extended mode, off by default
     libs.update(options.get('libraries', {}))
     libs.pop('micromap', None)  # MicroMap (NC-SA) removed; ignore stale option keys
-    global REACTION_STYLE, COMPLETION, SOURCE_PATHS, LAYOUT, ORIENTATION, INSTANCES, CONTEXT, EDGE_ROUTING, COMPLETION_CONTEXT, LAYOUT_STYLE
+    global REACTION_STYLE, COMPLETION, SOURCE_PATHS, LAYOUT, ORIENTATION, INSTANCES, CONTEXT, EDGE_ROUTING, COMPLETION_CONTEXT, LAYOUT_STYLE, PREVIOUS_ANCHORS, PREVIOUS_SKIP_PACK, PREVIOUS_REUSE_MAP, PREVIOUS_MAP_PATH
     LAYOUT_STYLE = normalize_layout_style(options.get('layout_style'))
     COMPLETION_CONTEXT = options.get('completion_context') if options.get('completion_context') in ('auto', 'off') else 'auto'
     EDGE_ROUTING = options.get('edge_routing') if options.get('edge_routing') in ('libavoid', 'hybrid', 'none') else 'libavoid'
@@ -1287,6 +1508,10 @@ def run_job(folder):
     _gl.BLOCK_LAYOUT = options.get('block_layout') if options.get('block_layout') in ('auto', 'single') else 'auto'
     REACTION_STYLE = options.get('reaction_style') if options.get('reaction_style') in ('line', 'marker') else 'line'
     COMPLETION = options.get('completion') if options.get('completion') in ('spaced', 'classic') else 'spaced'
+    PREVIOUS_ANCHORS = None
+    PREVIOUS_SKIP_PACK = False
+    PREVIOUS_REUSE_MAP = False
+    PREVIOUS_MAP_PATH = None
     library_kind = options.get('library', 'windows')  # module-candidate source; 'windows' (default, Atlas v0.3) | 'units_sub' (structure units + derived sub-windows)
     if library_kind not in ('windows', 'units_sub'):
         library_kind = 'windows'
@@ -1315,6 +1540,22 @@ def run_job(folder):
         original = uid(model)
         g = model_graph(model)
         allids = {r['id'] for r in model['reactions']}
+        if options.get('previous'):
+            import previous_layout as prev
+            try:
+                PREVIOUS_MAP_PATH = str(Path(options['previous']).resolve())
+                PREVIOUS_ANCHORS = prev.load_previous_anchors(PREVIOUS_MAP_PATH, model)
+            except Exception as e:
+                raise Failure('bad_previous', f"Could not read --previous map: {e}") from e
+            PREVIOUS_SKIP_PACK = prev.should_skip_packing(PREVIOUS_ANCHORS, model)
+            missing_rx = prev.missing_model_reactions(PREVIOUS_MAP_PATH, model)
+            PREVIOUS_REUSE_MAP = PREVIOUS_SKIP_PACK and not missing_rx
+            job.log(f"Previous layout: {len(PREVIOUS_ANCHORS)} anchors from {PREVIOUS_MAP_PATH} "
+                    f"({prev.reaction_anchor_share(PREVIOUS_ANCHORS, model):.0%} of reactions"
+                    f"{'; reuse map' if PREVIOUS_REUSE_MAP else ('; skip packing' if PREVIOUS_SKIP_PACK else '')})")
+            if PREVIOUS_SKIP_PACK:
+                import global_layout as _gl_prev
+                _gl_prev.BLOCK_LAYOUT = 'single'  # avoid candidate packing search
 
         job.step('map')
         install_tool_environment()

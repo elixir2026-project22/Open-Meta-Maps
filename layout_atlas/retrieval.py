@@ -212,10 +212,12 @@ class Library:
        if source[sk]['role']=='metabolite' and isinstance(source[sk].get('entity'),str):
         if tk[2:] not in binding_candidates(source[sk]['entity'],[tk[2:]],mrefs):core_agrees=False
       biol=3 if ok_refs and core_agrees else 2 if ok_equations and core_agrees else 1 if any_ref and core_agrees else 0
-     ports=sum(bool(n) for n in targetports.values());srcports=sum(p.get('key') in {n['key'] for n in m['nodes']} for p in m['ports']);xy=np.array(list(positions.values()));extent=np.ptp(xy,axis=0);area=max(float(np.prod(extent)),.05);edgevec=[np.array(positions[a])-positions[b] for a,b in tg.edges() if a in positions and b in positions];axis=np.mean([min(abs(v[0]),abs(v[1]))/max(np.linalg.norm(v),1e-8)<.1 for v in edgevec]);initial=float(np.sqrt(np.mean([np.sum((positions[k]-generic[k])**2) for k in positions])))
+     if not positions:continue
+     ports=sum(bool(n) for n in targetports.values());srcports=sum(p.get('key') in {n['key'] for n in m['nodes']} for p in m['ports']);xy=np.array(list(positions.values()));extent=np.ptp(xy,axis=0);area=max(float(np.prod(extent)),.05);edgevec=[np.array(positions[a])-positions[b] for a,b in tg.edges() if a in positions and b in positions];axis=(np.mean([min(abs(v[0]),abs(v[1]))/max(np.linalg.norm(v),1e-8)<.1 for v in edgevec]) if edgevec else 0.0);initial=float(np.sqrt(np.mean([np.sum((positions[k]-generic[k])**2) for k in positions])))
      # Edge-role disagreement is geometric context, not a claim of biochemical equivalence.
      flow_cost=0;count=0
      for e in m['edges']:
+      if e.get('a') not in mp or e.get('b') not in mp:continue
       a,b=mp[e['a']],mp[e['b']]
       if e.get('flow') in ('substrate','product') and tg.edges[a,b].get('role'):
        flow_cost+=e['flow']!=tg.edges[a,b]['role'];count+=1
