@@ -1,0 +1,230 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Atlas Browser · Open Meta Maps</title><style>
+:root{color-scheme:light dark;--bg:#f4f7f8;--panel:#fff;--ink:#17323d;--mute:#5b7480;--line:#dbe4e8;--accent:#0b7285;--accent-ink:#fff;--soft:#e7f1f3;--edge:#9baab4;--rx:#b66b28;--met:#167e83;--shadow:0 1px 2px rgba(20,50,60,.06),0 4px 14px rgba(20,50,60,.05)}
+@media(prefers-color-scheme:dark){:root{--bg:#10191d;--panel:#182429;--ink:#e3edf0;--mute:#90a8b2;--line:#2b3b42;--accent:#52b7c9;--accent-ink:#06242b;--soft:#1f3239;--edge:#6d818b;--rx:#e09a5a;--met:#4fc1c6;--shadow:none}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+a{color:var(--accent);text-underline-offset:2px}
+a:hover{text-decoration-thickness:2px}
+.top{background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.top .in{max-width:1240px;margin:0 auto;padding:10px 20px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px}
+.brand{font-weight:700;color:var(--ink);text-decoration:none;letter-spacing:.01em}
+.top nav{display:flex;flex-wrap:wrap;gap:6px 18px}.grp{display:flex;flex-wrap:wrap;align-items:center;gap:2px 4px}.grp+.grp{border-left:1px solid var(--line);padding-left:18px}.gl{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin-right:4px}.stage{font-size:12px;border:1px solid var(--line);border-radius:6px;padding:0 6px;margin-right:6px;color:var(--mute)}
+.top nav a{padding:4px 10px;border-radius:999px;text-decoration:none;color:var(--mute);font-size:14px}
+.top nav a:hover{background:var(--soft);color:var(--ink)}
+.top nav a[aria-current]{background:var(--accent);color:var(--accent-ink)}
+main{max-width:1240px;margin:0 auto;padding:28px 20px 56px}
+h1{font-size:clamp(24px,4vw,34px);line-height:1.2;margin:0 0 6px;letter-spacing:-.01em}
+h2{font-size:20px;line-height:1.3;margin:36px 0 12px}
+h3{font-size:16px;margin:0 0 6px}
+.lead{color:var(--mute);max-width:78ch;margin:0 0 20px;font-size:16px}
+.note{border-left:3px solid var(--accent);background:var(--soft);padding:10px 14px;border-radius:0 8px 8px 0;margin:16px 0;max-width:90ch}
+.crumbs{font-size:13px;color:var(--mute);margin-bottom:12px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0 8px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+.stat b{display:block;font-size:26px;line-height:1.15;font-variant-numeric:tabular-nums}
+.stat span{color:var(--mute);font-size:13px}
+.bar{display:flex;height:10px;border-radius:5px;overflow:hidden;margin:8px 0 4px;background:var(--line)}
+.bar i{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13px;color:var(--mute)}
+.legend em{font-style:normal}.legend em:before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:var(--c)}
+.panel,section.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;box-shadow:var(--shadow);margin:16px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px;margin-top:16px}
+main>article,.card,main>.grid>article{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow);overflow-wrap:anywhere;min-width:0}
+main>article{margin:18px 0}
+.card h2,main article h2{font-size:15px;margin:0 0 8px;line-height:1.35}
+.card svg,main article svg{display:block;width:100%;height:170px;background:var(--bg);border-radius:8px;margin-bottom:10px}
+.card .meta{font-size:13px;color:var(--mute);margin:0 0 8px}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 8px}
+.tag{font-size:12px;padding:1px 9px;border-radius:999px;background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+.tag.src-escher{border-color:#2d8f6f}.tag.src-wikipathways{border-color:#3b77b8}.tag.src-reactome{border-color:#a8559a}
+.tag.lic{font-family:ui-monospace,Menlo,monospace;font-size:11px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font-size:13px;margin:0}
+.kv dt{color:var(--mute)}.kv dd{margin:0;min-width:0;overflow-wrap:anywhere}
+details{font-size:13px;margin-top:8px}
+summary{cursor:pointer;color:var(--accent)}
+pre{white-space:pre-wrap;word-break:break-all;font:11.5px/1.5 ui-monospace,Menlo,monospace;background:var(--bg);padding:8px;border-radius:6px;margin:6px 0 0}
+code{font:.92em ui-monospace,Menlo,monospace;background:var(--soft);padding:1px 6px;border-radius:5px}
+.edge{stroke:var(--edge);stroke-width:1.2}.nr{fill:var(--rx)}.nm{fill:var(--met)}
+.tablewrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);margin:14px 0}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute);background:var(--bg);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:var(--soft)}
+main img{max-width:100%;height:auto;max-height:640px;object-fit:contain;display:block;margin:8px auto;background:#fff;border-radius:8px;border:1px solid var(--line)}
+.card img{max-height:360px}
+main>ul{padding-left:20px}main>ul li{margin:5px 0}
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:end;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow);margin:16px 0}
+.filters label{display:flex;flex-direction:column;font-size:12px;color:var(--mute);gap:3px}
+.filters input,.filters select{font:inherit;font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;min-width:150px}
+.filters input[type=search]{min-width:min(280px,100%);flex:1}
+.filters button{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:7px 14px;cursor:pointer}
+.count{color:var(--mute);font-size:14px;margin:6px 0}
+.pager{display:flex;flex-wrap:wrap;gap:4px;margin:14px 0}
+.pager a,.pager span{min-width:34px;text-align:center;padding:4px 9px;border-radius:8px;border:1px solid var(--line);background:var(--panel);text-decoration:none;font-size:13px}
+.pager span{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.pager a:hover{background:var(--soft)}
+.hit{display:none}
+footer{max-width:1240px;margin:0 auto;padding:0 20px 36px;color:var(--mute);font-size:13px}
+.th{width:64px;height:64px;display:block;background:var(--bg);border-radius:6px}td .sub{font-size:12px;color:var(--mute)}td .rx,.card .rx{font-size:12px;color:var(--ink);overflow-wrap:anywhere;font-family:ui-monospace,Menlo,monospace}.card .rx{margin:0 0 8px}
+.fam{text-decoration:none;cursor:pointer;display:inline-block;font:12px ui-monospace,Menlo,monospace;padding:1px 8px;border-radius:6px;white-space:nowrap;color:var(--ink);background:hsl(var(--h) 60% 50%/.18);border:1px solid hsl(var(--h) 55% 50%/.55)}
+tr.same td{border-top:0}
+#hits td:nth-child(2){min-width:230px}
+.legendline{font-size:13px;color:var(--mute);margin:6px 0}.fchip{display:inline-flex;gap:8px;align-items:center;font-size:13px;margin:6px 0}.fchip button{font:inherit;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:1px 10px;cursor:pointer}.muted{color:var(--mute);font-size:11px;font-family:ui-monospace,Menlo,monospace}.warn{color:var(--mute);font-style:italic}dl.defs dt{font-weight:600;margin-top:8px}dl.defs dd{margin:2px 0 0;color:var(--mute)}
+.toolbar{margin:0 0 12px}.toolbar a{text-decoration:none}
+.viewer{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;margin:14px 0}
+.vbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);font-size:14px}
+.vbar button{font:inherit;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:3px 12px;cursor:pointer;min-width:34px}
+.vbox{height:min(70vh,640px);background:var(--bg)}.gv{width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+.gv .redge{fill:none;stroke:var(--ink);opacity:.6;stroke-linecap:round}.gv .redge.far{stroke-dasharray:10 7}.gv .nm.far{stroke-dasharray:4 3;fill-opacity:.1}.lsn{padding:4px 12px;margin:0;border-bottom:1px solid var(--line)}.vbar select{font:inherit;font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:2px 8px}
+.gv .arrow{fill:var(--ink);opacity:.7}.gv .nm{fill-opacity:.3;stroke:var(--met);stroke-width:2}.gv text.rl{opacity:.85}
+.gv text.lab{fill:var(--ink);paint-order:stroke;stroke:var(--bg);stroke-width:.25em;stroke-linejoin:round}.nolab .gv text.lab{display:none}
+.gv g.hl circle,.gv g.hl text{filter:drop-shadow(0 0 3px var(--accent))}.gv g.hl circle{stroke:var(--accent);stroke-width:2.2}
+tr.hl td{background:var(--soft)!important}
+.detail-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.strip{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px}.sv{display:flex;flex-direction:column;align-items:center;font-size:11px;text-decoration:none;color:var(--mute);padding:4px;border:1px solid var(--line);border-radius:8px;flex:0 0 auto}.sv[aria-current]{border-color:var(--accent);color:var(--ink);background:var(--soft)}
+.pgrp{margin:6px 0 10px}.pgrp .pt{font-size:13px;color:var(--mute);margin-bottom:4px}#grpBox h3{font-size:14px;margin:12px 0 4px}#grpBox{margin-top:16px}
+.pager2{display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px}.svgl{display:block}.ctx{margin-bottom:6px}
+@media(min-width:801px){.detail-grid.one{grid-template-columns:1fr}}
+@media(max-width:800px){.detail-grid{grid-template-columns:1fr}}
+.tag.tier{font-size:11px}.tag.t0{opacity:.75}.tag.ind{border-color:#2d8f6f;color:#2d8f6f}.tag.cont{border-color:var(--mute);color:var(--mute);text-decoration:none}.tag.grp{border-color:var(--accent);color:var(--accent)}label.rgf span{flex-direction:row;display:flex;gap:6px;align-items:center;font-size:13px;color:var(--ink)}label.rgf input{min-width:0;width:auto}fieldset.tiers{border:1px solid var(--line);border-radius:8px;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;padding:4px 10px;margin:0}fieldset.tiers legend{font-size:12px;color:var(--mute);padding:0 4px}fieldset.tiers label{flex-direction:row;align-items:center;gap:4px;font-size:13px;color:var(--ink)}fieldset.tiers input{min-width:0;width:auto}
+.dz{border:2px dashed var(--line);border-radius:12px;padding:28px 16px;text-align:center;cursor:pointer;background:var(--bg);color:var(--mute)}.dz.on,.dz:hover{border-color:var(--accent);color:var(--ink)}.dz p{margin:0}
+.opts{display:flex;flex-wrap:wrap;gap:8px 22px}.opts label{display:flex;gap:6px;align-items:center;font-size:14px}.vbar2{display:flex;gap:10px;margin-bottom:10px}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}.vbar2 button{font:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:6px 18px;cursor:pointer;background:var(--bg);color:var(--ink)}.vbar2 button:disabled{opacity:.45;cursor:not-allowed}
+button.lnk{font:inherit;background:none;border:0;color:var(--accent);cursor:pointer;padding:0;text-decoration:underline}th button.lnk{text-transform:inherit;letter-spacing:inherit;color:var(--mute);font-weight:inherit;text-decoration:none;font-size:inherit}
+.steps{list-style:none;padding:0;margin:10px 0}.steps .st{display:grid;grid-template-columns:24px 1fr auto;gap:8px;padding:5px 0;border-bottom:1px solid var(--line);font-size:14px;color:var(--mute)}.steps .st.running{color:var(--ink);font-weight:600}.steps .st.done{color:var(--ink)}.steps .st.failed{color:#c0392b}.steps .sec{font-variant-numeric:tabular-nums}
+.slog{max-height:180px;overflow:auto}.bar.big{height:14px}.abars .ab{display:grid;grid-template-columns:60px 1fr 44px;gap:8px;align-items:center;font-size:13px;margin:4px 0}.abars .bar{margin:0}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--line);margin-bottom:12px}.tabs button{font:inherit;font-size:14px;background:none;border:0;border-bottom:3px solid transparent;padding:6px 14px;cursor:pointer;color:var(--mute)}.tabs button[aria-selected=true]{color:var(--ink);border-color:var(--accent);font-weight:600}
+.vbox.tall{height:min(65vh,560px)}.vbox svg{touch-action:none;cursor:grab}.note.err{border-color:#c0392b;background:rgba(192,57,43,.1)}.lead2{color:var(--mute);max-width:90ch}
+.pdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}ul.checks{list-style:none;padding:0;margin:6px 0}ul.checks li{padding:2px 0}ul.checks .ok b{color:#2e7d32}ul.checks .bad b{color:#c0392b}details.det{margin:12px 0}details.det>summary{cursor:pointer;color:var(--accent)}
+@media(max-width:640px){.top{position:static}.grp+.grp{border-left:0;padding-left:0}.top nav{flex-direction:column;gap:4px}main{padding:20px 14px 40px}.top .in{padding:8px 14px}th,td{padding:8px 10px}.grid{grid-template-columns:1fr}.filters label,.filters input,.filters select{width:100%}}
+</style><header class="top"><div class="in"><a class="brand" href="../../../index.html">Open Meta Maps</a><nav aria-label="Site"><div class="grp"><a href="../tool/index.html">Map Generator</a><a href="index.html" aria-current="page">Atlas Browser</a><a href="../about/index.html">About / Provenance</a></div></nav></div></header><main><h1>Atlas Browser</h1><p class="lead">Search curated Atlas modules by EC, reaction, metabolite, source map or licence, then download Escher JSON with a provenance manifest.</p><style>
+.ab-toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 12px}
+.ab-toolbar .sel{font-size:13px;color:var(--mute)}
+.ab-card{position:relative;cursor:pointer}
+.ab-card.sel{outline:2px solid var(--accent)}
+.ab-card .chk{position:absolute;top:10px;right:10px;z-index:2}
+.ab-card img.th,.ab-card object.th{display:block;width:100%;height:140px;object-fit:contain;background:var(--bg);border-radius:8px;margin-bottom:10px;border:1px solid var(--line)}
+.ab-empty{color:var(--mute);padding:24px 0}
+.ab-detail{display:none}.ab-detail.on{display:block}
+.ab-list.on{display:none}
+.ab-rx{max-height:280px;overflow:auto;font:12px/1.45 ui-monospace,Menlo,monospace}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.filters .grow{flex:1;min-width:min(280px,100%)}
+</style>
+<div id="listView" class="ab-list">
+<form class="filters" id="filters" autocomplete="off">
+<label class="grow">Search<input type="search" name="q" id="q" placeholder="name, id, free text"></label>
+<label>EC number<input name="ec" id="ec" placeholder="1.1.1.1"></label>
+<label>Reaction ID<input name="reaction" id="reaction" placeholder="BiGG / Rhea / source"></label>
+<label>Metabolite ID<input name="metabolite" id="metabolite" placeholder="g6p / chebi:…"></label>
+<label>Map / model<input name="map" id="map" placeholder="map id or name"></label>
+<label>Source database<select name="source" id="source"><option value="">All</option></select></label>
+<label>Licence<select name="license" id="license"><option value="">All</option></select></label>
+<button type="submit" class="primary">Search</button>
+<button type="button" id="reset">Reset</button>
+</form>
+<div class="ab-toolbar">
+<label class="sel"><input type="checkbox" id="selPage"> Select all on page</label>
+<span class="count" id="count">Loading index…</span>
+<button type="button" id="dlSel" disabled>Download selected</button>
+</div>
+<div class="grid" id="grid"></div>
+<nav class="pager" id="pager" aria-label="Pages"></nav>
+</div>
+<div id="detailView" class="ab-detail">
+<p class="toolbar"><button type="button" class="lnk" id="back">← Back to results</button>
+ · <button type="button" id="dlOne">Download this module</button></p>
+<div class="panel" id="detail"></div>
+</div>
+<script>
+(function(){
+var $=function(id){return document.getElementById(id)};
+var state={page:1,per:24,selected:{},lastIds:[],detail:null};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function params(){var f=$('filters'),o={};['q','ec','reaction','metabolite','map','source','license'].forEach(function(k){var v=f[k].value.trim();if(v)o[k]=v});o.page=state.page;o.per_page=state.per;return o}
+function qs(o){return Object.keys(o).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(o[k])}).join('&')}
+function selCount(){return Object.keys(state.selected).length}
+function syncDl(){$('dlSel').disabled=!selCount();$('dlSel').textContent=selCount()?'Download selected ('+selCount()+')':'Download selected'}
+function loadMeta(){
+ fetch('/api/atlas/meta').then(function(r){return r.json()}).then(function(m){
+  var s=$('source'),l=$('license');
+  (m.sources||[]).forEach(function(x){var o=document.createElement('option');o.value=x[0];o.textContent=x[0]+' ('+x[1]+')';s.appendChild(o)});
+  (m.licences||[]).forEach(function(x){var o=document.createElement('option');o.value=x[0];o.textContent=x[0]+' ('+x[1]+')';l.appendChild(o)});
+  search();
+ }).catch(function(){$('count').textContent='Could not load Atlas index. Is the tool server running?'})}
+function card(m){
+ var checked=state.selected[m.id]?' checked':'';
+ return '<article class="card ab-card'+(state.selected[m.id]?' sel':'')+'" data-id="'+esc(m.id)+'">'
+  +'<label class="chk" onclick="event.stopPropagation()"><input type="checkbox" data-id="'+esc(m.id)+'"'+checked+'></label>'
+  +'<img class="th" loading="lazy" alt="" src="'+esc(m.thumbnail)+'">'
+  +'<h2 class="dn">'+esc(m.name||m.id)+'</h2>'
+  +'<p class="meta">'+esc(m.source)+' · '+esc(m.name||m.map_id)+'</p>'
+  +'<div class="tags"><span class="tag src-'+esc(m.source)+'">'+esc(m.source)+'</span>'
+  +'<span class="tag">'+esc(m.size)+' reactions</span>'
+  +'<span class="tag lic">'+esc(m.license)+'</span></div></article>'}
+function render(data){
+ state.lastIds=(data.results||[]).map(function(m){return m.id});
+ $('grid').innerHTML=(data.results||[]).map(card).join('')||'<p class="ab-empty">No modules match these filters.</p>';
+ $('count').textContent=data.total.toLocaleString()+' modules · page '+data.page+' / '+data.pages;
+ var p=$('pager'),html='',i,start=Math.max(1,data.page-3),end=Math.min(data.pages,data.page+3);
+ if(data.page>1)html+='<a href="#" data-p="'+(data.page-1)+'">‹</a>';
+ for(i=start;i<=end;i++)html+=i===data.page?'<span>'+i+'</span>':'<a href="#" data-p="'+i+'">'+i+'</a>';
+ if(data.page<data.pages)html+='<a href="#" data-p="'+(data.page+1)+'">›</a>';
+ p.innerHTML=html;
+ $('selPage').checked=state.lastIds.length>0&&state.lastIds.every(function(id){return state.selected[id]});
+ syncDl();
+}
+function search(){
+ $('count').textContent='Searching…';
+ fetch('/api/atlas/search?'+qs(params())).then(function(r){return r.json()}).then(render)
+  .catch(function(){$('count').textContent='Search failed.'})}
+$('filters').onsubmit=function(e){e.preventDefault();state.page=1;search()};
+$('reset').onclick=function(){['q','ec','reaction','metabolite','map'].forEach(function(k){$(k).value=''});$('source').value='';$('license').value='';state.page=1;search()};
+$('pager').onclick=function(e){var a=e.target.closest('[data-p]');if(!a)return;e.preventDefault();state.page=+a.getAttribute('data-p');search()};
+function toggleSel(cb){if(!cb)return;if(cb.checked)state.selected[cb.getAttribute('data-id')]=1;else delete state.selected[cb.getAttribute('data-id')];syncDl();var art=cb.closest('.ab-card');if(art)art.classList.toggle('sel',cb.checked)}
+$('grid').onclick=function(e){
+ var cb=e.target.closest('input[type=checkbox][data-id]');
+ if(cb){toggleSel(cb);return}
+ var card=e.target.closest('.ab-card');if(card)openDetail(card.getAttribute('data-id'))};
+$('grid').onchange=function(e){var cb=e.target.closest('input[type=checkbox][data-id]');if(cb)toggleSel(cb)};
+$('selPage').onchange=function(){
+ state.lastIds.forEach(function(id){if($('selPage').checked)state.selected[id]=1;else delete state.selected[id]});
+ Array.prototype.forEach.call(document.querySelectorAll('.ab-card'),function(art){
+  var id=art.getAttribute('data-id');var on=!!$('selPage').checked;art.classList.toggle('sel',on);
+  var cb=art.querySelector('input[type=checkbox]');if(cb)cb.checked=on});
+ syncDl()};
+function openDetail(id){
+ fetch('/api/atlas/modules/'+encodeURIComponent(id)).then(function(r){return r.json()}).then(function(d){
+  if(d.error){alert(d.error.message_en||'Not found');return}
+  state.detail=d;
+  $('listView').classList.add('on');$('detailView').classList.add('on');
+  var rx=(d.reactions||[]).map(function(r){
+   var refs=Object.keys(r.references||{}).map(function(ns){return ns+':'+(r.references[ns]||[]).join(',')}).join('; ');
+   return '<tr><td>'+esc(r.id||'')+'</td><td>'+esc(refs)+'</td></tr>'}).join('');
+  $('detail').innerHTML='<div class="detail-grid"><div><img class="th" style="height:240px;width:100%" src="'+esc(d.thumbnail)+'" alt="">'
+   +'</div><div><dl class="kv">'
+   +'<dt>Source</dt><dd>'+esc(d.source)+'</dd>'
+   +'<dt>Map</dt><dd>'+esc(d.name)+' <span class="muted">'+esc(d.map_id)+'</span></dd>'
+   +'<dt>Species</dt><dd>'+esc(d.species||'')+'</dd>'
+   +'<dt>Licence</dt><dd>'+esc(d.license)+'</dd>'
+   +'<dt>Attribution</dt><dd>'+esc(d.attribution||'')+'</dd>'
+   +'<dt>Reactions</dt><dd>'+esc(d.size)+'</dd>'
+   +'<dt>Quality</dt><dd>'+esc(d.quality||'')+'</dd>'
+   +'<dt>SHA-256</dt><dd class="muted">'+esc(d.source_sha256||'')+'</dd>'
+   +'</dl></div></div>'
+   +'<h2>Member reactions</h2><div class="tablewrap"><table><thead><tr><th>ID</th><th>References</th></tr></thead><tbody class="ab-rx">'+rx+'</tbody></table></div>'
+   +(d.extraction?'<details class="det"><summary>Extraction provenance</summary><pre>'+esc(JSON.stringify(d.extraction,null,2))+'</pre></details>':'');
+ }).catch(function(){alert('Could not load module')})}
+$('back').onclick=function(){$('listView').classList.remove('on');$('detailView').classList.remove('on');state.detail=null};
+function download(ids){
+ fetch('/api/atlas/download',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:ids})})
+  .then(function(r){if(!r.ok)return r.json().then(function(j){throw j});return r.blob()})
+  .then(function(b){var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='atlas_modules.zip';a.click();URL.revokeObjectURL(a.href)})
+  .catch(function(e){alert((e&&e.error&&e.error.message_en)||'Download failed')})}
+$('dlSel').onclick=function(){download(Object.keys(state.selected))};
+$('dlOne').onclick=function(){if(state.detail)download([state.detail.id])};
+loadMeta();
+})();
+</script></main><script>window.tr=function(s,v){var o=s;if(v)for(var k in v)o=o.split('{'+k+'}').join(v[k]);return o};</script></html>

@@ -9,6 +9,7 @@
 /layout_atlas/results/*
 !/layout_atlas/results/tool/
 !/layout_atlas/results/about/
+!/layout_atlas/results/atlas_browser/
 
 # build outputs (rebuilt by `python3 project.py setup`)
 /layout_atlas/build/
@@ -19,6 +20,8 @@
 
 # optional / large local data (not redistributed with the open-core checkout); the real files may live outside this repository (../LocalData)
 /data/atlas.sqlite
+# Atlas Browser search index (rebuild: python3 tools/build_atlas_browser_index.py)
+/data/atlas_browser_index.json.gz
 # Derived Mapper crosswalk (built from identifier_bridge + available models); do not track
 /data/annotation_bridge.json
 /data/annotation_bridge.json.gz
