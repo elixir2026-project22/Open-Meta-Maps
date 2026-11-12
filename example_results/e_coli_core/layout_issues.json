@@ -4,48 +4,62 @@
     {
       "kind": "same_reaction",
       "reactions": [
+        "PFK"
+      ],
+      "metabolites": [
+        "fdp_c",
+        "h_c"
+      ],
+      "x": 70.9,
+      "y": 3660.6
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "PFL"
+      ],
+      "metabolites": [
+        "coa_c",
+        "pyr_c"
+      ],
+      "x": 1419.5,
+      "y": 4464.2
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
         "PGL"
       ],
       "metabolites": [
-        "6pgc_c",
-        "h_c"
+        "6pgl_c",
+        "h2o_c"
       ],
-      "x": 6454.4,
-      "y": 1480.8
+      "x": 360.0,
+      "y": 3639.5
     },
     {
-      "kind": "curated_curated",
-      "kind_legacy": "expert_expert",
+      "kind": "same_reaction",
       "reactions": [
-        "ACALD",
-        "CS"
+        "ACALD"
+      ],
+      "metabolites": [
+        "acald_c",
+        "coa_c"
+      ],
+      "x": 2001.1,
+      "y": 4418.3
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "ACALD"
       ],
       "metabolites": [
         "accoa_c",
-        "accoa_c"
+        "nadh_c"
       ],
-      "x": 1766.7,
-      "y": 4350.1,
-      "currency_involved": false
-    },
-    {
-      "kind": "algorithm_curated",
-      "kind_legacy": "algorithm_expert",
-      "reactions": [
-        "ACALD",
-        "CS"
-      ],
-      "metabolites": [
-        "h_c",
-        "accoa_c"
-      ],
-      "x": 1899.2,
-      "y": 4342.1,
-      "currency_involved": true,
-      "curated_rid": "CS",
-      "algorithm_rid": "ACALD",
-      "curated_met": "accoa_c",
-      "algorithm_met": "h_c"
+      "x": 1933.0,
+      "y": 4418.3
     },
     {
       "kind": "same_reaction",
@@ -56,39 +70,20 @@
         "akg_c",
         "h_c"
       ],
-      "x": 4349.1,
-      "y": 3670.2
-    },
-    {
-      "kind": "algorithm_curated",
-      "kind_legacy": "algorithm_expert",
-      "reactions": [
-        "PGM",
-        "ENO"
-      ],
-      "metabolites": [
-        "2pg_c",
-        "pep_c"
-      ],
-      "x": 4592.2,
-      "y": 2674.2,
-      "currency_involved": false,
-      "curated_rid": "PGM",
-      "algorithm_rid": "ENO",
-      "curated_met": "2pg_c",
-      "algorithm_met": "pep_c"
+      "x": 4417.8,
+      "y": 3736.8
     },
     {
       "kind": "same_reaction",
       "reactions": [
-        "ACKr"
+        "ALCD2x"
       ],
       "metabolites": [
-        "ac_c",
-        "atp_c"
+        "acald_c",
+        "h_c"
       ],
-      "x": 1716.9,
-      "y": 4698.3
+      "x": 2300.0,
+      "y": 4539.5
     },
     {
       "kind": "same_reaction",
@@ -99,8 +94,8 @@
         "co2_c",
         "pep_c"
       ],
-      "x": 1397.3,
-      "y": 3875.6
+      "x": 1460.1,
+      "y": 3937.2
     },
     {
       "kind": "same_reaction",
@@ -111,8 +106,8 @@
         "h_c",
         "oaa_c"
       ],
-      "x": 1457.5,
-      "y": 3897.2
+      "x": 1534.7,
+      "y": 3963.6
     },
     {
       "kind": "curated_curated",
@@ -125,8 +120,8 @@
         "oaa_c",
         "accoa_c"
       ],
-      "x": 2267.2,
-      "y": 4071.0,
+      "x": 2338.7,
+      "y": 4136.2,
       "currency_involved": false
     },
     {
@@ -140,8 +135,8 @@
         "oaa_c",
         "pyr_c"
       ],
-      "x": 1804.1,
-      "y": 3971.6,
+      "x": 1875.6,
+      "y": 4036.8,
       "currency_involved": false
     },
     {
@@ -155,62 +150,9 @@
         "oaa_c",
         "pyr_c"
       ],
-      "x": 1833.9,
-      "y": 3978.0,
+      "x": 1905.4,
+      "y": 4043.2,
       "currency_involved": false
-    },
-    {
-      "kind": "algorithm_curated",
-      "kind_legacy": "algorithm_expert",
-      "reactions": [
-        "ATPM",
-        "SUCCt2_2"
-      ],
-      "metabolites": [
-        "atp_c",
-        "succ_c"
-      ],
-      "x": 4086.4,
-      "y": 3386.9,
-      "currency_involved": true,
-      "curated_rid": "SUCCt2_2",
-      "algorithm_rid": "ATPM",
-      "curated_met": "succ_c",
-      "algorithm_met": "atp_c"
-    },
-    {
-      "kind": "algorithm_algorithm",
-      "kind_legacy": "algorithm_algorithm",
-      "reactions": [
-        "ATPM",
-        "ADK1"
-      ],
-      "metabolites": [
-        "atp_c",
-        "adp_c"
-      ],
-      "x": 4060.6,
-      "y": 3324.2,
-      "currency_involved": true
-    },
-    {
-      "kind": "algorithm_curated",
-      "kind_legacy": "algorithm_expert",
-      "reactions": [
-        "ATPM",
-        "SUCCt2_2"
-      ],
-      "metabolites": [
-        "adp_c",
-        "succ_c"
-      ],
-      "x": 3984.8,
-      "y": 3372.3,
-      "currency_involved": true,
-      "curated_rid": "SUCCt2_2",
-      "algorithm_rid": "ATPM",
-      "curated_met": "succ_c",
-      "algorithm_met": "adp_c"
     },
     {
       "kind": "curated_curated",
@@ -223,8 +165,8 @@
         "oaa_c",
         "accoa_c"
       ],
-      "x": 2251.7,
-      "y": 4079.0,
+      "x": 2323.2,
+      "y": 4144.2,
       "currency_involved": false
     },
     {
@@ -238,8 +180,8 @@
         "oaa_c",
         "pyr_c"
       ],
-      "x": 1767.9,
-      "y": 3993.4,
+      "x": 1839.4,
+      "y": 4058.5,
       "currency_involved": false
     },
     {
@@ -253,9 +195,21 @@
         "oaa_c",
         "pyr_c"
       ],
-      "x": 1797.4,
-      "y": 3998.6,
+      "x": 1868.9,
+      "y": 4063.8,
       "currency_involved": false
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "PPCK"
+      ],
+      "metabolites": [
+        "co2_c",
+        "pep_c"
+      ],
+      "x": 1485.3,
+      "y": 3988.3
     },
     {
       "kind": "same_reaction",
@@ -266,35 +220,23 @@
         "ac_e",
         "h_e"
       ],
-      "x": 1707.6,
-      "y": 5051.3
+      "x": 1779.7,
+      "y": 5111.2
     },
     {
-      "kind": "same_reaction",
+      "kind": "algorithm_algorithm",
+      "kind_legacy": "algorithm_algorithm",
       "reactions": [
-        "PYK"
+        "ADK1",
+        "ATPS4r"
       ],
       "metabolites": [
-        "h_c",
-        "pep_c"
+        "adp_c",
+        "atp_c"
       ],
-      "x": 1169.4,
-      "y": 4096.6
-    },
-    {
-      "kind": "curated_curated",
-      "kind_legacy": "expert_expert",
-      "reactions": [
-        "BIOMASS_Ecoli_core_w_GAM",
-        "TALA"
-      ],
-      "metabolites": [
-        "3pg_c",
-        "e4p_c"
-      ],
-      "x": 4347.7,
-      "y": 2596.1,
-      "currency_involved": false
+      "x": 4629.6,
+      "y": 4307.1,
+      "currency_involved": true
     },
     {
       "kind": "same_reaction",
@@ -302,11 +244,90 @@
         "BIOMASS_Ecoli_core_w_GAM"
       ],
       "metabolites": [
-        "adp_c",
-        "akg_c"
+        "3pg_c",
+        "nadph_c"
       ],
-      "x": 4599.5,
-      "y": 2464.1
+      "x": 5132.3,
+      "y": 2549.6
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "BIOMASS_Ecoli_core_w_GAM"
+      ],
+      "metabolites": [
+        "accoa_c",
+        "glu__L_c"
+      ],
+      "x": 5111.7,
+      "y": 2580.6
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "BIOMASS_Ecoli_core_w_GAM"
+      ],
+      "metabolites": [
+        "e4p_c",
+        "coa_c"
+      ],
+      "x": 5056.6,
+      "y": 2577.5
+    },
+    {
+      "kind": "algorithm_curated",
+      "kind_legacy": "algorithm_expert",
+      "reactions": [
+        "BIOMASS_Ecoli_core_w_GAM",
+        "TPI"
+      ],
+      "metabolites": [
+        "e4p_c",
+        "g3p_c"
+      ],
+      "x": 4879.7,
+      "y": 2653.1,
+      "currency_involved": false,
+      "curated_rid": "BIOMASS_Ecoli_core_w_GAM",
+      "algorithm_rid": "TPI",
+      "curated_met": "e4p_c",
+      "algorithm_met": "g3p_c"
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "BIOMASS_Ecoli_core_w_GAM"
+      ],
+      "metabolites": [
+        "f6p_c",
+        "pi_c"
+      ],
+      "x": 5112.1,
+      "y": 2521.8
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "BIOMASS_Ecoli_core_w_GAM"
+      ],
+      "metabolites": [
+        "gln__L_c",
+        "nadh_c"
+      ],
+      "x": 5083.3,
+      "y": 2524.9
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "BIOMASS_Ecoli_core_w_GAM"
+      ],
+      "metabolites": [
+        "r5p_c",
+        "coa_c"
+      ],
+      "x": 5052.2,
+      "y": 2585.0
     },
     {
       "kind": "same_reaction",
@@ -315,10 +336,10 @@
       ],
       "metabolites": [
         "akg_c",
-        "coa_c"
+        "h_c"
       ],
-      "x": 4656.8,
-      "y": 2464.8
+      "x": 5061.3,
+      "y": 2553.8
     },
     {
       "kind": "same_reaction",
@@ -329,8 +350,8 @@
         "h_e",
         "pyr_e"
       ],
-      "x": 614.0,
-      "y": 4356.8
+      "x": 700.0,
+      "y": 4419.8
     },
     {
       "kind": "same_reaction",
@@ -341,8 +362,8 @@
         "accoa_c",
         "h2o_c"
       ],
-      "x": 2628.5,
-      "y": 4297.9
+      "x": 2697.7,
+      "y": 4363.2
     },
     {
       "kind": "same_reaction",
@@ -353,20 +374,20 @@
         "h_c",
         "succ_c"
       ],
-      "x": 4397.1,
-      "y": 3431.9
+      "x": 4458.9,
+      "y": 3495.6
     },
     {
       "kind": "same_reaction",
       "reactions": [
-        "D_LACt2"
+        "SUCCt3"
       ],
       "metabolites": [
-        "h_e",
-        "lac__D_e"
+        "h_c",
+        "succ_e"
       ],
-      "x": 1169.4,
-      "y": 5006.7
+      "x": 4508.4,
+      "y": 3321.6
     },
     {
       "kind": "same_reaction",
@@ -377,20 +398,8 @@
         "etoh_e",
         "h_e"
       ],
-      "x": 2383.8,
-      "y": 5014.8
-    },
-    {
-      "kind": "same_reaction",
-      "reactions": [
-        "SUCDi"
-      ],
-      "metabolites": [
-        "fum_c",
-        "q8h2_c"
-      ],
-      "x": 3002.8,
-      "y": 3233.7
+      "x": 2456.0,
+      "y": 5073.6
     },
     {
       "kind": "algorithm_algorithm",
@@ -403,8 +412,8 @@
         "nad_c",
         "nadh_c"
       ],
-      "x": 352.2,
-      "y": 3974.8,
+      "x": 4894.6,
+      "y": 1891.7,
       "currency_involved": true
     },
     {
@@ -416,8 +425,8 @@
         "for_e",
         "h_e"
       ],
-      "x": 1389.9,
-      "y": 5039.1
+      "x": 1461.0,
+      "y": 5097.4
     },
     {
       "kind": "same_reaction",
@@ -428,8 +437,8 @@
         "fum_e",
         "h_e"
       ],
-      "x": 2734.9,
-      "y": 2754.6
+      "x": 2806.4,
+      "y": 2816.7
     },
     {
       "kind": "same_reaction",
@@ -440,32 +449,20 @@
         "fum_c",
         "h_c"
       ],
-      "x": 2734.9,
-      "y": 2943.9
+      "x": 2806.4,
+      "y": 3003.4
     },
     {
       "kind": "same_reaction",
       "reactions": [
-        "G6PDH2r"
+        "GAPD"
       ],
       "metabolites": [
-        "g6p_c",
-        "nadp_c"
+        "g3p_c",
+        "pi_c"
       ],
-      "x": 5779.6,
-      "y": 1486.7
-    },
-    {
-      "kind": "same_reaction",
-      "reactions": [
-        "G6PDH2r"
-      ],
-      "metabolites": [
-        "6pgl_c",
-        "h_c"
-      ],
-      "x": 5859.5,
-      "y": 1486.7
+      "x": 174.7,
+      "y": 4127.7
     },
     {
       "kind": "same_reaction",
@@ -474,34 +471,10 @@
       ],
       "metabolites": [
         "13dpg_c",
-        "h_c"
+        "nadh_c"
       ],
-      "x": 533.7,
-      "y": 4988.7
-    },
-    {
-      "kind": "same_reaction",
-      "reactions": [
-        "GLNS"
-      ],
-      "metabolites": [
-        "atp_c",
-        "glu__L_c"
-      ],
-      "x": 4119.3,
-      "y": 4245.9
-    },
-    {
-      "kind": "same_reaction",
-      "reactions": [
-        "GLNS"
-      ],
-      "metabolites": [
-        "adp_c",
-        "gln__L_c"
-      ],
-      "x": 4128.0,
-      "y": 4289.6
+      "x": 174.6,
+      "y": 4171.0
     },
     {
       "kind": "same_reaction",
@@ -512,8 +485,8 @@
         "gln__L_c",
         "h_c"
       ],
-      "x": 4107.0,
-      "y": 4329.8
+      "x": 4182.7,
+      "y": 4386.9
     },
     {
       "kind": "same_reaction",
@@ -524,8 +497,8 @@
         "gln__L_c",
         "pi_c"
       ],
-      "x": 4157.2,
-      "y": 4549.7
+      "x": 4223.5,
+      "y": 4613.1
     },
     {
       "kind": "same_reaction",
@@ -536,8 +509,20 @@
         "glu__L_c",
         "nh4_c"
       ],
-      "x": 4017.7,
-      "y": 4245.1
+      "x": 4089.2,
+      "y": 4304.5
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "GLUt2r"
+      ],
+      "metabolites": [
+        "glu__L_e",
+        "h_e"
+      ],
+      "x": 4490.7,
+      "y": 4108.2
     },
     {
       "kind": "same_reaction",
@@ -548,8 +533,8 @@
         "glu__L_c",
         "h_c"
       ],
-      "x": 4368.6,
-      "y": 4042.9
+      "x": 4432.4,
+      "y": 4108.0
     },
     {
       "kind": "same_reaction",
@@ -560,8 +545,8 @@
         "6pgc_c",
         "nadp_c"
       ],
-      "x": 818.5,
-      "y": 4516.0
+      "x": 488.9,
+      "y": 3639.9
     },
     {
       "kind": "same_reaction",
@@ -572,8 +557,8 @@
         "co2_c",
         "ru5p__D_c"
       ],
-      "x": 866.4,
-      "y": 4515.8
+      "x": 549.5,
+      "y": 3640.0
     },
     {
       "kind": "same_reaction",
@@ -584,8 +569,8 @@
         "icit_c",
         "nadp_c"
       ],
-      "x": 3432.3,
-      "y": 4298.8
+      "x": 3511.7,
+      "y": 4358.7
     },
     {
       "kind": "same_reaction",
@@ -596,8 +581,8 @@
         "akg_c",
         "co2_c"
       ],
-      "x": 3507.3,
-      "y": 4240.6
+      "x": 3579.7,
+      "y": 4304.4
     },
     {
       "kind": "curated_curated",
@@ -610,8 +595,8 @@
         "accoa_c",
         "oaa_c"
       ],
-      "x": 2504.8,
-      "y": 3949.3,
+      "x": 2576.3,
+      "y": 4014.4,
       "currency_involved": false
     },
     {
@@ -623,20 +608,8 @@
         "h_e",
         "mal__L_e"
       ],
-      "x": 2511.3,
-      "y": 3109.3
-    },
-    {
-      "kind": "same_reaction",
-      "reactions": [
-        "MALt2_2"
-      ],
-      "metabolites": [
-        "h_c",
-        "mal__L_c"
-      ],
-      "x": 2511.4,
-      "y": 3211.8
+      "x": 2578.8,
+      "y": 3240.5
     },
     {
       "kind": "same_reaction",
@@ -647,8 +620,8 @@
         "h_c",
         "oaa_c"
       ],
-      "x": 2477.0,
-      "y": 3840.7
+      "x": 2547.5,
+      "y": 3901.9
     },
     {
       "kind": "same_reaction",
@@ -659,8 +632,56 @@
         "nadh_c",
         "pyr_c"
       ],
-      "x": 2080.8,
-      "y": 3805.3
+      "x": 2150.1,
+      "y": 3871.8
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "ME2"
+      ],
+      "metabolites": [
+        "co2_c",
+        "nadph_c"
+      ],
+      "x": 2207.1,
+      "y": 3872.7
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "ME2"
+      ],
+      "metabolites": [
+        "co2_c",
+        "nadph_c"
+      ],
+      "x": 2205.7,
+      "y": 3873.7
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "ME2"
+      ],
+      "metabolites": [
+        "co2_c",
+        "pyr_c"
+      ],
+      "x": 2205.8,
+      "y": 3873.6
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "ME2"
+      ],
+      "metabolites": [
+        "nadph_c",
+        "pyr_c"
+      ],
+      "x": 2206.0,
+      "y": 3873.6
     },
     {
       "kind": "same_reaction",
@@ -671,8 +692,8 @@
         "coa_c",
         "pyr_c"
       ],
-      "x": 1460.1,
-      "y": 4353.1
+      "x": 1523.8,
+      "y": 4418.3
     },
     {
       "kind": "same_reaction",
@@ -680,178 +701,212 @@
         "PDH"
       ],
       "metabolites": [
-        "accoa_c",
-        "co2_c"
+        "nad_c",
+        "pyr_c"
       ],
-      "x": 1539.3,
-      "y": 4353.1
+      "x": 1567.2,
+      "y": 4418.3
     }
   ],
   "obstacle_hits": [
     {
       "kind": "node",
+      "reaction": "PPC",
+      "metabolite": "pi_c",
+      "x": 1532.3,
+      "y": 3971.0
+    },
+    {
+      "kind": "node",
       "reaction": "ATPM",
       "metabolite": "adp_c",
-      "x": 4046.7,
-      "y": 3410.4
+      "x": 4612.9,
+      "y": 4391.8
+    },
+    {
+      "kind": "node",
+      "reaction": "PPS",
+      "metabolite": "amp_c",
+      "x": 1047.4,
+      "y": 4104.7
     },
     {
       "kind": "node",
       "reaction": "ADK1",
       "metabolite": "adp_c",
-      "x": 4073.4,
-      "y": 3320.0
+      "x": 4644.0,
+      "y": 4302.9
     },
     {
       "kind": "node",
       "reaction": "ATPS4r",
       "metabolite": "atp_c",
-      "x": 3988.9,
-      "y": 3308.3
+      "x": 4571.5,
+      "y": 4278.6
+    },
+    {
+      "kind": "node",
+      "reaction": "BIOMASS_Ecoli_core_w_GAM",
+      "metabolite": "3pg_c",
+      "x": 5144.2,
+      "y": 2547.1
+    },
+    {
+      "kind": "node",
+      "reaction": "BIOMASS_Ecoli_core_w_GAM",
+      "metabolite": "g3p_c",
+      "x": 5073.3,
+      "y": 2554.6
+    },
+    {
+      "kind": "label",
+      "reaction": "BIOMASS_Ecoli_core_w_GAM",
+      "metabolite": "g3p_c",
+      "label": "coa_c",
+      "x": 5035.0,
+      "y": 2561.5
     },
     {
       "kind": "node",
       "reaction": "BIOMASS_Ecoli_core_w_GAM",
       "metabolite": "g6p_c",
-      "x": 4659.3,
-      "y": 2489.2
+      "x": 5154.3,
+      "y": 2569.7
+    },
+    {
+      "kind": "node",
+      "reaction": "BIOMASS_Ecoli_core_w_GAM",
+      "metabolite": "nadph_c",
+      "x": 5126.7,
+      "y": 2552.5
     },
     {
       "kind": "node",
       "reaction": "BIOMASS_Ecoli_core_w_GAM",
       "metabolite": "pep_c",
-      "x": 4659.5,
-      "y": 2503.9
+      "x": 5118.5,
+      "y": 2543.9
     },
     {
       "kind": "node",
       "reaction": "CYTBD",
       "metabolite": "q8_c",
-      "x": 591.7,
-      "y": 3898.3
+      "x": 5085.1,
+      "y": 1772.2
     },
     {
       "kind": "node",
       "reaction": "SUCCt3",
       "metabolite": "h_e",
-      "x": 4435.3,
-      "y": 3267.6
+      "x": 4507.1,
+      "y": 3332.3
     },
     {
       "kind": "node",
       "reaction": "THD2",
-      "metabolite": "nadph_c",
-      "x": 354.4,
-      "y": 3997.9
+      "metabolite": "nad_c",
+      "x": 4840.8,
+      "y": 1894.7
     },
     {
       "kind": "node",
-      "reaction": "GLUDy",
-      "metabolite": "h_c",
-      "x": 3852.5,
-      "y": 4018.5
-    },
-    {
-      "kind": "node",
-      "reaction": "NADTRHD",
-      "metabolite": "nadh_c",
-      "x": 399.0,
-      "y": 4007.5
+      "reaction": "NADH16",
+      "metabolite": "q8h2_c",
+      "x": 5008.6,
+      "y": 1834.9
     }
   ],
   "curve_anomalies": [],
   "worst_regions": [
     {
-      "x": 3860.1,
-      "y": 3071.7,
+      "x": 4827.4,
+      "y": 2264.4,
       "w": 400,
       "h": 400,
-      "crossings": 3,
-      "obstacle_hits": 3,
+      "crossings": 1,
+      "obstacle_hits": 6,
       "node_overlaps": 0,
-      "edges": 16,
+      "edges": 25,
       "reactions": [
-        "ADK1",
-        "ATPM",
-        "ATPS4r",
-        "SUCCt2_2"
+        "BIOMASS_Ecoli_core_w_GAM",
+        "TPI"
       ]
     },
     {
-      "x": 260.1,
-      "y": 3671.7,
+      "x": 4827.4,
+      "y": 1664.4,
       "w": 400,
       "h": 400,
       "crossings": 1,
       "obstacle_hits": 3,
       "node_overlaps": 0,
-      "edges": 25,
+      "edges": 22,
       "reactions": [
         "CYTBD",
+        "NADH16",
         "NADTRHD",
         "THD2"
       ]
     },
     {
-      "x": 4460.1,
-      "y": 2471.7,
+      "x": 4427.4,
+      "y": 4064.4,
       "w": 400,
       "h": 400,
       "crossings": 1,
-      "obstacle_hits": 2,
+      "obstacle_hits": 3,
       "node_overlaps": 0,
-      "edges": 15,
+      "edges": 18,
       "reactions": [
-        "BIOMASS_Ecoli_core_w_GAM",
-        "ENO",
-        "PGM"
+        "ADK1",
+        "ATPM",
+        "ATPS4r"
       ]
     },
     {
-      "x": 1660.1,
-      "y": 4271.7,
-      "w": 400,
-      "h": 400,
-      "crossings": 1,
-      "obstacle_hits": 0,
-      "node_overlaps": 0,
-      "edges": 12,
-      "reactions": [
-        "ACALD",
-        "CS"
-      ]
-    },
-    {
-      "x": 3660.1,
-      "y": 3871.7,
+      "x": 1227.5,
+      "y": 3864.4,
       "w": 400,
       "h": 400,
       "crossings": 0,
       "obstacle_hits": 1,
       "node_overlaps": 0,
-      "edges": 11,
+      "edges": 12,
       "reactions": [
-        "GLUDy"
+        "PPC"
+      ]
+    },
+    {
+      "x": 827.5,
+      "y": 4064.4,
+      "w": 400,
+      "h": 400,
+      "crossings": 0,
+      "obstacle_hits": 1,
+      "node_overlaps": 0,
+      "edges": 8,
+      "reactions": [
+        "PPS"
       ]
     }
   ],
   "node_overlaps": [],
   "split_structures": [
     {
-      "structure": "ccdc9b32c395e30b382051b4#cc2",
-      "reactions": 4,
-      "pairs": 3,
-      "contiguous_pairs": 3,
+      "structure": "05a4558d51e0bf86849aae74#cc3",
+      "reactions": 5,
+      "pairs": 4,
+      "contiguous_pairs": 4,
       "components": 2,
       "contiguous_pair_share": 1.0
     },
     {
-      "structure": "ccdc9b32c395e30b382051b4#cc3",
-      "reactions": 4,
-      "pairs": 2,
-      "contiguous_pairs": 2,
+      "structure": "05a4558d51e0bf86849aae74#cc6",
+      "reactions": 2,
+      "pairs": 0,
+      "contiguous_pairs": 0,
       "components": 2,
-      "contiguous_pair_share": 1.0
+      "contiguous_pair_share": null
     },
     {
       "structure": "7b4797d4d68a0ba87acb08a7",
@@ -868,14 +923,15 @@
       "kind": "related",
       "reactions": [
         "PFK",
+        "PGL",
         "RPE",
-        "RPI",
-        "TKT1"
+        "RPI"
       ],
-      "moved_px": 4558.4,
+      "moved_px": 4910.3,
       "anchors": [
         "FBP",
         "FRUpts2",
+        "GLCpts",
         "PGI"
       ]
     },
@@ -884,33 +940,73 @@
       "reactions": [
         "PGK",
         "PGM",
-        "BIOMASS_Ecoli_core_w_GAM",
         "ENO"
       ],
-      "moved_px": 2844.0,
-      "anchors": [
-        "ACALD",
-        "AKGDH",
-        "AKGt2r",
-        "CS"
-      ]
-    },
-    {
-      "kind": "related",
-      "reactions": [
-        "PGL",
-        "G6PDH2r"
-      ],
-      "moved_px": 1948.8,
+      "moved_px": 1606.4,
       "anchors": [
         "BIOMASS_Ecoli_core_w_GAM",
-        "GLCpts",
-        "GND",
-        "PGI"
+        "FRUpts2",
+        "GAPD",
+        "GLCpts"
       ]
     }
   ],
   "peripheral": [
+    {
+      "exchange": "EX_acald_e",
+      "transports": [
+        "ACALDt"
+      ],
+      "xe": "acald_e",
+      "xc": [
+        "acald_c"
+      ],
+      "anchors": [
+        "ACALD",
+        "ALCD2x"
+      ],
+      "rank": 3,
+      "connection_px": [
+        475.3,
+        120.0
+      ],
+      "state": "not_attached",
+      "moved_px": 355.3,
+      "delta": [
+        3.703191540387536,
+        -355.27059597850257
+      ],
+      "keys": [
+        "copy:bee463ed50b4ae60148e680a:acald_c",
+        "copy:bee463ed50b4ae60148e680a:acald_e",
+        "r:ACALDt",
+        "r:EX_acald_e"
+      ],
+      "reactions": [
+        "EX_acald_e",
+        "ACALDt"
+      ],
+      "gate": {
+        "exchange": "EX_acald_e",
+        "transports": [
+          "ACALDt"
+        ],
+        "decision": "rejected",
+        "reason": "more collisions (17 -> 18)",
+        "moved_px": 355.3,
+        "before": {
+          "collisions": 17,
+          "crossings": 14,
+          "long_edges": 82
+        },
+        "after": {
+          "collisions": 18,
+          "crossings": 14,
+          "long_edges": 82
+        }
+      },
+      "x": null
+    },
     {
       "exchange": "EX_for_e",
       "transports": [
@@ -927,18 +1023,18 @@
       ],
       "rank": 3,
       "connection_px": [
-        867.8,
+        865.2,
         120.0
       ],
       "state": "not_attached",
-      "moved_px": 747.8,
+      "moved_px": 745.2,
       "delta": [
-        -66.01240621381304,
-        -744.913221813913
+        -69.77740910953437,
+        -741.9039488878761
       ],
       "keys": [
-        "copy:ad1e63f63a1a945d61fd5fd4:for_c",
-        "copy:ad1e63f63a1a945d61fd5fd4:for_e",
+        "copy:25c16d0297cc8e93b1baeac3:for_c",
+        "copy:25c16d0297cc8e93b1baeac3:for_e",
         "inst:for_c:0",
         "r:EX_for_e",
         "r:FORt",
@@ -958,17 +1054,17 @@
           "FORt2"
         ],
         "decision": "rejected",
-        "reason": "more collisions (12 -> 13)",
-        "moved_px": 747.8,
+        "reason": "more collisions (17 -> 18)",
+        "moved_px": 745.2,
         "before": {
-          "collisions": 12,
-          "crossings": 29,
-          "long_edges": 85
+          "collisions": 17,
+          "crossings": 14,
+          "long_edges": 82
         },
         "after": {
-          "collisions": 13,
-          "crossings": 32,
-          "long_edges": 85
+          "collisions": 18,
+          "crossings": 18,
+          "long_edges": 82
         }
       },
       "x": null
@@ -987,7 +1083,7 @@
       ],
       "rank": 3,
       "connection_px": [
-        93.1,
+        93.2,
         120.0
       ],
       "state": "attached",
