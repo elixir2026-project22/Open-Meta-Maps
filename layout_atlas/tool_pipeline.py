@@ -271,7 +271,7 @@ def save_gz(path, obj):
 
 
 def render_skeleton_svg(model, blocks, containers, bridges, anchors, status, path):
-    """Skeleton = expert modules (coloured by source library) plus network bridges; nothing else is drawn."""
+    """Skeleton = curated modules (coloured by source library) plus network bridges; nothing else is drawn."""
     from xml.sax.saxutils import escape
     g = model_graph(model)
     xs, ys = [], []
@@ -491,7 +491,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             lap('completion of unplaced nodes (fCoSE)')
         else:
             core = {k: list(v) for k, v in anchors.items() if k in g}
-        metric_completion = dict(method='modules placed as rigid groups (expert blocks + automatic modules)', unplaced=len(plan['missing']), **{k: v for k, v in plan['stats'].items() if k in ('auto_modules', 'auto_modules_linked_to_expert', 'auto_modules_not_linked')})
+        metric_completion = dict(method='modules placed as rigid groups (curated blocks + automatic modules)', unplaced=len(plan['missing']), **{k: v for k, v in plan['stats'].items() if k in ('auto_modules', 'auto_modules_linked_to_expert', 'auto_modules_not_linked')})
     elif COMPLETION == 'spaced':
         import completion
         core = completion.complete_spaced(g, anchors, iterations=350)
@@ -824,6 +824,17 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             squeeze = composition_module.squeeze_escher(data, max_gap=k * spacing)
             squeeze['spacing_px'] = round(spacing, 1)
             squeeze['k'] = k
+            # Follow-up tighter gap so remaining BiGG alignment voids still shrink
+            # (blank / empty-rect / long-p90), whether or not the first pass moved.
+            squeeze2 = composition_module.squeeze_escher(
+                data, max_gap=max(spacing * 1.25, 40.0))
+            if squeeze2.get('applied'):
+                squeeze2['spacing_px'] = round(spacing, 1)
+                squeeze2['k'] = round(1.25, 2)
+                squeeze2['fallback'] = True
+                squeeze2['first'] = {kk: vv for kk, vv in squeeze.items()
+                                     if kk not in ('first',)}
+                squeeze = squeeze2
             metric['squeeze'] = squeeze
             if composition_report is not None:
                 composition_report['squeeze'] = squeeze
@@ -867,6 +878,13 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
                 hr = metric['hotspot_repair']
                 log('  hotspot repair: ' + str({k: hr.get(k) for k in ('accepted_count', 'tries', 'rounds', 'seconds', 'improved')}))
             dump(folder / 'map.json', data)
+        # Shrink canvas to content so empty frame padding does not inflate blank/empty gates.
+        import composition as _comp_fit
+        fit = _comp_fit.fit_canvas_to_content(data)
+        metric['canvas_fit'] = fit
+        if log and fit.get('applied'):
+            log(f"  canvas fit to content: {fit.get('content')} pad=40")
+        dump(folder / 'map.json', data)
     elif not scalable and len(model['reactions']) <= 400:
         import edge_routing
         er = dict(mode=EDGE_ROUTING, before=edge_routing.measure(data, skip_edges))

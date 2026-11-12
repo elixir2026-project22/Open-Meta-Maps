@@ -28,20 +28,24 @@ ROW_WIDTH_MIN = 2000.0  # floor only; actual row width follows main-network size
 TARGET_ASPECT = 1.55   # target width/height for shelf + packers (centre of 4:3–16:9)
 ASPECT_MIN = 4.0 / 3.0
 ASPECT_MAX = 16.0 / 9.0
-SQUEEZE_K = 3.0
+SQUEEZE_K = 1.75
 # Collapse empty corridors even when that leaves the aspect band, if an empty run
 # is at least this fraction of the content bbox on that axis (fake landscape from voids).
-SQUEEZE_FORCE_EMPTY_FRAC = 0.22
+SQUEEZE_FORCE_EMPTY_FRAC = 0.08
+# Flush shelf standoff (was 400 px and created a huge empty corridor beside main).
+SHELF_STANDOFF = SHELF_GAP
 LINK_COST = 1.8   # once aspect is in-band, prefer chemically linked tiles sitting adjacent
 TILE_GAP = 120.0
 LARGE_AREA_PCT = 75.0
-SHELF_GAP = 120.0
 CROSS_COST = 0.85  # among equal-compactness slots / widths, minimise estimated link crossings
 NODE_ASPECT_LOOPS = 14  # binary-search width iterations for pack_tiles_aspect
 STRETCH_MAX = 1.35  # cap anisotropic pack stretch so aspect faking cannot explode the canvas
 # Compact long transport / exchange arms (scene + escher): leave at most TARGET px.
 ARM_MAX = 220.0
 ARM_TARGET = 150.0
+# Pocket pack: search empty cells inside/flush with the main AABB before external shelving.
+POCKET_CELL_FRAC = 0.55
+POCKET_PAD_CELLS = 1
 
 
 def components(model, scene, cur):
@@ -235,7 +239,7 @@ def compose(model, scene, blocks, cur):
         report['moved_related'] += 1
         if len(report['moves']) < 400:
             report['moves'].append(dict(kind='related', reactions=comps[i]['reactions'][:4], moved_px=round(float(np.hypot(*delta)), 1), anchors=sorted({u for _, u in anchors})[:4]))
-    # ---- independent components: shelves beside the main network
+    # ---- independent components: fill empty pockets beside/inside main, then flush shelf
     if independent:
         main_pts = np.array([placed_pts[k] for i in main for k in cur_keys_of[i] if k in placed_pts], float)
         lo, hi = main_pts.min(0), main_pts.max(0)
@@ -256,9 +260,36 @@ def compose(model, scene, blocks, cur):
             lw = min(max([text_w(str(labels.get(k, ''))) for k in ks] + [0.0]), 220.0)
             pads[i] = lw
             boxes.append((i, arr.min(0), arr.max(0) - arr.min(0) + np.array([60.0 + lw, 60.0])))
+        # Pocket-pack into empty space flush with the main AABB before any external shelf.
+        prefer_c = main_pts.mean(0)
+        pocket_boxes = sorted(
+            [(i, float(size[0]), float(size[1])) for i, _bmin, size in boxes],
+            key=lambda t: (-t[1] * t[2], t[0]))
+        pocket_placed, pocket_rep = pack_into_main_pockets(
+            pocket_boxes, main_pts, spacing, prefer_c=prefer_c)
+        report['pocket_pack'] = pocket_rep
+        remaining = []
+        for i, bmin, size in boxes:
+            if i in pocket_placed:
+                origin = pocket_placed[i]
+                # bmin is the component's current min corner; move so min lands on origin.
+                delta = np.array([origin[0], origin[1]], float) - bmin
+                move(i, delta)
+                report['arranged_independent'] += 1
+                # Keep occupancy current for later shelf checks.
+                for k in cur_keys_of[i]:
+                    if k in pos:
+                        placed_pts[k] = list(pos[k])
+            else:
+                remaining.append((i, bmin, size))
+        boxes = remaining
+        if not boxes:
+            report['shelf'] = dict(side='pocket', rows=0, width=0, height=0,
+                                   components=0, pocket=pocket_rep.get('placed', 0))
+            report['shelf_check'] = dict(rect_overlaps=0, overlaps_with_main_network=0)
         # Binary-search shelf row width so the combined main+shelf frame lands in 4:3–16:9.
-        total_area = sum(b[2][0] * b[2][1] for b in boxes)
-        widest_box = max(b[2][0] for b in boxes) + SHELF_GAP
+        total_area = sum(b[2][0] * b[2][1] for b in boxes) if boxes else 0.0
+        widest_box = (max(b[2][0] for b in boxes) + SHELF_GAP) if boxes else SHELF_GAP
         main_w, main_h = float(hi[0] - lo[0]), float(hi[1] - lo[1])
 
         def shelf_layout(row_w):
@@ -278,69 +309,141 @@ def compose(model, scene, blocks, cur):
             return layout, block_w, block_h, row_h
 
         def combined_options(block_w, block_h):
+            g = SHELF_STANDOFF
             return {
-                'below': (lo[0], hi[1] + 400.0, max(main_w, block_w) / max(main_h + block_h + 400.0, 1.0)),
-                'above': (lo[0], lo[1] - 400.0 - block_h, max(main_w, block_w) / max(main_h + block_h + 400.0, 1.0)),
-                'right': (hi[0] + 400.0, lo[1], (main_w + block_w + 400.0) / max(main_h, block_h, 1.0)),
-                'left': (lo[0] - 400.0 - block_w, lo[1], (main_w + block_w + 400.0) / max(main_h, block_h, 1.0)),
+                'below': (lo[0], hi[1] + g, max(main_w, block_w) / max(main_h + block_h + g, 1.0)),
+                'above': (lo[0], lo[1] - g - block_h, max(main_w, block_w) / max(main_h + block_h + g, 1.0)),
+                'right': (hi[0] + g, lo[1], (main_w + block_w + g) / max(main_h, block_h, 1.0)),
+                'left': (lo[0] - g - block_w, lo[1], (main_w + block_w + g) / max(main_h, block_h, 1.0)),
             }
 
-        def shelf_score(row_w):
-            layout, block_w, block_h, row_h = shelf_layout(row_w)
-            options = combined_options(block_w, block_h)
-            side = min(options, key=lambda s: abs(np.log(max(options[s][2], 1e-6) / TARGET_ASPECT)))
-            aspect = options[side][2]
-            in_band = ASPECT_MIN - 1e-6 <= aspect <= ASPECT_MAX + 1e-6
-            # Prefer in-band combined aspect, then closest to TARGET, then compact shelf.
-            return (0 if in_band else 1,
-                    abs(math.log(max(aspect, 1e-9) / TARGET_ASPECT)),
-                    block_w * block_h,
-                    side, layout, block_w, block_h, row_h, aspect)
+        if boxes:
+            def shelf_score(row_w):
+                layout, block_w, block_h, row_h = shelf_layout(row_w)
+                options = combined_options(block_w, block_h)
+                # Prefer compact combined bbox among in-band sides, then aspect near TARGET.
+                def side_key(s):
+                    asp = options[s][2]
+                    in_band = ASPECT_MIN - 1e-6 <= asp <= ASPECT_MAX + 1e-6
+                    ox, oy, _ = options[s]
+                    comb_w = max(hi[0], ox + block_w) - min(lo[0], ox)
+                    comb_h = max(hi[1], oy + block_h) - min(lo[1], oy)
+                    return (0 if in_band else 1,
+                            comb_w * comb_h,
+                            abs(math.log(max(asp, 1e-9) / TARGET_ASPECT)))
+                side = min(options, key=side_key)
+                aspect = options[side][2]
+                in_band = ASPECT_MIN - 1e-6 <= aspect <= ASPECT_MAX + 1e-6
+                return (0 if in_band else 1,
+                        abs(math.log(max(aspect, 1e-9) / TARGET_ASPECT)),
+                        block_w * block_h,
+                        side, layout, block_w, block_h, row_h, aspect)
 
-        lo_w = max(widest_box, ROW_WIDTH_MIN * 0.5)
-        hi_w = max(lo_w * 1.05, math.sqrt(max(total_area * ASPECT_MAX, 1.0)) * 1.6,
-                   math.sqrt(max(total_area * TARGET_ASPECT, 1.0)) * 1.35, float(W))
-        best_shelf = None
-        a, b = lo_w, hi_w
-        probes = [lo_w, hi_w, math.sqrt(max(total_area * TARGET_ASPECT, 1.0)),
-                  math.sqrt(max(total_area * ASPECT_MIN, 1.0)),
-                  math.sqrt(max(total_area * ASPECT_MAX, 1.0))]
-        for _ in range(NODE_ASPECT_LOOPS):
-            mid = 0.5 * (a + b)
-            probes.append(mid)
-            sc = shelf_score(mid)
-            aspect = sc[-1]
-            if aspect < TARGET_ASPECT:
-                a = mid
-            else:
-                b = mid
-            if best_shelf is None or sc[:3] < best_shelf[:3]:
-                best_shelf = sc
-        for tw in probes:
-            sc = shelf_score(max(tw, lo_w))
-            if best_shelf is None or sc[:3] < best_shelf[:3]:
-                best_shelf = sc
-        _in, _log, _area, side, layout, block_w, block_h, row_h, _asp = best_shelf
-        options = combined_options(block_w, block_h)
-        ox, oy = options[side][0], options[side][1]
-        row_w = block_w
-        for i, bmin, off in layout:
-            ks = [k for k in cur_keys_of[i] if k in pos]
-            arr = np.array([pos[k] for k in ks], float)
-            delta = np.array([ox, oy]) + off - arr.min(0) + np.array([30.0 + pads.get(i, 0.0) / 2.0, 30.0])
+            lo_w = max(widest_box, ROW_WIDTH_MIN * 0.5)
+            hi_w = max(lo_w * 1.05, math.sqrt(max(total_area * ASPECT_MAX, 1.0)) * 1.6,
+                       math.sqrt(max(total_area * TARGET_ASPECT, 1.0)) * 1.35, float(W))
+            best_shelf = None
+            a, b = lo_w, hi_w
+            probes = [lo_w, hi_w, math.sqrt(max(total_area * TARGET_ASPECT, 1.0)),
+                      math.sqrt(max(total_area * ASPECT_MIN, 1.0)),
+                      math.sqrt(max(total_area * ASPECT_MAX, 1.0))]
+            for _ in range(NODE_ASPECT_LOOPS):
+                mid = 0.5 * (a + b)
+                probes.append(mid)
+                sc = shelf_score(mid)
+                aspect = sc[-1]
+                if aspect < TARGET_ASPECT:
+                    a = mid
+                else:
+                    b = mid
+                if best_shelf is None or sc[:3] < best_shelf[:3]:
+                    best_shelf = sc
+            for tw in probes:
+                sc = shelf_score(max(tw, lo_w))
+                if best_shelf is None or sc[:3] < best_shelf[:3]:
+                    best_shelf = sc
+            _in, _log, _area, side, layout, block_w, block_h, row_h, _asp = best_shelf
+            options = combined_options(block_w, block_h)
+            ox, oy = options[side][0], options[side][1]
+            for i, bmin, off in layout:
+                ks = [k for k in cur_keys_of[i] if k in pos]
+                arr = np.array([pos[k] for k in ks], float)
+                delta = np.array([ox, oy]) + off - arr.min(0) + np.array([30.0 + pads.get(i, 0.0) / 2.0, 30.0])
+                move(i, delta)
+                report['arranged_independent'] += 1
+            rects = []
+            for i, _, _ in layout:
+                arr = np.array([pos[k] for k in cur_keys_of[i] if k in pos], float)
+                rects.append((arr.min(0)[0] - 30, arr.min(0)[1] - 30,
+                              arr.max(0)[0] + pads.get(i, 0.0) + 30, arr.max(0)[1] + 30))
+            overlaps = sum(1 for a in range(len(rects)) for b in range(a + 1, len(rects))
+                           if rects[a][0] < rects[b][2] and rects[b][0] < rects[a][2]
+                           and rects[a][1] < rects[b][3] and rects[b][1] < rects[a][3])
+            main_rect = (lo[0], lo[1], hi[0], hi[1])
+            with_main = sum(1 for r in rects if r[0] < main_rect[2] and main_rect[0] < r[2]
+                            and r[1] < main_rect[3] and main_rect[1] < r[3])
+            report['shelf_check'] = dict(rect_overlaps=overlaps, overlaps_with_main_network=with_main)
+            report['shelf'] = dict(
+                side=side, rows=int(round(block_h / max(row_h + SHELF_GAP, 1))),
+                width=round(block_w), height=round(block_h), components=len(layout),
+                pocket=pocket_rep.get('placed', 0))
+    report['gathered'] = report['moved_related']
+    # After related/independent moves: pull any still-exterior small components into
+    # the largest free regions of the main AABB (do not grow the canvas first).
+    iter_reps = []
+    prev_ids = None
+    for _it in range(3):
+        main_pts = np.array(
+            [placed_pts[k] for i in main for k in cur_keys_of[i] if k in placed_pts], float)
+        if len(main_pts) < 2:
+            break
+        mlo, mhi = main_pts.min(0), main_pts.max(0)
+        outliers = []
+        for i in movable_idx:
+            ks = [k for k in cur_keys_of[i] if k in placed_pts]
+            if len(ks) < 1:
+                continue
+            arr = np.array([placed_pts[k] for k in ks], float)
+            clo, chi = arr.min(0), arr.max(0)
+            # Outside or barely overlapping the main content AABB.
+            overlap_w = max(0.0, min(chi[0], mhi[0]) - max(clo[0], mlo[0]))
+            overlap_h = max(0.0, min(chi[1], mhi[1]) - max(clo[1], mlo[1]))
+            area = max(float((chi[0] - clo[0]) * (chi[1] - clo[1])), 1.0)
+            if overlap_w * overlap_h >= 0.45 * area:
+                continue
+            bw = float(max(chi[0] - clo[0], 40.0) + 60.0)
+            bh = float(max(chi[1] - clo[1], 40.0) + 60.0)
+            outliers.append((i, bw, bh, clo.copy()))
+        if not outliers:
+            break
+        boxes = sorted([(i, bw, bh) for i, bw, bh, _ in outliers],
+                       key=lambda t: (-t[1] * t[2], t[0]))
+        placed, prep = pack_into_main_pockets(
+            boxes, main_pts, spacing, prefer_c=main_pts.mean(0))
+        ids = frozenset(placed)
+        if not placed or ids == prev_ids:
+            iter_reps.append(dict(placed=len(placed), missed=len(boxes) - len(placed),
+                                  **{k: v for k, v in prep.items()
+                                     if k not in ('placed', 'missed')}))
+            break
+        prev_ids = ids
+        moved_px = 0.0
+        for i, bw, bh, clo in outliers:
+            if i not in placed:
+                continue
+            origin = placed[i]
+            delta = np.array([origin[0], origin[1]], float) - clo
+            moved_px += float(np.hypot(*delta))
             move(i, delta)
             report['arranged_independent'] += 1
-        # after-the-fact check: no two shelf rectangles (and none of them with the main network's rectangle) may overlap
-        rects = []
-        for i, _, _ in layout:
-            arr = np.array([pos[k] for k in cur_keys_of[i] if k in pos], float)
-            rects.append((arr.min(0)[0] - 30, arr.min(0)[1] - 30, arr.max(0)[0] + pads.get(i, 0.0) + 30, arr.max(0)[1] + 30))
-        overlaps = sum(1 for a in range(len(rects)) for b in range(a + 1, len(rects)) if rects[a][0] < rects[b][2] and rects[b][0] < rects[a][2] and rects[a][1] < rects[b][3] and rects[b][1] < rects[a][3])
-        main_rect = (lo[0], lo[1], hi[0], hi[1])
-        with_main = sum(1 for r in rects if r[0] < main_rect[2] and main_rect[0] < r[2] and r[1] < main_rect[3] and main_rect[1] < r[3])
-        report['shelf_check'] = dict(rect_overlaps=overlaps, overlaps_with_main_network=with_main)
-        report['shelf'] = dict(side=side, rows=int(round(block_h / max(row_h + SHELF_GAP, 1))) , width=round(block_w), height=round(block_h), components=len(layout))
-    report['gathered'] = report['moved_related']
+        iter_reps.append(dict(placed=len(placed), missed=len(boxes) - len(placed),
+                              moved_px=round(moved_px, 1),
+                              **{k: v for k, v in prep.items()
+                                 if k not in ('placed', 'missed')}))
+        if moved_px < 1.0:
+            break
+    if iter_reps:
+        report['interior_repack'] = iter_reps
     # Final landscape reflow: translation-only skyline of rigid visual components so the
     # content bbox lands in 4:3–16:9 even when related-pulls left a tall column.
     scene, reflow = reflow_landscape(model, scene, blocks, cur)
@@ -357,6 +460,184 @@ def _scene_aspect(pos):
     return float((hi[0] - lo[0]) / max(hi[1] - lo[1], 1e-9)), pts
 
 
+def _occupancy_grid(points, cell, pad_cells=POCKET_PAD_CELLS):
+    """Binary occupancy grid covering ``points`` with a one-cell halo."""
+    pts = np.asarray(points, float)
+    if len(pts) < 1:
+        return None
+    cell = max(float(cell), 1.0)
+    lo = pts.min(0) - pad_cells * cell
+    hi = pts.max(0) + pad_cells * cell
+    nx = max(int(math.ceil((hi[0] - lo[0]) / cell)) + 1, 2)
+    ny = max(int(math.ceil((hi[1] - lo[1]) / cell)) + 1, 2)
+    # Cap grid size for mid GEMs.
+    while nx * ny > 250_000 and cell < 1e6:
+        cell *= 1.5
+        nx = max(int(math.ceil((hi[0] - lo[0]) / cell)) + 1, 2)
+        ny = max(int(math.ceil((hi[1] - lo[1]) / cell)) + 1, 2)
+    grid = np.zeros((ny, nx), dtype=np.uint8)
+    for x, y in pts:
+        ix = int((x - lo[0]) / cell)
+        iy = int((y - lo[1]) / cell)
+        if 0 <= ix < nx and 0 <= iy < ny:
+            grid[iy, ix] = 1
+            # Dilate one cell so glyphs keep clearance.
+            for dy in (-1, 0, 1):
+                for dx in (-1, 0, 1):
+                    jx, jy = ix + dx, iy + dy
+                    if 0 <= jx < nx and 0 <= jy < ny:
+                        grid[jy, jx] = 1
+    return dict(grid=grid, lo=lo, cell=cell, nx=nx, ny=ny)
+
+
+def _mark_rect_occupied(occ, x0, y0, w, h):
+    if occ is None:
+        return
+    grid, lo, cell = occ['grid'], occ['lo'], occ['cell']
+    ix0 = max(0, int((x0 - lo[0]) / cell))
+    iy0 = max(0, int((y0 - lo[1]) / cell))
+    ix1 = min(occ['nx'], int(math.ceil((x0 + w - lo[0]) / cell)) + 1)
+    iy1 = min(occ['ny'], int(math.ceil((y0 + h - lo[1]) / cell)) + 1)
+    grid[iy0:iy1, ix0:ix1] = 1
+
+
+def _find_pocket_origin(occ, size_w, size_h, prefer_c, content_lo=None, content_hi=None):
+    """Top-left origin for a ``size_w×size_h`` box inside empty cells nearest ``prefer_c``.
+
+    When ``content_lo/hi`` are set, prefer slots that pull the combined aspect toward
+    the 4:3–16:9 band (widen a tall map, avoid growing height on an already-wide map).
+    """
+    if occ is None:
+        return None
+    grid, lo, cell = occ['grid'], occ['lo'], occ['cell']
+    nw = max(1, int(math.ceil(size_w / cell)))
+    nh = max(1, int(math.ceil(size_h / cell)))
+    if nw >= occ['nx'] or nh >= occ['ny']:
+        return None
+    empty = (grid == 0).astype(np.int32)
+    integ = np.pad(empty, ((1, 0), (1, 0)), mode='constant')
+    integ = integ.cumsum(0).cumsum(1)
+    best = None
+    step = 1 if occ['nx'] * occ['ny'] < 40_000 else 2
+    want_wide = False
+    want_tall = False
+    if content_lo is not None and content_hi is not None:
+        cw = float(content_hi[0] - content_lo[0])
+        ch = float(content_hi[1] - content_lo[1])
+        asp = cw / max(ch, 1e-9)
+        want_wide = asp < ASPECT_MIN - 1e-3
+        want_tall = asp > ASPECT_MAX + 1e-3
+    for iy in range(0, occ['ny'] - nh + 1, step):
+        for ix in range(0, occ['nx'] - nw + 1, step):
+            total = (integ[iy + nh, ix + nw] - integ[iy, ix + nw]
+                     - integ[iy + nh, ix] + integ[iy, ix])
+            if total < nw * nh:
+                continue
+            x0 = lo[0] + ix * cell
+            y0 = lo[1] + iy * cell
+            cx = x0 + size_w / 2.0
+            cy = y0 + size_h / 2.0
+            dist = (cx - prefer_c[0]) ** 2 + (cy - prefer_c[1]) ** 2
+            aspect_pen = 0.0
+            expand_pen = 0.0
+            void_pen = 0.0
+            if content_lo is not None and content_hi is not None:
+                nlo0 = min(content_lo[0], x0)
+                nhi0 = max(content_hi[0], x0 + size_w)
+                nlo1 = min(content_lo[1], y0)
+                nhi1 = max(content_hi[1], y0 + size_h)
+                nasp = (nhi0 - nlo0) / max(nhi1 - nlo1, 1e-9)
+                # Prefer pockets inside the current content AABB (fill voids, don't
+                # inflate blank/empty by parking tiles in the outer search pad).
+                expand_pen = (
+                    max(0.0, content_lo[0] - x0) + max(0.0, (x0 + size_w) - content_hi[0])
+                    + max(0.0, content_lo[1] - y0) + max(0.0, (y0 + size_h) - content_hi[1]))
+                if want_wide:
+                    # Prefer growing width (east/west of content), penalise growing height.
+                    aspect_pen = max(0.0, ASPECT_MIN - nasp) * 1e6 + max(0.0, (y0 + size_h) - content_hi[1]) * 10
+                    # Needed width growth is cheap; other expansion stays costly.
+                    expand_pen = (
+                        max(0.0, content_lo[1] - y0) + max(0.0, (y0 + size_h) - content_hi[1])
+                        + 0.05 * (max(0.0, content_lo[0] - x0) + max(0.0, (x0 + size_w) - content_hi[0])))
+                elif want_tall:
+                    aspect_pen = max(0.0, nasp - ASPECT_MAX) * 1e6 + max(0.0, (x0 + size_w) - content_hi[0]) * 10
+                    expand_pen = (
+                        max(0.0, content_lo[0] - x0) + max(0.0, (x0 + size_w) - content_hi[0])
+                        + 0.05 * (max(0.0, content_lo[1] - y0) + max(0.0, (y0 + size_h) - content_hi[1])))
+                else:
+                    aspect_pen = abs(math.log(max(nasp, 1e-9) / TARGET_ASPECT)) * 1e3
+            # Prefer the largest free neighbourhood (big empty rects inside main AABB).
+            ring = 2
+            iy0 = max(0, iy - ring); iy1 = min(occ['ny'], iy + nh + ring)
+            ix0 = max(0, ix - ring); ix1 = min(occ['nx'], ix + nw + ring)
+            neigh = integ[iy1, ix1] - integ[iy0, ix1] - integ[iy1, ix0] + integ[iy0, ix0]
+            void_pen = -float(neigh)  # more empty neighbours → lower score
+            score = (aspect_pen, expand_pen, void_pen, dist, iy, ix)
+            if best is None or score < best[0]:
+                best = (score, x0, y0)
+    if best is None:
+        return None
+    return best[1], best[2]
+
+
+def pack_into_main_pockets(boxes, main_pts, spacing, prefer_c=None):
+    """Place boxes into empty pockets inside/flush with the main AABB.
+
+    ``boxes``: list of ``(id, size_w, size_h)`` largest-first preferred.
+    Returns ``{id: (x, y)}`` top-left placements for those that fit; others omitted.
+    """
+    if not boxes or len(main_pts) < 2:
+        return {}, dict(placed=0, missed=len(boxes))
+    cell = max(float(spacing) * POCKET_CELL_FRAC, 20.0)
+    # Search primarily inside the main AABB; only a small flush strip outside so
+    # small components fill the largest free regions before the canvas grows.
+    pts = np.asarray(main_pts, float)
+    lo, hi = pts.min(0), pts.max(0)
+    pad = min(float(spacing) * 1.25 + SHELF_GAP, 0.08 * max(float(hi[0] - lo[0]), float(hi[1] - lo[1]), 1.0))
+    # Seed occupancy with main points only; pocket search covers the padded AABB.
+    seed = []
+    for x, y in pts:
+        seed.append((x, y))
+    # Ring of sentinel points on the outer pad edge so pockets stay near main.
+    for t in np.linspace(lo[0] - pad, hi[0] + pad, 12):
+        seed.append((t, lo[1] - pad))
+        seed.append((t, hi[1] + pad))
+    for t in np.linspace(lo[1], hi[1], 8):
+        seed.append((lo[0] - pad, t))
+        seed.append((hi[0] + pad, t))
+    occ = _occupancy_grid(seed, cell)
+    # Clear interior of the padded frame is searchable; re-mark main glyphs.
+    if occ is not None:
+        occ['grid'][:] = 0
+        for x, y in pts:
+            ix = int((x - occ['lo'][0]) / occ['cell'])
+            iy = int((y - occ['lo'][1]) / occ['cell'])
+            if 0 <= ix < occ['nx'] and 0 <= iy < occ['ny']:
+                for dy in (-1, 0, 1):
+                    for dx in (-1, 0, 1):
+                        jx, jy = ix + dx, iy + dy
+                        if 0 <= jx < occ['nx'] and 0 <= jy < occ['ny']:
+                            occ['grid'][jy, jx] = 1
+    prefer_c = prefer_c if prefer_c is not None else pts.mean(0)
+    content_lo, content_hi = lo.copy(), hi.copy()
+    placed = {}
+    for bid, bw, bh in boxes:
+        origin = _find_pocket_origin(occ, bw, bh, prefer_c,
+                                    content_lo=content_lo, content_hi=content_hi)
+        if origin is None:
+            continue
+        placed[bid] = origin
+        _mark_rect_occupied(occ, origin[0], origin[1], bw, bh)
+        content_lo[0] = min(content_lo[0], origin[0])
+        content_lo[1] = min(content_lo[1], origin[1])
+        content_hi[0] = max(content_hi[0], origin[0] + bw)
+        content_hi[1] = max(content_hi[1], origin[1] + bh)
+    return placed, dict(placed=len(placed), missed=len(boxes) - len(placed),
+                        cell=round(cell, 1), search_pad=round(pad, 1),
+                        aspect_after=round(float((content_hi[0] - content_lo[0])
+                                                 / max(content_hi[1] - content_lo[1], 1e-9)), 3))
+
+
 def reflow_landscape(model, scene, blocks, cur):
     """Bring the scene content bbox into 4:3–16:9 without deforming curated glyphs.
 
@@ -370,13 +651,13 @@ def reflow_landscape(model, scene, blocks, cur):
     pos = scene['positions']
     aspect0, _ = _scene_aspect(pos)
     report = dict(applied=False, aspect_before=round(aspect0, 3), page_rotated_90=False)
-    if ASPECT_MIN - 1e-3 <= aspect0 <= ASPECT_MAX + 1e-3:
-        report['aspect_after'] = report['aspect_before']
-        report['reason'] = 'already_in_band'
-        return scene, report
+    in_band0 = ASPECT_MIN - 1e-3 <= aspect0 <= ASPECT_MAX + 1e-3
+    # When already in-band we still fall through to pocket-pack far non-main
+    # components into empty space beside main (compactness), unless there is
+    # nothing movable.
 
     # Portrait → page rotate only when the rotated aspect is in-band (avoid 0.27 → 3.7).
-    if aspect0 < ASPECT_MIN - 1e-3:
+    if (not in_band0) and aspect0 < ASPECT_MIN - 1e-3:
         rot_aspect = 1.0 / max(aspect0, 1e-9)
         if ASPECT_MIN - 1e-3 <= rot_aspect <= ASPECT_MAX + 1e-3:
             for k, (x, y) in list(pos.items()):
@@ -400,7 +681,8 @@ def reflow_landscape(model, scene, blocks, cur):
                 main.append(i)
     movable = [i for i in range(len(comps)) if i not in set(main)]
     if not main or not movable:
-        report.update(aspect_after=round(aspect0, 3), reason='no_movable_or_main')
+        report.update(aspect_after=round(aspect0, 3),
+                      reason='already_in_band' if in_band0 else 'no_movable_or_main')
         return scene, report
     main_pts = np.array([pos[k] for i in main for k in comps[i]['keys']
                          if k in pos and not k.startswith('side:')], float)
@@ -449,12 +731,79 @@ def reflow_landscape(model, scene, blocks, cur):
                     pos[k] = [origin_pos[k][0] + float(delta[0]), origin_pos[k][1] + float(delta[1])]
         return _scene_aspect(pos)[0]
 
+    # Prefer pocket-packing movables into empty space flush with main before an external shelf.
+    pocket_boxes = sorted(
+        [(i, sizes[i][0], sizes[i][1]) for i in sizes],
+        key=lambda t: (-t[1] * t[2], t[0]))
+    pocket_tl, pocket_rep = pack_into_main_pockets(
+        pocket_boxes, main_pts, max(spacing_from_main(main_pts), 40.0),
+        prefer_c=main_pts.mean(0))
+    if in_band0 and not pocket_tl:
+        report.update(aspect_after=round(aspect0, 3), reason='already_in_band',
+                      pocket=pocket_rep)
+        return scene, report
+    if pocket_tl:
+        pocket_keys = {i: list(keys_of[i]) for i in pocket_tl}
+        pocket_placed = {i: (x, y) for i, (x, y) in pocket_tl.items()}
+        # Absolute top-lefts with origin (0,0): _apply_placed targets top-left + size/2.
+        aspect_p = _apply_placed(pocket_placed, (0.0, 0.0))
+        leftover = [i for i in sizes if i not in pocket_tl]
+        report['pocket'] = dict(pocket_rep, leftover=len(leftover))
+        aspect_p_in = ASPECT_MIN - 1e-3 <= aspect_p <= ASPECT_MAX + 1e-3
+
+        def _pocket_done(reason, left):
+            report.update(applied=bool(pocket_tl), aspect_after=round(aspect_p, 3),
+                          reason=reason,
+                          pack=dict(side='pocket', movable=len(pocket_tl) - len(left),
+                                    leftover=len(left), aspect=round(aspect_p, 3),
+                                    in_band=ASPECT_MIN - 1e-3 <= aspect_p <= ASPECT_MAX + 1e-3))
+            return scene, report
+
+        # If every movable fitted in a pocket but the frame is still tall/narrow,
+        # peel the largest pocketed tiles onto an east shelf so width can catch up
+        # to 4:3 without reopening empty corridors inside main.
+        if not leftover and not aspect_p_in and aspect_p < ASPECT_MIN - 1e-3:
+            peel_order = sorted(pocket_tl, key=lambda i: (-sizes[i][1] * sizes[i][0], i))
+            peel_n = max(1, (len(peel_order) + 2) // 3)
+            leftover = peel_order[:peel_n]
+            keep = {i for i in pocket_tl if i not in set(leftover)}
+            pocket_placed = {i: pocket_tl[i] for i in keep}
+            aspect_p = _apply_placed(pocket_placed, (0.0, 0.0))
+            report['pocket'] = dict(pocket_rep, leftover=len(leftover), peeled=len(leftover))
+            pocket_keys = {i: list(keys_of[i]) for i in keep}
+        elif aspect_p_in and not leftover:
+            return _pocket_done('main_pocket_pack', [])
+        elif in_band0 and not leftover:
+            # Started in-band; pocket-pack only (no external re-shelf that reopens gaps).
+            return _pocket_done('main_pocket_pack', [])
+        elif not leftover:
+            return _pocket_done('main_pocket_pack', [])
+
+        if leftover:
+            sizes = {i: sizes[i] for i in leftover}
+            centres = {i: centres[i] for i in leftover}
+            keys_of = {i: keys_of[i] for i in leftover}
+            w_use = {k: v for k, v in w_use.items() if k[0] in sizes and k[1] in sizes}
+            main_pts = np.array(
+                [pos[k] for i in main for k in comps[i]['keys']
+                 if k in pos and not k.startswith('side:')]
+                + [pos[k] for i, ks in pocket_keys.items() for k in ks if k in pos],
+                float)
+            if len(main_pts) >= 2:
+                mlo, mhi = main_pts.min(0), main_pts.max(0)
+                main_w, main_h = float(mhi[0] - mlo[0]), float(mhi[1] - mlo[1])
+            origin_centres = {i: np.asarray(centres[i], float).copy() for i in centres}
+            origin_pos = {k: list(v) for k, v in pos.items()}
+        else:
+            return _pocket_done('main_pocket_pack', [])
+
     # Binary-search shelf width; try right/left/below/above origins; pick best combined aspect.
     widest = max(w for w, h in sizes.values()) + SHELF_GAP
     area = sum((w + SHELF_GAP) * (h + SHELF_GAP) for w, h in sizes.values())
     order = sorted(sizes, key=lambda i: (-sizes[i][0] * sizes[i][1], i))
     best = None
     width_trials = []
+    g = SHELF_STANDOFF
     for ar in (TARGET_ASPECT, ASPECT_MIN, ASPECT_MAX, 1.45):
         base = max(math.sqrt(max(area * ar, 1.0)), widest)
         for scale in (0.7, 0.85, 1.0, 1.2):
@@ -465,8 +814,7 @@ def reflow_landscape(model, scene, blocks, cur):
         width_trials.append(mid)
         placed_try = skyline_pack(order, sizes, SHELF_GAP, mid, weights=w_use)
         bw, bh = skyline_extent(placed_try, sizes, SHELF_GAP)
-        # combined aspect if placed to the right of main
-        comb = (main_w + bw + 400.0) / max(main_h, bh, 1.0)
+        comb = (main_w + bw + g) / max(main_h, bh, 1.0)
         if comb < TARGET_ASPECT:
             a = mid
         else:
@@ -480,17 +828,20 @@ def reflow_landscape(model, scene, blocks, cur):
         placed_try = skyline_pack(order, sizes, SHELF_GAP, tw, weights=w_use)
         bw, bh = skyline_extent(placed_try, sizes, SHELF_GAP)
         options = {
-            'right': (mhi[0] + 400.0, mlo[1], (main_w + bw + 400.0) / max(main_h, bh, 1.0)),
-            'left': (mlo[0] - 400.0 - bw, mlo[1], (main_w + bw + 400.0) / max(main_h, bh, 1.0)),
-            'below': (mlo[0], mhi[1] + 400.0, max(main_w, bw) / max(main_h + bh + 400.0, 1.0)),
-            'above': (mlo[0], mlo[1] - 400.0 - bh, max(main_w, bw) / max(main_h + bh + 400.0, 1.0)),
+            'right': (mhi[0] + g, mlo[1], (main_w + bw + g) / max(main_h, bh, 1.0)),
+            'left': (mlo[0] - g - bw, mlo[1], (main_w + bw + g) / max(main_h, bh, 1.0)),
+            'below': (mlo[0], mhi[1] + g, max(main_w, bw) / max(main_h + bh + g, 1.0)),
+            'above': (mlo[0], mlo[1] - g - bh, max(main_w, bw) / max(main_h + bh + g, 1.0)),
         }
         for side, (ox, oy, comb) in options.items():
-            in_band = ASPECT_MIN - 1e-3 <= comb <= ASPECT_MAX + 1e-3
-            # Apply and score real content aspect (comb is a rectangle estimate).
             asp = _apply_placed(placed_try, (ox, oy))
             in_band_c = ASPECT_MIN - 1e-3 <= asp <= ASPECT_MAX + 1e-3
+            # Prefer in-band, then smaller content area (compact), then aspect near target.
+            pts_now = np.array([v for k, v in pos.items() if not k.startswith('side:')], float)
+            area_now = float((pts_now[:, 0].max() - pts_now[:, 0].min())
+                             * (pts_now[:, 1].max() - pts_now[:, 1].min())) if len(pts_now) else 1e18
             score = (0 if in_band_c else 1,
+                     area_now,
                      abs(math.log(max(asp, 1e-9) / TARGET_ASPECT)),
                      _pack_link_cost(placed_try, sizes, SHELF_GAP, w_use))
             cand = dict(placed=placed_try, origin=(ox, oy), side=side, aspect=asp,
@@ -504,9 +855,36 @@ def reflow_landscape(model, scene, blocks, cur):
     report.update(applied=True, aspect_after=round(aspect1, 3),
                   pack=dict(side=best['side'], target_width=round(best['target_width']),
                             aspect=round(aspect1, 3), in_band=best['in_band'],
-                            movable=len(best['placed'])),
+                            movable=len(best['placed']),
+                            pocket=pocket_rep.get('placed', 0) if pocket_tl else 0),
                   reason='main_frozen_shelf_reflow')
     return scene, report
+
+
+def spacing_from_main(main_pts):
+    pts = np.asarray(main_pts, float)
+    if len(pts) < 3:
+        return 100.0
+    return float(np.median(cKDTree(pts).query(pts, k=2)[0][:, 1])) or 100.0
+
+
+def fit_canvas_to_content(data, pad=40.0):
+    """Shrink ``data[1]['canvas']`` to the content bbox plus ``pad`` on each side.
+
+    Translation-free: only the canvas frame changes, so map units stay absolute.
+    """
+    xs, ys = _coord_lists(data[1])
+    if not xs:
+        return dict(applied=False)
+    x0, x1 = min(xs), max(xs)
+    y0, y1 = min(ys), max(ys)
+    before = dict(data[1].get('canvas') or {})
+    data[1]['canvas'] = dict(
+        x=x0 - pad, y=y0 - pad,
+        width=(x1 - x0) + 2 * pad,
+        height=(y1 - y0) + 2 * pad)
+    return dict(applied=True, before=before, after=dict(data[1]['canvas']),
+                content=[round(x1 - x0, 1), round(y1 - y0, 1)])
 
 
 def _link_key(a, b):
@@ -867,10 +1245,41 @@ def squeeze_escher(data, max_gap):
             frac = max(max_empty_x / max(before_w, 1e-9), max_empty_y / max(before_h, 1e-9))
             if frac >= SQUEEZE_FORCE_EMPTY_FRAC:
                 force_empty = True
-                # Prefer most collapse, then closer to TARGET aspect.
-                for c in candidates:
-                    collapse = (before_w - c['w']) + (before_h - c['h'])
-                    c['score'] = (0, -collapse, abs(math.log(max(c['aspect'], 1e-9) / TARGET_ASPECT)))
+                # Prefer densest collapse that still stays in-band; only leave the
+                # band when no in-band candidate exists (then stop at ASPECT_MIN).
+                band_ok = [c for c in candidates
+                           if ASPECT_MIN - 1e-3 <= c['aspect'] <= ASPECT_MAX + 1e-3]
+                if band_ok:
+                    for c in band_ok:
+                        collapse = (before_w - c['w']) + (before_h - c['h'])
+                        c['score'] = (0, -collapse, abs(math.log(max(c['aspect'], 1e-9) / TARGET_ASPECT)))
+                    candidates = band_ok
+                else:
+                    # Partial collapse toward the nearer band edge.
+                    partial = None
+                    if before_aspect > ASPECT_MIN and fx is not None:
+                        room = before_w - ASPECT_MIN * before_h
+                        if room > 1.0:
+                            fx_p = build_axis_remap(xs, max_gap, max_shift=room)
+                            if fx_p is not None:
+                                trial, w, h, asp = _trial_remap(data, fx_p, None)
+                                partial = dict(trial=trial, w=w, h=h, aspect=asp, tag='force_partial_x',
+                                               score=(0, 0, 0), use_x=True, use_y=False)
+                    if partial is None and before_aspect < ASPECT_MAX and fy is not None:
+                        room = before_h - before_w / ASPECT_MAX
+                        if room > 1.0:
+                            fy_p = build_axis_remap(ys, max_gap, max_shift=room)
+                            if fy_p is not None:
+                                trial, w, h, asp = _trial_remap(data, None, fy_p)
+                                partial = dict(trial=trial, w=w, h=h, aspect=asp, tag='force_partial_y',
+                                               score=(0, 0, 0), use_x=False, use_y=True)
+                    if partial is not None:
+                        candidates = [partial]
+                    else:
+                        for c in candidates:
+                            collapse = (before_w - c['w']) + (before_h - c['h'])
+                            c['score'] = (0, -collapse,
+                                          abs(math.log(max(c['aspect'], 1e-9) / TARGET_ASPECT)))
             else:
                 # Partial squeeze on the long axis: collapse only as far as the
                 # nearer band edge so landscape stays in 4:3–16:9.

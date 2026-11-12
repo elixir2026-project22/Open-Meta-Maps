@@ -184,14 +184,20 @@ def run_batch(args) -> int:
 
 
 def main(argv=None) -> int:
-    p = argparse.ArgumentParser(description="Evaluate Open Meta Maps Escher layouts (layout-benchmark metrics).")
-    p.add_argument("--gem", help="SBML or COBRA/BiGG JSON model")
-    p.add_argument("--map", help="Escher map.json")
-    p.add_argument("--reference", help="Optional reference: SBGN, Escher JSON, or {id:[x,y]} JSON")
-    p.add_argument("--compare-map", help="Optional second map.json for reproducibility metrics")
-    p.add_argument("--batch", help="Evaluate batch manifest or folder of compose results")
-    p.add_argument("--out", help="Output JSON path (single) or directory (batch)")
-    p.add_argument("--no-geometry", action="store_true", help="Skip layout_quality final-geometry block")
+    p = argparse.ArgumentParser(
+        description=(
+            "Score an Open Meta Maps Escher layout: Project 22 layout-benchmark "
+            "fields plus the same final-geometry block used by compose "
+            "(crossings, overlaps, continuity, blank/empty space)."
+        ))
+    p.add_argument("--gem", help="Input GEM: SBML (.xml/.sbml) or COBRA/BiGG JSON")
+    p.add_argument("--map", help="Composed Escher map.json to score")
+    p.add_argument("--reference", help="Optional reference layout: SBGN, Escher JSON, or {id:[x,y]} JSON")
+    p.add_argument("--compare-map", help="Optional second map.json for reproducibility / stability metrics")
+    p.add_argument("--batch", help="Batch manifest JSON, or a folder of compose result directories")
+    p.add_argument("--out", help="Write JSON report here (file for one map, directory for --batch)")
+    p.add_argument("--no-geometry", action="store_true",
+                   help="Skip layout_quality final-geometry (curve crossings, collisions, continuity)")
     args = p.parse_args(argv)
     if args.batch:
         return run_batch(args)

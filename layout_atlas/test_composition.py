@@ -159,10 +159,16 @@ def test_squeeze_force_collapses_empty_when_aspect_held_by_void():
     assert C.ASPECT_MIN <= before_w / before_h <= C.ASPECT_MAX
     out = C.squeeze_escher(data, max_gap=200.0)
     assert out['applied']
-    assert out['mode'].startswith('force_empty_')
-    assert out['dx'] > 1000
+    # Prefer collapsing the void while staying in 4:3–16:9 (force_partial_*) when a
+    # full force_empty_* pass would leave the band; either mode must shrink width.
+    assert out['mode'].startswith('force_')
+    assert out['dx'] > 400
     xs = [n['x'] for n in data[1]['nodes'].values()]
-    assert max(xs) - min(xs) < before_w - 1000
+    ys = [n['y'] for n in data[1]['nodes'].values()]
+    new_w = max(xs) - min(xs)
+    new_h = max(ys) - min(ys)
+    assert new_w < before_w - 400
+    assert C.ASPECT_MIN - 0.05 <= new_w / max(new_h, 1e-9) <= C.ASPECT_MAX + 0.05
 
 
 def test_compact_long_arms_escher_shortens_transport():
@@ -230,3 +236,37 @@ def test_squeeze_partial_stays_in_aspect_band():
     ys = [n['y'] for n in data[1]['nodes'].values()]
     aspect = (max(xs) - min(xs)) / max(max(ys) - min(ys), 1e-9)
     assert C.ASPECT_MIN - 0.02 <= aspect <= C.ASPECT_MAX + 0.02, aspect
+
+
+def test_pack_into_main_pockets_places_beside_main():
+    # Main cluster at origin; one free box should tuck into the empty pad, not far away.
+    main = [(0.0, 0.0), (40.0, 0.0), (0.0, 40.0), (40.0, 40.0),
+            (80.0, 0.0), (80.0, 40.0), (0.0, 80.0), (40.0, 80.0), (80.0, 80.0)]
+    boxes = [(1, 50.0, 40.0)]
+    placed, rep = C.pack_into_main_pockets(boxes, main, spacing=40.0, prefer_c=(40.0, 40.0))
+    assert 1 in placed, rep
+    x, y = placed[1]
+    # Within a modest halo of the main AABB.
+    assert -80 <= x <= 160 and -80 <= y <= 160
+
+
+def test_fit_canvas_to_content_shrinks_frame():
+    data = [
+        {},
+        {
+            'nodes': {
+                'a': {'node_type': 'metabolite', 'x': 100.0, 'y': 200.0},
+                'b': {'node_type': 'metabolite', 'x': 400.0, 'y': 500.0},
+            },
+            'reactions': {},
+            'text_labels': {},
+            'canvas': {'x': 0, 'y': 0, 'width': 5000, 'height': 4000},
+        },
+    ]
+    out = C.fit_canvas_to_content(data, pad=40.0)
+    assert out['applied']
+    can = data[1]['canvas']
+    assert abs(can['x'] - 60.0) < 1e-6
+    assert abs(can['y'] - 160.0) < 1e-6
+    assert abs(can['width'] - 380.0) < 1e-6
+    assert abs(can['height'] - 380.0) < 1e-6

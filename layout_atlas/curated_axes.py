@@ -78,6 +78,8 @@ def _absolute_from_escher(body, path):
     reactions = body.get('reactions') or {}
     rx, mets = {}, defaultdict(list)
     edge_lengths = []
+    # Midmarker↔metabolite pairs for corridor padding compress (r:id, m:id).
+    edges = []
     for _nid, n in nodes.items():
         if n.get('node_type') == 'metabolite' and n.get('bigg_id'):
             mets[n['bigg_id']].append((n.get('node_is_primary', True), n['x'], n['y']))
@@ -92,21 +94,22 @@ def _absolute_from_escher(body, path):
                 n = nodes.get(nid) or {}
                 if n.get('node_type') == 'midmarker':
                     mid = [n['x'], n['y']]
-                elif n.get('node_type') == 'metabolite':
-                    met_nodes.append([n['x'], n['y']])
+                elif n.get('node_type') == 'metabolite' and n.get('bigg_id'):
+                    met_nodes.append((n['bigg_id'], [n['x'], n['y']]))
         if mid is None and 'label_x' in r:
             mid = [r['label_x'], r['label_y']]
         if mid is not None:
             rx[bigg] = mid
-            for mp in met_nodes:
+            for met_id, mp in met_nodes:
                 d = float(np.hypot(mid[0] - mp[0], mid[1] - mp[1]))
                 if d > 1e-6:
                     edge_lengths.append(d)
+                    edges.append(('r:' + bigg, 'm:' + met_id))
     met_xy = {}
     for mid, opts in mets.items():
         opts = sorted(opts, key=lambda t: (not t[0], t[1], t[2]))
         met_xy[mid] = [opts[0][1], opts[0][2]]
-    return dict(reactions=rx, metabolites=met_xy, path=path, edge_lengths=edge_lengths)
+    return dict(reactions=rx, metabolites=met_xy, path=path, edge_lengths=edge_lengths, edges=edges)
 
 
 @lru_cache(maxsize=8)
@@ -264,7 +267,8 @@ def _common_abs_scale(blocks, idxs, abs_lookups, abs_map=None):
 
 
 # Gaps longer than this × median segment length are treated as alignment padding.
-PADDING_GAP_FACTOR = 1.25
+# Keep H/V alignment / order; collapse empty runs longer than ~one typical mid↔met span.
+PADDING_GAP_FACTOR = 0.8
 
 
 def _remap_from_breaks(breaks):
@@ -365,6 +369,128 @@ def compress_padding_xy(xy_by_key, max_gap=None, edge_lengths=None):
                 length_removed=round(rx['removed'] + ry['removed'], 2))
 
 
+def compress_empty_axis_edges(xy_by_key, edges, max_gap, axis_tol=10.0, margin=14.0):
+    """Shorten axis-aligned mid↔met spans whose open corridor holds no other glyphs.
+
+    Global axis remaps cannot collapse a long vertical when other modules occupy the
+    same Y band at a different X.  When the thin corridor between the two endpoints
+    is empty, length is free (shape and direction kept): pull the more peripheral
+    endpoint toward its partner down to ``max_gap``.
+    """
+    if not xy_by_key or not edges or max_gap is None:
+        return dict(applied=False, shortened=0, length_removed=0.0)
+    pts = {k: np.asarray(xy_by_key[k], float) for k in xy_by_key}
+    if len(pts) < 2:
+        return dict(applied=False, shortened=0, length_removed=0.0)
+    centroid = np.mean(np.stack(list(pts.values())), axis=0)
+    # Longest empty corridors first so nested shortenings see freed space.
+    scored = []
+    for ka, kb in edges:
+        if ka not in pts or kb not in pts:
+            continue
+        a, b = pts[ka], pts[kb]
+        dx, dy = float(a[0] - b[0]), float(a[1] - b[1])
+        length = float(math.hypot(dx, dy))
+        if length <= max_gap + 1e-6:
+            continue
+        vertical = abs(dx) <= axis_tol and abs(dy) > axis_tol
+        horizontal = abs(dy) <= axis_tol and abs(dx) > axis_tol
+        if not (vertical or horizontal):
+            continue
+        scored.append((length, ka, kb, vertical))
+    scored.sort(reverse=True)
+    shortened = 0
+    removed = 0.0
+
+    def _corridor_empty(a, b, vertical):
+        lo = np.minimum(a, b)
+        hi = np.maximum(a, b)
+        for k, p in pts.items():
+            if p is a or p is b:
+                continue
+            if vertical:
+                if abs(p[0] - a[0]) > margin and abs(p[0] - b[0]) > margin:
+                    continue
+                if lo[1] + 1e-6 < p[1] < hi[1] - 1e-6:
+                    return False
+            else:
+                if abs(p[1] - a[1]) > margin and abs(p[1] - b[1]) > margin:
+                    continue
+                if lo[0] + 1e-6 < p[0] < hi[0] - 1e-6:
+                    return False
+        return True
+
+    for length, ka, kb, vertical in scored:
+        a, b = pts[ka], pts[kb]
+        length = float(np.hypot(*(a - b)))
+        if length <= max_gap + 1e-6:
+            continue
+        if not _corridor_empty(a, b, vertical):
+            continue
+        # Move the endpoint farther from the cloud centroid.
+        da = float(np.hypot(*(a - centroid)))
+        db = float(np.hypot(*(b - centroid)))
+        move_k, fixed = (ka, b) if da >= db else (kb, a)
+        movable = pts[move_k]
+        vec = movable - fixed
+        dist = float(np.hypot(*vec))
+        if dist <= max_gap + 1e-6:
+            continue
+        u = vec / dist
+        new_xy = fixed + u * float(max_gap)
+        removed += dist - max_gap
+        pts[move_k] = new_xy
+        xy_by_key[move_k] = [float(new_xy[0]), float(new_xy[1])]
+        shortened += 1
+    return dict(applied=shortened > 0, shortened=shortened,
+                length_removed=round(removed, 2), max_gap=round(float(max_gap), 2))
+
+
+def compress_padding_joint(xy_by_key, edge_lengths=None, edges=None, rounds=3):
+    """Alternate global empty-run collapse with empty-corridor edge shortening.
+
+    Each round: axis remap → corridor shorten → axis remap.  Stops when a round
+    removes less than 1 px of length.  Mutates ``xy_by_key``.
+    """
+    report = dict(rounds=0, padding=[], corridors=[], length_removed=0.0, max_gap=None)
+    prev = None
+    for _ in range(max(1, int(rounds))):
+        pad = compress_padding_xy(xy_by_key, edge_lengths=edge_lengths)
+        report['padding'].append(pad)
+        report['max_gap'] = pad.get('max_gap')
+        corridor = dict(applied=False, shortened=0, length_removed=0.0)
+        if edges and pad.get('max_gap') is not None:
+            corridor = compress_empty_axis_edges(
+                xy_by_key, edges, max_gap=float(pad['max_gap']))
+            # Re-collapse any global gaps the corridor moves opened.
+            if corridor.get('applied'):
+                pad2 = compress_padding_xy(
+                    xy_by_key, max_gap=float(pad['max_gap']), edge_lengths=edge_lengths)
+                report['padding'].append(pad2)
+                pad = pad2
+        report['corridors'].append(corridor)
+        gained = float(pad.get('length_removed') or 0.0) + float(corridor.get('length_removed') or 0.0)
+        report['rounds'] += 1
+        report['length_removed'] = round(report['length_removed'] + gained, 2)
+        if gained < 1.0 or (prev is not None and gained < 0.05 * max(prev, 1.0)):
+            break
+        prev = gained
+    report['applied'] = report['length_removed'] > 0.0
+    report['segments_compressed'] = sum(p.get('segments_compressed') or 0 for p in report['padding'])
+    report['edges_shortened'] = sum(c.get('shortened') or 0 for c in report['corridors'])
+    # Source-path replay uses the final global axis breaks (corridor moves are
+    # node-only; mismatched Beziers fall back to restyle/reroute).
+    last_pad = next((p for p in reversed(report['padding']) if p.get('breaks_x') is not None
+                     or p.get('breaks_y') is not None), {}) if report['padding'] else {}
+    report['breaks_x'] = last_pad.get('breaks_x') or []
+    report['breaks_y'] = last_pad.get('breaks_y') or []
+    report['gaps_x'] = sum(p.get('gaps_x') or 0 for p in report['padding'])
+    report['gaps_y'] = sum(p.get('gaps_y') or 0 for p in report['padding'])
+    report['removed_x'] = round(sum(p.get('removed_x') or 0 for p in report['padding']), 2)
+    report['removed_y'] = round(sum(p.get('removed_y') or 0 for p in report['padding']), 2)
+    return report
+
+
 def bake_same_map_positions(blocks, model_n_reactions=None):
     """Place same-source curated blocks as one rigid group from original map coords.
 
@@ -401,7 +527,11 @@ def bake_same_map_positions(blocks, model_n_reactions=None):
             for i in idxs:
                 for k, xy in abs_lookups[i].items():
                     cloud[k] = list(xy)
-            pad = compress_padding_xy(cloud, edge_lengths=abs_map.get('edge_lengths'))
+            pad = compress_padding_joint(
+                cloud,
+                edge_lengths=abs_map.get('edge_lengths'),
+                edges=abs_map.get('edges') or [],
+                rounds=4)
             for i in idxs:
                 abs_lookups[i] = {k: list(cloud[k]) for k in abs_lookups[i] if k in cloud}
             # Rebuild every resolvable glyph from (compressed) absolute coords.
