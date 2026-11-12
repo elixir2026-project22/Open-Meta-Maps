@@ -5,13 +5,19 @@
 * GET /                      the tool page results/tool/index.html
 * GET /docs/*.md, /README.md, /THIRD_PARTY_NOTICES.md, /LICENSE, /data/README.md
                              allowlisted repo docs rendered as HTML (same chrome/nav); GET /docs/images/* for embedded images
-* GET /<path>                read-only static files from results/ (catalog, experiment pages, ...); tool_runs is NOT served this way
+* GET /<path>                read-only static files from results/ (catalog, atlas_browser, experiment pages, ...); tool_runs is NOT served this way
 * POST /api/jobs             multipart/form-data: `model` (.xml SBML or .json COBRA/BiGG) + `options` (JSON string)
 * GET  /api/jobs/<id>        job state (see tool_pipeline.Job)
 * GET  /api/jobs/<id>/files/<name>   result files (skeleton.svg, map.svg, map.json, modules.json, report.json, licenses.json, views/<view>.svg ...)
 * POST /api/jobs/<id>/map            save interactive position edits into map.json (keeps map.original.json once; regenerates map.svg + layout quality)
 * POST /api/jobs/<id>/views/<view_id>  draw one view (queued behind running jobs)
 * DELETE /api/jobs/<id>      cancel a running job and delete its folder
+* GET  /api/atlas/meta       Atlas Browser filter vocabulary + counts (builds index on first use)
+* GET  /api/atlas/search     paginated module search (`q`, `ec`, `reaction`, `metabolite`, `map`, `source`, `license`, `page`, `per_page`)
+* GET  /api/atlas/modules/<id>                module detail + provenance
+* GET  /api/atlas/modules/<id>/thumbnail.svg  lazy thumbnail (no rotate/mirror)
+* GET  /api/atlas/modules/<id>/escher.json    single-module Escher download
+* POST /api/atlas/download   JSON `{ids:[...]}` → zip of Escher JSON + provenance manifest (CSV+JSON)
 
 Lifetime: each open tab sends /api/bye on pagehide (primary signal) and also pings /api/ping while visible. When the last tab is
 gone (bye, or a multi-minute stale fallback that tolerates Chrome background-timer throttling) and a short grace (~8 s) has
@@ -69,8 +75,10 @@ MAX_QUEUE = 4
 JOB_TIMEOUT = 45 * 60
 JOB_ID = re.compile(r'^j_[0-9a-f]{10}$')
 VIEW_ID = re.compile(r'^view-\d+$')
+MODULE_ID = re.compile(r'^[A-Za-z0-9._:-]{8,128}$')
 SAFE_FILE = re.compile(r'^(?:views/view-\d+\.(?:svg|json)|[A-Za-z0-9_.-]+)$')
 BLOCKED_TOP = {'upload', 'options.json', 'selected.json.gz', 'views.json', 'full', 'whole', 'job.json'}
+MAX_ATLAS_DOWNLOAD = 200
 
 tasks = queue.Queue()
 processes = {}
@@ -225,12 +233,58 @@ class Handler(http.server.BaseHTTPRequestHandler):
             extra = {'Content-Disposition': 'attachment; filename="%s"' % f.name} if self.path.endswith('?download=1') else {}
             return self.send_bytes(200, f.read_bytes(), ctype + ('; charset=utf-8' if ctype.startswith(('text/', 'application/json', 'image/svg')) else ''), extra)
         if path == '/api/health':
-            return self.send_json(200, dict(tool='open-pathway-maps', pid=os.getpid(), examples=True, auto_exit=not LIFE.get('keep', False)))
+            return self.send_json(200, dict(tool='open-pathway-maps', pid=os.getpid(), examples=True, atlas=True, auto_exit=not LIFE.get('keep', False)))
         if path == '/api/examples':
             return self.send_json(200, dict(examples=example_list()))
+        if path.startswith('/api/atlas'):
+            return self.atlas_get(path)
         if path.startswith('/api/'):
             return self.send_json(404, error('not_found', 'Unknown endpoint.'))
         return self.static(path)
+
+    def atlas_get(self, path):
+        import atlas_browser
+        try:
+            atlas_browser.ensure_index()
+        except Exception:
+            return self.send_json(500, error('atlas_index', 'Could not build or load the Atlas Browser index.'))
+        if path == '/api/atlas/meta':
+            return self.send_json(200, atlas_browser.meta())
+        if path == '/api/atlas/search':
+            qs = parse_qs(urlparse(self.path).query)
+            filters = {k: (qs.get(k) or [''])[0] for k in ('q', 'ec', 'reaction', 'metabolite', 'map', 'source', 'license', 'licence', 'database', 'ec_number', 'reaction_id', 'metabolite_id', 'map_id', 'model', 'variants', 'show_variants')}
+            page = (qs.get('page') or ['1'])[0]
+            per = (qs.get('per_page') or [str(atlas_browser.PAGE_DEFAULT)])[0]
+            try:
+                return self.send_json(200, atlas_browser.search(filters, page=page, per_page=per))
+            except Exception:
+                return self.send_json(500, error('atlas_search', 'Search failed.'))
+        m = re.match(r'^/api/atlas/modules/([^/]+)(?:/(thumbnail\.svg|escher\.json))?$', path)
+        if not m or not MODULE_ID.match(m[1]):
+            return self.send_json(404, error('not_found', 'Unknown Atlas endpoint.'))
+        mid = m[1]
+        kind = m[2]
+        if kind == 'thumbnail.svg':
+            mod = atlas_browser.load_module(mid)
+            if mod is None or not atlas_browser.license_ok(mod.get('license') or mod.get('licence') or ''):
+                return self.send_json(404, error('not_found', 'Unknown module.'))
+            svg = atlas_browser.thumbnail_svg(mod)
+            return self.send_bytes(200, svg.encode(), 'image/svg+xml; charset=utf-8', {'Cache-Control': 'public, max-age=3600'})
+        if kind == 'escher.json':
+            mod = atlas_browser.load_module(mid)
+            if mod is None or not atlas_browser.license_ok(mod.get('license') or mod.get('licence') or ''):
+                return self.send_json(404, error('not_found', 'Unknown module.'))
+            try:
+                data = atlas_browser.module_to_escher(mod)
+            except Exception:
+                return self.send_json(400, error('no_geometry', 'This module has no drawable geometry.'))
+            body = json.dumps(data, ensure_ascii=False, indent=2).encode()
+            return self.send_bytes(200, body, 'application/json; charset=utf-8',
+                                   {'Content-Disposition': 'attachment; filename="%s.escher.json"' % mid[:40]})
+        detail = atlas_browser.module_detail(mid)
+        if detail is None:
+            return self.send_json(404, error('not_found', 'Unknown module.'))
+        return self.send_json(200, detail)
 
     HEARTBEAT = (b"<script>(function(){if(window.__opmHB)return;window.__opmHB=1;"
                  b"var id=Math.random().toString(36).slice(2,10);"
@@ -294,6 +348,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return self.send_json(200, dict(ok=True))
         if path == '/api/jobs':
             return self.create_job()
+        if path == '/api/atlas/download':
+            return self.atlas_download()
         m = re.match(r'^/api/jobs/([^/]+)/map/reset$', path)
         if m:
             return self.reset_map(m[1])
@@ -372,6 +428,37 @@ class Handler(http.server.BaseHTTPRequestHandler):
         return self.send_json(200, dict(id=job_id, status='reset', summary=state.get('summary'),
                                         layout_quality=result.get('layout_quality'),
                                         original_kept=True))
+
+    def atlas_download(self):
+        import atlas_browser
+        length = int(self.headers.get('Content-Length') or 0)
+        if length <= 0 or length > 2_000_000:
+            return self.send_json(413 if length > 2_000_000 else 400,
+                                  error('too_large' if length > 2_000_000 else 'bad_format', 'Download request missing or too large.'))
+        ctype = (self.headers.get('Content-Type') or '').split(';')[0].strip().lower()
+        if ctype not in ('application/json', 'text/json'):
+            return self.send_json(400, error('bad_format', 'Expected application/json.'))
+        try:
+            body = json.loads(self.rfile.read(length).decode())
+            ids = body.get('ids') or body.get('modules') or []
+            assert isinstance(ids, list)
+        except Exception:
+            return self.send_json(400, error('bad_format', 'Expected JSON with an ids array.'))
+        ids = [str(x) for x in ids if MODULE_ID.match(str(x or ''))]
+        if not ids:
+            return self.send_json(400, error('bad_format', 'No valid module ids.'))
+        if len(ids) > MAX_ATLAS_DOWNLOAD:
+            return self.send_json(400, error('too_many', f'At most {MAX_ATLAS_DOWNLOAD} modules per download.'))
+        try:
+            atlas_browser.ensure_index()
+            blob, rows, missing = atlas_browser.build_download_zip(ids)
+        except Exception:
+            return self.send_json(500, error('atlas_download', 'Could not build the download archive.'))
+        if not rows:
+            return self.send_json(404, error('not_found', 'None of the requested modules were found.'))
+        return self.send_bytes(200, blob, 'application/zip',
+                               {'Content-Disposition': 'attachment; filename="atlas_modules.zip"',
+                                'X-Atlas-Modules': str(len(rows)), 'X-Atlas-Missing': str(len(missing))})
 
     def create_job(self):
         length = int(self.headers.get('Content-Length') or 0)

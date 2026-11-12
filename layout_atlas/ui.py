@@ -105,7 +105,7 @@ button.lnk{font:inherit;background:none;border:0;color:var(--accent);cursor:poin
 @media(max-width:640px){.top{position:static}.grp+.grp{border-left:0;padding-left:0}.top nav{flex-direction:column;gap:4px}main{padding:20px 14px 40px}.top .in{padding:8px 14px}th,td{padding:8px 10px}.grid{grid-template-columns:1fr}.filters label,.filters input,.filters select{width:100%}}
 '''
 
-GROUPS=[('',[('Map Generator','layout_atlas/results/tool/index.html','tool'),('About / Provenance','layout_atlas/results/about/index.html','about')])]
+GROUPS=[('',[('Map Generator','layout_atlas/results/tool/index.html','tool'),('Atlas Browser','layout_atlas/results/atlas_browser/index.html','atlas'),('About / Provenance','layout_atlas/results/about/index.html','about')])]
 NAV=[x for _,g in GROUPS for x in g]
 
 TR_JS='''<script>window.tr=function(s,v){var o=s;if(v)for(var k in v)o=o.split('{'+k+'}').join(v[k]);return o};</script>'''
