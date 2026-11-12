@@ -255,7 +255,7 @@ def test_orderliness_goals_match_curated_ecoli_core():
 
 
 def test_orderliness_metrics_invariant_to_resampling():
-    """Length-weighted axis share and node-spacing grid tol ignore polyline subdivision."""
+    """Count- and length-weighted axis shares and node-spacing grid tol ignore subdivision."""
     import numpy as np
     from evaluation.map_rules import orderliness_metrics
 
@@ -316,6 +316,7 @@ def test_orderliness_metrics_invariant_to_resampling():
     for factor in (2, 4):
         dense = orderliness_metrics(data[1], _subdivide(edges, factor), spacing=60.0)
         assert dense["main_segment_axis_share"] == base["main_segment_axis_share"], factor
+        assert dense["main_segment_axis_share_length"] == base["main_segment_axis_share_length"], factor
         assert dense["metabolite_grid_share"] == base["metabolite_grid_share"], factor
         assert dense["orderliness_grid_tol_px"] == base["orderliness_grid_tol_px"], factor
         assert dense["orderliness_segments"] == base["orderliness_segments"], factor

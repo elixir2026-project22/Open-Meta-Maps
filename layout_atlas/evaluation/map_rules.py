@@ -36,10 +36,11 @@ GRID_TOL_NN_FRAC = 0.02
 GRID_TOL_FLOOR_PX = 1.0  # fixed floor so tiny maps still snap
 
 # Goal reference: curated BiGG e_coli_core ("Core metabolism") under the definitions
-# above (length-weighted axis share; grid tol = GRID_TOL_NN_FRAC × median NN).
+# above. Gate axis share is per-edge (count); length-weighted is reported alongside.
 # Source: data/source_inputs/raw/escher/e_coli_core/e_coli_core.Core metabolism.json
 ORDERLINESS_GOALS = dict(
-    main_segment_axis_share=0.5732,
+    main_segment_axis_share=0.5468,  # count-weighted per main edge (gate)
+    main_segment_axis_share_length=0.5732,  # length-weighted (report only)
     reaction_axis_share=0.7097,
     chain_turn_median_deg=0.0,
     metabolite_grid_share=0.8462,
@@ -198,24 +199,27 @@ def _reaction_axis(rx: dict, nodes: dict) -> np.ndarray | None:
 def orderliness_metrics(body: dict, edges: list[dict], spacing: float) -> dict[str, Any]:
     """Axis alignment, chain turns and metabolite grid share (cofactors excluded).
 
-    ``main_segment_axis_share`` is length-weighted over drawn polyline pieces, so
-    subdividing/resampling a curve cannot change the score. Grid tolerance uses
-    median nearest-neighbour distance among main metabolite nodes (not curve
-    sample lengths), with a fixed pixel floor.
+    ``main_segment_axis_share`` (gate) counts each main reaction–metabolite edge once:
+    the edge is axis-aligned when ≥50% of its drawn path length is within ±10° of H/V
+    (weight independent of total length and of sampling density).
+    ``main_segment_axis_share_length`` is the older length-weighted share (report only).
+    Grid tolerance uses median nearest-neighbour distance among main metabolite nodes.
 
     Not yet optimised by the pipeline; exposed so orderliness can become a gate.
     """
     del spacing  # kept for call-site compatibility; grid tol is node-spacing based
     nodes = body["nodes"]
-    # --- segment axis share: length-weighted (sampling-invariant under subdivision)
+    # --- segment axis share: count-weighted (gate) + length-weighted (report)
     total_len = 0.0
     axis_len = 0.0
     main_edges = 0
+    edge_axis_hits = 0
     for e in edges:
         if e.get("currency"):
             continue
         pts = e["pts"]
         edge_len = 0.0
+        edge_axis = 0.0
         for a, b in zip(pts[:-1], pts[1:]):
             dx, dy = float(b[0] - a[0]), float(b[1] - a[1])
             L = math.hypot(dx, dy)
@@ -225,9 +229,13 @@ def orderliness_metrics(body: dict, edges: list[dict], spacing: float) -> dict[s
             total_len += L
             if _axis_aligned(dx, dy):
                 axis_len += L
+                edge_axis += L
         if edge_len > 0:
             main_edges += 1
-    seg_axis = round(axis_len / total_len, 4) if total_len > 0 else None
+            if edge_axis / edge_len >= 0.5:
+                edge_axis_hits += 1
+    seg_axis = round(edge_axis_hits / main_edges, 4) if main_edges > 0 else None
+    seg_axis_length = round(axis_len / total_len, 4) if total_len > 0 else None
 
     # --- reaction axis share
     scored = aligned = 0
@@ -298,6 +306,7 @@ def orderliness_metrics(body: dict, edges: list[dict], spacing: float) -> dict[s
 
     return dict(
         main_segment_axis_share=seg_axis,
+        main_segment_axis_share_length=seg_axis_length,
         reaction_axis_share=rx_axis,
         chain_turn_median_deg=chain_turn,
         metabolite_grid_share=grid,
@@ -765,7 +774,7 @@ def collect_map_rule_details(
         "hub/long currency thresholds are relative to median reaction spacing; "
         "blank_space / unrelated_overlaps follow MetaCarto ideas (CC BY 4.0; reimplemented, not copied); "
         "map size, aspect W/H and blank/utilisation share one content-node bbox; "
-        f"orderliness axis tolerance ±{AXIS_ALIGN_DEG:g}° (length-weighted); "
+        f"orderliness axis tolerance ±{AXIS_ALIGN_DEG:g}° (count-weighted gate; length-weighted reported); "
         f"grid tolerance {GRID_TOL_NN_FRAC:g} × median nearest-neighbour "
         f"main-metabolite distance (floor {GRID_TOL_FLOOR_PX:g} px)"
     )

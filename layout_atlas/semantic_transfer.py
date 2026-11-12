@@ -217,7 +217,7 @@ class Mapper:
                 if len(set(node_map.values()))!=len(node_map):skips['repeated_core_copy_requires_graphic_matcher']+=1;continue
                 if any(not g.has_edge(node_map[e['a']],node_map[e['b']]) for e in m['edges']):skips['core_incidence_or_currency_conflict']+=1;continue
                 tg,generic=initial(rids);source={n['key']:n for n in m['nodes']};ks=sorted(node_map)
-                frame=fit_frame([source[k]['xy'] for k in ks],[generic[node_map[k]] for k in ks]);positions=transform({node_map[k]:source[k]['xy'] for k in ks},frame)
+                frame=fit_frame([source[k]['xy'] for k in ks],[generic[node_map[k]] for k in ks]);positions=transform({node_map[k]:source[k]['xy'] for k in ks},frame);source_xy={node_map[k]:list(source[k]['xy']) for k in ks}
                 targetports={k:len(set(g[k])-{'r:'+rid for rid in rids}) for k in tg if g.nodes[k]['role']=='metabolite'}
                 srcports=len(m.get('ports',[]));ports=sum(bool(v) for v in targetports.values());initial_fit=float(np.sqrt(np.mean([np.sum((positions[k]-generic[k])**2) for k in positions])))
                 xy=np.array(list(positions.values()));extent=np.ptp(xy,axis=0);area=max(float(np.prod(extent)),.05);spread=float(np.std(xy[:,0])+np.std(xy[:,1]));vectors=[np.array(positions[node_map[e['a']]])-positions[node_map[e['b']]] for e in m['edges']];axis=float(np.mean([min(abs(v[0]),abs(v[1]))/max(np.linalg.norm(v),1e-8)<.1 for v in vectors])) if vectors else 0.;direction_cost=float(np.mean([c['factor']<0 for c in combination]))
@@ -226,7 +226,7 @@ class Mapper:
                 checks=[dict(source_reaction=r['id'],source_key=r['key'],**c,complete_equation=True,evidence='annotation-supported candidates plus unique full participant/stoichiometry matching') for r,c in zip(m['reactions'],combination)]
                 p=dict(id=uid(['direct-equation',m['id'],rids,sorted(node_map.items())]),template_id=m['id'],map_id=m['map_id'],lineage=m['lineage'],source=m['source'],species=m['species'],license=m['license'],source_citation=m.get('source_citation'),partition=m.get('partition','open_core'),
                     geometry_fingerprint=m['geometry_fingerprint'],reaction_ids=list(rids),node_mapping=node_map,reaction_mapping=rmap,source_glyph_mapping={k:v[2:] for k,v in node_map.items() if source[k]['role']=='metabolite'},
-                    positions={k:np.array(v).tolist() for k,v in positions.items()},position_origins={node_map[k]:source[k]['position_origin'] for k in ks},
+                    positions={k:np.array(v).tolist() for k,v in positions.items()},source_xy=source_xy,position_origins={node_map[k]:source[k]['position_origin'] for k in ks},
                     source_to_initial_frame=frame,match_level='complete_equation',complete_chemical_equation_verified=True,
                     complete_equation_verified=exact_comp,label_compartments_verified=exact_comp,
                     mapping_evidence=checks,features=features,ports=targetports,score=2*len(rids)+1.2-.1*features[2]-.2*direction_cost-.2*initial_fit,

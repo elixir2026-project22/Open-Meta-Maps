@@ -34,8 +34,8 @@ WINDOW_PAD = 40.0
 BUDGET_CROSS = 0.05   # search-seconds per crossing in the top-k windows
 BUDGET_EDGE = 0.002   # search-seconds per edge touching those windows
 BUDGET_FLOOR = 0.8    # search floor (index build is timed separately)
-BUDGET_CAP = 12.0     # absolute search cap
-TRIES_PER_CROSS = 1.5 # evaluation tries scale with window crossings
+BUDGET_CAP = 30.0     # absolute search cap (mid GEMs need headroom past the old 12 s)
+TRIES_PER_CROSS = 4.0 # evaluation tries scale with window crossings
 
 
 def _is_currency(bigg):
@@ -619,7 +619,8 @@ def repair(data, model=None, scene=None, blocks=None, skip_edges=(), k=DEFAULT_K
     structures = structures or (data[0].get('metadata') or {}).get('expert_structures')
 
     # Setup (not charged to the search budget): shared index + light metrics (no full evaluate).
-    index = lq.CrossingIndex(data, skip_edges)
+    # Use the same skip set as evaluate (preserved + source_paths), not the raw caller list.
+    index = lq.CrossingIndex(data, skip)
     node_ov0, lab_ov0 = lq.overlap_counts(data)
     windows = _windows_from_index(index, k)
     spacing = _spacing_from_nodes(index.nodes)
@@ -631,7 +632,10 @@ def repair(data, model=None, scene=None, blocks=None, skip_edges=(), k=DEFAULT_K
     auto_budget, auto_tries, mass = _window_budget(windows, k)
     if budget_s is None:
         budget_s = auto_budget
+    # When the caller raises the time budget, scale tries so search is not try-capped first.
     max_tries = auto_tries
+    if budget_s > auto_budget and auto_budget > 0:
+        max_tries = max(auto_tries, int(auto_tries * budget_s / auto_budget))
     setup_s = round(time.time() - t0, 2)
 
     report = dict(
@@ -707,14 +711,24 @@ def repair(data, model=None, scene=None, blocks=None, skip_edges=(), k=DEFAULT_K
                     why = 'node_overlap' if n_ov > node_ov0 else 'label_overlap'
                     report['reject_reasons'][why] = report['reject_reasons'].get(why, 0) + 1
                     continue
-                index.commit(payload)
-                current_cross = index.headline()
+                # Rebuild after every accept so incremental delta drift cannot
+                # claim phantom gains (delta_after_replace under-counts some Bezier edits).
+                index.rebuild(data)
+                real_total = index.headline()
+                real_delta = real_total - current_cross
+                if real_delta >= 0:
+                    undo()
+                    index.rebuild(data)
+                    report['rejected'] += 1
+                    report['reject_reasons']['no_real_drop'] = report['reject_reasons'].get('no_real_drop', 0) + 1
+                    continue
+                current_cross = real_total
                 node_ov0, lab_ov0 = n_ov, l_ov
                 row = dict(
                     kind=move['kind'], order=list(move.get('order') or ()),
                     window=[win['x'], win['y']],
-                    before_crossings=current_cross - delta, after_crossings=current_cross,
-                    delta=delta,
+                    before_crossings=current_cross - real_delta, after_crossings=current_cross,
+                    delta=real_delta,
                 )
                 if move.get('rid'):
                     row['reaction'] = move['rid']
@@ -722,7 +736,7 @@ def repair(data, model=None, scene=None, blocks=None, skip_edges=(), k=DEFAULT_K
                 accepts += 1
                 progressed = True
                 if log:
-                    log(f"  hotspot repair: accepted {move['kind']} Δ={delta} crossings→{current_cross}")
+                    log(f"  hotspot repair: accepted {move['kind']} Δ={real_delta} crossings→{current_cross}")
                 cross_rids, cross_nids = index.participants_in_window(win)
                 if not cross_rids:
                     cross_rids = set(win.get('reactions') or [])

@@ -37,10 +37,18 @@ def complete(g,anchors,seed=SEEDS[0],iterations=250,method='fcose'):
 
 def pack_modules(model,chosen,bridge_list,physical_scale=False):
  metadata={m['id']:m for m in model['metabolites']};rlookup={r['id']:r for r in model['reactions']};groups={};owners=defaultdict(list);children=[]
+ # Translation-only fit can leave tiny modules with huge module_scale (density/spacing blow-up).
+ # Clamp each scale to [0.5, 2]× the median so curated continuity stays near the source spacing.
+ raw_scales=[]
+ if physical_scale:
+  import geometry
+  raw_scales=[geometry.module_scale(model,p) for p in chosen]
+ med=float(np.median(raw_scales)) if raw_scales else 100.0
  for i,p in enumerate(chosen):
   scale=100
   if physical_scale:
-   import geometry;scale=geometry.module_scale(model,p)
+   # Tight clamp: translation-only fit otherwise inflates tiny modules and breaks continuity.
+   scale=float(np.clip(raw_scales[i], 0.75*med, 1.35*med))
   p['physical_scale']=scale
   xy={k:np.array(v)*scale for k,v in p['positions'].items()};arr=np.array(list(xy.values()));mn=arr.min(0);extent=np.ptp(arr,axis=0)+80;localpos={k:(v-mn+40).tolist() for k,v in xy.items()};roles=sorted({metadata[mid].get('compartment','unknown') for rid in p['reaction_ids'] for mid in rlookup[rid]['metabolites']});group='comp:'+('|'.join(roles));groupid='comp'+uid(roles)
   entry=groups.setdefault(groupid,dict(id=groupid,roles=roles,children=[]));ports=[];bid='block'+str(i)
@@ -68,7 +76,10 @@ def pack_modules(model,chosen,bridge_list,physical_scale=False):
   for k,v in positions.items():
    if k.startswith('r:'):reaction_anchors[k]=v
    else:met_suggestions[k].append(v)
-  blocks.append(dict(id=p['id'],template_id=p['template_id'],map_id=p['map_id'],lineage=p['lineage'],source=p['source'],species=p['species'],reaction_ids=p['reaction_ids'],positions=positions,node_mapping=p['node_mapping'],reaction_mapping=p['reaction_mapping'],match_level=p['match_level'],template_quality=p['template_quality'],match_mode=p['match_mode'],complete_equation_verified=p['complete_equation_verified'],complete_chemical_equation_verified=p.get('complete_chemical_equation_verified',p['complete_equation_verified']),container=p['container'],physical_scale=p['physical_scale'],anchor_confidence=.9 if p['complete_equation_verified'] else .7 if p['match_level']=='reaction_reference' else .35,movable=True))
+  blk=dict(id=p['id'],template_id=p['template_id'],map_id=p['map_id'],lineage=p['lineage'],source=p['source'],species=p['species'],reaction_ids=p['reaction_ids'],positions=positions,node_mapping=p['node_mapping'],reaction_mapping=p['reaction_mapping'],match_level=p['match_level'],template_quality=p['template_quality'],match_mode=p['match_mode'],complete_equation_verified=p['complete_equation_verified'],complete_chemical_equation_verified=p.get('complete_chemical_equation_verified',p['complete_equation_verified']),container=p['container'],physical_scale=p['physical_scale'],anchor_confidence=.9 if p['complete_equation_verified'] else .7 if p['match_level']=='reaction_reference' else .35,movable=True)
+  for key in ('source_xy','source_to_initial_frame','source_sha256','original_instance'):
+   if key in p:blk[key]=p[key]
+  blocks.append(blk)
  for mid,vals in met_suggestions.items():
   junction='junction'+uid(mid)
   # Shared identity is a separate derived junction, not the first source copy.

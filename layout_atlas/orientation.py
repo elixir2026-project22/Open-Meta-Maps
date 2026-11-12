@@ -288,12 +288,110 @@ def separate_free_reactions(model, scene, blocks, reaction_gap=95.0, other_gap=4
     return scene
 
 
+def _snap_axis(dx, dy, prefer_cardinal_deg=22.0):
+    """Unit direction snapped to 0/90°, or 45° only when clearly closer to a diagonal."""
+    ang = math.atan2(dy, dx)
+    cardinal = round(ang / (math.pi / 2.0)) * (math.pi / 2.0)
+    if abs(ang - cardinal) <= math.radians(prefer_cardinal_deg):
+        snapped = cardinal
+    else:
+        snapped = round(ang / (math.pi / 4.0)) * (math.pi / 4.0)
+    return np.array([math.cos(snapped), math.sin(snapped)], float)
+
+
+def straighten_chains(model, scene, blocks, max_shift=140.0, min_turn_deg=25.0, blend=0.55):
+    """Partially snap algorithm midmarkers so bent 2-reaction chains straighten.
+
+    ``chain_turn_median_deg`` measures the turn R1 → met → R2 (0° = opposite sides).  After
+    translation-only packing, automatic modules keep spring angles, so algorithm–algorithm
+    turns rise.  Move only algorithm midmarkers (and their private glyphs); curated geometry
+    stays fixed.  Prefer 0/90°; use 45° only when clearly diagonal.  Soft blend + turn
+    threshold avoid the full snap that raised algorithm×algorithm crossings.
+    """
+    from collections import defaultdict
+    cur = currency(model)
+    expert = _expert_reactions(blocks)
+    scene = dict(scene, positions={k: list(v) for k, v in scene['positions'].items()})
+    pos, parts = scene['positions'], scene['participants']
+    holders = defaultdict(set)
+    for (rid, mid), key in parts.items():
+        holders[key].add(rid)
+    private = defaultdict(list)
+    for key, rids in holders.items():
+        if key.startswith('m:') and len(rids) == 1:
+            private[next(iter(rids))].append(key)
+        elif key.startswith('side:') and len(rids) == 1:
+            private[next(iter(rids))].append(key)
+
+    chains = []
+    for key, rids in holders.items():
+        if key.startswith('side:') or len(rids) != 2:
+            continue
+        mid = scene.get('copies', {}).get(key)
+        if mid is None and key.startswith('m:'):
+            mid = key[2:]
+        elif mid is None and key.startswith('copy:') and key.count(':') >= 2:
+            mid = key.split(':', 2)[2]
+        if mid is None or mid in cur:
+            continue
+        a, b = sorted(rids)
+        chains.append((key, a, b))
+
+    moved = 0
+    for key, rid0, rid1 in chains:
+        mov0, mov1 = rid0 not in expert, rid1 not in expert
+        if not (mov0 or mov1):
+            continue
+        met = np.array(pos[key], float)
+        p0 = np.array(pos['r:' + rid0], float)
+        p1 = np.array(pos['r:' + rid1], float)
+        d0 = float(np.hypot(*(p0 - met)))
+        d1 = float(np.hypot(*(p1 - met)))
+        if d0 < 1e-6 or d1 < 1e-6:
+            continue
+        # Current turn (same definition as orderliness): R0 → met → R1.
+        a = p0 - met
+        b = p1 - met
+        u, v = -a / d0, b / d1
+        cos = float(np.clip(u @ v, -1.0, 1.0))
+        turn = math.degrees(math.acos(cos))
+        if turn < min_turn_deg:
+            continue
+        if mov0 and mov1:
+            axis = _snap_axis(*(p0 - p1))
+            cand0 = met + axis * d0
+            if float(np.hypot(*(cand0 - p0))) > float(np.hypot(*(met - axis * d0 - p0))):
+                axis = -axis
+            targets = {rid0: met + axis * d0, rid1: met - axis * d1}
+        elif mov0:
+            axis = _snap_axis(*(p1 - met))
+            targets = {rid0: met - axis * d0}
+        else:
+            axis = _snap_axis(*(p0 - met))
+            targets = {rid1: met - axis * d1}
+        for rid, goal in targets.items():
+            here = np.array(pos['r:' + rid], float)
+            delta = (goal - here) * blend
+            n = float(np.hypot(*delta))
+            if n < 1.0:
+                continue
+            if n > max_shift:
+                delta *= max_shift / n
+            for k in ['r:' + rid] + private.get(rid, []):
+                if k in pos:
+                    pos[k] = (np.array(pos[k], float) + delta).tolist()
+            moved += 1
+    scene['orientation_chains_straightened'] = moved
+    return scene
+
+
 def apply(model, scene, blocks, mode, stage):
     """`mode` off / sides / full; stage 'before_relax' (free reactions) or 'after_relax' (currency sides, final)."""
     if mode == 'full' and stage == 'before_relax':
         return free_reactions(model, scene, blocks)
     if mode in ('sides', 'full') and stage == 'after_relax':
         if mode == 'full':
+            scene = straighten_chains(model, scene, blocks)
             scene = separate_free_reactions(model, scene, blocks)
         return sides(model, scene, blocks)
     return scene

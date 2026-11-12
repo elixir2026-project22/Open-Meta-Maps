@@ -280,7 +280,7 @@ def render_skeleton_svg(model, blocks, containers, bridges, anchors, status, pat
             xs.append(v[0])
             ys.append(v[1])
     if not xs:
-        path.write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120"><text x="20" y="60" font-family="sans-serif" font-size="16">No expert structure was matched.</text></svg>')
+        path.write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120"><text x="20" y="60" font-family="sans-serif" font-size="16">No curated structure was matched.</text></svg>')
         return
     pad = 60
     x0, y0, x1, y1 = min(xs) - pad, min(ys) - pad, max(xs) + pad, max(ys) + pad
@@ -427,7 +427,9 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     original = uid(model)
     g = CanonicalGraph(model_graph(model))
     bridges = retrieval.bridges(model, selected)
-    if scalable:
+    # Prefer an explicit global plan (connection-aware packing) whenever provided — including
+    # small curated models where translation-only fit_frame needs adjacent neighbour placement.
+    if plan is not None or scalable:
         import global_layout as gl_pack
         plan = copy.deepcopy(plan) if plan is not None else gl_pack.plan_global(model, selected, bridges, g, log=log)
         anchors, blocks, containers, routes = plan['anchors'], plan['blocks'], plan['containers'], plan['routes']
@@ -437,9 +439,35 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     for b in blocks:
         p = proposal_by_id[b['id']]
         for key in ('license', 'partition', 'mapping_evidence', 'source_glyph_mapping', 'label_compartments_verified', 'source_to_initial_frame',
-                    'source_path_policy', 'source_citation', 'view_clipping', 'source_sha256', 'original_instance'):
+                    'source_xy', 'source_path_policy', 'source_citation', 'view_clipping', 'source_sha256', 'original_instance',
+                    'same_map_rigid', 'source_xy_absolute'):
             if key in p:
                 b[key] = p[key]
+    # Small-model path: re-pack above drops skeleton rigid bake — restore same-source group here.
+    if plan is None and not any(b.get('same_map_rigid') for b in blocks):
+        import curated_axes
+        blocks, same_map_bake = curated_axes.bake_same_map_positions(
+            blocks, model_n_reactions=len(model.get('reactions') or []))
+        if same_map_bake.get('blocks'):
+            if log:
+                log(f"Same-map rigid (draw): {same_map_bake['blocks']} block(s) in {same_map_bake['groups']} group(s) "
+                    f"mode={same_map_bake.get('mode')}")
+                pad = same_map_bake.get('padding_compression') or {}
+                if pad.get('applied'):
+                    log(f"  padding compress: {pad.get('segments_compressed', 0)} segment(s) "
+                        f"(x={pad.get('gaps_x', 0)}/−{pad.get('removed_x', 0)}px, "
+                        f"y={pad.get('gaps_y', 0)}/−{pad.get('removed_y', 0)}px) "
+                        f"max_gap={pad.get('max_gap')}")
+            anchors = {}
+            met_acc = defaultdict(list)
+            for b in blocks:
+                for k, v in b['positions'].items():
+                    if k.startswith('r:'):
+                        anchors[k] = v
+                    else:
+                        met_acc[k].append(v)
+            for k, vals in met_acc.items():
+                anchors[k] = np.mean(vals, axis=0).tolist()
     for bridge in bridges:
         a, c = anchors.get(bridge['nodes'][0]), anchors.get(bridge['nodes'][-1])
         if a is None or c is None:
@@ -513,6 +541,77 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         scene, composition_report = composition.compose(model, scene, blocks, currency(model))
         if log:
             log('  composition: ' + str({k: v for k, v in composition_report.items() if k != 'moves'}))
+        # Composition / landscape reflow must not break same-map absolute relatives.
+        import curated_axes as _ca
+        scene, _rr = _ca.restore_rigid_group(scene, blocks)
+        if log and _rr.get('restored'):
+            log(f"  same-map rigid restore (after compose): {_rr['restored']} glyphs, n_rx={_rr.get('n_rx')}")
+    # Sync curated block positions from the composed scene (composition translates tiles
+    # in the scene without rewriting blocks[].positions).
+    def _sync_blocks_from_scene(blocks, scene):
+        pos = scene.get('positions') or {}
+        for b in blocks or []:
+            bid = b.get('id')
+            new_pos = {}
+            for k, v in (b.get('positions') or {}).items():
+                if k.startswith('r:') and k in pos:
+                    new_pos[k] = list(pos[k])
+                elif k.startswith('m:'):
+                    ck = 'copy:%s:%s' % (bid, k[2:])
+                    if ck in pos:
+                        new_pos[k] = list(pos[ck])
+                    elif k in pos:
+                        new_pos[k] = list(pos[k])
+                    else:
+                        new_pos[k] = list(v)
+                else:
+                    new_pos[k] = list(v)
+            if new_pos:
+                b['positions'] = new_pos
+        return blocks
+
+    if composition_report is not None:
+        blocks = _sync_blocks_from_scene(blocks, scene)
+    # Re-place algorithm reactions against final curated AABB faces after composition.
+    # Translation-only packing leaves algo midmarkers aimed at the old (rotated) frames;
+    # a boundary-aware pass shortens curated×algorithm connectors and crossings.
+    long_links_before = None
+    if COMPLETION_CONTEXT == 'auto' and composition_report is not None:
+        import completion_context as completion_context_module
+        curated_rx = {rid for b in blocks for rid in b['reaction_ids']}
+        long_links_before = completion_context_module.scene_longest_links(
+            model, scene, currency(model), curated_rx, top=10)
+        scene, completion_after = completion_context_module.place(
+            model, scene, blocks, currency(model), completion_skip, boundary_aware=True)
+        if completion_report is not None:
+            completion_report['after_compose'] = {
+                k: completion_after.get(k)
+                for k in ('placed', 'candidates', 'tiers', 'rounds', 'boundary_aware', 'prefer_ew')
+            }
+            # Summarise which attach sides were used (for algo×curated diagnosis).
+            sides = Counter((d or {}).get('attach_side') for d in (completion_after.get('details') or {}).values()
+                            if (d or {}).get('attach_side'))
+            completion_report['after_compose']['attach_sides'] = dict(sides)
+        else:
+            completion_report = completion_after
+        if log:
+            log(f"  boundary-aware placement (after compose): {completion_after['placed']} of "
+                f"{completion_after['candidates']} reactions {completion_after['tiers']}")
+        # Compact stretched transport / exchange arms before orientation + export.
+        import composition as composition_module
+        scene, arm_report = composition_module.compact_long_arms_scene(
+            model, scene, currency(model))
+        if completion_report is not None:
+            completion_report['compact_long_arms'] = arm_report
+        if log and arm_report.get('shortened'):
+            log(f"  compact long arms: shortened {arm_report['shortened']}, "
+                f"pulled mids {arm_report['pulled_midmarkers']}")
+        import curated_axes as _ca2
+        scene, _rr2 = _ca2.restore_rigid_group(scene, blocks)
+        if log and _rr2.get('restored'):
+            log(f"  same-map rigid restore (after arms): {_rr2['restored']} glyphs")
+        # Private glyphs already move with each reaction in place(); a second full
+        # instances.optimize here doubled runtime on iIT341 without cutting ac crossings.
     import orientation as orientation_module
     scene = orientation_module.apply(model, scene, blocks, ORIENTATION, 'before_relax')
     if scalable:
@@ -525,6 +624,13 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         scene = instances_module.separate(model, scene, blocks)
         if instance_report is not None:
             instance_report['instances_separated'] = scene.get('instances_separated')
+    import curated_axes as _ca3
+    scene, _rr3 = _ca3.restore_rigid_group(scene, blocks)
+    if log and _rr3.get('restored'):
+        log(f"  same-map rigid restore (after relax): {_rr3['restored']} glyphs")
+    scene, _ov = _ca3.clear_rigid_node_overlaps(scene, blocks)
+    if log and _ov.get('moved'):
+        log(f"  clear rigid node overlaps: moved {_ov['moved']} non-rigid glyphs")
     import layout_quality
     protected_report = None
     if completion_report is not None:
@@ -540,6 +646,10 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     if completion_report is not None:
         completion_report['attachment_rate_final'] = completion_context_module.attachment_rate(model, scene, currency(model), {rid for b in blocks for rid in b['reaction_ids']}, completion_skip)
     expert_geometry = layout_quality.expert_geometry(blocks, scene)
+    import curated_axes
+    # Frame-only axes score: the fit_frame contract (no rot/reflect).  Scene residual Kabsch is
+    # unstable on small / near-collinear modules after completion and is not the gate signal.
+    axes = curated_axes.axes_report(blocks, scene=None)
     attempts = []
     # Routing decision: expert style uses Bezier curves (edge_style), legacy uses libavoid
     # For large models (> ROUTING_THRESHOLD reactions), defer routing to avoid long build times
@@ -559,12 +669,15 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     dump(folder / 'source_licenses.json', dict(layout_sources=sources, policy='Original licenses preserved; research-partition content keeps its own terms'))
     data = read(folder / 'map.json')
     data[0]['metadata']['layout_sources'] = sources
+    if plan is not None:
+        metric['global'] = dict(plan=(plan or {}).get('stats'), scene_nodes=len(scene['positions']),
+                                routing_status=('none: straight connections between glyphs; structure edges use the structures\' own lines or curves'
+                                                if scalable else 'curated/local routing'))
     if scalable:
         table = gl.instance_table(model, scene)
         data[0]['metadata']['metabolite_instances'] = table
         metric['instances'] = gl.instance_summary(table)
-        metric['global'] = dict(timings=timings, plan=plan['stats'], relax=audit, routing_status="none: straight connections between glyphs; structure edges use the structures' own lines or curves",
-                                scene_nodes=len(scene['positions']))
+        metric['global'] = dict(metric.get('global') or {}, timings=timings, relax=audit)
     # edges whose metabolite glyph is a copy taken from an expert structure: the line renderer draws them straight, as in the structure
     if SOURCE_PATHS:
         import source_paths
@@ -605,6 +718,13 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         metric['_source_path_chains'] = kept
     expert_reactions = {rid for b in blocks for rid in b['reaction_ids']}
     data[0]['metadata']['preserved_edges'] = sorted([rid, mid] for (rid, mid), key in scene['participants'].items() if key.startswith('copy:') and rid in expert_reactions)
+    # Early expert_structures: whole atlas windows as corridor AABBs for edge_style.
+    # Continuity later rewrites these to spatial pieces (see final evaluate below).
+    codes_early = module_codes(blocks) if blocks else {}
+    data[0]['metadata']['expert_structures'] = [
+        dict(id=b.get('id') or b.get('template_id'), code=codes_early.get(b.get('id')),
+             reactions=list(b['reaction_ids']))
+        for b in blocks if len(b.get('reaction_ids') or []) >= 2]
     skip_edges = data[0]['metadata']['preserved_edges'] + [[p['reaction'], p['metabolite']] for p in data[0]['metadata'].get('source_paths', [])]
     if LAYOUT_STYLE == 'curated':
         import edge_style
@@ -623,20 +743,33 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             import quality_gate
             _s, peripheral_report = peripheral_module.attach(model, scene, blocks, currency(model), apply=False)
             props = [dict(d, connection_px=d.get('connection_px', [0, 0])) for d in peripheral_report['details'] if d['state'] == 'proposed']
-            data, gate = quality_gate.peripheral_pass(data, scene, props, skip_edges, log=log)
-            for d in peripheral_report['details']:
-                row = next((r for r in gate['rows'] if r['exchange'] == d['exchange']), None)
-                if d['state'] == 'proposed' and row:
-                    d['state'] = 'attached' if row['decision'] == 'accepted' else 'not_attached'
-                    d['gate'] = row
-                    if row['decision'] != 'accepted':
-                        d.setdefault('x', None)
-            peripheral_report['attached'] = sum(d['state'] == 'attached' for d in peripheral_report['details'])
-            peripheral_report['not_attached'] = sum(d['state'] == 'not_attached' for d in peripheral_report['details'])
-            peripheral_report['gate'] = {k: v for k, v in gate.items() if k != 'rows'}
-            peripheral_report['gate_rows'] = gate['rows']
-            if log:
-                log('  peripheral modules: ' + str({k: v for k, v in peripheral_report.items() if k not in ('details', 'gate_rows')}))
+            # Mid/large GEMs: skip peripheral_pass. Its baseline evaluate_map alone is
+            # O(minutes) on iIT341 and was exhausting the budget with 0 accepts.
+            n_rx = len(model['reactions'])
+            if n_rx >= 200:
+                peripheral_report['gate'] = dict(proposed=len(props), accepted=0, rejected=0,
+                                                 budget_exhausted=0, seconds=0.0, skipped='n_rx>=200')
+                peripheral_report['gate_rows'] = []
+                if log:
+                    log('  peripheral modules: skipped gate (n_rx=%d); ' % n_rx
+                        + str({k: v for k, v in peripheral_report.items() if k not in ('details', 'gate_rows')}))
+            else:
+                peri_budget, peri_max = 12.0, 2
+                data, gate = quality_gate.peripheral_pass(data, scene, props, skip_edges,
+                                                         budget_s=peri_budget, max_candidates=peri_max, log=log)
+                for d in peripheral_report['details']:
+                    row = next((r for r in gate['rows'] if r['exchange'] == d['exchange']), None)
+                    if d['state'] == 'proposed' and row:
+                        d['state'] = 'attached' if row['decision'] == 'accepted' else 'not_attached'
+                        d['gate'] = row
+                        if row['decision'] != 'accepted':
+                            d.setdefault('x', None)
+                peripheral_report['attached'] = sum(d['state'] == 'attached' for d in peripheral_report['details'])
+                peripheral_report['not_attached'] = sum(d['state'] == 'not_attached' for d in peripheral_report['details'])
+                peripheral_report['gate'] = {k: v for k, v in gate.items() if k != 'rows'}
+                peripheral_report['gate_rows'] = gate['rows']
+                if log:
+                    log('  peripheral modules: ' + str({k: v for k, v in peripheral_report.items() if k not in ('details', 'gate_rows')}))
             dump(folder / 'map.json', data)
         if os.environ.get('OPM_BLOCK_RELOC', 'off') == 'on':     # demoted: stress packing should place blocks; enable with OPM_BLOCK_RELOC=on for A/B
             import block_relocation
@@ -645,9 +778,13 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             if log:
                 log('  block relocation: ' + str({k: v for k, v in reloc.items() if k != 'rows'}))
             dump(folder / 'map.json', data)
-        if os.environ.get('OPM_EXPERT_SUBMODULE', 'branch') in ('on', 'branch'):   # on by default: constrained relocation of exchange + transport modules inside big expert blocks; OPM_EXPERT_SUBMODULE=off disables it
+        if os.environ.get('OPM_EXPERT_SUBMODULE', 'branch') in ('on', 'branch'):   # on by default: constrained relocation of exchange + transport modules inside big curated blocks; OPM_EXPERT_SUBMODULE=off disables it
             import block_relocation
-            data, sub = block_relocation.relocate_sub(data, model, scene, blocks, currency(model), skip_edges, log=log, simple=os.environ.get('OPM_EXPERT_SUBMODULE', 'branch') != 'branch')
+            n_rx = len(model['reactions'])
+            sub_budget = 45.0 if n_rx < 200 else (60.0 if n_rx < 800 else 90.0)
+            data, sub = block_relocation.relocate_sub(data, model, scene, blocks, currency(model), skip_edges,
+                                                     budget_s=sub_budget, log=log,
+                                                     simple=os.environ.get('OPM_EXPERT_SUBMODULE', 'branch') != 'branch')
             metric['expert_submodule'] = sub
             data[0].setdefault('metadata', {})['regenerated_expert_edges'] = sub['regenerated_expert_edges']
             if log:
@@ -662,15 +799,70 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             if log:
                 log('  region placement: ' + str({k: v for k, v in rp.items() if k != 'rows'}))
             dump(folder / 'map.json', data)
-        if os.environ.get('OPM_HOTSPOT_REPAIR', 'on') != 'off':   # local crossing-hotspot repair (default on)
+        # Compact long transport/exchange arms after peripheral / submodule moves
+        # (those passes can re-stretch arms that were shortened earlier on the scene).
+        import composition as composition_module
+        arm_escher = composition_module.compact_long_arms_escher(data, currency(model))
+        metric['compact_long_arms'] = arm_escher
+        if composition_report is not None:
+            composition_report['compact_long_arms_escher'] = arm_escher
+        if log and arm_escher.get('shortened'):
+            log(f"  compact long arms (escher): shortened {arm_escher['shortened']}")
+        import curated_axes as _ca_es
+        data, _rr_es = _ca_es.restore_rigid_group_escher(data, blocks)
+        if log and _rr_es.get('restored'):
+            log(f"  same-map rigid restore (escher after arms): {_rr_es['restored']} nodes")
+        data, _ov_es = _ca_es.clear_rigid_node_overlaps_escher(data, blocks)
+        if log and _ov_es.get('moved'):
+            log(f"  clear rigid node overlaps (escher): moved {_ov_es['moved']} nodes")
+        dump(folder / 'map.json', data)
+        # Final empty-band squeeze: collapse corridors wider than K × median reaction spacing
+        # (nodes, labels and Bezier controls move together; monotone remap cannot add crossings).
+        if os.environ.get('OPM_SQUEEZE', 'on') != 'off':
+            spacing = composition_module.reaction_spacing_escher(data)
+            k = float(os.environ.get('OPM_SQUEEZE_K', composition_module.SQUEEZE_K))
+            squeeze = composition_module.squeeze_escher(data, max_gap=k * spacing)
+            squeeze['spacing_px'] = round(spacing, 1)
+            squeeze['k'] = k
+            metric['squeeze'] = squeeze
+            if composition_report is not None:
+                composition_report['squeeze'] = squeeze
+            if log:
+                log('  empty-band squeeze: ' + str(squeeze))
+            # Monotone squeeze preserves relatives inside the rigid group — do not
+            # restore here (that would re-expand BiGG-internal voids against a
+            # squeezed surrounding canvas).
+            dump(folder / 'map.json', data)
+        # Rebuild algorithm Beziers against post-restore geometry on small maps
+        # (early edge_style ran before absolute snap). Skip on mid/large — edge_style
+        # alone is ~75 s on iIT341 and would blow the runtime gate.
+        if len(model['reactions']) < 200:
+            import edge_style as _es_post
+            t_style2 = time.time()
+            metric['edge_style_post_restore'] = dict(
+                _es_post.apply(data, skip_edges), seconds=round(time.time() - t_style2, 1))
+            if log:
+                log(f"  expert-style connections (post-restore): {metric['edge_style_post_restore']}")
+            dump(folder / 'map.json', data)
+        # Hotspot repair AFTER rigid restore + overlap clear + squeeze + restyle so
+        # accepted moves are not undone by absolute snap.
+        if os.environ.get('OPM_HOTSPOT_REPAIR', 'on') != 'off':
             import hotspot_repair
             codes_early = module_codes(blocks) if blocks else {}
-            expert_structures_early = [dict(id=b.get('id') or b.get('template_id'), code=codes_early.get(b.get('id')), reactions=list(b['reaction_ids']))
-                                       for b in blocks if len(b.get('reaction_ids') or []) >= 2]
+            expert_structures_early = [
+                dict(id=b.get('id') or b.get('template_id'), code=codes_early.get(b.get('id')),
+                     reactions=list(b['reaction_ids']))
+                for b in blocks if len(b.get('reaction_ids') or []) >= 2]
             data[0].setdefault('metadata', {})['expert_structures'] = expert_structures_early
+            # After absolute rigid restore, more windows need search than the default
+            # mass-scaled budget covers (e_coli formate cluster alone was 15 crossings).
+            n_rx = len(model['reactions'])
+            hs_budget = 20.0 if n_rx < 200 else 45.0
+            hs_k = 8 if n_rx < 200 else 8
             metric['hotspot_repair'] = hotspot_repair.repair(
                 data, model=model, scene=scene, blocks=blocks, skip_edges=skip_edges, log=log,
-                structures=expert_structures_early)
+                structures=expert_structures_early, k=hs_k, max_accepts=80, budget_s=hs_budget,
+                max_rounds=6)
             if log:
                 hr = metric['hotspot_repair']
                 log('  hotspot repair: ' + str({k: hr.get(k) for k in ('accepted_count', 'tries', 'rounds', 'seconds', 'improved')}))
@@ -686,13 +878,37 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         metric['edge_routing'] = dict(mode=EDGE_ROUTING, not_applied='large model: routing of the algorithm-placed connections is a later step')
     t_quality = time.time()
     # Persist structure membership on the map so continuity can be scored from map.json alone.
+    # Absolute same-map reuse keeps BiGG spacing; score spatial pieces, not whole atlas windows.
     codes = module_codes(blocks) if blocks else {}
-    expert_structures = [dict(id=b.get('id') or b.get('template_id'), code=codes.get(b.get('id')), reactions=list(b['reaction_ids']))
-                         for b in blocks if len(b.get('reaction_ids') or []) >= 2]
+    import curated_axes as _ca_final
+    expert_structures = _ca_final.expert_structure_entries(blocks, codes)
     data[0].setdefault('metadata', {})['expert_structures'] = expert_structures
     quality_summary, quality_issues = layout_quality.evaluate(data, skip_edges, structures=expert_structures)
     quality_summary['seconds'] = round(time.time() - t_quality, 1)
     quality_summary['layout_style'] = LAYOUT_STYLE
+    # Diagnosis reports are built inside evaluate (reuse crossing/edge pass). Attach the
+    # pre-boundary longest-link snapshot when we have one.
+    try:
+        det = quality_summary.setdefault('details', {})
+        ac_report = det.get('algorithm_curated_crossings') or {}
+        long_pack = det.get('longest_links') or {}
+        if isinstance(long_pack, dict):
+            long_pack = dict(long_pack)
+            if long_links_before is not None:
+                long_pack['before'] = long_links_before
+            det['longest_links'] = long_pack
+        if log and ac_report.get('count'):
+            top = ', '.join('%s×%d' % (r['algorithm_rid'], r['crossings'])
+                            for r in (ac_report.get('top_algorithm_reactions') or [])[:8])
+            log(f"  algorithm×curated crossings: {ac_report['count']} "
+                f"(reasons {ac_report.get('by_reason')}); top algos: {top}")
+        long_after = (long_pack or {}).get('after') or {}
+        if log and long_after.get('top'):
+            sample = '; '.join('%s–%s %.0fpx' % (r['reaction'], r['metabolite'], r['length_px'])
+                               for r in long_after['top'][:5])
+            log(f"  longest links p90={long_after.get('p90')} top: {sample}")
+    except Exception as e:
+        quality_summary.setdefault('details', {})['packing_diagnosis_error'] = str(e)[:200]
     if composition_report is not None:
         quality_summary['details']['composition_pass'] = {k: v for k, v in composition_report.items() if k != 'moves'}
         quality_issues['composition_moves'] = composition_report.get('moves', [])
@@ -723,6 +939,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             details = quality_summary.setdefault('details', {})
             details['orderliness'] = dict(
                 main_segment_axis_share=ord_m.get('main_segment_axis_share'),
+                main_segment_axis_share_length=ord_m.get('main_segment_axis_share_length'),
                 reaction_axis_share=ord_m.get('reaction_axis_share'),
                 chain_turn_median_deg=ord_m.get('chain_turn_median_deg'),
                 metabolite_grid_share=ord_m.get('metabolite_grid_share'),
@@ -732,7 +949,8 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
                 metabolites=ord_m.get('orderliness_metabolites'),
                 grid_tol_px=ord_m.get('orderliness_grid_tol_px'),
             )
-            for k in ('main_segment_axis_share', 'reaction_axis_share', 'chain_turn_median_deg', 'metabolite_grid_share'):
+            for k in ('main_segment_axis_share', 'main_segment_axis_share_length',
+                      'reaction_axis_share', 'chain_turn_median_deg', 'metabolite_grid_share'):
                 details[k] = ord_m.get(k)
             details['panel'] = layout_quality._detailed_metrics_panel(
                 details,
@@ -746,6 +964,8 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             if log:
                 log(f'  orderliness refresh after source-path stamp skipped: {type(ex).__name__}: {ex}'[:160])
     metric['layout_quality_final'] = quality_summary
+    metric['algorithm_curated_crossings'] = (quality_summary.get('details') or {}).get('algorithm_curated_crossings')
+    metric['longest_links'] = (quality_summary.get('details') or {}).get('longest_links')
     metric['peripheral'] = None if peripheral_report is None else {k: v for k, v in peripheral_report.items() if k not in ('details', 'gate_rows')}
     dump(folder / 'layout_issues.json', quality_issues)
     metric['instance_optimization'] = instance_report if instance_report is not None else dict(mode='off')
@@ -777,6 +997,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     metric['constraints'] = audit
     metric['routing_attempts'] = attempts
     metric['expert_geometry'] = expert_geometry
+    metric['curated_axes'] = axes
     metric['orientation_mode'] = ORIENTATION
     metric['completion'] = metric_completion
     assert_chemistry(model, folder / 'map.json')
@@ -1129,6 +1350,11 @@ def run_job(folder):
             import lowconf
             selected, lowconf_report = lowconf.split(model, currency(model), selected)
             job.log(f"Low-confidence decomposition: {len(lowconf_report['split'])} structure(s) split, {lowconf_report['kept']} kept, of {lowconf_report['checked']} topology-only: {lowconf_report['split']}")
+        # Translation-only curated axes: one common scale per source map, keep relative offsets.
+        import curated_axes
+        selected, same_map_report = curated_axes.reapply_same_map_layout(selected)
+        if same_map_report.get('modules'):
+            job.log(f"Same-map axes: {same_map_report['modules']} module(s) across {same_map_report['maps']} map(s) reapplied (common scale, no rot/reflect)")
         used = {r for p in selected for r in p['reaction_ids']}
         job.log(f'Selected {len(selected)} structures covering {len(used)} of {len(allids)} reactions (stages {[len(s) for s in stages]})')
         save_gz(folder / 'selected.json.gz', selected)
@@ -1146,6 +1372,8 @@ def run_job(folder):
         import interfaces
         bridges = retrieval.bridges(model, selected)
         global_plan = None
+        # Large models: connection-aware global packing.  Small models keep ELK (baseline quality);
+        # translation-only fit + landscape composition shelf still apply there.
         if LAYOUT == 'global' and LIMITS['full_routed_max_reactions'] < len(allids) <= LIMITS['whole_map_max_reactions']:
             import global_layout as gl_pack
             try:
@@ -1164,6 +1392,30 @@ def run_job(folder):
             for key in ('license', 'partition', 'mapping_evidence', 'source_citation', 'source_sha256', 'original_instance', 'layout_origin', 'counted_as_expert_design'):
                 if key in p:
                     b[key] = p[key]
+        # Small-model ELK path: same-source fragments → one rigid group (global_plan already bakes).
+        if global_plan is None:
+            import curated_axes
+            blocks, same_map_bake = curated_axes.bake_same_map_positions(blocks, model_n_reactions=len(allids))
+            if same_map_bake.get('blocks'):
+                job.log(f"Same-map rigid: {same_map_bake['blocks']} block(s) in {same_map_bake['groups']} group(s) "
+                        f"mode={same_map_bake.get('mode')}")
+                pad = same_map_bake.get('padding_compression') or {}
+                if pad.get('applied'):
+                    job.log(f"  padding compress: {pad.get('segments_compressed', 0)} segment(s) "
+                            f"(x={pad.get('gaps_x', 0)}/−{pad.get('removed_x', 0)}px, "
+                            f"y={pad.get('gaps_y', 0)}/−{pad.get('removed_y', 0)}px) "
+                            f"max_gap={pad.get('max_gap')}")
+                # Rebuild anchors from rewritten block positions (bridges re-anchored below).
+                anchors = {}
+                met_acc = defaultdict(list)
+                for b in blocks:
+                    for k, v in b['positions'].items():
+                        if k.startswith('r:'):
+                            anchors[k] = v
+                        else:
+                            met_acc[k].append(v)
+                for k, vals in met_acc.items():
+                    anchors[k] = np.mean(vals, axis=0).tolist()
         for bridge in bridges:
             a, c = anchors.get(bridge['nodes'][0]), anchors.get(bridge['nodes'][-1])
             if a is None or c is None:
@@ -1184,14 +1436,14 @@ def run_job(folder):
         job.log('Provenance: ' + ', '.join(f'{k} {n}' for k, n in legend))
         skeleton = dict(schema=5, model=model['id'], target_model_hash=original, modules=blocks, bridges=bridges, containers=containers,
                         anchors={k: dict(xy=v) for k, v in anchors.items()}, reaction_status=status,
-                        note='Skeleton = expert structures plus network bridges only; every other reaction is completed algorithmically in step 2.')
+                        note='Skeleton = curated structures plus network bridges only; every other reaction is completed algorithmically in step 2.')
         skeleton = interfaces.annotate(model, skeleton)
         dump(folder / 'skeleton.json', skeleton)
         if len(allids) <= LIMITS['full_routed_max_reactions']:
             render_skeleton_svg(model, blocks, containers, bridges, anchors, status, folder / 'skeleton.svg')
         else:
             grid_skeleton_svg(model, blocks, folder / 'skeleton.svg')
-        job.add_file('skeleton.svg', 'Skeleton (expert structures + bridges)', 'svg')
+        job.add_file('skeleton.svg', 'Skeleton (curated structures + bridges)', 'svg')
         job.add_file('skeleton.json', 'Skeleton data', 'json')
         try:
             skel_cards = []

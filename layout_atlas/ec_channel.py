@@ -519,6 +519,7 @@ class ECMapper(st.Mapper):
                 ks = sorted(node_map)
                 frame = fit_frame([source[k]['xy'] for k in ks], [generic[node_map[k]] for k in ks])
                 positions = transform({node_map[k]: source[k]['xy'] for k in ks}, frame)
+                source_xy = {node_map[k]: list(source[k]['xy']) for k in ks}
                 targetports = {k: len(set(g[k]) - {'r:' + rid for rid in rids}) for k in tg if g.nodes[k]['role'] == 'metabolite'}
                 srcports, ports = len(m.get('ports', [])), sum(bool(v) for v in targetports.values())
                 initial_fit = float(np.sqrt(np.mean([np.sum((positions[k] - generic[k]) ** 2) for k in positions])))
@@ -540,7 +541,7 @@ class ECMapper(st.Mapper):
                          source=m['source'], species=m['species'], license=m['license'], source_citation=m.get('source_citation'),
                          partition=m.get('partition', 'open_core'), geometry_fingerprint=m['geometry_fingerprint'], reaction_ids=list(rids),
                          node_mapping=node_map, reaction_mapping=rmap, positions={k: np.array(v).tolist() for k, v in positions.items()},
-                         position_origins={node_map[k]: source[k]['position_origin'] for k in ks}, source_to_initial_frame=frame,
+                         source_xy=source_xy, position_origins={node_map[k]: source[k]['position_origin'] for k in ks}, source_to_initial_frame=frame,
                          match_level='ec_topology', complete_chemical_equation_verified=False, complete_equation_verified=False,
                          label_compartments_verified=False, mapping_evidence=checks, metabolite_evidence=evidence,
                          unmapped_source_nodes=sorted(ambiguous), source_node_count=len(m['nodes']), features=features,

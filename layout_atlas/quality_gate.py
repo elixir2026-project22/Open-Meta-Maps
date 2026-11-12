@@ -172,6 +172,9 @@ def peripheral_pass(data, scene, proposals, skip_edges, budget_s=150.0, max_cand
         d2, redo, _ = translate_module(data, scene, prop['keys'], prop['delta'], set(prop['reactions']), skip_edges)
         edge_style.apply(d2, skip_edges, only=redo)
         new, s2, i2 = evaluate_map(d2, skip_edges, disconnected=far - 1)
+        if time.time() - t0 > budget_s:
+            rows.append(dict(exchange=prop['exchange'], decision='budget_exhausted'))
+            continue
         ok, why = accept(base, new)
         rows.append(dict(exchange=prop['exchange'], transports=prop['transports'], decision='accepted' if ok else 'rejected', reason=why, moved_px=prop.get('moved_px'),
                          before={k: base[k] for k in ('collisions', 'crossings', 'long_edges')}, after={k: new[k] for k in ('collisions', 'crossings', 'long_edges')}))

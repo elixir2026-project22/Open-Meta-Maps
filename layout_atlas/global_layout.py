@@ -584,6 +584,88 @@ def group_weights(model, groups, cur):
     return weights
 
 
+def _shared_mets(rx_a, rx_b, cur):
+    """Non-currency metabolites shared by two reaction-id sets."""
+    ma = {m for r in rx_a.values() for m in r['metabolites'] if m not in cur}
+    mb = {m for r in rx_b.values() for m in r['metabolites'] if m not in cur}
+    return ma & mb
+
+
+def _local_met_offset(block_pos, shared, lo, size):
+    """Mean of shared-met glyphs in block coords, as offset from block centre (or None)."""
+    pts = []
+    for k, v in (block_pos or {}).items():
+        if not k.startswith('m:'):
+            continue
+        mid = k[2:]
+        if mid in shared:
+            pts.append(v)
+    if not pts:
+        return None
+    mean = np.mean(np.asarray(pts, float), axis=0)
+    centre = np.asarray(lo, float) + np.asarray(size, float) / 2.0
+    return mean - centre
+
+
+def _face_shared_metabolites(items, centres, weights, n_expert, blocks=None, cur=None,
+                             max_nudge=80.0, face_axis=False):
+    """Nudge curated block centres so linked pairs sit closer (shared-met sides optional).
+
+    Translation only.  ``face_axis`` reorients pairs onto the shared-metabolite side; leave
+    it off when the packing already satisfies aspect — axis flips raise curated×curated
+    crossings.  Returns (centres, report).
+    """
+    centres = np.asarray(centres, float).copy()
+    if n_expert < 2:
+        return centres, dict(nudged=0)
+    cur = cur or set()
+    blocks = blocks or []
+    nudged = 0
+    faced = 0
+    pairs = sorted(((w, a, b) for (a, b), w in weights.items()
+                    if a < n_expert and b < n_expert and w >= 0.25), reverse=True)
+    half = np.array([np.asarray(items[i]['size'], float) / 2.0 for i in range(n_expert)])
+    for w, a, b in pairs[:60]:
+        delta = centres[b] - centres[a]
+        dist = float(np.hypot(*delta))
+        if dist < 1e-6:
+            continue
+        axis = None
+        if face_axis:
+            shared = _shared_mets(items[a].get('_rx') or {}, items[b].get('_rx') or {}, cur)
+            if shared and a < len(blocks) and b < len(blocks):
+                oa = _local_met_offset(blocks[a].get('positions'), shared, items[a]['lo'], items[a]['size'])
+                if oa is not None and float(np.hypot(*oa)) > 1.0:
+                    axis = oa / (np.linalg.norm(oa) + 1e-9)
+        if axis is not None:
+            mid = 0.5 * (centres[a] + centres[b])
+            sep = float(np.abs(axis[0]) * (half[a, 0] + half[b, 0]) +
+                        np.abs(axis[1]) * (half[a, 1] + half[b, 1])) + 50.0
+            for idx, tgt in ((a, mid - axis * (sep / 2.0)), (b, mid + axis * (sep / 2.0))):
+                step = tgt - centres[idx]
+                n = float(np.hypot(*step))
+                if n > max_nudge:
+                    step = step * (max_nudge / n)
+                centres[idx] = centres[idx] + step
+            faced += 1
+            nudged += 1
+            continue
+        touch = float(np.abs(delta[0]) / dist * (half[a, 0] + half[b, 0]) +
+                      np.abs(delta[1]) / dist * (half[a, 1] + half[b, 1]))
+        gap = dist - touch
+        if gap <= 40.0:
+            continue
+        pull = min(max_nudge, gap - 40.0) * min(1.0, w / 2.0)
+        step = (delta / dist) * (pull / 2.0)
+        centres[a] = centres[a] + step
+        centres[b] = centres[b] - step
+        nudged += 1
+    if nudged and n_expert >= 2:
+        sizes = np.array([items[i]['size'] for i in range(len(centres))], float) + BLOCK_GAP
+        centres = _separate(centres, sizes / 2.0, passes=60)
+    return centres, dict(nudged=nudged, faced=faced, pairs_considered=len(pairs), face_axis=bool(face_axis))
+
+
 def plan_global(model, selected, bridges, g, log=None):
     """Complete placement of the whole model: expert blocks (rigid, as packed by pack_modules) and automatic modules (rigid, locally laid out) are
     placed together on one plane by their shared metabolites.  Returns dict(anchors, blocks, containers, routes, groups, stats)."""
@@ -597,46 +679,119 @@ def plan_global(model, selected, bridges, g, log=None):
             log(f'  {name}: {timings[name]} s')
     cur = currency(model)
     anchors, blocks, containers, routes = drawing.pack_modules(model, copy.deepcopy(selected), bridges, physical_scale=True)
+    import curated_axes
+    # Same-source fragments → one rigid group at original relative positions (absolute map coords).
+    blocks, same_map_bake = curated_axes.bake_same_map_positions(blocks, model_n_reactions=len(model['reactions']))
+    rigid_groups = curated_axes.same_map_packing_groups(blocks)
+    if log and same_map_bake.get('blocks'):
+        log(f"Same-map rigid: {same_map_bake['blocks']} block(s) in {same_map_bake['groups']} group(s) "
+            f"mode={same_map_bake.get('mode')}")
+        pad = same_map_bake.get('padding_compression') or {}
+        if pad.get('applied'):
+            log(f"  padding compress: {pad.get('segments_compressed', 0)} segment(s) "
+                f"(x={pad.get('gaps_x', 0)}/−{pad.get('removed_x', 0)}px, "
+                f"y={pad.get('gaps_y', 0)}/−{pad.get('removed_y', 0)}px) "
+                f"max_gap={pad.get('max_gap')}")
     lap('expert blocks (ELK)')
     reactions = {r['id']: r for r in model['reactions']}
     groups, stats = reaction_communities(model, g, blocks, cur)
     lap('communities of uncovered reactions')
     layouts, sizes, members = local_layouts(model, g, groups, cur)
     lap('local layout of automatic modules')
-    # one list: expert blocks first
+    # Packing items: each same-map rigid group is ONE composite tile; other expert blocks stay individuals.
+    member_of = {}
+    for mid, idxs in rigid_groups.items():
+        for i in idxs:
+            member_of[i] = mid
     items = []
-    for b in blocks:
-        pts = np.array(list(b['positions'].values()), float)
-        lo, hi = pts.min(0), pts.max(0)
-        items.append(dict(kind='expert', reactions=list(b['reaction_ids']), lo=lo, size=hi - lo + 80, compartment=b.get('container'), _rx={rid: reactions[rid] for rid in b['reaction_ids']}))
+    expert_plan = []  # parallel to centres[:n_pack_expert]: ('block', i) or ('rigid', mid, idxs)
+    seen_rigid = set()
+    for i, b in enumerate(blocks):
+        mid = member_of.get(i)
+        if mid is not None:
+            if mid in seen_rigid:
+                continue
+            seen_rigid.add(mid)
+            idxs = rigid_groups[mid]
+            pts = np.vstack([np.array(list(blocks[j]['positions'].values()), float) for j in idxs])
+            lo, hi = pts.min(0), pts.max(0)
+            rx_all = [rid for j in idxs for rid in blocks[j]['reaction_ids']]
+            items.append(dict(kind='expert_rigid', reactions=list(rx_all), lo=lo, size=hi - lo + 80,
+                              compartment=blocks[idxs[0]].get('container'),
+                              _rx={rid: reactions[rid] for rid in rx_all if rid in reactions},
+                              map_id=blocks[idxs[0]].get('map_id'), same_map_rigid=mid,
+                              block_indexes=list(idxs)))
+            expert_plan.append(('rigid', mid, list(idxs)))
+        else:
+            pts = np.array(list(b['positions'].values()), float)
+            lo, hi = pts.min(0), pts.max(0)
+            items.append(dict(kind='expert', reactions=list(b['reaction_ids']), lo=lo, size=hi - lo + 80,
+                              compartment=b.get('container'), _rx={rid: reactions[rid] for rid in b['reaction_ids']},
+                              map_id=b.get('map_id'), block_indexes=[i]))
+            expert_plan.append(('block', i, [i]))
+    n_expert_items = len(items)
     for grp in groups:
         sz = np.array(sizes[grp['id']]) + 80
-        items.append(dict(kind='auto', reactions=grp['reactions'], size=sz, compartment=grp['compartment'], id=grp['id'], _rx={rid: reactions[rid] for rid in grp['reactions']}))
+        items.append(dict(kind='auto', reactions=grp['reactions'], size=sz, compartment=grp['compartment'],
+                          id=grp['id'], _rx={rid: reactions[rid] for rid in grp['reactions']}))
     for it in items:
         it['compartment'] = it.get('compartment')
+        # Cap pathological local-layout / ELK extents so one runaway tile cannot
+        # inflate skyline / spring canvases into tens of thousands of pixels.
+        # Rigid same-map backbones keep their true AABB (must match lo for the
+        # later centre→delta translation); only soft-cap absurd outliers.
+        sz = np.asarray(it['size'], float)
+        nrx = max(len(it.get('reactions') or []), 1)
+        if it.get('kind') == 'expert_rigid':
+            cap = max(float(sz.max()), 80.0 + 120.0 * max(8.0, float(np.sqrt(nrx) * 6.0)))
+            it['size'] = np.minimum(sz, cap)
+        else:
+            cap = 80.0 + 140.0 * max(8.0, float(nrx))
+            it['size'] = np.minimum(sz, cap)
     weights = group_weights(model, [dict(reactions=i['reactions'], compartment=i['compartment'], _rx=i['_rx']) for i in items], cur)
+    # Soft same-map attraction only for expert tiles that were NOT merged into a rigid composite.
+    SAME_MAP_W = 0.14
+    for i in range(n_expert_items):
+        for j in range(i + 1, n_expert_items):
+            if items[i].get('same_map_rigid') or items[j].get('same_map_rigid'):
+                continue
+            if items[i].get('map_id') and items[i].get('map_id') == items[j].get('map_id'):
+                weights[i, j] = weights.get((i, j), 0.0) + SAME_MAP_W
+    # Amplify chemical neighbour weights so connected blocks sit adjacent (long-line gate).
+    for key in list(weights):
+        weights[key] = weights[key] * 1.30
     lap('module weights')
     if BLOCK_LAYOUT == 'auto':
         import block_candidates
         _, links = block_candidates.module_links([dict(reactions=i['reactions'], _rx=i['_rx']) for i in items], cur, HUB)
         centres, placement = block_candidates.place(items, weights, links, layout_blocks, log=log)
     else:
-        centres, placement = layout_blocks([i['size'] for i in items], weights), dict(selection=dict(chosen='spring', rule='single arrangement (block_layout=single)'))
+        centres, placement = layout_blocks([i['size'] for i in items], weights, aspect=1.5), dict(selection=dict(chosen='spring', rule='single arrangement (block_layout=single)'))
+    centres = np.asarray(centres, float)
+    # Gentle pull-together only (no axis flip): keep strongly linked curated pairs close
+    # without reshuffling the aspect-feasible packing enough to raise curated×curated crossings.
+    centres, face_report = _face_shared_metabolites(
+        items, centres, weights, n_expert_items, blocks=blocks, cur=cur, max_nudge=80.0, face_axis=False)
+    placement = dict(placement or {}, same_map_weights=SAME_MAP_W, link_weight_scale=1.30,
+                     face_shared=face_report, same_map_bake=same_map_bake,
+                     rigid_groups={str(k)[:24]: v for k, v in rigid_groups.items()})
     lap('placement of all modules')
     new_anchors = {}
-    # expert blocks keep their internal geometry
-    for b, it, centre in zip(blocks, items[:len(blocks)], centres[:len(blocks)]):
+    # Expert tiles (individuals or rigid composites): one shared translation per tile.
+    for plan, it, centre in zip(expert_plan, items[:n_expert_items], centres[:n_expert_items]):
         delta = centre - it['size'] / 2 + 40 - it['lo']
-        b['positions'] = {k: (np.array(v) + delta).tolist() for k, v in b['positions'].items()}
-        for k, v in b['positions'].items():
-            if k.startswith('r:'):
-                anchors[k] = v
-            else:
-                new_anchors.setdefault(k, []).append(v)
+        for bi in plan[2]:
+            b = blocks[bi]
+            b['positions'] = {k: (np.array(v) + delta).tolist() for k, v in b['positions'].items()}
+            for k, v in b['positions'].items():
+                if k.startswith('r:'):
+                    anchors[k] = v
+                else:
+                    new_anchors.setdefault(k, []).append(v)
     expert_met = {k for k in new_anchors}
     for k, vals in new_anchors.items():
         anchors[k] = np.mean(vals, axis=0).tolist()
-    # automatic modules: reactions and the metabolites they are "home" for (most reactions of that metabolite are in this module)
+    # automatic modules: reactions and the metabolites they are "home" for
     home = defaultdict(Counter)
     for grp in groups:
         for rid in grp['reactions']:
@@ -644,7 +799,7 @@ def plan_global(model, selected, bridges, g, log=None):
                 if mid not in cur and 'm:' + mid not in expert_met:
                     home[mid][grp['id']] += 1
     home_of = {mid: sorted(c.items(), key=lambda kv: (-kv[1], kv[0]))[0][0] for mid, c in home.items()}
-    for grp, it, centre in zip(groups, items[len(blocks):], centres[len(blocks):]):
+    for grp, it, centre in zip(groups, items[n_expert_items:], centres[n_expert_items:]):
         local = layouts[grp['id']]
         offset = centre - it['size'] / 2 + 40
         grp['positions'] = {}

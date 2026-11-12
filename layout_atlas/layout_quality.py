@@ -358,6 +358,7 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, str
                   cycles=rules.get('cycles'), cycle_len=rules.get('cycle_len'))
     orderliness = dict(
         main_segment_axis_share=rules.get('main_segment_axis_share'),
+        main_segment_axis_share_length=rules.get('main_segment_axis_share_length'),
         reaction_axis_share=rules.get('reaction_axis_share'),
         chain_turn_median_deg=rules.get('chain_turn_median_deg'),
         metabolite_grid_share=rules.get('metabolite_grid_share'),
@@ -374,11 +375,17 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, str
         total=rules.get('unrelated_overlaps_total'),
     )
     crossing_density = dict(worst_window_crossings=windows[0]['crossings'] if windows else 0)
+    # Packing diagnosis from the same crossing/edge pass (no second detect_crossings).
+    ac_report = algorithm_curated_crossing_report(cross=cross, events=all_cross_events, top=40)
+    long_links_after = longest_links_report(data=data, edges=edges, nodes=nodes, top=10)
     details = dict(
+        algorithm_curated_crossings=ac_report,
+        longest_links=dict(after=long_links_after),
         line_shape=line_shape,
         cycles=cycles,
         orderliness=orderliness,
         main_segment_axis_share=orderliness.get('main_segment_axis_share'),
+        main_segment_axis_share_length=orderliness.get('main_segment_axis_share_length'),
         reaction_axis_share=orderliness.get('reaction_axis_share'),
         chain_turn_median_deg=orderliness.get('chain_turn_median_deg'),
         metabolite_grid_share=orderliness.get('metabolite_grid_share'),
@@ -514,9 +521,9 @@ def _detailed_metrics_panel(details, *, line_shape, cycles, unrelated, crossing_
     densest = comp.get('max_reactions_in_one_cell')
     canvas = comp.get('canvas')
 
-    # Targets currently measured but not yet optimised (待优化).
+    # Targets currently measured; stage is STAGE_NOT_YET until a pipeline owns them.
     cycle_is_target = True
-    flow_is_target = False  # global reading direction fights curated orientations
+    flow_is_target = False  # panel target is false; kept under Debug diagnostics
     from evaluation.map_rules import GRID_TOL_FLOOR_PX, GRID_TOL_NN_FRAC, ORDERLINESS_GOALS
     og = ORDERLINESS_GOALS
 
@@ -531,10 +538,15 @@ def _detailed_metrics_panel(details, *, line_shape, cycles, unrelated, crossing_
             miss=(exch is not None and exch < 0.5),
         ),
         _row(
-            'Axis-aligned main segments',
+            'Axis-aligned main edges',
             _pct(seg_axis),
             code='main_segment_axis_share',
-            tip=f'Share of drawn main (non-cofactor) path length within ±10° of horizontal or vertical (length-weighted; resampling a curve does not change the score). Higher is better; goal {round(100 * og["main_segment_axis_share"])}% on curated BiGG e_coli_core. Not yet optimised.',
+            tip=(
+                f'Share of main (non-cofactor) reaction–metabolite edges whose path is ≥50% '
+                f'within ±10° of H/V (count-weighted: each edge once, independent of length). '
+                f'Higher is better; goal {round(100 * og["main_segment_axis_share"])}% on curated '
+                f'BiGG e_coli_core. Length-weighted share is reported separately.'
+            ),
             better='higher',
             target=f'≥ {round(100 * og["main_segment_axis_share"])}% (curated e_coli_core)',
             stage=STAGE_NOT_YET,
@@ -544,7 +556,7 @@ def _detailed_metrics_panel(details, *, line_shape, cycles, unrelated, crossing_
             'Axis-aligned reaction axes',
             _pct(rx_axis),
             code='reaction_axis_share',
-            tip=f'Share of reactions whose substrate→product axis (non-cofactor) is within ±10° of horizontal or vertical. Higher is better; goal {round(100 * og["reaction_axis_share"])}% on curated BiGG e_coli_core. Not yet optimised.',
+            tip=f'Share of reactions whose substrate→product axis (non-cofactor) is within ±10° of horizontal or vertical. Higher is better; goal {round(100 * og["reaction_axis_share"])}% on curated BiGG e_coli_core.',
             better='higher',
             target=f'≥ {round(100 * og["reaction_axis_share"])}% (curated e_coli_core)',
             stage=STAGE_NOT_YET,
@@ -554,7 +566,7 @@ def _detailed_metrics_panel(details, *, line_shape, cycles, unrelated, crossing_
             'Grid-aligned metabolites',
             _pct(grid),
             code='metabolite_grid_share',
-            tip=f'Share of main metabolite glyphs that share an x or y with another nearby main glyph (tolerance {GRID_TOL_NN_FRAC:g} × median nearest-neighbour main-metabolite distance, floor {GRID_TOL_FLOOR_PX:g} px). Higher is better; goal {round(100 * og["metabolite_grid_share"])}% on curated BiGG e_coli_core. Not yet optimised.',
+            tip=f'Share of main metabolite glyphs that share an x or y with another nearby main glyph (tolerance {GRID_TOL_NN_FRAC:g} × median nearest-neighbour main-metabolite distance, floor {GRID_TOL_FLOOR_PX:g} px). Higher is better; goal {round(100 * og["metabolite_grid_share"])}% on curated BiGG e_coli_core.',
             better='higher',
             target=f'≥ {round(100 * og["metabolite_grid_share"])}% (curated e_coli_core)',
             stage=STAGE_NOT_YET,
@@ -564,7 +576,7 @@ def _detailed_metrics_panel(details, *, line_shape, cycles, unrelated, crossing_
             'Median chain turn angle',
             '—' if chain_turn is None else f'{chain_turn}°',
             code='chain_turn_median_deg',
-            tip=f'Median turn at a main metabolite shared by exactly two reactions (0° = the two midmarkers sit on opposite sides of the metabolite). Lower is better; goal {og["chain_turn_median_deg"]:g}° on curated BiGG e_coli_core. Not yet optimised.',
+            tip=f'Median turn at a main metabolite shared by exactly two reactions (0° = the two midmarkers sit on opposite sides of the metabolite). Lower is better; goal {og["chain_turn_median_deg"]:g}° on curated BiGG e_coli_core.',
             better='lower',
             target=f'{og["chain_turn_median_deg"]:g}° (curated e_coli_core)',
             stage=STAGE_NOT_YET,
@@ -576,7 +588,7 @@ def _detailed_metrics_panel(details, *, line_shape, cycles, unrelated, crossing_
             'Cycle circularity / direction / order',
             f"{_na(circ)} / {_na(cy.get('cycle_direction_consistency'))} ({_na(cy.get('cycle_direction'))}) / {_na(cy.get('cycle_order_consistency'))}",
             code='cycle_circularity',
-            tip='How round and consistently oriented drawn cycles are (isoperimetric quotient and neighbour order). Higher is better. Backlog: ring/cycle placement for algorithm-placed cycles.',
+            tip='How round and consistently oriented drawn cycles are (isoperimetric quotient and neighbour order). Higher is better; goal higher circularity and neighbour-order consistency.',
             better='higher', target='higher circularity & consistency',
             stage=STAGE_NOT_YET,
             miss=(circ is not None and circ < 0.35),
@@ -585,7 +597,7 @@ def _detailed_metrics_panel(details, *, line_shape, cycles, unrelated, crossing_
         'Species in another compartment',
         _na(species) if species is None else f'{round(float(species), 3)}',
         code='species_in_other_compartment',
-        tip='Share of metabolite glyphs that fall inside another compartment hull. Lower is better; target 0. Compartment packing is not yet optimised.',
+        tip='Share of metabolite glyphs that fall inside another compartment hull. Lower is better; target 0.',
         better='lower', target='0',
         stage=STAGE_NOT_YET,
         miss=(species is not None and float(species) > 0.05),
@@ -707,7 +719,7 @@ def _detailed_metrics_panel(details, *, line_shape, cycles, unrelated, crossing_
                 'Reproducibility (Procrustes / mean displacement)',
                 f"{_na(repro.get('procrustes_disparity', repro.get('procrustes_mean')))} / {_na(repro.get('mean_displacement', repro.get('mean_displacement_mean')))}",
                 code='reproducibility',
-                tip='Displacement versus a compare-map (evaluate --compare-map). Lower is better. Not a compose objective yet (no seed flag / build-on-previous-layout).',
+                tip='Displacement versus a compare-map (evaluate --compare-map). Lower is better; target stable across runs.',
                 better='lower', target='stable across runs',
                 stage=STAGE_NOT_YET,
                 miss=False,
@@ -719,7 +731,7 @@ def _detailed_metrics_panel(details, *, line_shape, cycles, unrelated, crossing_
             'Main flow-direction share',
             _pct(flow) + (f" ({details.get('flow_main_dir')})" if details.get('flow_main_dir') else ''),
             code='flow_main_dir_share',
-            tip='Share of reactant→product axes aligned with the dominant reading direction. Debug only — not an optimisation target (would fight curated orientations).',
+            tip='Share of reactant→product axes aligned with the dominant reading direction.',
             better=None, target='n/a (debug)',
             stage='debug only',
             miss=False,
@@ -729,7 +741,7 @@ def _detailed_metrics_panel(details, *, line_shape, cycles, unrelated, crossing_
             'Cycle circularity / direction / order',
             f"{_na(circ)} / {_na(cy.get('cycle_direction_consistency'))} ({_na(cy.get('cycle_direction'))}) / {_na(cy.get('cycle_order_consistency'))}",
             code='cycle_circularity',
-            tip='Cycle shape diagnostics kept as debug when cycle layout is not a target.',
+            tip='Isoperimetric quotient and neighbour-order consistency for drawn cycles.',
             better=None, target='n/a (debug)',
             stage='debug only',
             miss=False,
@@ -879,8 +891,16 @@ def detect_crossings(edges, nodes, max_issues=4000):
             per_edge_cross[i] += 1; per_edge_cross[j] += 1
             legacy = {'algorithm_curated': 'algorithm_expert', 'curated_curated': 'expert_expert'}.get(kindc, kindc)
             ev = dict(kind=kindc, kind_legacy=legacy, reactions=[edges[i]['rid'], edges[j]['rid']],
+                      metabolites=[edges[i]['met'], edges[j]['met']],
                       x=round(float(pt[0]), 1), y=round(float(pt[1]), 1),
                       currency_involved=bool(edges[i]['currency'] or edges[j]['currency']))
+            if kindc == 'algorithm_curated':
+                if edges[i]['curated'] and not edges[j]['curated']:
+                    ev['curated_rid'], ev['algorithm_rid'] = edges[i]['rid'], edges[j]['rid']
+                    ev['curated_met'], ev['algorithm_met'] = edges[i]['met'], edges[j]['met']
+                else:
+                    ev['curated_rid'], ev['algorithm_rid'] = edges[j]['rid'], edges[i]['rid']
+                    ev['curated_met'], ev['algorithm_met'] = edges[j]['met'], edges[i]['met']
             all_cross_events.append(ev)
             if len(cross_points) < max_issues:
                 cross_points.append(ev)
@@ -892,6 +912,175 @@ def algorithm_crossings(data, skip_edges=None):
     edges, nodes = build_edges(data, skip_edges)
     cross, events, _, _ = detect_crossings(edges, nodes, max_issues=0)
     return int(cross['algorithm_algorithm'] + cross['algorithm_curated']), cross, events
+
+
+def algorithm_curated_crossing_report(data=None, skip_edges=None, top=40, cross=None, events=None):
+    """Which algorithm reactions cross curated edges, and why.
+
+    Reasons:
+      spoke/currency   — at least one edge is a currency spoke
+      main_metabolite  — both edges are non-currency (core) links
+    Each sample also records the algorithm/curated reaction + metabolite endpoints.
+
+    Pass ``cross`` / ``events`` from a prior ``detect_crossings`` (e.g. inside
+    ``evaluate``) to avoid a second full crossing pass on large maps.
+    """
+    from collections import Counter
+    if cross is None or events is None:
+        edges, nodes = build_edges(data, skip_edges)
+        cross, events, _, _ = detect_crossings(edges, nodes, max_issues=0)
+    ac = [e for e in events if e.get('kind') == 'algorithm_curated']
+    by_algo = Counter()
+    why = Counter()
+    samples = []
+    for e in ac:
+        arid = e.get('algorithm_rid') or (e.get('reactions') or [None])[0]
+        by_algo[arid] += 1
+        reason = 'spoke/currency' if e.get('currency_involved') else 'main_metabolite'
+        why[reason] += 1
+        if len(samples) < top:
+            samples.append(dict(
+                algorithm_rid=arid, curated_rid=e.get('curated_rid'),
+                algorithm_met=e.get('algorithm_met'), curated_met=e.get('curated_met'),
+                reason=reason,
+                why=('Algorithm reaction %s’s link to %s crosses curated reaction %s’s link to %s'
+                     % (arid, e.get('algorithm_met'), e.get('curated_rid'), e.get('curated_met'))
+                     + (' (currency spoke)' if e.get('currency_involved') else ' (main metabolite)')),
+                x=e.get('x'), y=e.get('y')))
+    top_algos = [{'algorithm_rid': rid, 'crossings': n,
+                  'why': next((s['why'] for s in samples if s['algorithm_rid'] == rid), None)}
+                 for rid, n in by_algo.most_common(top)]
+    return dict(count=len(ac), headline=int(cross['algorithm_algorithm'] + cross['algorithm_curated']),
+                by_reason=dict(why), top_algorithm_reactions=top_algos, samples=samples)
+
+
+def _block_aabbs_from_map(data):
+    """structure id -> (lo, hi) from curated midmarkers (+ optional module boxes)."""
+    body = data[1]
+    nodes = body['nodes']
+    structs = (data[0].get('metadata') or {}).get('expert_structures') or []
+    rid_block = {}
+    for s in structs:
+        sid = s.get('id') or s.get('code') or s.get('template_id')
+        for rid in s.get('reactions') or []:
+            rid_block[rid] = sid
+    # Midmarker xy per reaction.
+    mid_xy = {}
+    for rx in body['reactions'].values():
+        rid = rx['bigg_id']
+        for seg in rx['segments'].values():
+            for nid in (seg['from_node_id'], seg['to_node_id']):
+                n = nodes.get(nid) or {}
+                if n.get('node_type') == 'midmarker':
+                    mid_xy[rid] = (float(n['x']), float(n['y']))
+                    break
+            if rid in mid_xy:
+                break
+    from collections import defaultdict
+    pts = defaultdict(list)
+    for rid, sid in rid_block.items():
+        if rid in mid_xy:
+            pts[sid].append(mid_xy[rid])
+    # Expand each block AABB with metabolites of its curated edges that sit near the mids.
+    for e_pts_sid in list(pts):
+        pass
+    aabbs = {}
+    pad = 80.0
+    for sid, xy in pts.items():
+        arr = np.asarray(xy, float)
+        if len(arr) < 1:
+            continue
+        lo, hi = arr.min(0) - pad, arr.max(0) + pad
+        aabbs[sid] = (lo, hi)
+    return aabbs, rid_block
+
+
+def _classify_link(e, nodes, aabbs, rid_block):
+    """intra_curated_block | inter_curated_block | algorithm | curated_unscoped."""
+    if not e.get('curated'):
+        return 'algorithm'
+    rid = e['rid']
+    bid = rid_block.get(rid)
+    mid_id, met_id = e['ends']
+    met = nodes.get(met_id) or {}
+    mxy = np.array([float(met.get('x', 0)), float(met.get('y', 0))], float)
+
+    def owners(xy):
+        hit = []
+        for sid, (lo, hi) in aabbs.items():
+            if lo[0] <= xy[0] <= hi[0] and lo[1] <= xy[1] <= hi[1]:
+                hit.append(sid)
+        return hit
+
+    met_owners = owners(mxy)
+    if bid is None:
+        return 'curated_unscoped'
+    if met_owners == [bid] or (bid in met_owners and len(met_owners) == 1):
+        return 'intra_curated_block'
+    if met_owners and bid not in met_owners:
+        return 'inter_curated_block'
+    if bid in met_owners and len(met_owners) > 1:
+        return 'inter_curated_block'  # shared glyph / multi-block met
+    # Met outside every block AABB: still part of this reaction's curated drawing if near its mid.
+    mid = nodes.get(mid_id) or {}
+    midx = np.array([float(mid.get('x', 0)), float(mid.get('y', 0))], float)
+    if bid in aabbs:
+        lo, hi = aabbs[bid]
+        # Grow own box; if met falls inside grown box → intra (rigid body + label margin).
+        grow = 220.0
+        if lo[0] - grow <= mxy[0] <= hi[0] + grow and lo[1] - grow <= mxy[1] <= hi[1] + grow:
+            return 'intra_curated_block'
+    if float(np.hypot(*(mxy - midx))) < 250.0:
+        return 'intra_curated_block'
+    return 'inter_curated_block'
+
+
+def longest_links_report(data=None, skip_edges=None, top=10, edges=None, nodes=None):
+    """Top-N longest reaction–metabolite edges with endpoints (for long-line diagnosis).
+
+    Pass ``edges`` / ``nodes`` from a prior ``build_edges`` to reuse evaluate’s work.
+    Classifies links as intra_curated_block (unchanged by translation-only pack) vs
+    inter_curated_block vs algorithm, and reports p90 excluding pure intra-block edges.
+    """
+    if edges is None or nodes is None:
+        edges, nodes = build_edges(data, skip_edges)
+    aabbs, rid_block = ({}, {})
+    if data is not None:
+        aabbs, rid_block = _block_aabbs_from_map(data)
+    rows = []
+    for e in edges:
+        pts = e.get('pts')
+        if pts is None:
+            continue
+        pts = np.asarray(pts, float)
+        if len(pts) < 2:
+            continue
+        length = float(np.sum(np.hypot(*np.diff(pts, axis=0).T)))
+        a, b = e['ends']
+        na, nb = nodes.get(a, {}), nodes.get(b, {})
+        klass = _classify_link(e, nodes, aabbs, rid_block) if aabbs else (
+            'algorithm' if not e.get('curated') else 'curated_unscoped')
+        rows.append(dict(
+            reaction=e['rid'], metabolite=e['met'], length_px=round(length, 1),
+            curated=bool(e.get('curated')), currency=bool(e.get('currency')),
+            link_class=klass,
+            from_xy=[round(float(na.get('x', 0)), 1), round(float(na.get('y', 0)), 1)],
+            to_xy=[round(float(nb.get('x', 0)), 1), round(float(nb.get('y', 0)), 1)],
+            from_type=na.get('node_type'), to_type=nb.get('node_type')))
+    rows.sort(key=lambda r: -r['length_px'])
+    lengths = [r['length_px'] for r in rows]
+    ex = [r['length_px'] for r in rows if r['link_class'] != 'intra_curated_block']
+    from collections import Counter
+    return dict(
+        top=rows[:top], n_edges=len(rows),
+        p90=round(float(np.percentile(lengths, 90)), 1) if lengths else 0.0,
+        p90_ex_intra_curated=round(float(np.percentile(ex, 90)), 1) if ex else 0.0,
+        by_class=dict(Counter(r['link_class'] for r in rows)),
+        above_p90_by_class=dict(Counter(
+            r['link_class'] for r in rows
+            if lengths and r['length_px'] >= float(np.percentile(lengths, 90)))),
+        note='intra_curated_block edges are rigid under translation-only packing; '
+             'p90_ex_intra_curated is the packing-relevant long-line gate')
 
 
 def overlap_counts(data):

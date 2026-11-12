@@ -1,23 +1,15 @@
-"""Final composition pass: modules that the layout scattered far from everything are brought back and the truly independent ones are arranged in order.
+"""Final composition: keep large curated modules intact; shelf the rest.
 
-In iIT341 the module arrangement left 164 visually separate components on a canvas of 64,350 x 95,435 px: 69 single reactions and 33 pairs sat in far corners
-(5th-nearest-reaction distance up to 31,128 px, median 296), the map used 0.5 % of a coarse grid.  No curve fitting can fix that; modules have to move.
+Large curated modules (area ≥ data-derived percentile, spatially clustered) mark visual
+components that stay put — never re-tiled, split or deformed.  Related outside components
+are pulled to anchors; independents are shelved in uniform rows with an aspect-aware side.
+Empty-band squeeze (pipeline OPM_SQUEEZE) collapses finished-map corridors.
 
-Everything is decided from the GEM and the scene, never from names, and whole modules move rigidly (their inner geometry, the expert curves and protected
-shared nodes are untouched):
-
-  component    reactions joined through shared non-currency glyphs of the final scene (a connected visual component); its keys: the reaction points, the
-               metabolite glyphs and the per-reaction currency glyphs of its reactions
-  main         the biggest components (>= MAIN_MIN reactions): never moved
-  related      a smaller component that shares a non-currency METABOLITE (the GEM, not the glyph) with a reaction of another component: it is moved next to
-               those anchors if it is far from them (more than FAR_FACTOR x its own size + FAR_MIN px); nothing is added to the chemistry, the glyphs stay separate
-               unless the instance step already shared them
-  independent  shares no non-currency metabolite with any other reaction: arranged on shelves (rows of rectangles, equal gaps) beside the main network,
-               grouped by compartment and sorted by size; the side with the smallest aspect-ratio distortion is used; no connection is drawn
-Free-space search keeps CLEAR px from everything already placed (labels and curve channels included by the margin), so the pass does not create crowded places.
-The pass reports what it moved and why; `quality_gate` / the final evaluation decide on the finished map (A/B switch OPM_COMPOSE=off).
+Shelf / squeeze ideas follow MetaCarto (CC BY 4.0; doi:10.64898/2026.09.19.752882);
+independent reimplementation.  A/B: OPM_COMPOSE=off.
 """
 from collections import defaultdict
+import math
 
 import numpy as np
 from scipy.spatial import cKDTree
@@ -33,7 +25,23 @@ LONG = os.environ.get('OPM_COMPOSE_LONG', 'on') == 'on'
 CLEAR = 110.0
 SHELF_GAP = 120.0
 ROW_WIDTH_MIN = 2000.0  # floor only; actual row width follows main-network size and target aspect
-TARGET_ASPECT = 1.4    # target width/height ratio for the independent shelf block (slightly wider than tall)
+TARGET_ASPECT = 1.55   # target width/height for shelf + packers (centre of 4:3–16:9)
+ASPECT_MIN = 4.0 / 3.0
+ASPECT_MAX = 16.0 / 9.0
+SQUEEZE_K = 3.0
+# Collapse empty corridors even when that leaves the aspect band, if an empty run
+# is at least this fraction of the content bbox on that axis (fake landscape from voids).
+SQUEEZE_FORCE_EMPTY_FRAC = 0.22
+LINK_COST = 1.8   # once aspect is in-band, prefer chemically linked tiles sitting adjacent
+TILE_GAP = 120.0
+LARGE_AREA_PCT = 75.0
+SHELF_GAP = 120.0
+CROSS_COST = 0.85  # among equal-compactness slots / widths, minimise estimated link crossings
+NODE_ASPECT_LOOPS = 14  # binary-search width iterations for pack_tiles_aspect
+STRETCH_MAX = 1.35  # cap anisotropic pack stretch so aspect faking cannot explode the canvas
+# Compact long transport / exchange arms (scene + escher): leave at most TARGET px.
+ARM_MAX = 220.0
+ARM_TARGET = 150.0
 
 
 def components(model, scene, cur):
@@ -113,9 +121,33 @@ def compose(model, scene, blocks, cur):
             if mid not in cur:
                 metab_users[mid].add(r['id'])
     comp_of = {rid: i for i, c in enumerate(comps) for rid in c['reactions']}
+    tiles = build_tiles(model, scene, blocks, cur)
+    large_ids = classify_large_tiles(tiles)
+    # Large curated tiles are reported for diagnostics.  The immovable "main" set stays the
+    # largest visual components (MAIN_MIN) so related/independent classification matches the
+    # previous main behaviour — expanding main with every large tile caused extra related
+    # pulls and crossing/overlap regressions on iIT341.
+    report = dict(components=len(comps), tiles=len(tiles),
+                  curated_tiles=sum(t['kind'] == 'curated' for t in tiles),
+                  auto_tiles=sum(t['kind'] == 'auto' for t in tiles),
+                  large_tiles=len(large_ids), small_tiles=len(tiles) - len(large_ids),
+                  large_area_pct=LARGE_AREA_PCT,
+                  moved_related=0, arranged_independent=0, kept_near=0, failed=0, gathered=0, moves=[])
     main = [i for i, c in enumerate(comps) if len(c['reactions']) >= MAIN_MIN]
-    report = dict(components=len(comps), main=len(main), moved_related=0, arranged_independent=0, kept_near=0, failed=0, moves=[])
+    # Freeze EVERY visual component that touches a same-map rigid backbone reaction.
+    # Landscape reflow used to treat 2-reaction transport fragments as movable and
+    # skyline-pack them away from the rest of the shared source map.
+    rigid_rx = {rid for b in (blocks or []) if b.get('same_map_rigid') for rid in (b.get('reaction_ids') or [])}
+    if rigid_rx:
+        for i, c in enumerate(comps):
+            if i in main:
+                continue
+            if any(rid in rigid_rx for rid in c['reactions']):
+                main.append(i)
+        report['same_map_rigid_reactions'] = len(rigid_rx)
+    report['main'] = len(main)
     if not main:
+        scene['composition'] = report
         return scene, report
     movable_idx = {i for i in range(len(comps)) if i not in set(main)}
     rpts = np.array([pos[k] for k in pos if k.startswith('r:')], float)
@@ -187,6 +219,17 @@ def compose(model, scene, blocks, cur):
         if spot is None or (LONG and float(np.hypot(*(spot - target_c))) > 0.7 * dist_now):
             report['failed'] += 1          # no free place clearly closer to the anchors
             continue
+        # Prefer east/west attachments when the current content bbox is already tall, so
+        # related pulls do not grow a portrait column that the landscape packer then loses.
+        cur_asp, _ = _scene_aspect(placed_pts)
+        if cur_asp < ASPECT_MIN and spot is not None:
+            ew = []
+            for sign in (-1.0, 1.0):
+                cand = _free_spot(local - centre, target_c + np.array([sign * (size / 2.0 + 180.0), 0.0]), tree)
+                if cand is not None:
+                    ew.append(cand)
+            if ew:
+                spot = min(ew, key=lambda c: float(np.hypot(*(c - target_c))))
         delta = spot - centre
         move(i, delta)
         report['moved_related'] += 1
@@ -213,33 +256,74 @@ def compose(model, scene, blocks, cur):
             lw = min(max([text_w(str(labels.get(k, ''))) for k in ks] + [0.0]), 220.0)
             pads[i] = lw
             boxes.append((i, arr.min(0), arr.max(0) - arr.min(0) + np.array([60.0 + lw, 60.0])))
-        # row width: aim for a TARGET_ASPECT block (wider than tall), not limited by main network width
+        # Binary-search shelf row width so the combined main+shelf frame lands in 4:3–16:9.
         total_area = sum(b[2][0] * b[2][1] for b in boxes)
-        # solve for row_w such that area / row_w * row_w ~ TARGET_ASPECT -> row_w ~ sqrt(area * TARGET_ASPECT)
-        row_w = max(np.sqrt(total_area * TARGET_ASPECT), max(b[2][0] for b in boxes) + SHELF_GAP, ROW_WIDTH_MIN * 0.5)
-        x = y = 0.0
-        row_h = 0.0
-        layout = []
-        prev_group = None
-        for i, bmin, size in boxes:
-            g = _compartment(comps[i], rx)
-            if x > 0 and (x + size[0] > row_w or (prev_group is not None and g != prev_group and x > row_w * 0.5)):
-                x, y, row_h = 0.0, y + row_h + SHELF_GAP, 0.0
-            layout.append((i, bmin, np.array([x, y])))
-            x += size[0] + SHELF_GAP
-            row_h = max(row_h, size[1])
-            prev_group = g
-        block_w, block_h = row_w, y + row_h
-        # side with combined aspect ratio closest to 1:1 (square-ish canvas)
+        widest_box = max(b[2][0] for b in boxes) + SHELF_GAP
         main_w, main_h = float(hi[0] - lo[0]), float(hi[1] - lo[1])
-        # each option: (x_origin, y_origin, combined_aspect_ratio)
-        options = {'below': (lo[0], hi[1] + 400.0, max(main_w, block_w) / max(main_h + block_h + 400.0, 1.0)),
-                   'above': (lo[0], lo[1] - 400.0 - block_h, max(main_w, block_w) / max(main_h + block_h + 400.0, 1.0)),
-                   'right': (hi[0] + 400.0, lo[1], (main_w + block_w + 400.0) / max(main_h, block_h, 1.0)),
-                   'left': (lo[0] - 400.0 - block_w, lo[1], (main_w + block_w + 400.0) / max(main_h, block_h, 1.0))}
-        # prefer aspect ratio closest to 1.0; favor horizontal placements (right/left) when main is already tall
-        side = min(options, key=lambda s: abs(np.log(max(options[s][2], 1e-6))))
+
+        def shelf_layout(row_w):
+            x = y = 0.0
+            row_h = 0.0
+            layout = []
+            prev_group = None
+            for i, bmin, size in boxes:
+                g = _compartment(comps[i], rx)
+                if x > 0 and (x + size[0] > row_w or (prev_group is not None and g != prev_group and x > row_w * 0.5)):
+                    x, y, row_h = 0.0, y + row_h + SHELF_GAP, 0.0
+                layout.append((i, bmin, np.array([x, y])))
+                x += size[0] + SHELF_GAP
+                row_h = max(row_h, size[1])
+                prev_group = g
+            block_w, block_h = float(row_w), float(y + row_h)
+            return layout, block_w, block_h, row_h
+
+        def combined_options(block_w, block_h):
+            return {
+                'below': (lo[0], hi[1] + 400.0, max(main_w, block_w) / max(main_h + block_h + 400.0, 1.0)),
+                'above': (lo[0], lo[1] - 400.0 - block_h, max(main_w, block_w) / max(main_h + block_h + 400.0, 1.0)),
+                'right': (hi[0] + 400.0, lo[1], (main_w + block_w + 400.0) / max(main_h, block_h, 1.0)),
+                'left': (lo[0] - 400.0 - block_w, lo[1], (main_w + block_w + 400.0) / max(main_h, block_h, 1.0)),
+            }
+
+        def shelf_score(row_w):
+            layout, block_w, block_h, row_h = shelf_layout(row_w)
+            options = combined_options(block_w, block_h)
+            side = min(options, key=lambda s: abs(np.log(max(options[s][2], 1e-6) / TARGET_ASPECT)))
+            aspect = options[side][2]
+            in_band = ASPECT_MIN - 1e-6 <= aspect <= ASPECT_MAX + 1e-6
+            # Prefer in-band combined aspect, then closest to TARGET, then compact shelf.
+            return (0 if in_band else 1,
+                    abs(math.log(max(aspect, 1e-9) / TARGET_ASPECT)),
+                    block_w * block_h,
+                    side, layout, block_w, block_h, row_h, aspect)
+
+        lo_w = max(widest_box, ROW_WIDTH_MIN * 0.5)
+        hi_w = max(lo_w * 1.05, math.sqrt(max(total_area * ASPECT_MAX, 1.0)) * 1.6,
+                   math.sqrt(max(total_area * TARGET_ASPECT, 1.0)) * 1.35, float(W))
+        best_shelf = None
+        a, b = lo_w, hi_w
+        probes = [lo_w, hi_w, math.sqrt(max(total_area * TARGET_ASPECT, 1.0)),
+                  math.sqrt(max(total_area * ASPECT_MIN, 1.0)),
+                  math.sqrt(max(total_area * ASPECT_MAX, 1.0))]
+        for _ in range(NODE_ASPECT_LOOPS):
+            mid = 0.5 * (a + b)
+            probes.append(mid)
+            sc = shelf_score(mid)
+            aspect = sc[-1]
+            if aspect < TARGET_ASPECT:
+                a = mid
+            else:
+                b = mid
+            if best_shelf is None or sc[:3] < best_shelf[:3]:
+                best_shelf = sc
+        for tw in probes:
+            sc = shelf_score(max(tw, lo_w))
+            if best_shelf is None or sc[:3] < best_shelf[:3]:
+                best_shelf = sc
+        _in, _log, _area, side, layout, block_w, block_h, row_h, _asp = best_shelf
+        options = combined_options(block_w, block_h)
         ox, oy = options[side][0], options[side][1]
+        row_w = block_w
         for i, bmin, off in layout:
             ks = [k for k in cur_keys_of[i] if k in pos]
             arr = np.array([pos[k] for k in ks], float)
@@ -256,8 +340,1159 @@ def compose(model, scene, blocks, cur):
         with_main = sum(1 for r in rects if r[0] < main_rect[2] and main_rect[0] < r[2] and r[1] < main_rect[3] and main_rect[1] < r[3])
         report['shelf_check'] = dict(rect_overlaps=overlaps, overlaps_with_main_network=with_main)
         report['shelf'] = dict(side=side, rows=int(round(block_h / max(row_h + SHELF_GAP, 1))) , width=round(block_w), height=round(block_h), components=len(layout))
+    report['gathered'] = report['moved_related']
+    # Final landscape reflow: translation-only skyline of rigid visual components so the
+    # content bbox lands in 4:3–16:9 even when related-pulls left a tall column.
+    scene, reflow = reflow_landscape(model, scene, blocks, cur)
+    report['landscape_reflow'] = reflow
     scene['composition'] = report
     return scene, report
+
+
+def _scene_aspect(pos):
+    pts = np.array([v for k, v in pos.items() if not k.startswith('side:')], float)
+    if len(pts) < 2:
+        return 1.0, pts
+    lo, hi = pts.min(0), pts.max(0)
+    return float((hi[0] - lo[0]) / max(hi[1] - lo[1], 1e-9)), pts
+
+
+def reflow_landscape(model, scene, blocks, cur):
+    """Bring the scene content bbox into 4:3–16:9 without deforming curated glyphs.
+
+    Safe tools only (never tear the main packed network):
+      1. Rigid 90° page rotate when ``1/aspect`` lands in the hard band.
+      2. Otherwise freeze MAIN visual components and skyline-pack only the
+         non-main components beside them with binary-searched width so the
+         combined frame is landscape (translation only).
+    """
+    scene = dict(scene, positions={k: list(v) for k, v in scene['positions'].items()})
+    pos = scene['positions']
+    aspect0, _ = _scene_aspect(pos)
+    report = dict(applied=False, aspect_before=round(aspect0, 3), page_rotated_90=False)
+    if ASPECT_MIN - 1e-3 <= aspect0 <= ASPECT_MAX + 1e-3:
+        report['aspect_after'] = report['aspect_before']
+        report['reason'] = 'already_in_band'
+        return scene, report
+
+    # Portrait → page rotate only when the rotated aspect is in-band (avoid 0.27 → 3.7).
+    if aspect0 < ASPECT_MIN - 1e-3:
+        rot_aspect = 1.0 / max(aspect0, 1e-9)
+        if ASPECT_MIN - 1e-3 <= rot_aspect <= ASPECT_MAX + 1e-3:
+            for k, (x, y) in list(pos.items()):
+                pos[k] = [float(y), float(-x)]
+            xs = [v[0] for v in pos.values()]
+            ys = [v[1] for v in pos.values()]
+            ox, oy = min(xs), min(ys)
+            for k in pos:
+                pos[k] = [pos[k][0] - ox + 50.0, pos[k][1] - oy + 50.0]
+            aspect1, _ = _scene_aspect(pos)
+            report.update(applied=True, aspect_after=round(aspect1, 3),
+                          reason='page_rotate_90', page_rotated_90=True)
+            return scene, report
+
+    comps = components(model, scene, cur)
+    main = [i for i, c in enumerate(comps) if len(c['reactions']) >= MAIN_MIN]
+    rigid_rx = {rid for b in (blocks or []) if b.get('same_map_rigid') for rid in (b.get('reaction_ids') or [])}
+    if rigid_rx:
+        for i, c in enumerate(comps):
+            if i not in main and any(rid in rigid_rx for rid in c['reactions']):
+                main.append(i)
+    movable = [i for i in range(len(comps)) if i not in set(main)]
+    if not main or not movable:
+        report.update(aspect_after=round(aspect0, 3), reason='no_movable_or_main')
+        return scene, report
+    main_pts = np.array([pos[k] for i in main for k in comps[i]['keys']
+                         if k in pos and not k.startswith('side:')], float)
+    if len(main_pts) < 2:
+        report.update(aspect_after=round(aspect0, 3), reason='main_empty')
+        return scene, report
+    mlo, mhi = main_pts.min(0), main_pts.max(0)
+    main_w, main_h = float(mhi[0] - mlo[0]), float(mhi[1] - mlo[1])
+
+    sizes, centres, keys_of = {}, {}, {}
+    for i in movable:
+        ks = [k for k in comps[i]['keys'] if k in pos and not k.startswith('side:')]
+        if len(ks) < 1:
+            continue
+        arr = np.array([pos[k] for k in ks], float)
+        lo, hi = arr.min(0), arr.max(0)
+        sizes[i] = (float(max(hi[0] - lo[0], 40.0) + 60.0), float(max(hi[1] - lo[1], 40.0) + 60.0))
+        centres[i] = arr.mean(0)
+        keys_of[i] = ks
+    if len(sizes) < 1:
+        report.update(aspect_after=round(aspect0, 3), reason='no_sized_movable')
+        return scene, report
+    weights = island_link_weights(model, comps, cur)
+    w_use = {k: v for k, v in weights.items() if k[0] in sizes and k[1] in sizes}
+    parts = scene.get('participants') or {}
+    rx = {r['id']: r for r in model['reactions']}
+    origin_centres = {i: np.asarray(centres[i], float).copy() for i in centres}
+    origin_pos = {k: list(v) for k, v in pos.items()}
+
+    def _apply_placed(placed_map, origin_xy):
+        for k, v in origin_pos.items():
+            pos[k] = list(v)
+        for i, (x, y) in placed_map.items():
+            w, h = sizes[i]
+            target = np.array([origin_xy[0] + x + w / 2.0, origin_xy[1] + y + h / 2.0], float)
+            delta = target - origin_centres[i]
+            move_keys = set(keys_of[i])
+            for rid in comps[i]['reactions']:
+                move_keys.add('r:' + rid)
+                for mid in rx.get(rid, {}).get('metabolites', {}):
+                    k = parts.get((rid, mid))
+                    if k:
+                        move_keys.add(k)
+            for k in move_keys:
+                if k in pos:
+                    pos[k] = [origin_pos[k][0] + float(delta[0]), origin_pos[k][1] + float(delta[1])]
+        return _scene_aspect(pos)[0]
+
+    # Binary-search shelf width; try right/left/below/above origins; pick best combined aspect.
+    widest = max(w for w, h in sizes.values()) + SHELF_GAP
+    area = sum((w + SHELF_GAP) * (h + SHELF_GAP) for w, h in sizes.values())
+    order = sorted(sizes, key=lambda i: (-sizes[i][0] * sizes[i][1], i))
+    best = None
+    width_trials = []
+    for ar in (TARGET_ASPECT, ASPECT_MIN, ASPECT_MAX, 1.45):
+        base = max(math.sqrt(max(area * ar, 1.0)), widest)
+        for scale in (0.7, 0.85, 1.0, 1.2):
+            width_trials.append(max(base * scale, widest))
+    a, b = widest, max(width_trials)
+    for _ in range(10):
+        mid = 0.5 * (a + b)
+        width_trials.append(mid)
+        placed_try = skyline_pack(order, sizes, SHELF_GAP, mid, weights=w_use)
+        bw, bh = skyline_extent(placed_try, sizes, SHELF_GAP)
+        # combined aspect if placed to the right of main
+        comb = (main_w + bw + 400.0) / max(main_h, bh, 1.0)
+        if comb < TARGET_ASPECT:
+            a = mid
+        else:
+            b = mid
+    seen = set()
+    for tw in sorted(width_trials):
+        key = round(tw, 1)
+        if key in seen:
+            continue
+        seen.add(key)
+        placed_try = skyline_pack(order, sizes, SHELF_GAP, tw, weights=w_use)
+        bw, bh = skyline_extent(placed_try, sizes, SHELF_GAP)
+        options = {
+            'right': (mhi[0] + 400.0, mlo[1], (main_w + bw + 400.0) / max(main_h, bh, 1.0)),
+            'left': (mlo[0] - 400.0 - bw, mlo[1], (main_w + bw + 400.0) / max(main_h, bh, 1.0)),
+            'below': (mlo[0], mhi[1] + 400.0, max(main_w, bw) / max(main_h + bh + 400.0, 1.0)),
+            'above': (mlo[0], mlo[1] - 400.0 - bh, max(main_w, bw) / max(main_h + bh + 400.0, 1.0)),
+        }
+        for side, (ox, oy, comb) in options.items():
+            in_band = ASPECT_MIN - 1e-3 <= comb <= ASPECT_MAX + 1e-3
+            # Apply and score real content aspect (comb is a rectangle estimate).
+            asp = _apply_placed(placed_try, (ox, oy))
+            in_band_c = ASPECT_MIN - 1e-3 <= asp <= ASPECT_MAX + 1e-3
+            score = (0 if in_band_c else 1,
+                     abs(math.log(max(asp, 1e-9) / TARGET_ASPECT)),
+                     _pack_link_cost(placed_try, sizes, SHELF_GAP, w_use))
+            cand = dict(placed=placed_try, origin=(ox, oy), side=side, aspect=asp,
+                        score=score, target_width=tw, in_band=in_band_c)
+            if best is None or cand['score'] < best['score']:
+                best = cand
+    if best is None:
+        report.update(aspect_after=round(aspect0, 3), reason='pack_failed')
+        return scene, report
+    aspect1 = _apply_placed(best['placed'], best['origin'])
+    report.update(applied=True, aspect_after=round(aspect1, 3),
+                  pack=dict(side=best['side'], target_width=round(best['target_width']),
+                            aspect=round(aspect1, 3), in_band=best['in_band'],
+                            movable=len(best['placed'])),
+                  reason='main_frozen_shelf_reflow')
+    return scene, report
+
+
+def _link_key(a, b):
+    return (a, b) if (str(a), a) <= (str(b), b) else (b, a)
+
+
+def _seg_hits_rect(x0, y0, x1, y1, rx, ry, rw, rh):
+    """True when the open segment (x0,y0)-(x1,y1) crosses the axis-aligned rectangle interior."""
+    t_enter, t_leave = 0.0, 1.0
+    for a0, a1, lo, hi in ((x0, x1, rx, rx + rw), (y0, y1, ry, ry + rh)):
+        da = a1 - a0
+        if abs(da) < 1e-12:
+            if a0 < lo or a0 > hi:
+                return False
+            continue
+        ta, tb = (lo - a0) / da, (hi - a0) / da
+        if ta > tb:
+            ta, tb = tb, ta
+        t_enter = max(t_enter, ta)
+        t_leave = min(t_leave, tb)
+        if t_enter > t_leave:
+            return False
+    return t_leave > t_enter and t_leave > 1e-6 and t_enter < 1.0 - 1e-6
+
+
+def island_link_weights(model, comps, cur):
+    """Undirected weights between visual islands = shared non-currency metabolites."""
+    rx = {r['id']: r for r in model['reactions']}
+    users = defaultdict(set)
+    for i, c in enumerate(comps):
+        for rid in c['reactions']:
+            for mid in rx[rid]['metabolites']:
+                if mid not in cur:
+                    users[mid].add(i)
+    weights = defaultdict(float)
+    for mid, islands in users.items():
+        islands = sorted(islands)
+        for a in range(len(islands)):
+            for b in range(a + 1, len(islands)):
+                weights[_link_key(islands[a], islands[b])] += 1.0
+    return dict(weights)
+
+
+def skyline_pack(order, sizes, gap, target_width, weights=None, link_cost=LINK_COST):
+    """Pack axis-aligned tiles.  ``sizes`` maps id -> (w, h); returns id -> (x, y) top-left.
+
+    Candidate x = 0 and every skyline segment start/end.  Compactness first (lowest y, then
+    smallest x); when ``weights`` are given, among near-best compact slots prefer the one that
+    shortens chemical links to already-placed partners (tile sits next to its strongest neighbour).
+    """
+    weights = weights or {}
+    skyline = []  # (x0, x1, height)
+    placed = {}
+
+    def height_at(x0, x1):
+        top = 0.0
+        for a, b, h in skyline:
+            if a < x1 and x0 < b:
+                top = max(top, h)
+        return top
+
+    def centre(name, xy):
+        w, h = sizes[name]
+        return (xy[0] + w / 2.0, xy[1] + h / 2.0)
+
+    # Prim-style order when links exist: seed with first of `order` (largest), then strongest link.
+    remaining = [m for m in order if m in sizes]
+    if not remaining:
+        return placed
+    seq = [remaining.pop(0)]
+    remaining = set(remaining)
+    while remaining:
+        def pick(m):
+            w = sum(weights.get(_link_key(m, p), 0.0) for p in seq)
+            area = sizes[m][0] * sizes[m][1]
+            return (w, area)
+        nxt = max(remaining, key=pick)
+        remaining.remove(nxt)
+        seq.append(nxt)
+
+    for name in seq:
+        w0, h0 = sizes[name]
+        w, h = float(w0) + gap, float(h0) + gap
+        cand = {0.0} | {a for a, _, _ in skyline} | {b for _, b, _ in skyline}
+        # Prefer slots flush with already-placed chemical partners (right / left-aligned).
+        for p, pxy in placed.items():
+            if weights.get(_link_key(name, p), 0.0) <= 0:
+                continue
+            pw, _ph = sizes[p]
+            cand.add(pxy[0])
+            cand.add(pxy[0] + pw + gap)
+            cand.add(max(0.0, pxy[0] + pw + gap - w))
+        candidates = sorted(cand)
+        scored = []
+        for x in candidates:
+            if x + w > target_width + 1e-9 and x > 0.0:
+                continue
+            y = height_at(x, x + w)
+            scored.append((x, y))
+        if not scored:
+            x, y = 0.0, height_at(0.0, w)
+            scored = [(x, y)]
+        # Compactness floor: keep slots whose y is within one tile-height of the best y.
+        best_y = min(y for _, y in scored)
+        band = best_y + max(h0, gap)
+        compact = [(x, y) for x, y in scored if y <= band + 1e-9]
+        if not compact:
+            compact = scored
+
+        def slot_score(xy):
+            x, y = xy
+            # Primary: compactness.  Then chemical link length; among equal length, fewer
+            # centre-to-centre crossings through already-placed tiles.
+            link = 0.0
+            crosses = 0
+            cx, cy = centre(name, (x, y))
+            for p, pxy in placed.items():
+                wgt = weights.get(_link_key(name, p), 0.0)
+                if wgt <= 0:
+                    continue
+                px, py = centre(p, pxy)
+                link += wgt * math.hypot(cx - px, cy - py)
+                # Segment (cx,cy)-(px,py) through a third placed tile?
+                for q, qxy in placed.items():
+                    if q == p:
+                        continue
+                    qw, qh = sizes[q]
+                    qx0, qy0 = qxy
+                    if _seg_hits_rect(cx, cy, px, py, qx0, qy0, qw + gap, qh + gap):
+                        crosses += 1
+                        break
+            return (y, link_cost * link, CROSS_COST * crosses, x)
+
+        best_x, best_y = min(compact, key=slot_score)
+        placed[name] = (best_x, best_y)
+        skyline.append((best_x, best_x + w, best_y + h))
+    return placed
+
+
+def skyline_extent(placed, sizes, gap):
+    if not placed:
+        return 0.0, 0.0
+    right = max(placed[n][0] + sizes[n][0] + gap for n in placed)
+    bottom = max(placed[n][1] + sizes[n][1] + gap for n in placed)
+    return float(right), float(bottom)
+
+
+def target_pack_width(sizes, gap, aspect=TARGET_ASPECT):
+    """max(sqrt(sum((w+g)(h+g)) * aspect), widest + g)."""
+    if not sizes:
+        return 1.0
+    area = sum((float(w) + gap) * (float(h) + gap) for w, h in sizes.values())
+    widest = max(float(w) for w, h in sizes.values())
+    return max(math.sqrt(max(area * aspect, 1.0)), widest + gap)
+
+
+def pack_two_level(groups, sizes, gap, aspect=TARGET_ASPECT, weights=None):
+    """Two-level skyline: pack members inside each group, then pack the group blocks.
+
+    ``groups``: ordered list of (group_id, [member_ids...]).
+    ``sizes``: member_id -> (w, h).
+    ``weights``: optional {(a,b): w} between member ids (chemical links).
+    """
+    weights = weights or {}
+    block_local = {}
+    block_size = {}
+    member_of = {}
+    for gid, members in groups:
+        if not members:
+            continue
+        local_sizes = {m: sizes[m] for m in members if m in sizes}
+        if not local_sizes:
+            continue
+        for m in local_sizes:
+            member_of[m] = gid
+        local, _rep = pack_tiles_aspect(local_sizes, gap, weights, target_aspect=aspect)
+        bw, bh = skyline_extent(local, local_sizes, gap)
+        block_local[gid] = local
+        block_size[gid] = (bw, bh)
+
+    if not block_size:
+        return {}, dict(groups=0, tiles=0, width=0, height=0, target_aspect=aspect)
+
+    # Aggregate inter-group weights from member links.
+    gweights = defaultdict(float)
+    for (a, b), w in weights.items():
+        ga, gb = member_of.get(a), member_of.get(b)
+        if ga is None or gb is None or ga == gb:
+            continue
+        gweights[_link_key(ga, gb)] += w
+
+    block_pos, _grep = pack_tiles_aspect(block_size, gap, dict(gweights), target_aspect=aspect)
+
+    abs_pos = {}
+    for gid, local in block_local.items():
+        ox, oy = block_pos[gid]
+        for m, (x, y) in local.items():
+            abs_pos[m] = (ox + x, oy + y)
+    bw, bh = skyline_extent(block_pos, block_size, gap)
+    return abs_pos, dict(groups=len(block_size), tiles=len(abs_pos),
+                         width=round(bw), height=round(bh), target_aspect=aspect,
+                         aspect=round(bw / max(bh, 1.0), 3), link_pairs=len(weights))
+
+
+# --------------------------------------------------------------------------- empty-band squeeze
+def _coord_lists(body):
+    xs, ys = [], []
+    for node in body['nodes'].values():
+        xs.append(node['x']); ys.append(node['y'])
+        if 'label_x' in node:
+            xs.append(node['label_x']); ys.append(node['label_y'])
+    for reaction in body['reactions'].values():
+        if 'label_x' in reaction:
+            xs.append(reaction['label_x']); ys.append(reaction['label_y'])
+        for segment in (reaction.get('segments') or {}).values():
+            for key in ('b1', 'b2'):
+                pt = segment.get(key)
+                if pt:
+                    xs.append(pt['x']); ys.append(pt['y'])
+    for label in (body.get('text_labels') or {}).values():
+        xs.append(label['x']); ys.append(label['y'])
+    return xs, ys
+
+
+def build_axis_remap(values, max_gap, max_shift=None):
+    """Monotone piecewise-linear map that shrinks empty runs longer than ``max_gap``.
+
+    Returns a callable, or None when nothing collapses.  Order along the axis is preserved,
+    so the remap cannot introduce crossings.  ``max_shift`` caps total collapse (largest
+    gaps first) so a partial squeeze can stay inside the aspect band.
+    """
+    if not values:
+        return None
+    points = sorted(set(round(float(v), 3) for v in values))
+    if len(points) < 2:
+        return None
+    # Collect compressible gaps; optionally spend a collapse budget on the largest first.
+    gaps = []
+    for prev, cur in zip(points, points[1:]):
+        gap = cur - prev
+        if gap > max_gap:
+            gaps.append((cur, gap - max_gap))
+    if not gaps:
+        return None
+    if max_shift is not None and max_shift > 0:
+        # Spend budget on the widest corridors first (stable by position).
+        order = sorted(range(len(gaps)), key=lambda i: (-gaps[i][1], gaps[i][0]))
+        take = {i: 0.0 for i in range(len(gaps))}
+        budget = float(max_shift)
+        for i in order:
+            if budget <= 1e-9:
+                break
+            use = min(gaps[i][1], budget)
+            take[i] = use
+            budget -= use
+        gaps = [(gaps[i][0], take[i]) for i in range(len(gaps)) if take[i] > 1e-9]
+        if not gaps:
+            return None
+    shift, breaks = 0.0, []
+    for position, amount in sorted(gaps, key=lambda g: g[0]):
+        shift += amount
+        breaks.append((position, shift))
+
+    def remap(value):
+        total = 0.0
+        for position, accumulated in breaks:
+            if value >= position:
+                total = accumulated
+            else:
+                break
+        return value - total
+
+    return remap
+
+
+def _apply_axis_remap(body, fx, fy):
+    for node in body['nodes'].values():
+        node['x'] = fx(node['x']); node['y'] = fy(node['y'])
+        if 'label_x' in node:
+            node['label_x'] = fx(node['label_x']); node['label_y'] = fy(node['label_y'])
+    for reaction in body['reactions'].values():
+        if 'label_x' in reaction:
+            reaction['label_x'] = fx(reaction['label_x']); reaction['label_y'] = fy(reaction['label_y'])
+        for segment in (reaction.get('segments') or {}).values():
+            for key in ('b1', 'b2'):
+                pt = segment.get(key)
+                if pt:
+                    pt['x'] = fx(pt['x']); pt['y'] = fy(pt['y'])
+    for label in (body.get('text_labels') or {}).values():
+        label['x'] = fx(label['x']); label['y'] = fy(label['y'])
+
+
+def squeeze_escher(data, max_gap):
+    """Collapse empty bands on a finished Escher map.  -> dict(dx, dy, max_gap).
+
+    Prefers collapses that keep the content bbox inside the 4:3–16:9 landscape band:
+    if a full X+Y squeeze would leave the map portrait/too-wide, keep the squeeze on the
+    long axis only.
+    """
+    import copy as _copy
+    body = data[1]
+    xs, ys = _coord_lists(body)
+    if not xs:
+        return dict(dx=0.0, dy=0.0, max_gap=max_gap, applied=False)
+    before_w = max(xs) - min(xs)
+    before_h = max(ys) - min(ys)
+    before_aspect = before_w / max(before_h, 1e-9)
+    force_empty = False
+    fx = build_axis_remap(xs, max_gap)
+    fy = build_axis_remap(ys, max_gap)
+    if fx is None and fy is None:
+        return dict(dx=0.0, dy=0.0, max_gap=max_gap, applied=False)
+
+    def _trial_remap(src, fx_use, fy_use):
+        trial = _copy.deepcopy(src)
+        _apply_axis_remap(trial[1],
+                          fx_use if fx_use else (lambda v: v),
+                          fy_use if fy_use else (lambda v: v))
+        xs2, ys2 = _coord_lists(trial[1])
+        w = max(xs2) - min(xs2); h = max(ys2) - min(ys2)
+        return trial, w, h, w / max(h, 1e-9)
+
+    def _trial(use_x, use_y):
+        return _trial_remap(data,
+                            fx if use_x and fx else None,
+                            fy if use_y and fy else None)
+
+    candidates = []
+    for use_x, use_y, tag in ((True, True, 'xy'), (False, True, 'y'), (True, False, 'x')):
+        if use_x and fx is None:
+            continue
+        if use_y and fy is None:
+            continue
+        if not use_x and not use_y:
+            continue
+        trial, w, h, asp = _trial(use_x, use_y)
+        in_band = ASPECT_MIN - 1e-3 <= asp <= ASPECT_MAX + 1e-3
+        # Prefer in-band; then closer to TARGET; then more total collapse.
+        collapse = (before_w - w) + (before_h - h)
+        score = (0 if in_band else 1,
+                 abs(math.log(max(asp, 1e-9) / TARGET_ASPECT)),
+                 -collapse)
+        candidates.append(dict(trial=trial, w=w, h=h, aspect=asp, tag=tag, score=score,
+                               use_x=use_x, use_y=use_y))
+    if not candidates:
+        return dict(dx=0.0, dy=0.0, max_gap=max_gap, applied=False)
+    # Prefer keeping an in-band aspect when the map started in-band — unless empty
+    # corridors dominate the bbox (packing used voids to fake landscape).  Then
+    # force the densest collapse even if aspect leaves the band.
+    force_empty = False
+    if ASPECT_MIN - 1e-3 <= before_aspect <= ASPECT_MAX + 1e-3:
+        in_band_cands = [c for c in candidates if ASPECT_MIN - 1e-3 <= c['aspect'] <= ASPECT_MAX + 1e-3]
+        if in_band_cands:
+            candidates = in_band_cands
+        else:
+            max_empty_x = _max_empty_run(xs, max_gap)
+            max_empty_y = _max_empty_run(ys, max_gap)
+            frac = max(max_empty_x / max(before_w, 1e-9), max_empty_y / max(before_h, 1e-9))
+            if frac >= SQUEEZE_FORCE_EMPTY_FRAC:
+                force_empty = True
+                # Prefer most collapse, then closer to TARGET aspect.
+                for c in candidates:
+                    collapse = (before_w - c['w']) + (before_h - c['h'])
+                    c['score'] = (0, -collapse, abs(math.log(max(c['aspect'], 1e-9) / TARGET_ASPECT)))
+            else:
+                # Partial squeeze on the long axis: collapse only as far as the
+                # nearer band edge so landscape stays in 4:3–16:9.
+                partial = None
+                if before_aspect > ASPECT_MIN and fx is not None:
+                    # Width room down to ASPECT_MIN (keep height).
+                    room = before_w - ASPECT_MIN * before_h
+                    if room > 1.0:
+                        fx_p = build_axis_remap(xs, max_gap, max_shift=room)
+                        if fx_p is not None:
+                            trial, w, h, asp = _trial_remap(data, fx_p, None)
+                            partial = dict(trial=trial, w=w, h=h, aspect=asp, tag='partial_x',
+                                           score=(0, 0, 0), use_x=True, use_y=False)
+                if before_aspect < ASPECT_MAX and fy is not None and partial is None:
+                    room = before_h - before_w / ASPECT_MAX
+                    if room > 1.0:
+                        fy_p = build_axis_remap(ys, max_gap, max_shift=room)
+                        if fy_p is not None:
+                            trial, w, h, asp = _trial_remap(data, None, fy_p)
+                            partial = dict(trial=trial, w=w, h=h, aspect=asp, tag='partial_y',
+                                           score=(0, 0, 0), use_x=False, use_y=True)
+                if partial is None:
+                    return dict(dx=0.0, dy=0.0, max_gap=round(max_gap, 1), applied=False,
+                                mode='skipped_keep_aspect', aspect_before=round(before_aspect, 3),
+                                aspect_after=round(before_aspect, 3))
+                candidates = [partial]
+    best = min(candidates, key=lambda c: c['score'])
+    data[0], data[1] = best['trial'][0], best['trial'][1]
+    body = data[1]
+    xs2, ys2 = _coord_lists(body)
+    canvas = body.get('canvas') or {}
+    pad_x = max((canvas.get('width', before_w) - before_w) / 2.0, 40.0)
+    pad_y = max((canvas.get('height', before_h) - before_h) / 2.0, 40.0)
+    body['canvas'] = dict(
+        x=min(xs2) - pad_x, y=min(ys2) - pad_y,
+        width=(max(xs2) - min(xs2)) + 2 * pad_x,
+        height=(max(ys2) - min(ys2)) + 2 * pad_y)
+    return dict(dx=round(before_w - (max(xs2) - min(xs2)), 1),
+                dy=round(before_h - (max(ys2) - min(ys2)), 1),
+                max_gap=round(max_gap, 1), applied=True,
+                mode=('force_empty_' + best['tag']) if force_empty else best['tag'],
+                aspect_before=round(before_aspect, 3),
+                aspect_after=round(best['aspect'], 3))
+
+
+def _max_empty_run(values, max_gap):
+    """Largest gap along a 1-D coordinate list that exceeds ``max_gap`` (else 0)."""
+    if not values:
+        return 0.0
+    points = sorted(set(round(float(v), 3) for v in values))
+    best = 0.0
+    for prev, cur in zip(points, points[1:]):
+        gap = cur - prev
+        if gap > max_gap:
+            best = max(best, gap)
+    return best
+
+
+def _is_transport_mid(mid):
+    """Heuristic: extracellular / periplasm id or classic transport suffix."""
+    if not mid:
+        return False
+    if mid.endswith('_e') or mid.endswith('_p'):
+        return True
+    return False
+
+
+def compact_long_arms_scene(model, scene, cur, max_arm=ARM_MAX, target=ARM_TARGET):
+    """Pull long mid→metabolite arms in toward the reaction (scene positions).
+
+    Transport / exchange chains and private metabolite glyphs that were stretched by
+    a common scale or a distant shared copy are shortened to ``target`` px.  Shared
+    multi-reaction metabolites are not moved; the reaction midmarker is pulled instead
+    when the arm is a transport/exchange spoke.  -> (scene, report).
+    """
+    scene = dict(scene, positions={k: list(v) for k, v in scene['positions'].items()})
+    pos, parts = scene['positions'], scene.get('participants') or {}
+    rx = {r['id']: r for r in model['reactions']}
+    holders = defaultdict(set)
+    for (rid, mid), key in parts.items():
+        holders[key].add(rid)
+    shortened = 0
+    pulled_mids = 0
+    details = []
+    for rid, r in rx.items():
+        rk = 'r:' + rid
+        if rk not in pos:
+            continue
+        rxy = np.asarray(pos[rk], float)
+        core = [m for m in r['metabolites'] if m not in cur]
+        if not core:
+            continue
+        # Transport if reaction touches ≥2 compartments among non-currency mets.
+        comps = {comp(m) for m in core if comp(m)}
+        is_transport = len(comps) >= 2 or any(_is_transport_mid(m) for m in core)
+        for mid in core:
+            key = parts.get((rid, mid))
+            if not key or key not in pos or key.startswith('side:'):
+                continue
+            mxy = np.asarray(pos[key], float)
+            vec = mxy - rxy
+            dist = float(np.hypot(*vec))
+            if dist <= max_arm + 1e-6:
+                continue
+            # Prefer compacting private glyphs; always compact transport/exchange arms.
+            private = len(holders.get(key, ())) <= 1
+            if not (private or is_transport or _is_transport_mid(mid)):
+                continue
+            u = vec / dist
+            new_len = float(target)
+            if private or _is_transport_mid(mid):
+                pos[key] = (rxy + u * new_len).tolist()
+                shortened += 1
+                details.append(dict(reaction=rid, metabolite=mid, before=round(dist, 1),
+                                    after=round(new_len, 1), moved='metabolite'))
+            else:
+                # Shared cytosolic pool: pull the transporter midmarker toward it.
+                pos[rk] = (mxy - u * new_len).tolist()
+                rxy = np.asarray(pos[rk], float)
+                pulled_mids += 1
+                details.append(dict(reaction=rid, metabolite=mid, before=round(dist, 1),
+                                    after=round(new_len, 1), moved='midmarker'))
+                break  # midmarker moved; re-measure remaining arms next pass if needed
+    report = dict(shortened=shortened, pulled_midmarkers=pulled_mids,
+                  max_arm=max_arm, target=target, details=details[:40])
+    return scene, report
+
+
+def compact_long_arms_escher(data, cur=None, max_arm=ARM_MAX, target=ARM_TARGET):
+    """Same compact on a finished Escher map (nodes move; Bezier controls drop).
+
+    Private metabolite glyphs move toward their midmarker.  Shared extracellular /
+    periplasm pools move once toward the nearest holding midmarker (so ACt2r + EX
+    cannot yank the pool back and forth).  ``b1``/``b2`` are set to null (schema
+    requires the keys) so later restyle / source-path stamp can rebuild.
+    """
+    cur = cur or set()
+    body = data[1]
+    nodes, reactions = body['nodes'], body['reactions']
+    # metabolite node id -> reaction bigg_ids that touch it
+    holders = defaultdict(set)
+    mid_of = {}
+    for rx in reactions.values():
+        rid = rx['bigg_id']
+        mid_id = next((s['from_node_id'] for s in rx['segments'].values()
+                       if nodes.get(s['from_node_id'], {}).get('node_type') == 'midmarker'), None)
+        if mid_id is not None:
+            mid_of[rid] = mid_id
+        for s in (rx.get('segments') or {}).values():
+            for nid in (s['from_node_id'], s['to_node_id']):
+                n = nodes.get(nid) or {}
+                if n.get('node_type') == 'metabolite':
+                    holders[nid].add(rid)
+    shortened = 0
+    details = []
+    moved_shared = set()
+
+    def _clear_seg(seg):
+        seg['b1'] = None
+        seg['b2'] = None
+
+    # Pass 1: shared transport/exchange pools — one move toward the nearest mid.
+    for tid, rids in list(holders.items()):
+        if len(rids) < 2 or tid in moved_shared:
+            continue
+        t = nodes.get(tid) or {}
+        mid = t.get('bigg_id')
+        if not mid or not (_is_transport_mid(mid) or mid in cur):
+            # Shared cytosolic pools are left alone (packing/instances own those).
+            if not _is_transport_mid(mid or ''):
+                continue
+        mxy = np.array([t['x'], t['y']], float)
+        cands = []
+        for rid in rids:
+            mid_id = mid_of.get(rid)
+            if mid_id is None:
+                continue
+            rxy = np.array([nodes[mid_id]['x'], nodes[mid_id]['y']], float)
+            dist = float(np.hypot(*(mxy - rxy)))
+            if dist > max_arm:
+                cands.append((dist, rid, mid_id, rxy))
+        if not cands:
+            continue
+        # Place the pool next to the nearest mid, then pull every other holder
+        # midmarker in so EX ↔ transporter chains stay short on both sides.
+        dist, rid, mid_id, rxy = min(cands, key=lambda c: c[0])
+        u = (mxy - rxy) / dist
+        new_xy = rxy + u * float(target)
+        t['x'], t['y'] = float(new_xy[0]), float(new_xy[1])
+        if 'label_x' in t:
+            t['label_x'] = t['x'] + (t.get('label_x', t['x']) - mxy[0])
+            t['label_y'] = t['y'] + (t.get('label_y', t['y']) - mxy[1])
+        moved_shared.add(tid)
+        mxy = new_xy
+        for rid2, mid2 in ((r, mid_of[r]) for r in rids if r in mid_of):
+            rxy2 = np.array([nodes[mid2]['x'], nodes[mid2]['y']], float)
+            vec2 = mxy - rxy2
+            d2 = float(np.hypot(*vec2))
+            if d2 <= max_arm + 1e-6:
+                continue
+            u2 = vec2 / d2
+            new_mid = mxy - u2 * float(target)
+            nodes[mid2]['x'], nodes[mid2]['y'] = float(new_mid[0]), float(new_mid[1])
+            rx2 = next((r for r in reactions.values() if r['bigg_id'] == rid2), None)
+            if rx2 is not None and 'label_x' in rx2:
+                rx2['label_x'], rx2['label_y'] = nodes[mid2]['x'], nodes[mid2]['y']
+            shortened += 1
+            details.append(dict(reaction=rid2, metabolite=mid, before=round(d2, 1),
+                                after=round(float(target), 1), moved='shared_midmarker'))
+        # Clear controls on every segment into this node.
+        for rx in reactions.values():
+            for seg in rx['segments'].values():
+                if seg['to_node_id'] == tid or seg['from_node_id'] == tid:
+                    _clear_seg(seg)
+        shortened += 1
+        details.append(dict(reaction=rid, metabolite=mid, before=round(dist, 1),
+                            after=round(float(target), 1), moved='shared_metabolite'))
+
+    # Pass 2: private long arms (including private transport).
+    for rx in reactions.values():
+        rid = rx['bigg_id']
+        mid_id = mid_of.get(rid)
+        if mid_id is None:
+            continue
+        mid_n = nodes[mid_id]
+        rxy = np.array([mid_n['x'], mid_n['y']], float)
+        coeff = {m['bigg_id']: m['coefficient'] for m in (rx.get('metabolites') or []) if isinstance(m, dict)}
+        mets = [m for m in coeff if m not in cur]
+        comps = {comp(m) for m in mets if comp(m)}
+        is_transport = len(comps) >= 2 or any(_is_transport_mid(m) for m in mets)
+        for key, seg in list(rx['segments'].items()):
+            if seg['from_node_id'] != mid_id:
+                continue
+            tid = seg['to_node_id']
+            if tid in moved_shared:
+                continue
+            t = nodes.get(tid) or {}
+            if t.get('node_type') != 'metabolite':
+                continue
+            mid = t.get('bigg_id')
+            if not mid:
+                continue
+            if mid in cur and not _is_transport_mid(mid):
+                continue
+            mxy = np.array([t['x'], t['y']], float)
+            vec = mxy - rxy
+            dist = float(np.hypot(*vec))
+            if dist <= max_arm + 1e-6:
+                continue
+            private = len(holders.get(tid, ())) <= 1
+            if not (private or is_transport or _is_transport_mid(mid)):
+                continue
+            if not private:
+                continue  # shared non-transport handled above or skipped
+            u = vec / dist
+            new_xy = rxy + u * float(target)
+            t['x'], t['y'] = float(new_xy[0]), float(new_xy[1])
+            if 'label_x' in t:
+                t['label_x'] = t['x'] + (t.get('label_x', t['x']) - mxy[0])
+                t['label_y'] = t['y'] + (t.get('label_y', t['y']) - mxy[1])
+            _clear_seg(seg)
+            shortened += 1
+            details.append(dict(reaction=rid, metabolite=mid, before=round(dist, 1),
+                                after=round(float(target), 1), moved='metabolite'))
+    return dict(shortened=shortened, max_arm=max_arm, target=target, details=details[:40])
+
+
+def reaction_spacing_escher(data):
+    """Median nearest-neighbour distance of reaction midmarkers (fallback 100)."""
+    pts = []
+    for n in data[1]['nodes'].values():
+        if n.get('node_type') == 'midmarker':
+            pts.append((n['x'], n['y']))
+    if len(pts) < 3:
+        # approximate from metabolite nodes
+        pts = [(n['x'], n['y']) for n in data[1]['nodes'].values() if 'x' in n][:2000]
+    if len(pts) < 3:
+        return 100.0
+    arr = np.array(pts, float)
+    return float(np.median(cKDTree(arr).query(arr, k=2)[0][:, 1]))
+
+
+def _free_spot(local, target, tree, clear=CLEAR, tries=260):
+    if tree is None:
+        return target
+    for i in range(tries):
+        r = 0.0 if i == 0 else 45.0 * np.sqrt(i)
+        a = i * 2.399963
+        d = target + r * np.array([np.cos(a), np.sin(a)])
+        if float(tree.query(local + d)[0].min()) >= clear:
+            return d
+    return None
+
+
+def _aligned_spot(local, target, anchors, size, tree, centre):
+    """Free place next to anchors; prefer alignment with the nearest anchor centre-line."""
+    nearest = anchors[int(np.argmin(np.hypot(*(anchors - centre).T)))]
+    r = size / 2.0 + 160.0
+    cands = []
+    plain = _free_spot(local, target, tree)
+    if plain is not None:
+        cands.append(plain)
+    for k in range(8):
+        a = k * np.pi / 4
+        d = _free_spot(local, target + r * np.array([np.cos(a), np.sin(a)]), tree)
+        if d is not None:
+            cands.append(d)
+    if not cands:
+        return None
+
+    def score(c):
+        dx, dy = abs(c[0] - nearest[0]), abs(c[1] - nearest[1])
+        return float(np.hypot(*(c - target))) + 0.6 * min(dx, dy)
+
+    return min(cands, key=score)
+
+
+# --------------------------------------------------------------------------- tiles + aspect-constrained pack
+def _tile_local_geometry(rids, keys, pos, labels, text_w, margin):
+    """Pack size/centre from reaction midmarkers, plus only nearby stubs.
+
+    Shared metabolites and far side/inst glyphs must not inflate the reserved slot —
+    a single reaction with a map-spanning stub would otherwise reserve a 20k×50k tile.
+    """
+    local = ['r:' + rid for rid in rids if 'r:' + rid in pos]
+    if not local:
+        return None
+    arr = np.array([pos[k] for k in local], float)
+    lo, hi = arr.min(0), arr.max(0)
+    # Pad scales with the reaction cluster so dense multi-reaction tiles keep their local mets.
+    span = float(max(hi[0] - lo[0], hi[1] - lo[1], 1.0))
+    pad = max(margin * 2.0, 0.35 * span, 120.0)
+    for k in keys:
+        if k in local or k not in pos:
+            continue
+        pt = np.array(pos[k], float)
+        if lo[0] - pad <= pt[0] <= hi[0] + pad and lo[1] - pad <= pt[1] <= hi[1] + pad:
+            local.append(k)
+    arr = np.array([pos[k] for k in local], float)
+    lo, hi = arr.min(0), arr.max(0)
+    lw = min(max([text_w(str(labels.get(k, ''))) for k in local] + [0.0]), 220.0)
+    size = (float(max(hi[0] - lo[0] + margin + lw, 40.0)),
+            float(max(hi[1] - lo[1] + margin, 40.0)))
+    return dict(lo=lo, centre=arr.mean(0), size=size, lw=lw, local_keys=set(local))
+
+def _text_width():
+    try:
+        import drawing
+        return lambda s: float(drawing.FONT.getlength(s))
+    except Exception:
+        return lambda s: 6.5 * len(s)
+
+
+def build_tiles(model, scene, blocks, cur):
+    """Curated blocks as rigid tiles + leftover visual components among uncovered reactions."""
+    pos, parts = scene['positions'], scene['participants']
+    rx = {r['id']: r for r in model['reactions']}
+    labels = scene.get('labels', {})
+    text_w = _text_width()
+    margin = 60.0
+    tiles = []
+    covered = set()
+
+    for bi, b in enumerate(blocks or []):
+        rids = [rid for rid in (b.get('reaction_ids') or []) if rid in rx and 'r:' + rid in pos]
+        if not rids:
+            continue
+        covered.update(rids)
+        keys = set()
+        for rid in rids:
+            keys.add('r:' + rid)
+            for mid in rx[rid]['metabolites']:
+                key = parts.get((rid, mid))
+                if key and key in pos:
+                    keys.add(key)
+        keys = {k for k in keys if k in pos}
+        geom = _tile_local_geometry(rids, keys, pos, labels, text_w, margin)
+        if geom is None:
+            continue
+        tiles.append(dict(
+            id='block:%s' % (b.get('id') or bi),
+            kind='curated',
+            reactions=sorted(rids),
+            keys=keys,
+            lo=geom['lo'], centre=geom['centre'], size=geom['size'], lw=geom['lw'],
+            local_keys=geom['local_keys']))
+
+    # Leftover reactions: components joined only through non-currency glyphs (currency hubs
+    # would otherwise glue distant autos into one map-spanning tile).
+    leftover = [r['id'] for r in model['reactions'] if r['id'] not in covered and 'r:' + r['id'] in pos]
+    if leftover:
+        parent = {}
+
+        def find(a):
+            while parent.setdefault(a, a) != a:
+                parent[a] = parent[parent[a]]
+                a = parent[a]
+            return a
+
+        for rid in leftover:
+            find('r:' + rid)
+            for mid in rx[rid]['metabolites']:
+                if mid in cur:
+                    continue
+                key = parts.get((rid, mid))
+                if key is None or key.startswith('side:'):
+                    continue
+                find(key)
+                parent[find(key)] = find('r:' + rid)
+        groups = defaultdict(list)
+        for rid in leftover:
+            groups[find('r:' + rid)].append(rid)
+        for gi, rids in enumerate(sorted(groups.values(), key=lambda g: (-len(g), g[0]))):
+            keys = set()
+            for rid in rids:
+                keys.add('r:' + rid)
+                for mid in rx[rid]['metabolites']:
+                    key = parts.get((rid, mid))
+                    if key and key in pos:
+                        keys.add(key)
+            keys = {k for k in keys if k in pos}
+            geom = _tile_local_geometry(rids, keys, pos, labels, text_w, margin)
+            if geom is None:
+                continue
+            tiles.append(dict(
+                id='auto:%d' % gi, kind='auto', reactions=sorted(rids),
+                keys=keys, lo=geom['lo'], centre=geom['centre'], size=geom['size'], lw=geom['lw'],
+                local_keys=geom['local_keys']))
+    return tiles
+
+
+def _pack_link_cost(placed, sizes, gap, weights):
+    """Sum of weight × centre distance for chemically linked placed tiles."""
+    if not weights or not placed:
+        return 0.0
+    centres = {}
+    for n, (x, y) in placed.items():
+        w, h = sizes[n]
+        centres[n] = (x + w / 2.0, y + h / 2.0)
+    total = 0.0
+    for (a, b), wgt in weights.items():
+        if a not in centres or b not in centres or wgt <= 0:
+            continue
+        ax, ay = centres[a]
+        bx, by = centres[b]
+        total += float(wgt) * math.hypot(ax - bx, ay - by)
+    return total
+
+
+def _pack_cross_cost(placed, sizes, gap, weights):
+    """Count weighted links whose centre segment passes through a third tile."""
+    if not weights or len(placed) < 3:
+        return 0
+    centres = {}
+    rects = {}
+    for n, (x, y) in placed.items():
+        w, h = sizes[n]
+        centres[n] = (x + w / 2.0, y + h / 2.0)
+        rects[n] = (x, y, w + gap, h + gap)
+    hits = 0
+    for (a, b), wgt in weights.items():
+        if a not in centres or b not in centres or wgt <= 0:
+            continue
+        ax, ay = centres[a]
+        bx, by = centres[b]
+        for q, (rx, ry, rw, rh) in rects.items():
+            if q == a or q == b:
+                continue
+            if _seg_hits_rect(ax, ay, bx, by, rx, ry, rw, rh):
+                hits += 1
+                break
+    return hits
+
+
+def pack_tiles_aspect(sizes, gap, weights, target_aspect=TARGET_ASPECT):
+    """Binary-search skyline target widths; pick best cost under the 4:3–16:9 constraint.
+
+    Cost among in-band packs: link length (primary) then estimated crossings then area.
+    Out-of-band packs are only kept when no in-band width exists.
+    """
+    if not sizes:
+        return {}, dict(width=0, height=0, aspect=target_aspect, target_width=0)
+    widest = max(float(w) for w, h in sizes.values()) + gap
+    area = sum((float(w) + gap) * (float(h) + gap) for w, h in sizes.values())
+    order = sorted(sizes, key=lambda i: (-sizes[i][0] * sizes[i][1], str(i)))
+    # Search bracket: from a single column (widest) up to a wide landscape shelf.
+    lo = widest
+    hi = max(lo * 1.05, math.sqrt(max(area * ASPECT_MAX, 1.0)) * 1.6, math.sqrt(max(area * target_aspect, 1.0)) * 1.35)
+    trials = [lo, hi, target_pack_width(sizes, gap, target_aspect),
+              target_pack_width(sizes, gap, ASPECT_MIN),
+              target_pack_width(sizes, gap, ASPECT_MAX)]
+    # Binary-search refinement: evaluate midpoints, keep probing the side that
+    # moves packed aspect toward TARGET_ASPECT / into the hard band.
+    a, b = lo, hi
+    for _ in range(NODE_ASPECT_LOOPS):
+        mid = 0.5 * (a + b)
+        trials.append(mid)
+        placed = skyline_pack(order, sizes, gap, mid, weights=weights)
+        bw, bh = skyline_extent(placed, sizes, gap)
+        aspect = bw / max(bh, 1e-9)
+        if aspect < target_aspect:
+            a = mid  # too tall → widen
+        else:
+            b = mid  # too wide → narrow
+    # A few extra probes around the closed-form target for non-monotonic packs.
+    seed = target_pack_width(sizes, gap, target_aspect)
+    for scale in (0.85, 0.95, 1.05, 1.15, 1.3):
+        trials.append(max(seed * scale, widest))
+
+    seen, uniq = set(), []
+    for tw in sorted(trials):
+        key = round(float(tw), 1)
+        if key in seen or tw < widest - 1e-9:
+            continue
+        seen.add(key)
+        uniq.append(float(tw))
+
+    def _stretch_to_band(placed, aspect):
+        """Anisotropic stretch of top-lefts so the packed frame enters [ASPECT_MIN, ASPECT_MAX].
+
+        Stretching only expands an axis (never compresses), so tiles cannot newly overlap.
+        """
+        if not placed:
+            return placed, aspect, False
+        if ASPECT_MIN - 1e-6 <= aspect <= ASPECT_MAX + 1e-6:
+            return placed, aspect, False
+        bw, bh = skyline_extent(placed, sizes, gap)
+        # Aim slightly inside the band: extent uses (size+gap) so a exact-edge
+        # target can land a hair outside after top-left scaling.
+        if aspect < ASPECT_MIN:
+            target = min(ASPECT_MIN * 1.04, TARGET_ASPECT)
+            sx, sy = (target * bh) / max(bw, 1e-9), 1.0
+        else:
+            target = max(ASPECT_MAX * 0.97, TARGET_ASPECT)
+            sx, sy = 1.0, bw / max(target * bh, 1e-9)
+        # Only allow expansion, and cap so voids cannot invent a landscape frame.
+        sx, sy = max(sx, 1.0), max(sy, 1.0)
+        sx, sy = min(sx, STRETCH_MAX), min(sy, STRETCH_MAX)
+        if abs(sx - 1.0) < 1e-9 and abs(sy - 1.0) < 1e-9:
+            return placed, aspect, False
+        out = {n: (x * sx, y * sy) for n, (x, y) in placed.items()}
+        nbw, nbh = skyline_extent(out, sizes, gap)
+        return out, nbw / max(nbh, 1e-9), True
+
+    best = None
+    # Cap the search so a pathological weight field cannot pick an 80k-wide shelf.
+    seed_cap = target_pack_width(sizes, gap, target_aspect)
+    hi_cap = max(widest * 4.0, seed_cap * 2.5)
+    uniq = [tw for tw in uniq if tw <= hi_cap + 1e-9] or uniq[:1]
+    for tw in uniq:
+        placed = skyline_pack(order, sizes, gap, tw, weights=weights)
+        bw, bh = skyline_extent(placed, sizes, gap)
+        aspect = bw / max(bh, 1e-9)
+        placed, aspect, stretched = _stretch_to_band(placed, aspect)
+        bw, bh = skyline_extent(placed, sizes, gap)
+        in_band = ASPECT_MIN - 1e-6 <= aspect <= ASPECT_MAX + 1e-6
+        link = _pack_link_cost(placed, sizes, gap, weights)
+        crosses = _pack_cross_cost(placed, sizes, gap, weights)
+        # Prefer in-band; then shorter chemical links; then smaller area (dense pack);
+        # then fewer crossings; then closer to target.
+        band_pen = 0.0 if in_band else abs(math.log(max(aspect, 1e-9) / max(min(max(aspect, ASPECT_MIN), ASPECT_MAX), 1e-9)))
+        score = (
+            0 if in_band else 1,
+            band_pen,
+            link,
+            bw * bh,
+            CROSS_COST * crosses,
+            abs(math.log(max(aspect, 1e-9) / target_aspect)),
+        )
+        cand = dict(placed=placed, width=bw, height=bh, aspect=aspect,
+                    target_width=tw, in_band=in_band, score=score,
+                    link_cost=link, crossings=crosses, stretched=stretched)
+        if best is None or cand['score'] < best['score']:
+            best = cand
+    report = dict(width=round(best['width']), height=round(best['height']),
+                  aspect=round(best['aspect'], 3), target_aspect=target_aspect,
+                  target_width=round(best['target_width']), in_band=best['in_band'],
+                  tiles=len(best['placed']), gap=gap,
+                  link_cost=round(best['link_cost'], 1), crossings=best['crossings'],
+                  widths_tried=len(uniq), stretched=bool(best.get('stretched')))
+    return best['placed'], report
+
+
+def classify_large_tiles(tiles, area_pct=LARGE_AREA_PCT):
+    """Curated tiles at/above ``area_pct`` that form one spatial cluster around the largest.
+
+    Area cut is data-derived (percentile of curated tile areas).  Candidates far from the
+    growing core stay movable — only the compact main-metabolism cluster is frozen.
+    """
+    curated = [t for t in tiles if t['kind'] == 'curated']
+    if not curated:
+        return set()
+    areas = [float(t['size'][0] * t['size'][1]) for t in curated]
+    cut = float(np.percentile(areas, area_pct))
+    cands = [t for t in curated if float(t['size'][0] * t['size'][1]) >= cut - 1e-9]
+    if not cands:
+        cands = [max(curated, key=lambda t: t['size'][0] * t['size'][1])]
+    seed = max(cands, key=lambda t: t['size'][0] * t['size'][1])
+    large = {seed['id']}
+    by_id = {t['id']: t for t in cands}
+    if any('centre' not in t for t in cands):
+        # Unit tests / callers without centres: keep every area-qualified curated tile.
+        return {t['id'] for t in cands}
+
+    def diag(t):
+        return float(math.hypot(t['size'][0], t['size'][1]))
+
+    changed = True
+    while changed:
+        changed = False
+        cores = [by_id[i] for i in large]
+        for t in cands:
+            if t['id'] in large:
+                continue
+            # Join if centre-to-centre is within a generous multiple of the two diagonals.
+            for c in cores:
+                lim = 0.75 * (diag(t) + diag(c)) + 400.0
+                if float(np.hypot(*(np.array(t['centre'], float) - np.array(c['centre'], float)))) <= lim:
+                    large.add(t['id'])
+                    changed = True
+                    break
+    return large
 
 
 def _compartment(c, rx):

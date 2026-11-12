@@ -71,6 +71,7 @@ def _flat_row(report: dict) -> dict:
         "cycle_direction_consistency": (d.get("cycles") or {}).get("cycle_direction_consistency"),
         "cycle_order_consistency": (d.get("cycles") or {}).get("cycle_order_consistency"),
         "main_segment_axis_share": d.get("main_segment_axis_share") or (d.get("orderliness") or {}).get("main_segment_axis_share"),
+        "main_segment_axis_share_length": d.get("main_segment_axis_share_length") or (d.get("orderliness") or {}).get("main_segment_axis_share_length"),
         "reaction_axis_share": d.get("reaction_axis_share") or (d.get("orderliness") or {}).get("reaction_axis_share"),
         "chain_turn_median_deg": d.get("chain_turn_median_deg") or (d.get("orderliness") or {}).get("chain_turn_median_deg"),
         "metabolite_grid_share": d.get("metabolite_grid_share") or (d.get("orderliness") or {}).get("metabolite_grid_share"),
@@ -183,12 +184,12 @@ def run_batch(args) -> int:
 
 
 def main(argv=None) -> int:
-    p = argparse.ArgumentParser(description="Evaluate Open Meta Maps Escher layouts (layout rules).")
-    p.add_argument("--gem", help="SBML / model file")
+    p = argparse.ArgumentParser(description="Evaluate Open Meta Maps Escher layouts (layout-benchmark metrics).")
+    p.add_argument("--gem", help="SBML or COBRA/BiGG JSON model")
     p.add_argument("--map", help="Escher map.json")
     p.add_argument("--reference", help="Optional reference: SBGN, Escher JSON, or {id:[x,y]} JSON")
-    p.add_argument("--compare-map", help="Optional second map.json for stability / reproducibility")
-    p.add_argument("--batch", help="Manifest JSON or a folder of compose results")
+    p.add_argument("--compare-map", help="Optional second map.json for reproducibility metrics")
+    p.add_argument("--batch", help="Evaluate batch manifest or folder of compose results")
     p.add_argument("--out", help="Output JSON path (single) or directory (batch)")
     p.add_argument("--no-geometry", action="store_true", help="Skip layout_quality final-geometry block")
     args = p.parse_args(argv)

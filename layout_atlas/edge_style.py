@@ -141,10 +141,51 @@ def _corridor(p, q, rects, mine, step_cost=35.0):
     return out
 
 
+def _curated_block_rects(data, pad=18.0):
+    """Axis-aligned padded boxes of curated (expert) structures for corridor avoidance.
+
+    Built from midmarkers of reactions listed in ``metadata.expert_structures``.
+    Empty when metadata is missing (incremental restyle paths).
+    """
+    meta = (data[0] or {}).get('metadata') or {}
+    structures = meta.get('expert_structures') or []
+    if not structures:
+        return np.zeros((0, 4), float), np.zeros(0, dtype=object)
+    nodes = data[1]['nodes']
+    reactions = data[1]['reactions']
+    mid_of = {}
+    for rx in reactions.values():
+        for s in rx['segments'].values():
+            for nid in (s['from_node_id'], s['to_node_id']):
+                n = nodes.get(nid) or {}
+                if n.get('node_type') == 'midmarker':
+                    mid_of[rx['bigg_id']] = (float(n['x']), float(n['y']))
+                    break
+            if rx['bigg_id'] in mid_of:
+                break
+    rects, owners = [], []
+    for st in structures:
+        pts = [mid_of[r] for r in (st.get('reactions') or []) if r in mid_of]
+        if len(pts) < 2:
+            continue
+        xs = [p[0] for p in pts]
+        ys = [p[1] for p in pts]
+        # Expand by a fixed pad so corridors clear the block body, not just midmarkers.
+        span = max(max(xs) - min(xs), max(ys) - min(ys), 40.0)
+        grow = max(pad, 0.15 * span)
+        rects.append([min(xs) - grow, min(ys) - grow, max(xs) + grow, max(ys) + grow])
+        owners.append('block:' + str(st.get('id') or st.get('code') or len(owners)))
+    if not rects:
+        return np.zeros((0, 4), float), np.zeros(0, dtype=object)
+    return np.asarray(rects, float), np.asarray(owners, dtype=object)
+
+
 def apply(data, skip_edges=(), only=None):
     """Turn every algorithm-placed connection of `data` ([header, body], exported without routing) into Bezier segments, in place.  Returns a report.
 
     When `only` is a set of reaction ids, only those reactions are restyled (incremental path used by relocation/peripheral).
+    Curated block AABBs are appended as obstacles so algorithm corridors route around
+    packed modules instead of cutting diagonally through them.
     """
     import line_render
     body = data[1]
@@ -154,6 +195,10 @@ def apply(data, skip_edges=(), only=None):
     is_node = np.array([k == 'node' for k in all_kind])
     rects, owner_arr = all_rects[is_node], np.array(all_owner, dtype=object)[is_node]
     label_rects, label_owner = all_rects[~is_node], np.array(all_owner, dtype=object)[~is_node]
+    block_rects, block_owners = _curated_block_rects(data)
+    if len(block_rects):
+        rects = np.vstack([rects, block_rects]) if len(rects) else block_rects
+        owner_arr = np.concatenate([owner_arr, block_owners]) if len(owner_arr) else block_owners
     skip = {tuple(e) for e in skip_edges}
     only_set = set(only) if only is not None else None
     # all current segments, by reaction (the crossing term sees what is already drawn)

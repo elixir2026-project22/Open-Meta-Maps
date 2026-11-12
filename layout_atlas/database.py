@@ -133,7 +133,7 @@ def mappings(a,b,limit=16):
  except TimeoutError:return []
 
 def geometry_error(a,b,mp):
- aa={n['key']:n['xy'] for n in a['nodes']};bb={n['key']:n['xy'] for n in b['nodes']};ks=sorted(mp);frame=fit_frame([aa[k] for k in ks],[bb[mp[k]] for k in ks]);f=transform({k:aa[k] for k in ks},frame);return float(np.sqrt(np.mean([np.sum((np.array(f[k])-bb[mp[k]])**2) for k in ks])))
+ aa={n['key']:n['xy'] for n in a['nodes']};bb={n['key']:n['xy'] for n in b['nodes']};ks=sorted(mp);frame=fit_frame([aa[k] for k in ks],[bb[mp[k]] for k in ks], rotate=True);f=transform({k:aa[k] for k in ks},frame);return float(np.sqrt(np.mean([np.sum((np.array(f[k])-bb[mp[k]])**2) for k in ks])))
 
 def from_legacy(m):
  core=m.get('core_nodes',m['nodes']);keys={n['key'] for n in core};nodes=[];edges=[]

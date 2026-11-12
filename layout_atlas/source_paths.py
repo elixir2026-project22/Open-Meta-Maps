@@ -220,6 +220,18 @@ def _source_key(tkey):
     return tkey
 
 
+def _padding_src(xy, block):
+    """Replay bake-time padding compression on a source absolute coordinate."""
+    pad = block.get('padding_compression')
+    if not pad or not pad.get('applied'):
+        return xy
+    try:
+        import curated_axes as ca
+        return ca.apply_padding_xy(xy, pad)
+    except Exception:
+        return xy
+
+
 def _correspondences(block, data, *, reaction_xy):
     """Unique 1:1 mapping keys → (source xy, dest xy) for a similarity fit."""
     mapping = block['node_mapping']
@@ -235,7 +247,7 @@ def _correspondences(block, data, *, reaction_xy):
             g = data['glyphs'].get(_source_key(tkey))
             xy = g['xy'] if g else None
         if xy is not None:
-            src.append(xy)
+            src.append(_padding_src(xy, block))
             dst.append(block['positions'][target])
     return src, dst
 
@@ -272,7 +284,7 @@ def paths_for_block(block, tolerance=3.0):
         if not r:
             info['reaction_not_in_source'] += 1
             continue
-        mid = _apply(fit, data['glyphs'][r['mid']]['xy'])
+        mid = _apply(fit, _padding_src(data['glyphs'][r['mid']]['xy'], block))
         for gid, chain in r['chains'].items():
             tm = _mapping_get(mapping, gid)
             if tm is None:
@@ -281,10 +293,10 @@ def paths_for_block(block, tolerance=3.0):
             info['chains'] += 1
             segs = []
             for st in chain['steps']:
-                end = _apply(fit, data['glyphs'][st['to']]['xy']) - mid
+                end = _apply(fit, _padding_src(data['glyphs'][st['to']]['xy'], block)) - mid
                 if st['controls']:
-                    c1 = _apply(fit, st['controls'][0]) - mid
-                    c2 = _apply(fit, st['controls'][1]) - mid
+                    c1 = _apply(fit, _padding_src(st['controls'][0], block)) - mid
+                    c2 = _apply(fit, _padding_src(st['controls'][1], block)) - mid
                     segs.append(['C', *c1.round(2).tolist(), *c2.round(2).tolist(), *end.round(2).tolist()])
                 else:
                     segs.append(['L', *end.round(2).tolist()])

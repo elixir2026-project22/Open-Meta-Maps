@@ -319,10 +319,16 @@ def overlap_breakdown(scene, radius=10.0):
     return dict(out)
 
 
-def separate(model, scene, blocks, metabolite_gap=88.0, reaction_gap=70.0, passes=80, side_gap=None):
+# Gate node-overlap radius is 10 px; keep a hard floor above that even for linked pairs.
+NODE_CENTRE_MIN = 12.0
+
+
+def separate(model, scene, blocks, metabolite_gap=88.0, reaction_gap=70.0, passes=80, side_gap=None,
+             node_centre_min=NODE_CENTRE_MIN):
     """Keep the instances this module placed (`inst:`) and the shared nodes (`m:`) from landing on other glyphs: labels are 60-80 px wide, so
     two metabolite glyphs closer than `metabolite_gap`, or a metabolite glyph and a reaction it is not connected to closer than `reaction_gap`,
-    have overlapping labels.  Only `inst:` and `m:` glyphs move (never expert copies or reactions).
+    have overlapping labels.  Only `inst:` and `m:` glyphs move for the wide gaps; a hard ``node_centre_min`` floor also nudges algorithm
+    reactions (``r:`` not inside a curated copy) so gate node-overlap pairs (<10 px) cannot linger — including chemically linked pairs.
 
     Currency ``side:`` glyphs use the same adaptive local-clearance rule as ``orientation.sides`` unless ``side_gap`` is given explicitly.
     """
@@ -333,6 +339,9 @@ def separate(model, scene, blocks, metabolite_gap=88.0, reaction_gap=70.0, passe
     index = {k: i for i, k in enumerate(keys)}
     xy = np.array([pos[k] for k in keys], float)
     movable = np.array([k.startswith(('inst:', 'm:', 'side:')) for k in keys])
+    # Algorithm midmarkers may nudge under the hard floor; curated block reactions stay fixed.
+    curated_rx = {('r:' + rid) for b in (blocks or []) for rid in b.get('reaction_ids') or ()}
+    rx_movable = np.array([k.startswith('r:') and k not in curated_rx for k in keys])
     is_side = np.array([k.startswith('side:') for k in keys])
     is_rx = np.array([k.startswith('r:') for k in keys])
     if side_gap is None:
@@ -345,31 +354,41 @@ def separate(model, scene, blocks, metabolite_gap=88.0, reaction_gap=70.0, passe
         side_need = np.full(len(keys), float(side_gap))
     linked = defaultdict(set)
     for (rid, mid), key in scene['participants'].items():
+        if 'r:' + rid not in index or key not in index:
+            continue
         a, b = index['r:' + rid], index[key]
         linked[a].add(b)
         linked[b].add(a)
     start = xy.copy()
-    query_r = max(metabolite_gap, reaction_gap, float(side_need.max()) if len(side_need) else 0.0)
+    query_r = max(metabolite_gap, reaction_gap, float(node_centre_min),
+                  float(side_need.max()) if len(side_need) else 0.0)
     for _ in range(passes):
         pairs = cKDTree(xy).query_pairs(query_r, output_type='ndarray')
         push = np.zeros_like(xy)
         hit = False
         for i, j in pairs:
-            if not (movable[i] or movable[j]) or (is_rx[i] and is_rx[j]):
+            can_move = movable[i] or movable[j] or rx_movable[i] or rx_movable[j]
+            if not can_move or (is_rx[i] and is_rx[j]):
                 continue
+            linked_pair = False
             if is_side[i] or is_side[j]:
                 need = min(side_need[i] or side_need[j], side_need[j] or side_need[i])
                 if is_rx[i] != is_rx[j]:
                     a, b = (i, j) if is_rx[i] else (j, i)
                     if b in linked[a]:
-                        continue
+                        linked_pair = True
+                        need = node_centre_min
             elif is_rx[i] != is_rx[j]:
                 a, b = (i, j) if is_rx[i] else (j, i)
                 if b in linked[a]:
-                    continue
-                need = reaction_gap
+                    linked_pair = True
+                    need = node_centre_min  # keep centres ≥ gate radius even when chemically linked
+                else:
+                    need = reaction_gap
             else:
                 need = metabolite_gap
+            # Always honour the hard centre floor.
+            need = max(need, node_centre_min) if linked_pair else need
             d = xy[j] - xy[i]
             dist = float(np.hypot(*d))
             if dist >= need:
@@ -378,11 +397,20 @@ def separate(model, scene, blocks, metabolite_gap=88.0, reaction_gap=70.0, passe
                 ang = (i * 17 + j * 31) * 2.399963
                 d, dist = np.array([np.cos(ang), np.sin(ang)]), 1.0
             step = d / dist * (need - dist)
+            # Prefer moving non-curated glyphs.  For the hard floor, algorithm reactions may move.
+            move_i = movable[i] or (linked_pair and rx_movable[i] and not movable[j])
+            move_j = movable[j] or (linked_pair and rx_movable[j] and not movable[i])
+            if not (move_i or move_j):
+                # Fall back: any movable / algorithm endpoint.
+                move_i = movable[i] or rx_movable[i]
+                move_j = movable[j] or rx_movable[j]
+            if not (move_i or move_j):
+                continue
             hit = True
-            if movable[i] and movable[j]:
+            if move_i and move_j:
                 push[i] -= step / 2
                 push[j] += step / 2
-            elif movable[i]:
+            elif move_i:
                 push[i] -= step
             else:
                 push[j] += step

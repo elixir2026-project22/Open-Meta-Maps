@@ -73,7 +73,38 @@ class CanonicalGraph(nx.Graph):
 
 def normalize(xy):
  arr=np.array(list(xy.values()),float);center=arr.mean(0);sc=max(float(np.sqrt(np.mean(np.sum((arr-center)**2,1)))),1e-8);return {k:((np.array(v)-center)/sc).tolist() for k,v in xy.items()}
-def fit_frame(source,target):
- a=np.array(source,float);b=np.array(target,float);ac=a-a.mean(0);bc=b-b.mean(0);u,_,vt=np.linalg.svd(ac.T@bc);rot=u@vt;scale=max(float(np.sum((ac@rot)*bc)/max(np.sum(ac*ac),1e-12)),1e-8)
- return dict(rotation=rot.tolist(),scale=scale,source_center=a.mean(0).tolist(),target_center=b.mean(0).tolist())
+def fit_frame(source, target, rotate=False):
+ """Fit source points onto target centroids.
+
+ Default (rotate=False): uniform scale + translation only — curated axes are preserved
+ (no rotation, no reflection).  rotate=True restores the old Kabsch rotation for callers
+ that score geometric similarity (e.g. database matching); reflection is still forbidden.
+ """
+ a = np.asarray(source, float)
+ b = np.asarray(target, float)
+ ac, bc = a - a.mean(0), b - b.mean(0)
+ var = float(np.sum(ac * ac))
+ if rotate:
+  u, _, vt = np.linalg.svd(ac.T @ bc)
+  rot = u @ vt
+  # Forbid reflection: force det(rot) = +1
+  if np.linalg.det(rot) < 0:
+   u = u.copy()
+   u[:, -1] *= -1
+   rot = u @ vt
+  scale = max(float(np.sum((ac @ rot) * bc) / max(var, 1e-12)), 1e-8)
+ else:
+  rot = np.eye(2)
+  # Isotropic LS scale with axes fixed (no rotation).
+  scale = max(float(np.sqrt(np.sum(bc * bc) / max(var, 1e-12))), 1e-8)
+ return dict(rotation=rot.tolist(), scale=scale, source_center=a.mean(0).tolist(),
+             target_center=b.mean(0).tolist(), rotate=bool(rotate), reflect=False)
 def transform(xy,frame):return {k:((np.array(v)-frame['source_center'])@np.array(frame['rotation'])*frame['scale']+frame['target_center']).tolist() for k,v in xy.items()}
+
+
+def unify_map_scale(frames):
+ """One common scale for a list of fit frames (median of positive scales)."""
+ scales = [float(f['scale']) for f in frames if f and float(f.get('scale') or 0) > 0]
+ if not scales:
+  return 1.0
+ return float(np.median(scales))

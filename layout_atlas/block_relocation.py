@@ -416,13 +416,12 @@ def _joint_pairs(data, model, scene, blocks, cur, skip_edges, rejected, base, is
 
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------
-# Constrained expert SUB-module relocation (experimental, OPM_EXPERT_SUBMODULE=on; default off).
+# Constrained expert block relocation triggered by a long exchange + transport submodule
+# (OPM_EXPERT_SUBMODULE=on|branch; default branch).
 #
-# Hierarchical expert geometry preservation: the geometry INSIDE every expert reaction stays rigid, a confirmed expert backbone stays whole, expert blocks may move as a
-# whole (above), and - only as an exception - an exchange + simple transport module that sits inside a big expert block may be moved rigidly when its connection to the
-# rest of the block is abnormally long (the source map drew it far away; in the full GEM that position need not be right).  Only the connections that cross the
-# module boundary are re-drawn (as Bezier curves by edge_style); they are recorded as `regenerated_expert_edges`, so the report no longer claims 100 % block geometry
-# for such a block.  The module is found from the GEM (peripheral.find_modules: one exchange + simple transports), never by name; modules with a long connection only.
+# Detection still uses peripheral.find_modules (exchange + simple/branch transport) inside a large
+# curated block whose cross-link is abnormally long.  The move itself always translates the WHOLE
+# curated block — never pulls EX_mal/MALt2_2 (or EX_fum/FUMt2_2) out of the source structure.
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 def find_sub(model, scene, blocks, cur, simple=True):
     import peripheral
@@ -509,45 +508,143 @@ def _detach_cross_edges(data, scene, unit):
     return d2, detached
 
 
+def _whole_block_unit(model, scene, block, cur, long_hint, spacing):
+    """Build a rigid whole-block relocation unit (never a submodule slice).
+
+    Keys cover every reaction of the curated block plus glyphs used only inside it —
+    the same membership rule as ``find``, without the small-block size cap.
+    """
+    pos, parts = scene['positions'], scene['participants']
+    holders = defaultdict(set)
+    for (rid, mid), key in parts.items():
+        holders[key].add(rid)
+    rx = {r['id']: r for r in model['reactions']}
+    inside = set(block['reaction_ids'])
+    keys = {'r:' + r for r in inside if 'r:' + r in pos}
+    keys.update(k for k in pos if k.startswith('copy:' + block['id'] + ':'))
+    for r in inside:
+        if r not in rx:
+            continue
+        for mid in rx[r]['metabolites']:
+            k = parts.get((r, mid))
+            if k is not None and holders[k] <= inside and k in pos:
+                keys.add(k)
+    # Prefer long connections computed on the whole block; fall back to the submodule hint
+    # (used only to aim candidates when the block has no external long edge of its own).
+    users = defaultdict(set)
+    for r in model['reactions']:
+        for mm in r['metabolites']:
+            users[mm].add(r['id'])
+    long = []
+    for r in inside:
+        if 'r:' + r not in pos or r not in rx:
+            continue
+        for mid in rx[r]['metabolites']:
+            if mid in cur:
+                continue
+            k = parts.get((r, mid))
+            if k is None or k not in pos:
+                continue
+            if k not in keys:
+                px = float(np.hypot(*(np.array(pos['r:' + r]) - np.array(pos[k]))))
+                if px > TAU * spacing:
+                    long.append((r, mid, round(px, 1), k))
+                continue
+            best = None
+            for u in users[mid]:
+                if u in inside or (u, mid) not in parts:
+                    continue
+                ku = parts[u, mid]
+                if ku in pos and ku not in keys:
+                    d = float(np.hypot(*(np.array(pos['r:' + r]) - np.array(pos[ku]))))
+                    if best is None or d < best[0]:
+                        best = (d, ku)
+            if best is not None and best[0] > TAU * spacing:
+                long.append((r, mid, round(best[0], 1), best[1]))
+    if not long and long_hint:
+        long = list(long_hint)
+    if not long:
+        return None
+    return dict(block=block['id'], reactions=sorted(inside), keys=keys,
+                long=sorted(long, key=lambda t: -t[2]), spacing=spacing,
+                block_size=len(inside), cross=[], whole_block=True)
+
+
 def relocate_sub(data, model, scene, blocks, cur, skip_edges, budget_s=150.0, max_units=12, log=None, simple=True):
+    """Relocate whole curated blocks triggered by a long exchange+transport submodule.
+
+    Detection still uses ``find_sub`` (exchange + transport with an abnormally long link inside a
+    large expert block), but the move always translates the **entire** block.  Pulling only
+    EX_mal/MALt2_2 (or EX_fum/FUMt2_2) out of the curated structure is forbidden.
+    """
     import edge_style
     import quality_gate as qg
     t0 = time.time()
-    units = find_sub(model, scene, blocks, cur, simple=simple)
-    report = dict(mode='simple transport' if simple else 'branch (coupled transport allowed)', units=len(units), accepted=0, rejected=0, budget_exhausted=0, regenerated_expert_edges=[], rows=[])
+    subs = find_sub(model, scene, blocks, cur, simple=simple)
+    block_by_id = {b['id']: b for b in blocks}
+    units, seen = [], set()
+    for sub in subs:
+        bid = sub['block']
+        if bid in seen or bid not in block_by_id:
+            continue
+        seen.add(bid)
+        whole = _whole_block_unit(model, scene, block_by_id[bid], cur, sub['long'], sub['spacing'])
+        if whole is not None:
+            units.append(whole)
+    report = dict(mode='whole-block (triggered by simple transport)' if simple else 'whole-block (triggered by branch transport)',
+                  units=len(units), accepted=0, rejected=0, budget_exhausted=0,
+                  regenerated_expert_edges=[], rows=[], submodule_triggers=len(subs))
     if not units:
         return data, report
     far = len(units)
     base, summary, issues = qg.evaluate_map(data, skip_edges, disconnected=far)
+    # Cap expensive whole-block trials: translating a 40-reaction curated block rarely
+    # passes the gate and dominated e_coli_core runtime (+16 s of rejected tries).
+    max_tries = 2
+    max_move_px = 900.0
     for unit in units[:max_units]:
         if time.time() - t0 > budget_s:
             report['budget_exhausted'] += 1
             continue
-        row = dict(block=unit['block'], block_size=unit['block_size'], module=unit['reactions'], longest_px=unit['long'][0][2],
+        row = dict(block=unit['block'], block_size=unit['block_size'], module=unit['reactions'][:8],
+                   longest_px=unit['long'][0][2],
                    longest_in_spacings=round(unit['long'][0][2] / unit['spacing'], 1), tries=[])
         won = False
-        for delta in candidates(scene, unit):
-            d1, detached = _detach_cross_edges(data, scene, unit)
-            d2, redo, _ = qg.translate_module(d1, scene, unit['keys'], delta, set(unit['reactions']), skip_edges)
-            sk = [e for e in skip_edges if list(e) not in detached]
-            edge_style.apply(d2, sk, only=redo)
-            new, s2, i2 = qg.evaluate_map(d2, sk, disconnected=far - 1)
+        # Whole-block translate (same path as ``relocate``): no cross-edge detach, no submodule split.
+        longs = [(r, k, px) for r, _m, px, k in unit['long']]
+        ranked = sorted(((qg.proxy_score(scene, unit['keys'], d, longs), d) for d in candidates(scene, unit)),
+                        key=lambda t: -t[0]['score'])
+        tried = 0
+        for proxy, delta in ranked:
+            move = float(np.hypot(*delta))
+            if move > max_move_px and unit['block_size'] > 12:
+                row['tries'].append(dict(moved_px=round(move, 1), decision='skipped',
+                                         reason='whole-block move too far for large curated block'))
+                continue
+            if tried >= max_tries:
+                break
+            tried += 1
+            d2, redo, _ = qg.translate_module(data, scene, unit['keys'], delta, set(unit['reactions']), skip_edges)
+            edge_style.apply(d2, skip_edges, only=redo)
+            new, s2, i2 = qg.evaluate_map(d2, skip_edges, disconnected=far - 1)
             ok, why = _accept(base, new)
-            row['tries'].append(dict(moved_px=round(float(np.hypot(*delta)), 1), decision='accepted' if ok else 'rejected', reason=why, after={k: new[k] for k in ('collisions', 'crossings', 'long_edges')}))
+            row['tries'].append(dict(moved_px=round(move, 1),
+                                     decision='accepted' if ok else 'rejected', reason=why,
+                                     after={k: new[k] for k in ('collisions', 'crossings', 'long_edges')}))
             if ok:
                 data, base, summary, issues = d2, new, s2, i2
                 far -= 1
                 base['disconnected'] = far
                 for k in unit['keys']:
-                    scene['positions'][k] = [scene['positions'][k][0] + float(delta[0]), scene['positions'][k][1] + float(delta[1])]
-                skip_edges[:] = sk
-                report['regenerated_expert_edges'].extend(detached)
+                    scene['positions'][k] = [scene['positions'][k][0] + float(delta[0]),
+                                            scene['positions'][k][1] + float(delta[1])]
                 won = True
                 break
         row['decision'] = 'accepted' if won else 'rejected'
         report['accepted' if won else 'rejected'] += 1
         report['rows'].append(row)
         if log:
-            log(f"  expert sub-module relocation {unit['reactions']}: {row['decision']} (longest {row['longest_in_spacings']} spacings, block of {unit['block_size']})")
+            log(f"  curated whole-block relocation {unit['block'][:8]} ({unit['reactions'][:3]}): "
+                f"{row['decision']} (longest {row['longest_in_spacings']} spacings, block of {unit['block_size']})")
     report['seconds'] = round(time.time() - t0, 1)
     return data, report
