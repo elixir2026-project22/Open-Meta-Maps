@@ -221,9 +221,14 @@ def test_sbml_layout_validates(composed):
     assert original.getModel().getNumReactions() == exported.getModel().getNumReactions()
     plugin = exported.getModel().getPlugin('layout')
     assert plugin is not None and plugin.getNumLayouts() >= 1
-    # Prefer CubicBezier over dense polylines
+    n_curved = sum(
+        1
+        for rx in data[1]['reactions'].values()
+        for seg in rx['segments'].values()
+        if seg.get('b1') and seg.get('b2')
+    )
     layout = plugin.getLayout(0)
-    n_bez = n_line = 0
+    n_bez = 0
     for i in range(layout.getNumReactionGlyphs()):
         rg = layout.getReactionGlyph(i)
         for j in range(rg.getNumSpeciesReferenceGlyphs()):
@@ -235,9 +240,7 @@ def test_sbml_layout_validates(composed):
                 seg = curve.getCurveSegment(k)
                 if seg.getTypeCode() == libsbml.SBML_LAYOUT_CUBICBEZIER:
                     n_bez += 1
-                else:
-                    n_line += 1
-    assert n_bez + n_line > 0
+    assert n_bez == n_curved, f'{name}: CubicBezier {n_bez} != map.json curved segments {n_curved}'
 
 
 def test_celldesigner_validates_and_has_identity(composed):
@@ -394,6 +397,8 @@ def test_cobra_json_writes_all_formats():
         written = map_exports.write_all_exports(tmp, model_path=gem)
         assert written == ['map.sbgn', 'map.sbml', 'map.celldesigner.xml']
         assert (tmp / 'map.sbml').stat().st_size > 0
+        # Temporary SBML for JSON uploads is written under the job folder (and removed after).
+        assert not (tmp / 'export_model.xml').exists()
         ok, errs = map_exports.validate_sbml_libsbml(tmp / 'map.sbml')
         assert ok, errs[:5]
         ok2, errs2 = map_exports.validate_sbml_libsbml(tmp / 'map.celldesigner.xml')
@@ -471,8 +476,14 @@ def test_synthetic_bezier_clones_and_degraded():
         root = ET.parse(tmp / 'map.sbgn').getroot()
         clones = root.findall('.//{http://sbgn.org/libsbgn/0.3}clone')
         assert len(clones) >= 2
-        nexts = root.findall('.//{http://sbgn.org/libsbgn/0.3}next')
-        assert nexts
+        points = root.findall('.//{http://sbgn.org/libsbgn/0.3}point')
+        assert len(points) >= 2, 'expected Bezier <point> control points on curved arcs'
+        # Each control pair sits under next/end, not as sampled polyline next-points only
+        controlled = [
+            el for el in root.iter()
+            if el.tag.endswith(('next', 'end')) and any(c.tag.endswith('point') for c in el)
+        ]
+        assert controlled, 'curved segments must carry <point> children on next/end'
         # Labels are metabolite names
         labels = [e.get('text') for e in root.iter() if e.tag.endswith('label') and e.get('text')]
         assert 'A' in labels and 'H+' in labels

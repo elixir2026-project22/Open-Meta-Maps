@@ -7,7 +7,6 @@ map edits and the Map Generator write the same files.
 from __future__ import annotations
 
 import re
-import tempfile
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 from pathlib import Path
@@ -56,30 +55,8 @@ def _segment_controls(reaction, a, b):
     return None, None
 
 
-def _path_polyline(reaction, path, nodes, samples_per_curve=8):
-    """Flatten Escher segments along node path into a polyline (for SBGN arcs)."""
-    pts = []
-    for a, b in zip(path, path[1:]):
-        ax, ay = _xy(nodes[a])
-        bx, by = _xy(nodes[b])
-        b1, b2 = _segment_controls(reaction, a, b)
-        if b1 and b2:
-            t = np.linspace(0.0, 1.0, samples_per_curve + 1)[:, None]
-            p = np.array([ax, ay], float)
-            c1 = np.array([b1['x'], b1['y']], float)
-            c2 = np.array([b2['x'], b2['y']], float)
-            q = np.array([bx, by], float)
-            curve = ((1 - t) ** 3 * p + 3 * (1 - t) ** 2 * t * c1 + 3 * (1 - t) * t ** 2 * c2 + t ** 3 * q).tolist()
-            pts.extend(curve if not pts else curve[1:])
-        else:
-            if not pts:
-                pts.append([ax, ay])
-            pts.append([bx, by])
-    return pts
-
-
 def _curve_segments(reaction, path, nodes):
-    """Yield (start, c1_or_None, c2_or_None, end) along an Escher node path for Layout curves."""
+    """Yield (start, c1_or_None, c2_or_None, end) along an Escher node path."""
     for a, b in zip(path, path[1:]):
         start = _xy(nodes[a])
         end = _xy(nodes[b])
@@ -89,6 +66,16 @@ def _curve_segments(reaction, path, nodes):
         else:
             yield start, None, None, end
 
+
+def _reverse_curve_segments(segments):
+    """Reverse a sequence of cubic/straight segments (swap ends; swap control order)."""
+    out = []
+    for start, c1, c2, end in reversed(list(segments)):
+        if c1 is not None and c2 is not None:
+            out.append((end, c2, c1, start))
+        else:
+            out.append((end, None, None, start))
+    return out
 
 def _reaction_paths(reaction, nodes):
     """Node-id paths from midmarker to each metabolite, following stored segments."""
@@ -258,22 +245,21 @@ def model_to_sbml_document(model):
     return doc
 
 
-def _ensure_sbml_path(model_path, model):
-    """Return a path to an SBML file for the model (write a temp file for JSON GEMs)."""
+def _ensure_sbml_path(model_path, model, folder=None):
+    """Return a path to an SBML file for the model (write into the job folder for JSON GEMs)."""
     if model_path is not None:
         path = Path(model_path)
         if path.suffix.lower() in ('.xml', '.sbml'):
             return path, False
+    if folder is None:
+        raise ValueError('folder is required to materialise SBML for a JSON model')
     doc = model_to_sbml_document(model)
     import libsbml
-    tmp = tempfile.NamedTemporaryFile(prefix='omm_export_', suffix='.xml', delete=False)
-    tmp_path = Path(tmp.name)
-    tmp.close()
+    tmp_path = Path(folder) / 'export_model.xml'
     if not libsbml.writeSBMLToFile(doc, str(tmp_path)):
         tmp_path.unlink(missing_ok=True)
         raise RuntimeError('could not write temporary SBML for layout export')
     return tmp_path, True
-
 
 def validate_sbgn_xsd(path):
     """Validate SBGN-ML against the vendored libSBGN 0.3 XSD. Returns (ok, errors)."""
@@ -482,19 +468,16 @@ def build_sbgn(data, model, sbml_path=None):
             used_nodes.add(met_nid)
             mid = end.get('bigg_id')
             coef = coeffs.get(mid, 0.0)
-            poly = _path_polyline(rx, path, nodes)
-            if len(poly) < 2:
+            segs = list(_curve_segments(rx, path, nodes))
+            if not segs:
                 continue
             eg = entity_glyph.get(met_nid)
             if not eg:
                 continue
             if coef < 0:
-                pts = list(reversed(poly))
-                source, target, cls = eg, port_in, 'consumption'
+                pending_arcs.append(('consumption', eg, port_in, _reverse_curve_segments(segs)))
             else:
-                pts = poly
-                source, target, cls = port_out, eg, 'production'
-            pending_arcs.append((cls, source, target, pts))
+                pending_arcs.append(('production', port_out, eg, segs))
 
         attached = {nodes[n].get('bigg_id') for n in used_nodes}
         for mid, coef in coeffs.items():
@@ -507,20 +490,31 @@ def build_sbgn(data, model, sbml_path=None):
             eg = entity_glyph[met_nid]
             ex, ey = _xy(nodes[met_nid])
             if coef < 0:
-                pending_arcs.append(('consumption', eg, port_in, [[ex, ey], [bb['x'], my]]))
+                pending_arcs.append(('consumption', eg, port_in, [((ex, ey), None, None, (bb['x'], my))]))
             else:
-                pending_arcs.append(('production', port_out, eg, [[bb['x'] + bb['w'], my], [ex, ey]]))
+                pending_arcs.append(('production', port_out, eg, [((bb['x'] + bb['w'], my), None, None, (ex, ey))]))
 
-    for arc_i, (cls, source, target, pts) in enumerate(pending_arcs):
-        arc = ET.SubElement(map_el, f'{{{SBGN_NS}}}arc', {
-            'id': f'arc{arc_i}', 'class': cls, 'source': source, 'target': target,
-        })
-        ET.SubElement(arc, f'{{{SBGN_NS}}}start', {'x': f"{pts[0][0]:.4f}", 'y': f"{pts[0][1]:.4f}"})
-        for p in pts[1:-1]:
-            ET.SubElement(arc, f'{{{SBGN_NS}}}next', {'x': f"{p[0]:.4f}", 'y': f"{p[1]:.4f}"})
-        ET.SubElement(arc, f'{{{SBGN_NS}}}end', {'x': f"{pts[-1][0]:.4f}", 'y': f"{pts[-1][1]:.4f}"})
+    for arc_i, (cls, source, target, segs) in enumerate(pending_arcs):
+        _append_sbgn_arc(map_el, f'arc{arc_i}', cls, source, target, segs)
 
     return root
+
+
+def _append_sbgn_arc(map_el, arc_id, cls, source, target, segments):
+    """Write one SBGN arc; cubic segments carry two <point> control children on next/end."""
+    if not segments:
+        return
+    arc = ET.SubElement(map_el, f'{{{SBGN_NS}}}arc', {
+        'id': arc_id, 'class': cls, 'source': source, 'target': target,
+    })
+    start = segments[0][0]
+    ET.SubElement(arc, f'{{{SBGN_NS}}}start', {'x': f'{start[0]:.4f}', 'y': f'{start[1]:.4f}'})
+    for i, (_s, c1, c2, end) in enumerate(segments):
+        tag = 'end' if i == len(segments) - 1 else 'next'
+        el = ET.SubElement(arc, f'{{{SBGN_NS}}}{tag}', {'x': f'{end[0]:.4f}', 'y': f'{end[1]:.4f}'})
+        if c1 is not None and c2 is not None:
+            ET.SubElement(el, f'{{{SBGN_NS}}}point', {'x': f'{c1[0]:.4f}', 'y': f'{c1[1]:.4f}'})
+            ET.SubElement(el, f'{{{SBGN_NS}}}point', {'x': f'{c2[0]:.4f}', 'y': f'{c2[1]:.4f}'})
 
 
 def write_sbgn(path, data, model, sbml_path=None):
@@ -545,7 +539,6 @@ def _set_bb(go, x, y, w, h, bb_id):
 
 def _add_curve(srg, segments, reverse=False):
     """Attach Layout curve segments (CubicBezier when controls exist, else LineSegment)."""
-    import libsbml
     seq = list(reversed(segments)) if reverse else list(segments)
     for start, c1, c2, end in seq:
         if reverse:
@@ -566,7 +559,6 @@ def _add_curve(srg, segments, reverse=False):
 
 def _add_basic_render(layout):
     """Attach minimal local render information when the render package is present."""
-    import libsbml
     rplugin = layout.getPlugin('render')
     if rplugin is None:
         return
@@ -1098,7 +1090,7 @@ def write_all_exports(folder, model_path=None, map_path=None, model=None):
         model = load_model(model_path)
     model_path = Path(model_path) if model_path else None
 
-    sbml_path, temporary = _ensure_sbml_path(model_path, model)
+    sbml_path, temporary = _ensure_sbml_path(model_path, model, folder=folder)
     try:
         write_sbgn(folder / 'map.sbgn', data, model, sbml_path=sbml_path)
         write_sbml_layout(folder / 'map.sbml', sbml_path, data, model=model)
