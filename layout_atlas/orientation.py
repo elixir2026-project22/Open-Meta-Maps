@@ -18,8 +18,11 @@ Expert structures are never moved: their reaction points and their glyph copies 
 The orientation uses the stoichiometric sign of the participants (substrate = negative coefficient), not the flux direction.
 
 Currency side-glyph length is adaptive from local free space:
-``distance = clip(k · d_nn, ~25, 50)`` with ``k ≈ 0.27`` (nearest other reaction), spread and ``instances.separate``
-side_gap scaled the same way. Multi-currency fans open toward the half-plane with fewer unrelated edges.
+``distance = clip(k · d_nn, d_min, 50)`` with ``k ≈ 0.27``. The floor ``d_min`` follows the map's 10th-percentile
+reaction clearance: maps with a heavy tight-pair tail (small p10) may shorten more to cut crossings; maps whose
+nearest neighbours are already farther keep longer spokes to avoid curves-through-nodes. Spread and
+``instances.separate`` side_gap track the chosen length. Multi-currency fans open toward the freer half-plane
+only at full spoke length.
 """
 import math
 
@@ -27,13 +30,16 @@ import numpy as np
 
 from core import currency
 
-# Adaptive cofactor spokes (spacing experiment: fixed 50 px drove most spoke×curated crossings).
 SIDE_K = 0.27
-SIDE_MIN = 25.0
+SIDE_MIN = 32.0
+SIDE_MIN_DENSE = 45.0
 SIDE_MAX = 50.0
 SIDE_SPREAD_MAX = 30.0
 SIDE_GAP_RATIO = 26.0 / 50.0
-SIDE_GAP_FLOOR = 13.0  # SIDE×0.5 experiment at distance 25; grows with longer spokes
+SIDE_GAP_FLOOR = 18.0
+# d_min = clip(SIDE_P10_A + SIDE_P10_B * p10_clearance, SIDE_MIN, SIDE_MIN_DENSE)
+SIDE_P10_A = 20.0
+SIDE_P10_B = 0.324
 
 
 def _expert_reactions(blocks):
@@ -66,13 +72,11 @@ def _axis(subs, prods, here):
 
 
 def spoke_length(clearance, k=SIDE_K, dmin=SIDE_MIN, dmax=SIDE_MAX, spread_max=SIDE_SPREAD_MAX):
-    """Clip k × local clearance into [dmin, dmax]; scale spread by the same factor."""
     distance = float(np.clip(k * max(clearance, 0.0), dmin, dmax))
     return distance, distance * (spread_max / dmax)
 
 
 def side_gap_for(distance):
-    """``instances.separate`` gap for a currency side glyph (tracks spoke length)."""
     return max(SIDE_GAP_FLOOR, float(distance) * SIDE_GAP_RATIO)
 
 
@@ -81,7 +85,6 @@ def _reaction_xy(positions):
 
 
 def _unrelated_segments(model, scene, cur):
-    """Non-currency participant edges (for freer-side choice)."""
     pos, parts = scene['positions'], scene['participants']
     out = []
     for r in model['reactions']:
@@ -97,13 +100,26 @@ def _unrelated_segments(model, scene, cur):
 
 
 def local_clearance(here, rid, rx_xy, segments=None):
-    """Nearest other reaction centre."""
     best = min((float(np.hypot(*(xy - here))) for other, xy in rx_xy.items() if other != rid), default=float('inf'))
     return best if np.isfinite(best) else SIDE_MAX / SIDE_K
 
 
+def map_spoke_floor(clearances):
+    """Floor from the map's 10th-percentile reaction clearance.
+
+    Maps without a tight-pair tail (high p10) keep the full SIDE_MAX spoke — shortening
+    there cuts crossings little but raises curves-through-nodes / overlaps.
+    """
+    finite = [c for c in clearances if np.isfinite(c)]
+    if not finite:
+        return SIDE_MIN
+    p10 = float(np.percentile(finite, 10))
+    if p10 >= 65.0:
+        return SIDE_MAX
+    return float(np.clip(SIDE_P10_A + SIDE_P10_B * p10, SIDE_MIN, SIDE_MIN_DENSE))
+
+
 def _freer_perp(here, u, rid, segments, radius):
-    """+1 / −1 so multi-currency fans open toward the half-plane with fewer unrelated edges."""
     perp = np.array([-u[1], u[0]])
     plus = minus = 0
     for owner, a, b in segments:
@@ -125,18 +141,18 @@ def reaction_spoke_params(model, scene, cur=None):
     cur = currency(model) if cur is None else cur
     positions = scene['positions']
     rx_xy = _reaction_xy(positions)
+    clearances = {rid: local_clearance(np.array(positions['r:' + rid], float), rid, rx_xy) for rid in rx_xy}
+    dmin = map_spoke_floor(list(clearances.values()))
     out = {}
     for r in model['reactions']:
         rid = r['id']
-        here = np.array(positions['r:' + rid], float)
-        clearance = local_clearance(here, rid, rx_xy)
-        distance, spread = spoke_length(clearance)
-        out[rid] = dict(distance=distance, spread=spread, gap=side_gap_for(distance), clearance=clearance)
+        clearance = clearances[rid]
+        distance, spread = spoke_length(clearance, dmin=dmin)
+        out[rid] = dict(distance=distance, spread=spread, gap=side_gap_for(distance), clearance=clearance, floor=dmin)
     return out
 
 
 def place_side_glyphs(model, positions, participants, cur, params=None, fixed_distance=None, fixed_spread=None):
-    """Write currency ``side:`` positions. Adaptive unless fixed_distance is set. Returns (moved, params_used)."""
     cur = currency(model) if cur is None else cur
     scene = dict(positions=positions, participants=participants)
     fixed = fixed_distance is not None
@@ -152,7 +168,10 @@ def place_side_glyphs(model, positions, participants, cur, params=None, fixed_di
         u = _axis(subs, prods, here)
         p = params[r['id']]
         dist, spr = p['distance'], p['spread']
-        side = 1.0 if fixed else _freer_perp(here, u, r['id'], segments, radius=max(2.0 * dist, 80.0))
+        if fixed or dist < SIDE_MAX - 0.5:
+            side = 1.0
+        else:
+            side = _freer_perp(here, u, r['id'], segments, radius=max(2.0 * dist, 80.0))
         perp = side * np.array([-u[1], u[0]])
         groups = {-1: [], 1: []}
         for mid, coefficient in r['metabolites'].items():
