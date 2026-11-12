@@ -46,14 +46,14 @@ class TestSearchIndex:
         self.tmp = tempfile.TemporaryDirectory()
         self.path = Path(self.tmp.name) / 'index.json.gz'
         mods = [
-            _mod('mod_pfk', rx_id='TESTKX', ec=['9.9.9.9'], mets=['g6p_c', 'f6p_c'], name='e_coli_core.Glycolysis', map_id='eco1'),
-            _mod('mod_gapd', rx_id='GAPDX', ec=['1.2.1.12'], mets=['g3p_c', '13dpg_c'], name='e_coli_core.Glycolysis', map_id='eco1', source='escher'),
+            _mod('mod_pfk', rx_id='TESTKX', ec=['9.9.9.9'], mets=['g6p_c', 'f6p_c'], name='e_coli_core.Glycolysis', map_id='e_coli_core'),
+            _mod('mod_gapd', rx_id='GAPDX', ec=['1.2.1.12'], mets=['g3p_c', '13dpg_c'], name='e_coli_core.Glycolysis', map_id='e_coli_core', source='escher'),
             _mod('mod_human', rx_id='MAR0001', refs={'human.gem': ['MAR0001'], 'bigg.reaction': ['HEX1']},
                  ec=['2.7.1.1'], mets=['glc_D_c', 'g6p_c'], source='human_maps', license='CC-BY-4.0',
                  attribution='Human-maps (CC BY 4.0)', name='Human-GEM.Glycolysis', map_id='hm1'),
             # Same canonical reaction set as mod_pfk, different map/source → collapsed by default.
             _mod('mod_pfk_alt', rx_id='TESTKX', refs={'bigg.reaction': ['TESTKX']}, ec=['9.9.9.9'],
-                 mets=['g6p_c', 'f6p_c'], name='iJO1366.Glycolysis', map_id='ijo1', source='escher',
+                 mets=['g6p_c', 'f6p_c'], name='iJO1366.Glycolysis', map_id='iJO1366', source='escher',
                  attribution='Escher community-maps (CC0)'),
             # Larger module ranks first.
             _mod('mod_big', rx_id='A', extra_rx=['B', 'C', 'D'], mets=['x_c', 'y_c'], name='Big.Map', map_id='big1', size=4),
@@ -133,6 +133,9 @@ class TestSearchIndex:
         r_met = ab.search({'q': 'g6p_c'}, index=self.idx)
         assert r_met['q_kind'] == 'metabolite'
         assert r_met['total'] >= 1
+        r_map = ab.search({'q': 'e_coli_core'}, index=self.idx)
+        assert r_map['q_kind'] == 'map'
+        assert r_map['total'] >= 1
         # Plain English still uses the free-text blob path.
         r_txt = ab.search({'q': 'Glycolysis'}, index=self.idx)
         assert r_txt['q_kind'] == 'text'
@@ -147,6 +150,9 @@ class TestQueryAndSpeciesHelpers:
         assert ab.classify_query('rhea:12345') == 'reaction'
         assert ab.classify_query('g6p_c') == 'metabolite'
         assert ab.classify_query('chebi:17925') == 'metabolite'
+        assert ab.classify_query('e_coli_core') == 'map'
+        assert ab.classify_query('iAF1260') == 'map'
+        assert ab.classify_query('iAF1260.Fatty_Acid_Biosynthesis') == 'map'
         assert ab.classify_query('central carbon metabolism') == 'text'
         assert ab.classify_query('') == 'text'
 

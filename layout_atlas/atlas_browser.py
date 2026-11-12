@@ -292,12 +292,24 @@ def build_index(path=None, modules=None):
         licences[rec['license']] += 1
     # Larger / more complete modules first.
     records.sort(key=lambda r: (-r['size'], -len(r.get('rx_canon') or []), r['source'], r['name'], r['id']))
+    unique_rx = len({r.get('rx_sig') for r in records if r.get('rx_sig')})
+    # Stage B README unique-after-dedup (per-source nest dedupe); see atlas_overlap.json.
+    overlap_unique = None
+    overlap_path = ROOT / 'docs' / 'images' / 'atlas' / 'atlas_overlap.json'
+    if overlap_path.is_file():
+        try:
+            overlap_unique = json.loads(overlap_path.read_text(encoding='utf-8')).get('unique_reaction_sets_global')
+        except Exception:
+            overlap_unique = None
     reg_sha = registry_fingerprint()
     payload = dict(
         schema_version=INDEX_SCHEMA,
         generated=str(date.today()),
         registry_sha256=reg_sha,
         module_count=len(records),
+        unique_reaction_sets=unique_rx,
+        readme_cut_modules=len(records) + skipped,
+        readme_unique_reaction_sets=overlap_unique,
         skipped_license=skipped,
         sources=dict(sources),
         licences=dict(licences),
@@ -312,6 +324,9 @@ def build_index(path=None, modules=None):
         generated=payload['generated'],
         registry_sha256=reg_sha,
         modules=len(records),
+        unique_reaction_sets=unique_rx,
+        readme_cut_modules=payload['readme_cut_modules'],
+        readme_unique_reaction_sets=overlap_unique,
         bytes=path.stat().st_size,
     ))
     global _index
@@ -319,6 +334,9 @@ def build_index(path=None, modules=None):
     return dict(
         path=str(path.relative_to(ROOT)) if str(path).startswith(str(ROOT)) else str(path),
         modules=len(records),
+        unique_reaction_sets=unique_rx,
+        readme_cut_modules=payload['readme_cut_modules'],
+        readme_unique_reaction_sets=overlap_unique,
         skipped_license=skipped,
         bytes=path.stat().st_size,
         uncompressed=len(raw),
@@ -397,13 +415,19 @@ def _truthy(v):
 _EC_RE = re.compile(r'^\d{1,2}\.\d{1,2}\.\d{1,2}(?:\.(?:\d{1,3}|-))?$')
 # BiGG-like metabolite: g6p_c, glc__D_e
 _MET_RE = re.compile(r'(?i)^(?:chebi[:_]\d+|[a-z][a-z0-9]*(?:__[a-z0-9]+)?_[a-z]\d?)$')
+# Model / map tokens (BiGG GEM ids, e_coli_core, RECON1, Human-GEM, dotted map names).
+_MODEL_RE = re.compile(
+    r'(?i)^(?:e_coli_core|recon\d*|human[_-]?gem|yeast[_-]?gem|'
+    r'i[a-z]{1,3}\d{3,4}|[a-z][a-z0-9]*(?:_[a-z0-9]+)+)$'
+)
+_MAP_DOT_RE = re.compile(r'(?i)^[A-Za-z][A-Za-z0-9_-]*\.[A-Za-z0-9_.-]+$')
 # Namespaced reaction ids (Rhea / Reactome / MetaNetX) and bare BiGG-like tokens.
 _RX_NS_RE = re.compile(r'(?i)^(rhea|reactome|metanetx\.reaction):\S+$')
 _RX_RE = re.compile(r'(?i)^[A-Za-z][A-Za-z0-9_.-]{1,40}$')
 
 
 def classify_query(q):
-    """Detect whether free-text looks like an EC, reaction, or metabolite id."""
+    """Detect whether free-text looks like an EC, reaction, metabolite, or model/map id."""
     s = str(q or '').strip()
     if not s:
         return 'text'
@@ -411,6 +435,8 @@ def classify_query(q):
         return 'ec'
     if s.lower().startswith('chebi:') or _MET_RE.match(s):
         return 'metabolite'
+    if _MODEL_RE.match(s) or _MAP_DOT_RE.match(s):
+        return 'map'
     if _RX_NS_RE.match(s):
         return 'reaction'
     # Prefer reaction for ALLCAPS / id-like tokens; avoid swallowing plain English.
@@ -467,8 +493,8 @@ def _collapse(hits):
 def search(filters=None, page=1, per_page=PAGE_DEFAULT, index=None):
     """Filter modules. Dedup by canonical reaction set unless variants=1.
 
-    Free-text `q` auto-routes EC / reaction / metabolite shaped tokens so the
-    dedicated fields are optional.
+    Free-text `q` auto-routes EC / reaction / metabolite / model-map shaped
+    tokens so the dedicated fields are optional.
     """
     filters = filters or {}
     idx = index or load_index()
@@ -489,6 +515,8 @@ def search(filters=None, page=1, per_page=PAGE_DEFAULT, index=None):
         rx, q = q, ''
     elif q and q_kind == 'metabolite' and not met:
         met, q = q, ''
+    elif q and q_kind == 'map' and not mmap:
+        mmap, q = q, ''
 
     hits = []
     for m in rows:
@@ -951,7 +979,7 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
     body = css_extra + '''
 <div id="listView" class="ab-list">
 <form class="filters" id="filters" autocomplete="off">
-<label class="grow">Search<input type="search" name="q" id="q" placeholder="name, EC, reaction or metabolite id"></label>
+<label class="grow">Search<input type="search" name="q" id="q" placeholder="name, EC, reaction, metabolite or model"></label>
 <label>EC number<input name="ec" id="ec" placeholder="1.1.1.1"></label>
 <label>Reaction ID<input name="reaction" id="reaction" placeholder="BiGG / Rhea / source"></label>
 <label>Metabolite ID<input name="metabolite" id="metabolite" placeholder="g6p / chebi:…"></label>
