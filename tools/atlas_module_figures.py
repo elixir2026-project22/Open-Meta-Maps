@@ -311,7 +311,7 @@ def unique_representatives(by_src, sets):
 def _pil_draw_module(draw, m, x0, y0, cell):
     ink = (17, 17, 17)
     if cell < 5:
-        # Crumb: solid speck (shape not resolvable at this size).
+        # Small nested module: solid speck (shape not resolvable at this size).
         draw.rectangle([x0, y0, x0 + max(cell - 1, 0), y0 + max(cell - 1, 0)], fill=ink)
         return
     nodes = m.get('nodes') or []
@@ -368,7 +368,7 @@ def _pack_to_box(items, max_w, max_h):
     """Shelf-pack items into max_w×max_h by searching a fit scale (fills the box tightly)."""
     if not items or max_w < 4 or max_h < 4:
         return [], 1.0
-    # Sort large tiles first so shapes stay contiguous and crumbs fill gaps.
+    # Large tiles first so shapes stay visible; small modules fill later rows.
     ordered = sorted(items, key=lambda m: (-(m.get('size') or 0), m['id']))
     lo, hi = 0.15, 3.0
     best = ([], 0.15)
@@ -383,6 +383,14 @@ def _pack_to_box(items, max_w, max_h):
     placements, scale = best
     if not placements:
         placements, _, _ = _shelf_pack(ordered, max_w, scale=0.15)
+        return placements, 0.15
+    # If the last shelf is sparse and vertical slack remains, nudge scale up once.
+    _, _, h = _shelf_pack(ordered, max_w, scale=scale)
+    if h < max_h * 0.92 and scale < 2.8:
+        bumped = min(scale * 1.08, 3.0)
+        alt, _, ah = _shelf_pack(ordered, max_w, scale=bumped)
+        if ah <= max_h:
+            placements, scale = alt, bumped
     return placements, scale
 
 
@@ -536,7 +544,7 @@ def write_overview_mosaic(by_src, summary, sets):
     legend = (
         f"One tile per unique reaction set (after dedup) · cut {summary['total_modules']:,} · "
         f"unique {summary['unique_reaction_sets_global']:,} · nested {summary['modules_nested_in_larger_global']:,} · "
-        f"tile size scales with reactions; crumbs are solid specks"
+        f"tile size scales with reactions; tiny nested modules are solid specks"
     )
     draw.text((pad, ly), legend, fill=(31, 41, 55), font=font_sm)
 
@@ -564,31 +572,35 @@ def _ellipsis(text, max_chars):
     text = text or ''
     if len(text) <= max_chars:
         return text
-    return text[: max(1, max_chars - 1)].rstrip() + '…'
+    return text[: max(1, max_chars - 1)].rstrip(' …') + '…'
 
 
 def _wrap(text, max_chars, max_lines=2):
-    text = text or ''
+    """Word-wrap; truncated text always ends the last line with an ellipsis."""
+    text = (text or '').strip()
+    if not text:
+        return []
     words = text.split()
     lines = []
-    cur = ''
-    for w in words:
-        trial = (cur + ' ' + w).strip()
-        if len(trial) <= max_chars:
-            cur = trial
-        else:
-            if cur:
-                lines.append(cur)
-            cur = w
-            if len(lines) >= max_lines:
+    idx = 0
+    while idx < len(words) and len(lines) < max_lines:
+        cur = words[idx]
+        idx += 1
+        while idx < len(words):
+            trial = f'{cur} {words[idx]}'
+            if len(trial) <= max_chars:
+                cur = trial
+                idx += 1
+            else:
                 break
-    if cur and len(lines) < max_lines:
+        if len(cur) > max_chars:
+            cur = _ellipsis(cur, max_chars)
         lines.append(cur)
-    if len(lines) == max_lines and (''.join(lines) != text.replace(' ', '')[:]):
-        # if truncated mid-way, ellipsis last line
-        if sum(len(x) for x in lines) < len(text.replace(' ', '')):
-            lines[-1] = _ellipsis(lines[-1], max_chars)
-    return lines[:max_lines]
+    if idx < len(words) and lines:
+        # Force ellipsis even when the last line already fills max_chars.
+        base = lines[-1].rstrip('…')
+        lines[-1] = base[: max(1, max_chars - 1)].rstrip(' …') + '…'
+    return lines
 
 
 def pick_examples(by_src):
@@ -746,15 +758,28 @@ def _worked_cut_figure(by_src):
             if bb and (bb[2] - bb[0]) > 1 and (bb[3] - bb[1]) > 1:
                 sized[len(rs)].append((rs, bb))
 
+    def bb_iou(a, b):
+        ix0, iy0 = max(a[0], b[0]), max(a[1], b[1])
+        ix1, iy1 = min(a[2], b[2]), min(a[3], b[3])
+        iw, ih = max(0.0, ix1 - ix0), max(0.0, iy1 - iy0)
+        inter = iw * ih
+        if inter <= 0:
+            return 0.0
+        aa = max(a[2] - a[0], 1e-6) * max(a[3] - a[1], 1e-6)
+        ba = max(b[2] - b[0], 1e-6) * max(b[3] - b[1], 1e-6)
+        return inter / max(aa + ba - inter, 1e-6)
+
     def bb_center(bb):
         return ((bb[0] + bb[2]) / 2, (bb[1] + bb[3]) / 2)
 
-    def far_enough(bb, chosen_bbs, min_frac=0.12):
+    def distinct_enough(bb, chosen_bbs, max_iou=0.15, min_frac=0.14):
         if not chosen_bbs:
             return True
         cx, cy = bb_center(bb)
         span = max(xmax - xmin, ymax - ymin, 1e-6)
         for ob in chosen_bbs:
+            if bb_iou(bb, ob) > max_iou:
+                return False
             ox, oy = bb_center(ob)
             if math.hypot(cx - ox, cy - oy) / span < min_frac:
                 return False
@@ -763,22 +788,29 @@ def _worked_cut_figure(by_src):
     chosen = []
     chosen_bbs = []
     for n in (4, 8, 12):
-        cands = sorted(sized.get(n) or [], key=lambda t: -((t[1][2] - t[1][0]) * (t[1][3] - t[1][1])))
+        cands = sorted(
+            sized.get(n) or [],
+            key=lambda t: -((t[1][2] - t[1][0]) * (t[1][3] - t[1][1])),
+        )
         for item in cands:
-            if far_enough(item[1], chosen_bbs, min_frac=0.18):
+            if distinct_enough(item[1], chosen_bbs):
                 chosen.append(item)
                 chosen_bbs.append(item[1])
                 break
         if len(chosen) >= 3:
             break
     if len(chosen) < 3:
-        for n in sorted(sized, reverse=True):
-            for item in sized[n]:
-                if item in chosen:
-                    continue
-                if far_enough(item[1], chosen_bbs, min_frac=0.08):
-                    chosen.append(item)
-                    chosen_bbs.append(item[1])
+        # Relax IoU, still prefer separated centres.
+        for max_iou, min_frac in ((0.25, 0.10), (0.40, 0.06), (0.55, 0.0)):
+            for n in (4, 8, 12, 6, 10, 16):
+                for item in sorted(sized.get(n) or [], key=lambda t: -((t[1][2] - t[1][0]) * (t[1][3] - t[1][1]))):
+                    if item in chosen:
+                        continue
+                    if distinct_enough(item[1], chosen_bbs, max_iou=max_iou, min_frac=min_frac):
+                        chosen.append(item)
+                        chosen_bbs.append(item[1])
+                    if len(chosen) >= 3:
+                        break
                 if len(chosen) >= 3:
                     break
             if len(chosen) >= 3:
@@ -809,21 +841,24 @@ def _worked_cut_figure(by_src):
             'reactions': [{'id': rx[k]['id']} for k in rs if k in rx],
         }
 
-    # Map panel: draw all reactions/edges lightly, highlight chosen windows
+    # Layout: title + legend (outside map) + map panel + matching modules.
     map_w, map_h = 360, 280
     mw = max(xmax - xmin, 1e-6)
     mh = max(ymax - ymin, 1e-6)
     scale = min((map_w - 24) / mw, (map_h - 24) / mh)
+    legend_y = 48
+    map_top = 72
 
     def tx(xy):
-        return 20 + 12 + (xy[0] - xmin) * scale, 48 + 12 + (xy[1] - ymin) * scale
+        return 20 + 12 + (xy[0] - xmin) * scale, map_top + 12 + (xy[1] - ymin) * scale
 
     cell = 118
     gap = 14
     right_x = 20 + map_w + 28
-    W = right_x + len(chosen) * (cell + gap) + 8
-    H = 48 + max(map_h, cell + 40) + 40
-    tint_colors = ['#3f8f6b55', '#b9852f55', '#4a6fa555']
+    W = right_x + max(len(chosen), 1) * (cell + gap) + 8
+    H = map_top + max(map_h, cell + 40) + 36
+    # Stroke outlines with very light tint (<=15% alpha) so the map stays visible.
+    fill_colors = ['rgba(63,143,107,0.12)', 'rgba(185,133,47,0.12)', 'rgba(74,111,165,0.12)']
     stroke_colors = ['#3f8f6b', '#b9852f', '#4a6fa5']
 
     parts = [
@@ -831,8 +866,21 @@ def _worked_cut_figure(by_src):
         f'<rect width="{W}" height="{H}" fill="#fff"/>',
         f'<text x="20" y="24" font-size="13" font-weight="700" fill="#111">Cut windows on a source map</text>',
         f'<text x="20" y="40" font-size="11" fill="#4b5563">{html.escape(path.stem)} · outlined windows to stored modules</text>',
-        f'<rect x="20" y="48" width="{map_w}" height="{map_h}" rx="8" fill="#fafafa" stroke="#d0d7de"/>',
     ]
+    # Legend outside the map panel
+    chip_x = 20
+    for i, (rs, bb) in enumerate(chosen):
+        parts.append(
+            f'<rect x="{chip_x}" y="{legend_y}" width="54" height="16" rx="3" '
+            f'fill="#fff" stroke="{stroke_colors[i % 3]}" stroke-width="1.4"/>'
+        )
+        parts.append(
+            f'<text x="{chip_x + 27:.1f}" y="{legend_y + 12}" text-anchor="middle" '
+            f'font-size="10" font-weight="600" fill="{stroke_colors[i % 3]}">{len(rs)} rx</text>'
+        )
+        chip_x += 62
+
+    parts.append(f'<rect x="20" y="{map_top}" width="{map_w}" height="{map_h}" rx="8" fill="#fafafa" stroke="#d0d7de"/>')
     # faint full map
     for r in diagram['events']:
         for mk, coeff in (r.get('visible') or {}).items():
@@ -844,54 +892,21 @@ def _worked_cut_figure(by_src):
     for r in diagram['events']:
         x, y = tx(r['xy'])
         parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="2.0" fill="#111"/>')
-    # window outlines (draw largest first so small windows stay visible)
+    # Window outlines around actual module node bboxes (largest first).
     for i, (rs, bb) in sorted(enumerate(chosen), key=lambda t: -len(t[1][0])):
         x0, y0 = tx((bb[0], bb[1]))
         x1, y1 = tx((bb[2], bb[3]))
-        pad = 5
+        pad = 6
         parts.append(
             f'<rect x="{min(x0,x1)-pad:.1f}" y="{min(y0,y1)-pad:.1f}" width="{abs(x1-x0)+2*pad:.1f}" height="{abs(y1-y0)+2*pad:.1f}" '
-            f'fill="{tint_colors[i % 3]}" stroke="{stroke_colors[i % 3]}" stroke-width="1.6" rx="3"/>'
-        )
-    # size chips in a non-overlapping legend strip inside the map panel
-    chip_x, chip_y = 28, 56
-    for i, (rs, bb) in enumerate(chosen):
-        parts.append(
-            f'<rect x="{chip_x}" y="{chip_y + i * 16}" width="52" height="14" rx="3" '
-            f'fill="#ffffffcc" stroke="{stroke_colors[i % 3]}" stroke-width="1"/>'
-        )
-        parts.append(
-            f'<text x="{chip_x + 26:.1f}" y="{chip_y + i * 16 + 11}" text-anchor="middle" '
-            f'font-size="10" font-weight="600" fill="{stroke_colors[i % 3]}">{len(rs)} rx</text>'
+            f'fill="{fill_colors[i % 3]}" stroke="{stroke_colors[i % 3]}" stroke-width="2" rx="3"/>'
         )
 
-    # Right: Atlas match when possible, else draw window geometry directly
-    escher_mods = by_src.get('escher') or []
-    stem = path.stem
+    # Right panels draw the same window geometry as the outlines (exact match).
     for i, (rs, bb) in enumerate(chosen):
-        ids = frozenset(rx[k]['id'] for k in rs if k in rx)
-        match = next(
-            (
-                m for m in escher_mods
-                if (m.get('size') or 0) == len(rs)
-                and frozenset(r.get('id') for r in (m.get('reactions') or [])) == ids
-            ),
-            None,
-        )
-        if match is None:
-            match = next(
-                (
-                    m for m in escher_mods
-                    if (m.get('size') or 0) == len(rs)
-                    and stem.split('.')[0] in (m.get('name') or '')
-                    and len(m.get('nodes') or []) >= 4
-                ),
-                None,
-            )
-        if match is None or len(match.get('nodes') or []) < 2:
-            match = window_as_module(rs)
+        match = window_as_module(rs)
         x = right_x + i * (cell + gap)
-        y = 48 + 12
+        y = map_top + 8
         parts.append(f'<rect x="{x}" y="{y}" width="{cell}" height="{cell}" rx="8" fill="#fff" stroke="{stroke_colors[i % 3]}" stroke-width="1.3"/>')
         parts.extend(draw_module_paths(match, x, y, cell, stroke='#111', lw=1.0, node_r=1.8))
         parts.append(f'<text x="{x+cell/2:.1f}" y="{y+cell+14}" text-anchor="middle" font-size="10" fill="#111">{len(rs)} reactions</text>')
@@ -914,44 +929,48 @@ def _worked_ids_figure(by_src):
         if sum(1 for r in (m.get('reactions') or []) if (r.get('references') or {}).get('bigg.reaction')) >= 3
     ]
     m = max(hm_cands, key=lambda x: x.get('size') or 0) if hm_cands else None
-    W, H = 740, 250
-    parts = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif">',
-        f'<rect width="{W}" height="{H}" fill="#fff"/>',
+    W = 740
+    headers = ['Native (human.gem)', 'bigg.reaction', 'metanetx.reaction', 'rhea']
+    xs = [20, 200, 380, 560]
+    rows = []
+    if m:
+        for r in (m.get('reactions') or []):
+            refs = r.get('references') or {}
+            if refs.get('bigg.reaction') or refs.get('metanetx.reaction') or refs.get('rhea'):
+                rows.append((r.get('id'), refs))
+            if len(rows) >= 4:
+                break
+    body = [
         f'<text x="20" y="24" font-size="13" font-weight="700" fill="#111">Canonical reaction identifiers (Human-maps)</text>',
     ]
     if not m:
-        parts.append('<text x="20" y="60" font-size="12" fill="#6b7280">No example module found.</text></svg>')
-        path = OUT / 'worked_ids.svg'
-        path.write_text('\n'.join(parts), encoding='utf-8')
-        return path
-    parts.append(f'<text x="20" y="42" font-size="11" fill="#6b7280">Map: {html.escape(_ellipsis(m.get("name") or "", 70))}</text>')
-    y = 68
-    headers = ['Native (human.gem)', 'bigg.reaction', 'metanetx.reaction', 'rhea']
-    xs = [20, 200, 380, 560]
-    for x, h in zip(xs, headers):
-        parts.append(f'<text x="{x}" y="{y}" font-size="11" font-weight="600" fill="#111">{h}</text>')
-    y += 6
-    parts.append(f'<line x1="20" y1="{y}" x2="{W-20}" y2="{y}" stroke="#d0d7de"/>')
-    y += 20
-    rows = []
-    for r in (m.get('reactions') or []):
-        refs = r.get('references') or {}
-        if refs.get('bigg.reaction') or refs.get('metanetx.reaction') or refs.get('rhea'):
-            rows.append((r.get('id'), refs))
-        if len(rows) >= 4:
-            break
-    for rid, refs in rows:
-        vals = [
-            (refs.get('human.gem') or [rid])[0],
-            (refs.get('bigg.reaction') or ['—'])[0],
-            (refs.get('metanetx.reaction') or ['—'])[0],
-            (refs.get('rhea') or ['—'])[0],
-        ]
-        for x, v in zip(xs, vals):
-            parts.append(f'<text x="{x}" y="{y}" font-size="11" fill="#374151">{html.escape(str(v))}</text>')
-        y += 22
-    parts.append('</svg>')
+        body.append('<text x="20" y="48" font-size="12" fill="#6b7280">No example module found.</text>')
+        H = 64
+    else:
+        body.append(f'<text x="20" y="42" font-size="11" fill="#6b7280">Map: {html.escape(_ellipsis(m.get("name") or "", 70))}</text>')
+        y = 64
+        for x, h in zip(xs, headers):
+            body.append(f'<text x="{x}" y="{y}" font-size="11" font-weight="600" fill="#111">{h}</text>')
+        y += 6
+        body.append(f'<line x1="20" y1="{y}" x2="{W-20}" y2="{y}" stroke="#d0d7de"/>')
+        y += 18
+        for rid, refs in rows:
+            vals = [
+                (refs.get('human.gem') or [rid])[0],
+                (refs.get('bigg.reaction') or ['—'])[0],
+                (refs.get('metanetx.reaction') or ['—'])[0],
+                (refs.get('rhea') or ['—'])[0],
+            ]
+            for x, v in zip(xs, vals):
+                body.append(f'<text x="{x}" y="{y}" font-size="11" fill="#374151">{html.escape(str(v))}</text>')
+            y += 20
+        H = y + 4
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif">',
+        f'<rect width="{W}" height="{H}" fill="#fff"/>',
+        *body,
+        '</svg>',
+    ]
     path = OUT / 'worked_ids.svg'
     path.write_text('\n'.join(parts), encoding='utf-8')
     _svg_to_png(path, OUT / 'worked_ids.png', width=740)
@@ -1009,34 +1028,32 @@ def _worked_dedup_figure(by_src, mods, sets):
             break
 
     cell = 120
-    W, H = 920, 320
-    parts = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif">',
-        f'<rect width="{W}" height="{H}" fill="#fff"/>',
-        f'<text x="20" y="24" font-size="13" font-weight="700" fill="#111">Dedup: identical sets merge; nested crumbs remain stored</text>',
+    W = 920
+    body = [
+        f'<text x="20" y="24" font-size="13" font-weight="700" fill="#111">Dedup: identical sets merge; nested modules remain stored</text>',
+        '<text x="20" y="48" font-size="12" font-weight="600" fill="#111">A. Same reaction set across sources (drawings may differ)</text>',
     ]
     # Left panel: exact duplicate → merged record
-    parts.append('<text x="20" y="48" font-size="12" font-weight="600" fill="#111">A. Same reaction set across sources (drawings may differ)</text>')
     if pair:
         a, b, rs = pair
         for i, m in enumerate((a, b)):
             x = 20 + i * (cell + 16)
             y = 60
             sk = source_key(m)
-            parts.append(f'<rect x="{x}" y="{y}" width="{cell}" height="{cell}" rx="8" fill="#fafafa" stroke="{SOURCE_STROKE.get(sk,"#888")}" stroke-width="1.2"/>')
-            parts.extend(draw_module_paths(m, x, y, cell, stroke='#111', lw=1.0, node_r=1.7))
-            parts.append(f'<text x="{x+cell/2:.1f}" y="{y+cell+14}" text-anchor="middle" font-size="10" font-weight="600" fill="#111">{html.escape(_ellipsis(SOURCE_LABEL_SHORT.get(sk, sk), 16))}</text>')
-            parts.append(f'<text x="{x+cell/2:.1f}" y="{y+cell+28}" text-anchor="middle" font-size="9" fill="#6b7280">{html.escape(_ellipsis(m.get("name") or "", 18))}</text>')
-        parts.append('<path d="M280 120 L310 120 L310 114 L324 124 L310 134 L310 128 L280 128 Z" fill="#6b7280"/>')
+            body.append(f'<rect x="{x}" y="{y}" width="{cell}" height="{cell}" rx="8" fill="#fafafa" stroke="{SOURCE_STROKE.get(sk,"#888")}" stroke-width="1.2"/>')
+            body.extend(draw_module_paths(m, x, y, cell, stroke='#111', lw=1.0, node_r=1.7))
+            body.append(f'<text x="{x+cell/2:.1f}" y="{y+cell+14}" text-anchor="middle" font-size="10" font-weight="600" fill="#111">{html.escape(_ellipsis(SOURCE_LABEL_SHORT.get(sk, sk), 16))}</text>')
+            body.append(f'<text x="{x+cell/2:.1f}" y="{y+cell+28}" text-anchor="middle" font-size="9" fill="#6b7280">{html.escape(_ellipsis(m.get("name") or "", 18))}</text>')
+        body.append('<path d="M280 120 L310 120 L310 114 L324 124 L310 134 L310 128 L280 128 Z" fill="#6b7280"/>')
         mx, my, mw, mh = 340, 70, 200, 110
-        parts.append(f'<rect x="{mx}" y="{my}" width="{mw}" height="{mh}" rx="8" fill="#e7f4ee" stroke="#3f8f6b" stroke-width="1.4"/>')
-        parts.append(f'<text x="{mx+10}" y="{my+22}" font-size="11" font-weight="700" fill="#111">Unique after dedup</text>')
-        parts.append(f'<text x="{mx+10}" y="{my+42}" font-size="10" fill="#374151">{len(rs)} canonical reactions</text>')
-        parts.append(f'<text x="{mx+10}" y="{my+60}" font-size="10" fill="#374151">also_in:</text>')
-        parts.append(f'<text x="{mx+10}" y="{my+76}" font-size="10" fill="#374151">{html.escape(SOURCE_LABEL_SHORT.get(source_key(a), source_key(a)))}</text>')
-        parts.append(f'<text x="{mx+10}" y="{my+92}" font-size="10" fill="#374151">{html.escape(SOURCE_LABEL_SHORT.get(source_key(b), source_key(b)))}</text>')
+        body.append(f'<rect x="{mx}" y="{my}" width="{mw}" height="{mh}" rx="8" fill="#e7f4ee" stroke="#3f8f6b" stroke-width="1.4"/>')
+        body.append(f'<text x="{mx+10}" y="{my+22}" font-size="11" font-weight="700" fill="#111">Unique after dedup</text>')
+        body.append(f'<text x="{mx+10}" y="{my+42}" font-size="10" fill="#374151">{len(rs)} canonical reactions</text>')
+        body.append(f'<text x="{mx+10}" y="{my+60}" font-size="10" fill="#374151">also_in:</text>')
+        body.append(f'<text x="{mx+10}" y="{my+76}" font-size="10" fill="#374151">{html.escape(SOURCE_LABEL_SHORT.get(source_key(a), source_key(a)))}</text>')
+        body.append(f'<text x="{mx+10}" y="{my+92}" font-size="10" fill="#374151">{html.escape(SOURCE_LABEL_SHORT.get(source_key(b), source_key(b)))}</text>')
     # Right panel: nesting
-    parts.append('<text x="560" y="48" font-size="12" font-weight="600" fill="#111">B. Nested crumb</text>')
+    body.append('<text x="560" y="48" font-size="12" font-weight="600" fill="#111">B. Nested module</text>')
     if nest:
         child, parent = nest
         for i, m in enumerate((child, parent)):
@@ -1044,18 +1061,28 @@ def _worked_dedup_figure(by_src, mods, sets):
             y = 60
             sk = source_key(m)
             stroke = '#b9852f' if i == 0 else '#3f8f6b'
-            parts.append(f'<rect x="{x}" y="{y}" width="{cell}" height="{cell}" rx="8" fill="#fafafa" stroke="{stroke}" stroke-width="1.2"/>')
-            parts.extend(draw_module_paths(m, x, y, cell, stroke='#111', lw=1.0, node_r=1.7))
-            label = 'nested subset' if i == 0 else 'larger window'
-            parts.append(f'<text x="{x+cell/2:.1f}" y="{y+cell+14}" text-anchor="middle" font-size="10" font-weight="600" fill="#111">{label}</text>')
-            parts.append(f'<text x="{x+cell/2:.1f}" y="{y+cell+28}" text-anchor="middle" font-size="9" fill="#6b7280">{m.get("size")} reactions</text>')
-        parts.append('<path d="M686 120 L716 120 L716 114 L730 124 L716 134 L716 128 L686 128 Z" fill="#6b7280"/>')
+            body.append(f'<rect x="{x}" y="{y}" width="{cell}" height="{cell}" rx="8" fill="#fafafa" stroke="{stroke}" stroke-width="1.2"/>')
+            body.extend(draw_module_paths(m, x, y, cell, stroke='#111', lw=1.0, node_r=1.7))
+            label = 'nested module' if i == 0 else 'larger window'
+            body.append(f'<text x="{x+cell/2:.1f}" y="{y+cell+14}" text-anchor="middle" font-size="10" font-weight="600" fill="#111">{label}</text>')
+            body.append(f'<text x="{x+cell/2:.1f}" y="{y+cell+28}" text-anchor="middle" font-size="9" fill="#6b7280">{m.get("size")} reactions</text>')
+        body.append('<path d="M686 120 L716 120 L716 114 L730 124 L716 134 L716 128 L686 128 Z" fill="#6b7280"/>')
 
-    cap = 'A: identical canonical reaction sets collapse to one unique entry with also_in provenance. B: smaller reaction sets nested in larger windows stay stored as multi-scale crumbs.'
-    # wrap caption inside width
-    for i, line in enumerate(_wrap(cap, 110, 3)):
-        parts.append(f'<text x="20" y="{H - 36 + i * 14}" font-size="11" fill="#4b5563">{html.escape(line)}</text>')
-    parts.append('</svg>')
+    cap = (
+        'A: identical canonical reaction sets collapse to one unique entry with also_in provenance. '
+        'B: smaller reaction sets nested in larger windows stay stored as multi-scale nested modules.'
+    )
+    cap_lines = _wrap(cap, 110, 3)
+    y_cap = 60 + cell + 28 + 18
+    for i, line in enumerate(cap_lines):
+        body.append(f'<text x="20" y="{y_cap + i * 14}" font-size="11" fill="#4b5563">{html.escape(line)}</text>')
+    H = y_cap + max(len(cap_lines) - 1, 0) * 14 + 12
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif">',
+        f'<rect width="{W}" height="{H}" fill="#fff"/>',
+        *body,
+        '</svg>',
+    ]
     path = OUT / 'worked_dedup.svg'
     path.write_text('\n'.join(parts), encoding='utf-8')
     _svg_to_png(path, OUT / 'worked_dedup.png', width=920)
@@ -1082,14 +1109,19 @@ def _worked_provenance_figure(by_src, mods, sets):
     if sample is None:
         sample = next((m for m in escher if (m.get('size') or 0) >= 6 and m.get('extraction')), escher[0] if escher else None)
 
-    W, H = 700, 260
-    parts = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" font-family="ui-monospace,Menlo,monospace">',
-        f'<rect width="{W}" height="{H}" fill="#fff"/>',
+    W = 700
+    thumb = 140
+    body = [
         f'<text x="20" y="24" font-size="13" font-weight="700" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" fill="#111">Provenance fields on one module</text>',
     ]
     if not sample:
-        parts.append('</svg>')
+        H = 48
+        parts = [
+            f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" font-family="ui-monospace,Menlo,monospace">',
+            f'<rect width="{W}" height="{H}" fill="#fff"/>',
+            *body,
+            '</svg>',
+        ]
         path = OUT / 'worked_provenance.svg'
         path.write_text('\n'.join(parts), encoding='utf-8')
         return path
@@ -1104,13 +1136,19 @@ def _worked_provenance_figure(by_src, mods, sets):
     ]
     if also_in:
         lines.append('also_in:  ' + ', '.join(SOURCE_LABEL.get(s, s) for s in also_in))
-    y = 52
+    y = 48
     for line in lines:
-        parts.append(f'<text x="28" y="{y}" font-size="12" fill="#374151">{html.escape(line)}</text>')
-        y += 20
-    parts.append(f'<rect x="{W-170}" y="48" width="140" height="140" rx="8" fill="#fafafa" stroke="#d0d7de"/>')
-    parts.extend(draw_module_paths(sample, W - 170, 48, 140, stroke='#111', lw=1.0, node_r=1.8))
-    parts.append('</svg>')
+        body.append(f'<text x="28" y="{y}" font-size="12" fill="#374151">{html.escape(line)}</text>')
+        y += 18
+    body.append(f'<rect x="{W-170}" y="40" width="{thumb}" height="{thumb}" rx="8" fill="#fafafa" stroke="#d0d7de"/>')
+    body.extend(draw_module_paths(sample, W - 170, 40, thumb, stroke='#111', lw=1.0, node_r=1.8))
+    H = max(y + 8, 40 + thumb + 8)
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" font-family="ui-monospace,Menlo,monospace">',
+        f'<rect width="{W}" height="{H}" fill="#fff"/>',
+        *body,
+        '</svg>',
+    ]
     path = OUT / 'worked_provenance.svg'
     path.write_text('\n'.join(parts), encoding='utf-8')
     _svg_to_png(path, OUT / 'worked_provenance.png', width=700)

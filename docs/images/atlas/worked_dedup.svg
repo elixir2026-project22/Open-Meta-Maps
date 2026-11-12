@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 320" width="920" height="320" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif">
-<rect width="920" height="320" fill="#fff"/>
-<text x="20" y="24" font-size="13" font-weight="700" fill="#111">Dedup: identical sets merge; nested crumbs remain stored</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 252" width="920" height="252" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif">
+<rect width="920" height="252" fill="#fff"/>
+<text x="20" y="24" font-size="13" font-weight="700" fill="#111">Dedup: identical sets merge; nested modules remain stored</text>
 <text x="20" y="48" font-size="12" font-weight="600" fill="#111">A. Same reaction set across sources (drawings may differ)</text>
 <rect x="20" y="60" width="120" height="120" rx="8" fill="#fafafa" stroke="#3f8f6b" stroke-width="1.2"/>
 <line x1="80.00" y1="145.12" x2="80.00" y2="137.08" stroke="#111" stroke-width="1.0" stroke-linecap="round"/>
@@ -91,7 +91,7 @@
 <text x="350" y="130" font-size="10" fill="#374151">also_in:</text>
 <text x="350" y="146" font-size="10" fill="#374151">Escher</text>
 <text x="350" y="162" font-size="10" fill="#374151">Human-maps</text>
-<text x="560" y="48" font-size="12" font-weight="600" fill="#111">B. Nested crumb</text>
+<text x="560" y="48" font-size="12" font-weight="600" fill="#111">B. Nested module</text>
 <rect x="560" y="60" width="120" height="120" rx="8" fill="#fafafa" stroke="#b9852f" stroke-width="1.2"/>
 <line x1="604.90" y1="103.48" x2="608.92" y2="126.23" stroke="#111" stroke-width="1.0" stroke-linecap="round"/>
 <line x1="604.90" y1="103.48" x2="605.11" y2="96.11" stroke="#111" stroke-width="1.0" stroke-linecap="round"/>
@@ -128,7 +128,7 @@
 <circle cx="607.63" cy="133.55" r="1.7" fill="#111111"/>
 <circle cx="621.48" cy="138.89" r="1.7" fill="#111111"/>
 <circle cx="660.25" cy="102.80" r="1.7" fill="#111111"/>
-<text x="620.0" y="194" text-anchor="middle" font-size="10" font-weight="600" fill="#111">nested subset</text>
+<text x="620.0" y="194" text-anchor="middle" font-size="10" font-weight="600" fill="#111">nested module</text>
 <text x="620.0" y="208" text-anchor="middle" font-size="9" fill="#6b7280">8 reactions</text>
 <rect x="696" y="60" width="120" height="120" rx="8" fill="#fafafa" stroke="#3f8f6b" stroke-width="1.2"/>
 <line x1="740.90" y1="105.58" x2="744.92" y2="128.33" stroke="#111" stroke-width="1.0" stroke-linecap="round"/>
@@ -231,6 +231,6 @@
 <text x="756.0" y="194" text-anchor="middle" font-size="10" font-weight="600" fill="#111">larger window</text>
 <text x="756.0" y="208" text-anchor="middle" font-size="9" fill="#6b7280">24 reactions</text>
 <path d="M686 120 L716 120 L716 114 L730 124 L716 134 L716 128 L686 128 Z" fill="#6b7280"/>
-<text x="20" y="284" font-size="11" fill="#4b5563">A: identical canonical reaction sets collapse to one unique entry with also_in provenance. B: smaller reaction</text>
-<text x="20" y="298" font-size="11" fill="#4b5563">sets nested in larger windows stay stored as multi-scale crumbs.</text>
+<text x="20" y="226" font-size="11" fill="#4b5563">A: identical canonical reaction sets collapse to one unique entry with also_in provenance. B: smaller reaction</text>
+<text x="20" y="240" font-size="11" fill="#4b5563">sets nested in larger windows stay stored as multi-scale nested modules.</text>
 </svg>

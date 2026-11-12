@@ -135,7 +135,7 @@
 <circle cx="433.76" cy="71.52" r="2.0" fill="#111111"/>
 <circle cx="398.24" cy="109.13" r="2.0" fill="#111111"/>
 <text x="416.0" y="180" text-anchor="middle" font-size="11" font-weight="600" fill="#111">Escher</text>
-<text x="416.0" y="194" text-anchor="middle" font-size="10" fill="#374151">RECON1.LIPID_METABOLISM</text>
+<text x="416.0" y="194" text-anchor="middle" font-size="10" fill="#374151">RECON1.LIPID_METABOLI…</text>
 <text x="416.0" y="206" text-anchor="middle" font-size="10" fill="#6b7280">12 reactions</text>
 <rect x="504" y="18" width="148" height="148" rx="8" fill="#fafafa" stroke="#4a6fa5" stroke-width="1.2"/>
 <line x1="578.22" y1="52.38" x2="566.53" y2="38.72" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
@@ -366,7 +366,7 @@
 <circle cx="524.83" cy="306.12" r="2.0" fill="#111111"/>
 <text x="578.0" y="394" text-anchor="middle" font-size="11" font-weight="600" fill="#111">WikiPathways</text>
 <text x="578.0" y="408" text-anchor="middle" font-size="10" fill="#374151">Biomarkers for</text>
-<text x="578.0" y="420" text-anchor="middle" font-size="10" fill="#374151">pyrimidine metabolism</text>
+<text x="578.0" y="420" text-anchor="middle" font-size="10" fill="#374151">pyrimidine metabolism…</text>
 <text x="578.0" y="432" text-anchor="middle" font-size="10" fill="#6b7280">12 reactions</text>
 <rect x="18" y="446" width="148" height="148" rx="8" fill="#fafafa" stroke="#7a9a55" stroke-width="1.2"/>
 <line x1="92.36" y1="498.77" x2="145.28" y2="498.77" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
@@ -442,7 +442,7 @@
 <circle cx="255.67" cy="478.59" r="2.0" fill="#111111"/>
 <text x="254.0" y="608" text-anchor="middle" font-size="11" font-weight="600" fill="#111">Human-maps</text>
 <text x="254.0" y="622" text-anchor="middle" font-size="10" fill="#374151">Glycolysis /</text>
-<text x="254.0" y="634" text-anchor="middle" font-size="10" fill="#374151">Gluconeogenesis</text>
+<text x="254.0" y="634" text-anchor="middle" font-size="10" fill="#374151">Gluconeogenesis…</text>
 <text x="254.0" y="646" text-anchor="middle" font-size="10" fill="#6b7280">8 reactions</text>
 <rect x="342" y="446" width="148" height="148" rx="8" fill="#fafafa" stroke="#b07a45" stroke-width="1.2"/>
 <line x1="382.21" y1="504.48" x2="398.47" y2="504.48" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>
@@ -493,7 +493,7 @@
 <circle cx="378.10" cy="540.35" r="2.0" fill="#111111"/>
 <text x="416.0" y="608" text-anchor="middle" font-size="11" font-weight="600" fill="#111">Human-maps</text>
 <text x="416.0" y="622" text-anchor="middle" font-size="10" fill="#374151">Cholesterol</text>
-<text x="416.0" y="634" text-anchor="middle" font-size="10" fill="#374151">biosynthesis 1 (Bloch</text>
+<text x="416.0" y="634" text-anchor="middle" font-size="10" fill="#374151">biosynthesis 1 (Bloch…</text>
 <text x="416.0" y="646" text-anchor="middle" font-size="10" fill="#6b7280">8 reactions</text>
 <rect x="504" y="446" width="148" height="148" rx="8" fill="#fafafa" stroke="#5a6670" stroke-width="1.2"/>
 <line x1="585.99" y1="524.47" x2="595.05" y2="524.47" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>

@@ -80,7 +80,7 @@ Attribution: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Source notes: [do
 ### Extraction, identity and selection
 
 - **Cut** — documented extractors: in-repo Escher community cutter (`escher_community_windows`, parity-tested); Stage B `diagram_modules` / `geometry_modules` (size-scaled roots, near-nested dedupe) for Reactome, WikiPathways, Human-maps, Metabolism Regulation, PANTHER and iCH360; BRENDA’s own extractor.
-- **Deduplicate** — near-duplicate windows grouped into core families and geometric variants; Stage B also drops near-nested crumbs (`nest_factor=2`).
+- **Deduplicate** — near-duplicate windows grouped into core families and geometric variants; Stage B also drops near-nested modules (`nest_factor=2`).
 - **Canonical ids** — unique crosswalks map reaction references to BiGG, MetaNetX and/or Rhea where available (Human-maps via Human-GEM; Metabolism Regulation via participant ChEBI; Escher / iCH360 already BiGG).
 - **Provenance** — each module records source, map, licence and an `extraction` block (method, version, parameters, counts).
 - **Selection** — coverage ranks first; among same-source biochemical matches with the same reaction set, the denser drawing is kept.

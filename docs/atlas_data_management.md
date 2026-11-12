@@ -23,7 +23,7 @@ Coverage-preserving defaults for every source that uses `database.diagram_module
 
 - **Size-scaled roots (`root_policy=all_roots_upto_48_else_max_roots_24`):** all reactions when \(N \le 48\); otherwise cap at 24 roots (large maps stay tractable; small maps keep full root coverage).
 - **Near-nested dedupe (`nest_factor=2`):** a window S nested in T is dropped when |T| ≤ 2·|S| (size-2 ⊂ size-4, size-4 ⊂ size-8, size-8 ⊂ size-12/16, size-12 ⊂ size-24 go; size-2 ⊂ size-12/24 stays as a multi-scale seed).
-- **Size-1/2 windows that are not near-nested stay stored** (useful on small models). Preference is handled in `retrieval.select` (geometry-crumb demotion + complete-equation bonus), not by deleting non-nested crumbs from the library.
+- **Size-1/2 windows that are not near-nested stay stored** (useful on small models). Preference is handled in `retrieval.select` (geometry-only demotion + complete-equation bonus), not by deleting non-nested small modules from the library.
 - Provenance records `independent_only`, `nest_factor`, `root_policy`, `raw_windows_before_dedupe`, and `counts.independent_modules`.
 
 Surgical rebuild entrypoints on the build path: `reactome_recut.py` (Reactome open-core only), `human_maps_library.py`, `wikipathways_rebuild.py`, `ich360_library.py`, `panther_library.py`, `metabolismregulation_library.py`. Escher community windows remain on `escher_community_windows` (unchanged cutter). BRENDA remains on `brenda_library.extract` (not `diagram_modules`).
@@ -43,7 +43,7 @@ Surgical rebuild entrypoints on the build path: `reactome_recut.py` (Reactome op
 | BRENDA | `brenda_library.extract` | 11703 | 11703 | 0.9719 | 0.9719 |
 | Units (companion) | `units_library.decompose` | 2963 | 2963 | 0.0 | 0.0 |
 
-Size-1/2 crumbs remain in every recut library (example: Human-maps after still has 2722 size-1/2 modules). On iIT341, 46 selected complete-equation modules are size-2 — crumbs do win verified matches and must stay stored.
+Size-1/2 modules remain in every recut library (example: Human-maps after still has 2722 size-1/2 modules). On iIT341, 46 selected complete-equation modules are size-2 — small modules do win verified matches and must stay stored.
 
 `units_library.decompose` remains a **companion layer** (`data/extensions/units/`; not in the default `database.modules()` load). Use `--library units_sub` for units + on-demand sub-windows.
 
@@ -122,7 +122,7 @@ Figures: `PYTHONPATH=layout_atlas python3 tools/atlas_module_figures.py worked` 
 
 <img src="images/atlas/worked_cut.svg" alt="Source Escher map with cut-window outlines and the resulting non-trivial modules" width="700">
 
-A community Escher map is cut into reaction windows (sizes 1–40). The left panel shows the source map with window outlines; the right panel shows the resulting non-trivial modules. Near-nested crumbs may remain stored; Stage B drops only near-nested pairs under `nest_factor=2`.
+A community Escher map is cut into reaction windows (sizes 1–40). The left panel shows the source map with window outlines; the right panel shows the resulting non-trivial modules. Near-nested modules may remain stored; Stage B drops only near-nested pairs under `nest_factor=2`.
 
 ### 2. Canonical reaction identifiers
 
@@ -132,9 +132,9 @@ Human-maps keep the native MAR id under `human.gem` and attach BiGG / MetaNetX /
 
 ### 3. Dedup: identical sets and nesting
 
-<img src="images/atlas/worked_dedup.svg" alt="Exact cross-source duplicate collapsed with also_in provenance, plus a nested crumb inside a larger window" width="700">
+<img src="images/atlas/worked_dedup.svg" alt="Exact cross-source duplicate collapsed with also_in provenance, plus a nested module inside a larger window" width="700">
 
-Exact duplicates across sources collapse to one unique reaction set with `also_in` listing every contributing source. Nested crumbs (smaller reaction sets inside larger windows) stay stored as multi-scale seeds. At compose time, `retrieval.select` still prefers the denser drawing among same-source equal sets.
+Exact duplicates across sources collapse to one unique reaction set with `also_in` listing every contributing source. Nested modules (smaller reaction sets inside larger windows) stay stored as multi-scale seeds. At compose time, `retrieval.select` still prefers the denser drawing among same-source equal sets.
 
 ### 4. Provenance on one module
 
@@ -158,9 +158,9 @@ Among same-source biochemical proposals with identical reaction sets, only the d
 
 `retrieval.select` keeps coverage (`2 × matched reactions`) as the dominant term and does not change `selection_score` for compactness. Among same-source proposals with identical reaction sets, only the denser drawing is kept (compactness `matched_nodes / bbox_area` breaks remaining ties). Stage B also:
 
-- subtracts 3.0 for size≤2 geometry-only proposals (`biol < 1`) so crumbs cannot displace denser covers;
+- subtracts 3.0 for size≤2 geometry-only proposals (`biol < 1`) so small modules cannot displace denser covers;
 - adds 4.0 for complete-equation / stoichiometry-verified proposals;
-- when ≥8 free-standing size≤2 CE crumbs overlap a size≥4 non-CE proposal, locks **all** size≤2 CE crumbs before geometry fill-in (pool-density rule on reaction sets only — no source- or model-id branches); sparse pools keep pure score order so larger CE packs are not fragmented;
+- when ≥8 free-standing size≤2 CE modules overlap a size≥4 non-CE proposal, locks **all** size≤2 CE modules before geometry fill-in (pool-density rule on reaction sets only — no source- or model-id branches); sparse pools keep pure score order so larger CE packs are not fragmented;
 - refuses geometry-only one-for-up-to-two exchanges that would drop complete-equation covers.
 
 `layout_priority` still demotes `possibly_automatic` layouts (BRENDA).
