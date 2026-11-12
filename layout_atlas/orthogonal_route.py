@@ -45,10 +45,6 @@ LONG_EDGE = 160.0        # px: long algorithm edges always get orthogonal routes
 SNAP_TOL = 18.0          # px: treat as already axis-aligned / snap band
 ORTHO_CANDIDATES = 12    # hard budget of path candidates per edge
 FIT_EXTEND_TRIALS = 24   # hard budget of post-prefix keep trials (large maps)
-# Binary-search steps for the per-edge length ceiling: enough to shrink the
-# [chord, Manhattan] window below LENGTH_CEILING_TOL for edges up to ~1e5 px
-# (ceil(log2(1e5 * √2 / 0.05)) ≈ 22; 24 leaves a small margin).
-LENGTH_CEILING_ITERS = 24
 LENGTH_CEILING_TOL = 0.05  # px: stop when the lo/hi length window is this tight
 # Chord must lie within 30° of H/V (min/max ≤ tan30°) so an L-leave stays in the
 # metabolite half-plane and participant_consistency does not fall.
@@ -613,10 +609,10 @@ def apply_orthogonal(data, skip_edges=(), only=None, bezier_stub_fn=None, gem_pa
         idx = key_index.get(key)
         if idx is None:
             return old_L
-        # Ceiling: Manhattan upper bound for ≤2-bend ortho paths.
-        lo, hi = float(old_L), float(old_L) * 1.41421356237 + 1.0
+        # Ceiling: Manhattan upper bound for ≤2-bend ortho paths (√2 × chord).
+        lo, hi = float(old_L), float(old_L) * math.sqrt(2)
         best = float(old_L)
-        for _ in range(LENGTH_CEILING_ITERS):
+        while hi - lo >= LENGTH_CEILING_TOL:
             mid = 0.5 * (lo + hi)
             trial = list(lengths)
             trial[idx] = mid
@@ -625,8 +621,6 @@ def apply_orthogonal(data, skip_edges=(), only=None, bezier_stub_fn=None, gem_pa
                 lo = mid
             else:
                 hi = mid
-            if hi - lo < LENGTH_CEILING_TOL:
-                break
         return best
 
     for rx in sorted(reactions.values(), key=lambda r: r['bigg_id']):
