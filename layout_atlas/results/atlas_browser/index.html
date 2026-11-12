@@ -102,14 +102,14 @@ button.lnk{font:inherit;background:none;border:0;color:var(--accent);cursor:poin
 </style><header class="top"><div class="in"><a class="brand" href="../../../index.html">Open Meta Maps</a><nav aria-label="Site"><div class="grp"><a href="../tool/index.html">Map Generator</a><a href="index.html" aria-current="page">Atlas Browser</a><a href="../about/index.html">About / Provenance</a></div></nav></div></header><main><h1>Atlas Browser</h1><p class="lead">Search curated Atlas modules by EC, reaction, metabolite, source map or licence, then download Escher JSON with a provenance manifest. Identical reaction sets are collapsed by default.</p><style>
 .ab-toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 12px}
 .ab-toolbar .sel{font-size:13px;color:var(--mute)}
-.ab-card{position:relative;cursor:pointer}
+.ab-card{position:relative;cursor:pointer;display:flex;flex-direction:column;min-width:0;overflow:hidden}
 .ab-card.sel{outline:2px solid var(--accent)}
 .ab-card .chk{position:absolute;top:10px;right:10px;z-index:2}
-.ab-th{position:relative;display:block;width:100%;height:150px;margin-bottom:10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);overflow:hidden}
-.ab-th::before{content:"Loading…";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--mute);pointer-events:none}
+.ab-th{position:relative;display:block;width:100%;aspect-ratio:3/2;height:auto;margin-bottom:10px;border-radius:8px;border:1px solid var(--line);background:#fafafa;overflow:hidden}
+.ab-th::before{content:"Loading…";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--mute);pointer-events:none;z-index:1}
 .ab-th.is-ready::before,.ab-th.is-error::before{content:none}
-.ab-th.is-error::after{content:"Preview unavailable";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--mute);background:var(--bg)}
-.ab-th img.th{display:block;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .15s ease}
+.ab-th.is-error::after{content:"Preview unavailable";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--mute);background:#fafafa}
+.ab-th img.th{position:absolute;inset:0;display:block;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:cover!important;object-position:center;opacity:0;transition:opacity .15s ease}
 .ab-th.is-ready img.th{opacity:1}
 .ab-empty{color:var(--mute);padding:24px 0}
 .ab-detail{display:none}.ab-detail.on{display:block}
@@ -119,9 +119,10 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
 .filters .grow{flex:1;min-width:min(280px,100%)}
 .ab-also{font-size:12px;color:var(--mute);margin:0 0 6px}
 .ab-detect{font-size:12px;color:var(--mute);margin:4px 0 0;min-height:1.2em}
-.ab-wins{font-size:12px;margin:0 0 6px}
+.ab-wins{font-size:12px;margin:0 0 6px;min-width:0}
 .ab-wins button{font:inherit;font-size:12px;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:999px;padding:1px 10px;cursor:pointer}
-.ab-wins ul{margin:6px 0 0;padding-left:18px;color:var(--mute)}
+.ab-wins ul.winlist{display:block;margin:6px 0 0;padding:4px 8px 4px 18px;color:var(--mute);max-height:4.8em;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;list-style:disc;border:1px solid var(--line);border-radius:6px;background:var(--bg);box-sizing:border-box}
+.ab-wins ul.winlist li{margin:0 0 2px;padding:0;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tip{border-bottom:1px dotted var(--mute);cursor:help}
 </style>
 <div id="listView" class="ab-list">
@@ -210,22 +211,24 @@ if(!window.__abThumbScroll){
   });
  },{passive:true});
 }
+function reactionLabel(n){n=+n||0;return n===1?'1 reaction':n+' reactions'}
 function card(m){
  var checked=state.selected[m.id]?' checked':'';
  var also=m.also_in?'<p class="ab-also">'+esc(m.also_in.label)+'</p>':'';
  var wins='';
  if(m.windows_count&&m.windows_count>1){
-  wins='<p class="ab-wins"><button type="button" class="winbtn" data-id="'+esc(m.id)+'">'+esc(m.windows_count)+' windows</button><ul class="winlist" id="wins-'+esc(m.id)+'" hidden></ul></p>';
+  wins='<div class="ab-wins"><button type="button" class="winbtn" data-id="'+esc(m.id)+'">'+esc(m.windows_count)+' windows</button><ul class="winlist" id="wins-'+esc(m.id)+'" hidden></ul></div>';
  }
  var thumb=m.thumbnail||'';
  var sub=m.subtitle||((m.source_label||m.source||'')+(m.matched&&m.matched.length?' · matches '+m.matched.join(', '):''));
+ var sizeLab=m.size_label||reactionLabel(m.size);
  return '<article class="card ab-card'+(state.selected[m.id]?' sel':'')+'" data-id="'+esc(m.id)+'">'
   +'<label class="chk" onclick="event.stopPropagation()"><input type="checkbox" data-id="'+esc(m.id)+'"'+checked+'></label>'
   +'<div class="ab-th" data-src="'+esc(thumb)+'"><img class="th" alt="" decoding="async" data-src="'+esc(thumb)+'" src="'+TH_PLACEHOLDER+'"></div>'
   +'<h2 class="dn">'+esc(m.name||m.id)+'</h2>'
   +'<p class="meta">'+esc(sub)+'</p>'+also+wins
   +'<div class="tags"><span class="tag src-'+esc(m.source)+'">'+esc(m.source_label||m.source)+'</span>'
-  +'<span class="tag">'+esc(m.size)+' reactions</span>'
+  +'<span class="tag">'+esc(sizeLab)+'</span>'
   +'<span class="tag lic">'+esc(m.license)+'</span></div></article>'}
 function render(data){
  state.lastIds=(data.results||[]).map(function(m){return m.id});
@@ -267,8 +270,12 @@ $('grid').onclick=function(e){
   var id=win.getAttribute('data-id'),list=$('wins-'+id),card=state.cards[id];
   if(!list||!card)return;
   if(list.hidden){
-   list.innerHTML=(card.windows||[]).map(function(w){
-    return '<li><a href="#" class="tomod" data-id="'+esc(w.id)+'">'+esc(w.name||w.id)+'</a> · '+esc(w.size)+' reactions</li>';
+   var rows=(card.windows||[]).slice().sort(function(a,b){return (+b.size||0)-(+a.size||0)||String(a.id||'').localeCompare(String(b.id||''))});
+   var seen={},uniq=[];
+   rows.forEach(function(w){var s=+w.size||0;if(seen[s])return;seen[s]=1;uniq.push(w)});
+   list.innerHTML=uniq.map(function(w){
+    var lab=w.size_label||reactionLabel(w.size);
+    return '<li><a href="#" class="tomod" data-id="'+esc(w.id)+'" title="'+esc(w.id)+'">'+esc(lab)+'</a></li>';
    }).join('');
    list.hidden=false;
   }else list.hidden=true;

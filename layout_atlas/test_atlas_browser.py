@@ -55,11 +55,11 @@ class TestSearchIndex:
             _mod('mod_pfk_alt', rx_id='TESTKX', refs={'bigg.reaction': ['TESTKX']}, ec=['9.9.9.9'],
                  mets=['g6p_c', 'f6p_c'], name='iJO1366.Glycolysis', map_id='iJO1366', source='escher',
                  attribution='Escher community-maps (CC0)'),
-            # Second window on the same source map as mod_pfk (same name).
+            # Second window on the same source map as mod_pfk (same reactions, larger size).
             _mod('mod_pfk_win2', rx_id='TESTKX', ec=['9.9.9.9'], mets=['g6p_c', 'f6p_c'],
-                 name='e_coli_core.Glycolysis', map_id='e_coli_core', size=3, extra_rx=['X']),
+                 name='e_coli_core.Glycolysis', map_id='e_coli_core', size=5),
             # Larger module ranks first.
-            _mod('mod_big', rx_id='A', extra_rx=['B', 'C', 'D'], mets=['x_c', 'y_c'], name='Big.Map', map_id='big1', size=4),
+            _mod('mod_big', rx_id='A', extra_rx=['B', 'C', 'D', 'E', 'F', 'G'], mets=['x_c', 'y_c'], name='Big.Map', map_id='big1'),
             _mod('mod_bad', license='CC-BY-SA-4.0'),
         ]
         ab._index = None
@@ -88,10 +88,17 @@ class TestSearchIndex:
         assert r['total'] == 1
         card = r['results'][0]
         assert card['windows_count'] >= 2  # pfk + win2 on e_coli_core (or alt alone)
+        # Representative is the largest window on that map (win2 size 5 > pfk size 2).
+        assert card['id'] == 'mod_pfk_win2'
+        assert card['size'] == 5
+        assert card['size_label'] == '5 reactions'
         assert card['also_in']['maps'] == 2
-        assert 'also in:' in card['also_in']['label']
+        assert card['also_in']['label'] == 'also in: 1 source / 2 maps'
         assert '9.9.9.9' in ' '.join(card['matched'])
         assert card['subtitle'].startswith(ab.source_label(card['source']))
+        # Expanded windows list is size-desc and labels size once.
+        assert [w['size'] for w in card['windows']] == sorted((w['size'] for w in card['windows']), reverse=True)
+        assert card['windows'][0]['size_label'] == '5 reactions'
 
     def test_show_all_windows_expands(self):
         r = ab.search({'q': '9.9.9.9', 'variants': '1'}, index=self.idx)
@@ -102,7 +109,7 @@ class TestSearchIndex:
     def test_ranks_larger_first(self):
         r = ab.search({}, index=self.idx)
         assert r['results'][0]['id'] == 'mod_big'
-        assert r['results'][0]['size'] == 4
+        assert r['results'][0]['size'] == 7
 
     def test_search_by_reaction_canonical_and_source(self):
         r = ab.search({'q': 'HEX1'}, index=self.idx)
@@ -274,7 +281,15 @@ class TestEscherExportAndThumbnail:
         svg = ab.thumbnail_svg(m)
         assert '<circle' in svg
         assert '<line' in svg
-        assert 'viewBox="0 0 240 160"' in svg
+        assert 'viewBox="' in svg
+        assert 'width="' not in svg.split('>', 1)[0]
+        assert 'stroke="#111"' in svg
+
+    def test_count_label_pluralisation(self):
+        assert ab._count_label(1, 'reaction') == '1 reaction'
+        assert ab._count_label(2, 'reaction') == '2 reactions'
+        assert ab._count_label(1, 'source') == '1 source'
+        assert ab._count_label(4, 'map') == '4 maps'
 
     def test_quality_plain_language(self):
         q = ab.quality_label('semantic_transfer')
@@ -300,3 +315,8 @@ class TestEscherExportAndThumbnail:
         assert '1.1.1.100, HEX1, g6p_c, iJO1366' in html
         assert 'qDetect' in html
         assert 'windows' in html
+        assert 'max-height:4.8em' in html
+        assert 'aspect-ratio:3/2' in html
+        assert 'object-fit:cover' in html
+        assert 'reactionLabel' in html
+        assert 'size_label' in html

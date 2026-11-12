@@ -559,9 +559,21 @@ def _query_matches(m, ec='', rx='', met='', mmap='', q=''):
     return matched, len(matched)
 
 
+def _count_label(n, singular, plural=None):
+    """English count label with simple pluralisation (1 reaction, 2 reactions)."""
+    n = int(n or 0)
+    word = singular if n == 1 else (plural or (singular + 's'))
+    return f'{n} {word}'
+
+
 def _compactness(m):
-    """Lower is more compact (prefer smaller windows when hit counts tie)."""
-    return int(m.get('size') or 0), _quality_rank(m.get('quality')), m.get('id') or ''
+    """Lower is more compact when size and hit counts already tie."""
+    return _quality_rank(m.get('quality')), m.get('id') or ''
+
+
+def _rep_rank(m):
+    """Largest query-matching window first; then more hits; then compactness."""
+    return (-int(m.get('size') or 0), -int(m.get('_hits') or 0)) + _compactness(m)
 
 
 def _group_by_source_map(hits, show_all_windows=False):
@@ -577,12 +589,14 @@ def _group_by_source_map(hits, show_all_windows=False):
     cards = []
     for key in order:
         members = by_map[key]
-        members.sort(key=lambda r: (-int(r.get('_hits') or 0),) + _compactness(r))
+        members.sort(key=_rep_rank)
+        # Windows list for the badge: largest first.
+        windows_sorted = sorted(members, key=lambda r: (-int(r.get('size') or 0), r.get('id') or ''))
         if show_all_windows:
             for m in members:
-                cards.append((m, [m], members))
+                cards.append((m, [m], windows_sorted))
         else:
-            cards.append((members[0], members, members))
+            cards.append((members[0], windows_sorted, windows_sorted))
     return cards
 
 
@@ -594,12 +608,12 @@ def _collapse_cross_source(map_cards):
         by_sig.setdefault(sig, []).append((rep, windows, all_on_map))
     out = []
     for sig, group in by_sig.items():
-        # Prefer most query hits, then most compact window as the visible card.
-        group.sort(key=lambda t: (-int(t[0].get('_hits') or 0),) + _compactness(t[0]))
+        # Prefer the largest / highest-hit representative as the visible card.
+        group.sort(key=lambda t: _rep_rank(t[0]))
         rep, windows, all_on_map = group[0]
         peers = [t[0] for t in group]
         out.append((rep, windows, all_on_map, peers))
-    out.sort(key=lambda t: (-int(t[0].get('_hits') or 0), -int(t[0].get('size') or 0),
+    out.sort(key=lambda t: (-int(t[0].get('size') or 0), -int(t[0].get('_hits') or 0),
                             -len({_map_key(p) for p in t[3]}), t[0].get('name') or '', t[0].get('id') or ''))
     return out
 
@@ -720,11 +734,12 @@ def public_card(m, windows=None, peers=None, matched=None, variants=None):
     also = None
     if len(peer_maps) > 1:
         sources = sorted({v.get('source') for v in peers if v.get('source')})
+        n_src, n_maps = len(sources), len(peer_maps)
         also = dict(
             modules=len(peers),
-            sources=len(sources),
-            maps=len(peer_maps),
-            label=f"also in: {len(sources)} sources / {len(peer_maps)} maps",
+            sources=n_src,
+            maps=n_maps,
+            label=f"also in: {_count_label(n_src, 'source')} / {_count_label(n_maps, 'map')}",
         )
     q = quality_label(m.get('quality'))
     sp = species_display(m.get('species'))
@@ -733,6 +748,11 @@ def public_card(m, windows=None, peers=None, matched=None, variants=None):
     subtitle = source_label(src)
     if match_bits:
         subtitle = f"{subtitle} · matches {match_bits}"
+    size = int(m.get('size') or 0)
+    windows_sorted = sorted(
+        windows,
+        key=lambda w: (-int(w.get('size') or 0), w.get('id') or ''),
+    )
     return dict(
         id=m['id'],
         source=src,
@@ -744,19 +764,21 @@ def public_card(m, windows=None, peers=None, matched=None, variants=None):
         species=sp,
         license=m['license'],
         attribution=attribution_string(m.get('attribution'), src),
-        size=m['size'],
+        size=size,
+        size_label=_count_label(size, 'reaction'),
         quality=m.get('quality') or '',
         quality_label=q['label'],
         quality_tip=q['tip'],
         rx_sig=m.get('rx_sig') or '',
         also_in=also,
-        windows_count=len(windows),
+        windows_count=len(windows_sorted),
         windows=[dict(
             id=w['id'], source=w.get('source') or '', name=w.get('name') or '',
-            map_id=w.get('map_id') or '', size=w.get('size') or 0,
+            map_id=w.get('map_id') or '', size=int(w.get('size') or 0),
+            size_label=_count_label(w.get('size'), 'reaction'),
             license=w.get('license') or '',
             thumbnail=f"/api/atlas/modules/{w['id']}/thumbnail.svg",
-        ) for w in windows],
+        ) for w in windows_sorted],
         variants=[dict(
             id=v['id'], source=v['source'], name=v['name'], map_id=v.get('map_id') or '',
             license=v.get('license') or '',
@@ -868,12 +890,13 @@ def module_detail(module_id, index=None):
         ports=mod.get('ports') or [],
         node_count=len(mod.get('nodes') or []),
         edge_count=len(mod.get('edges') or []),
-        also_in=dict(
+        also_in=(lambda n_src, n_maps: dict(
             modules=len(siblings),
-            sources=len({s['source'] for s in siblings}),
-            maps=len({(s['source'], s['name']) for s in siblings}),
-            label=f"{len({s['source'] for s in siblings})} sources / {len({(s['source'], s['name']) for s in siblings})} maps",
-        ) if len(siblings) > 1 else None,
+            sources=n_src,
+            maps=n_maps,
+            label=f"{_count_label(n_src, 'source')} / {_count_label(n_maps, 'map')}",
+        ))(len({s['source'] for s in siblings}), len({(s['source'], s['name']) for s in siblings}))
+        if len(siblings) > 1 else None,
         variants=[dict(s, attribution=attribution_string(s.get('attribution'), s.get('source') or '')) for s in siblings],
         thumbnail=f"/api/atlas/modules/{mod['id']}/thumbnail.svg",
     )
@@ -884,11 +907,12 @@ def thumbnail_svg(module, width=240, height=160):
 
     Black edges, white metabolite nodes with black stroke, filled black reaction
     nodes. Uniform scale + translate only (no rotate/mirror). Aspect preserved.
+    ViewBox hugs the content (small pad); CSS object-fit:cover fills the card.
     """
     usable = [n for n in (module.get('nodes') or []) if n.get('xy') is not None]
     if not usable:
         return (
-            f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}">'
+            f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}">'
             f'<rect width="100%" height="100%" fill="#fafafa"/>'
             f'<text x="12" y="{height // 2}" fill="#5b7480" font-size="12">No geometry</text></svg>'
         )
@@ -902,25 +926,32 @@ def thumbnail_svg(module, width=240, height=160):
         seen_xy.add(key)
         deduped.append(n)
     usable = deduped or usable
-    xs = [n['xy'][0] for n in usable]
-    ys = [n['xy'][1] for n in usable]
+    xs = [float(n['xy'][0]) for n in usable]
+    ys = [float(n['xy'][1]) for n in usable]
     min_x, max_x = min(xs), max(xs)
     min_y, max_y = min(ys), max(ys)
     bw = (max_x - min_x) or 1.0
     bh = (max_y - min_y) or 1.0
-    pad = 18.0
-    scale = min((width - 2 * pad) / bw, (height - 2 * pad) / bh)
-    ox = (width - bw * scale) / 2
-    oy = (height - bh * scale) / 2
+    # Small padding in content units (~4% of the longer span).
+    pad = 0.04 * max(bw, bh)
+    vb_x, vb_y = min_x - pad, min_y - pad
+    vb_w, vb_h = bw + 2 * pad, bh + 2 * pad
+    # Stroke / node size relative to content so they stay readable when covered.
+    unit = max(vb_w / width, vb_h / height)
+    sw = round(1.15 * unit, 4)
+    r_rx = round(2.5 * unit, 4)
+    r_met = round(2.7 * unit, 4)
 
     def pt(n):
-        return (round(ox + (n['xy'][0] - min_x) * scale, 2), round(oy + (n['xy'][1] - min_y) * scale, 2))
+        return (round(float(n['xy'][0]), 4), round(float(n['xy'][1]), 4))
 
     by_key = {n['key']: n for n in usable}
+    # No fixed width/height: viewBox is content-tight so CSS object-fit:cover
+    # can fill the card without internal letterboxing.
     parts = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}" '
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{vb_x:.4f} {vb_y:.4f} {vb_w:.4f} {vb_h:.4f}" '
         f'role="img" aria-label="{xml_escape(str(module.get("name") or module.get("id") or "module"))}">'
-        f'<rect width="100%" height="100%" fill="#fafafa"/>'
+        f'<rect x="{vb_x:.4f}" y="{vb_y:.4f}" width="{vb_w:.4f}" height="{vb_h:.4f}" fill="#fafafa"/>'
     ]
     for e in module.get('edges') or []:
         a, b = by_key.get(e.get('a')), by_key.get(e.get('b'))
@@ -928,16 +959,16 @@ def thumbnail_svg(module, width=240, height=160):
             continue
         (ax, ay), (bx, by) = pt(a), pt(b)
         parts.append(
-            f'<line x1="{ax}" y1="{ay}" x2="{bx}" y2="{by}" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>'
+            f'<line x1="{ax}" y1="{ay}" x2="{bx}" y2="{by}" stroke="#111" stroke-width="{sw}" stroke-linecap="round"/>'
         )
     for n in usable:
         x, y = pt(n)
         title = xml_escape(str(n.get('label') or n.get('entity') or ''))
         if n.get('role') == 'reaction':
-            parts.append(f'<circle cx="{x}" cy="{y}" r="2.2" fill="#111111"><title>{title}</title></circle>')
+            parts.append(f'<circle cx="{x}" cy="{y}" r="{r_rx}" fill="#111111"><title>{title}</title></circle>')
         else:
             parts.append(
-                f'<circle cx="{x}" cy="{y}" r="2.4" fill="#ffffff" stroke="#111111" stroke-width="1.05">'
+                f'<circle cx="{x}" cy="{y}" r="{r_met}" fill="#ffffff" stroke="#111111" stroke-width="{sw}">'
                 f'<title>{title}</title></circle>'
             )
     parts.append('</svg>')
@@ -1129,14 +1160,14 @@ def page_html():
     css_extra = '''<style>
 .ab-toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 12px}
 .ab-toolbar .sel{font-size:13px;color:var(--mute)}
-.ab-card{position:relative;cursor:pointer}
+.ab-card{position:relative;cursor:pointer;display:flex;flex-direction:column;min-width:0;overflow:hidden}
 .ab-card.sel{outline:2px solid var(--accent)}
 .ab-card .chk{position:absolute;top:10px;right:10px;z-index:2}
-.ab-th{position:relative;display:block;width:100%;height:150px;margin-bottom:10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);overflow:hidden}
-.ab-th::before{content:"Loading…";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--mute);pointer-events:none}
+.ab-th{position:relative;display:block;width:100%;aspect-ratio:3/2;height:auto;margin-bottom:10px;border-radius:8px;border:1px solid var(--line);background:#fafafa;overflow:hidden}
+.ab-th::before{content:"Loading…";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--mute);pointer-events:none;z-index:1}
 .ab-th.is-ready::before,.ab-th.is-error::before{content:none}
-.ab-th.is-error::after{content:"Preview unavailable";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--mute);background:var(--bg)}
-.ab-th img.th{display:block;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .15s ease}
+.ab-th.is-error::after{content:"Preview unavailable";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--mute);background:#fafafa}
+.ab-th img.th{position:absolute;inset:0;display:block;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:cover!important;object-position:center;opacity:0;transition:opacity .15s ease}
 .ab-th.is-ready img.th{opacity:1}
 .ab-empty{color:var(--mute);padding:24px 0}
 .ab-detail{display:none}.ab-detail.on{display:block}
@@ -1146,9 +1177,10 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
 .filters .grow{flex:1;min-width:min(280px,100%)}
 .ab-also{font-size:12px;color:var(--mute);margin:0 0 6px}
 .ab-detect{font-size:12px;color:var(--mute);margin:4px 0 0;min-height:1.2em}
-.ab-wins{font-size:12px;margin:0 0 6px}
+.ab-wins{font-size:12px;margin:0 0 6px;min-width:0}
 .ab-wins button{font:inherit;font-size:12px;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:999px;padding:1px 10px;cursor:pointer}
-.ab-wins ul{margin:6px 0 0;padding-left:18px;color:var(--mute)}
+.ab-wins ul.winlist{display:block;margin:6px 0 0;padding:4px 8px 4px 18px;color:var(--mute);max-height:4.8em;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;list-style:disc;border:1px solid var(--line);border-radius:6px;background:var(--bg);box-sizing:border-box}
+.ab-wins ul.winlist li{margin:0 0 2px;padding:0;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tip{border-bottom:1px dotted var(--mute);cursor:help}
 </style>'''
     body = css_extra + r'''
@@ -1238,22 +1270,24 @@ if(!window.__abThumbScroll){
   });
  },{passive:true});
 }
+function reactionLabel(n){n=+n||0;return n===1?'1 reaction':n+' reactions'}
 function card(m){
  var checked=state.selected[m.id]?' checked':'';
  var also=m.also_in?'<p class="ab-also">'+esc(m.also_in.label)+'</p>':'';
  var wins='';
  if(m.windows_count&&m.windows_count>1){
-  wins='<p class="ab-wins"><button type="button" class="winbtn" data-id="'+esc(m.id)+'">'+esc(m.windows_count)+' windows</button><ul class="winlist" id="wins-'+esc(m.id)+'" hidden></ul></p>';
+  wins='<div class="ab-wins"><button type="button" class="winbtn" data-id="'+esc(m.id)+'">'+esc(m.windows_count)+' windows</button><ul class="winlist" id="wins-'+esc(m.id)+'" hidden></ul></div>';
  }
  var thumb=m.thumbnail||'';
  var sub=m.subtitle||((m.source_label||m.source||'')+(m.matched&&m.matched.length?' · matches '+m.matched.join(', '):''));
+ var sizeLab=m.size_label||reactionLabel(m.size);
  return '<article class="card ab-card'+(state.selected[m.id]?' sel':'')+'" data-id="'+esc(m.id)+'">'
   +'<label class="chk" onclick="event.stopPropagation()"><input type="checkbox" data-id="'+esc(m.id)+'"'+checked+'></label>'
   +'<div class="ab-th" data-src="'+esc(thumb)+'"><img class="th" alt="" decoding="async" data-src="'+esc(thumb)+'" src="'+TH_PLACEHOLDER+'"></div>'
   +'<h2 class="dn">'+esc(m.name||m.id)+'</h2>'
   +'<p class="meta">'+esc(sub)+'</p>'+also+wins
   +'<div class="tags"><span class="tag src-'+esc(m.source)+'">'+esc(m.source_label||m.source)+'</span>'
-  +'<span class="tag">'+esc(m.size)+' reactions</span>'
+  +'<span class="tag">'+esc(sizeLab)+'</span>'
   +'<span class="tag lic">'+esc(m.license)+'</span></div></article>'}
 function render(data){
  state.lastIds=(data.results||[]).map(function(m){return m.id});
@@ -1295,8 +1329,12 @@ $('grid').onclick=function(e){
   var id=win.getAttribute('data-id'),list=$('wins-'+id),card=state.cards[id];
   if(!list||!card)return;
   if(list.hidden){
-   list.innerHTML=(card.windows||[]).map(function(w){
-    return '<li><a href="#" class="tomod" data-id="'+esc(w.id)+'">'+esc(w.name||w.id)+'</a> · '+esc(w.size)+' reactions</li>';
+   var rows=(card.windows||[]).slice().sort(function(a,b){return (+b.size||0)-(+a.size||0)||String(a.id||'').localeCompare(String(b.id||''))});
+   var seen={},uniq=[];
+   rows.forEach(function(w){var s=+w.size||0;if(seen[s])return;seen[s]=1;uniq.push(w)});
+   list.innerHTML=uniq.map(function(w){
+    var lab=w.size_label||reactionLabel(w.size);
+    return '<li><a href="#" class="tomod" data-id="'+esc(w.id)+'" title="'+esc(w.id)+'">'+esc(lab)+'</a></li>';
    }).join('');
    list.hidden=false;
   }else list.hidden=true;
