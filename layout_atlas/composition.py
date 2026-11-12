@@ -409,7 +409,18 @@ def compose(model, scene, blocks, cur):
             overlap_w = max(0.0, min(chi[0], mhi[0]) - max(clo[0], mlo[0]))
             overlap_h = max(0.0, min(chi[1], mhi[1]) - max(clo[1], mlo[1]))
             area = max(float((chi[0] - clo[0]) * (chi[1] - clo[1])), 1.0)
-            if overlap_w * overlap_h >= 0.45 * area:
+            # Outside, barely overlapping, or centre outside the main core (outer
+            # 15% margin) — pull into the largest free region of the main AABB.
+            centre = 0.5 * (clo + chi)
+            core_lo = mlo + 0.08 * (mhi - mlo)
+            core_hi = mhi - 0.08 * (mhi - mlo)
+            outside_core = (centre[0] < core_lo[0] or centre[0] > core_hi[0]
+                            or centre[1] < core_lo[1] or centre[1] > core_hi[1])
+            if overlap_w * overlap_h >= 0.55 * area and not outside_core:
+                continue
+            if (overlap_w * overlap_h >= 0.55 * area
+                    and core_lo[0] <= centre[0] <= core_hi[0]
+                    and core_lo[1] <= centre[1] <= core_hi[1]):
                 continue
             bw = float(max(chi[0] - clo[0], 40.0) + 60.0)
             bh = float(max(chi[1] - clo[1], 40.0) + 60.0)
@@ -885,6 +896,85 @@ def fit_canvas_to_content(data, pad=40.0):
         height=(y1 - y0) + 2 * pad)
     return dict(applied=True, before=before, after=dict(data[1]['canvas']),
                 content=[round(x1 - x0, 1), round(y1 - y0, 1)])
+
+
+def compact_empty_corridors_escher(data, max_gap=None, spacing=None):
+    """Shorten empty axis-aligned mid↔met edges on a finished Escher map.
+
+    Builds edges from the map itself (so post-restore drift of a few px still
+    counts as vertical/horizontal) and reuses ``curated_axes.compress_empty_axis_edges``.
+    Clears Bezier handles on shortened edges so restyle can rebuild.
+    """
+    import curated_axes as ca
+    body = data[1]
+    nodes = body.get('nodes') or {}
+    reactions = body.get('reactions') or {}
+    # Stable keys for compress: node ids as strings.
+    cloud = {}
+    for nid, n in nodes.items():
+        if 'x' not in n or 'y' not in n:
+            continue
+        if n.get('node_type') not in ('metabolite', 'midmarker'):
+            continue
+        cloud[str(nid)] = [float(n['x']), float(n['y'])]
+    edges = []
+    edge_lens = []
+    mid_of = {}
+    for rx in reactions.values():
+        mid_id = None
+        mets = []
+        for seg in (rx.get('segments') or {}).values():
+            for nid in (seg.get('from_node_id'), seg.get('to_node_id')):
+                n = nodes.get(str(nid)) or nodes.get(nid) or {}
+                sid = str(nid)
+                if n.get('node_type') == 'midmarker':
+                    mid_id = sid
+                elif n.get('node_type') == 'metabolite':
+                    mets.append(sid)
+        if mid_id is None:
+            continue
+        mid_of[rx.get('bigg_id') or mid_id] = mid_id
+        mxy = cloud.get(mid_id)
+        if mxy is None:
+            continue
+        for mid in mets:
+            if mid not in cloud:
+                continue
+            d = float(math.hypot(cloud[mid][0] - mxy[0], cloud[mid][1] - mxy[1]))
+            if d > 1e-6:
+                edges.append((mid_id, mid))
+                edge_lens.append(d)
+    if not edges:
+        return dict(applied=False, shortened=0)
+    if max_gap is None:
+        med = float(np.median(edge_lens)) if edge_lens else 150.0
+        # Corridor target: a bit above one typical span so shape stays readable.
+        max_gap = max(med * 1.15, float(spacing or med), 80.0)
+    prefer_move = {str(nid) for nid, n in nodes.items()
+                   if n.get('node_type') == 'metabolite'}
+    before = {k: list(v) for k, v in cloud.items()}
+    rep = ca.compress_empty_axis_edges(
+        cloud, edges, max_gap=float(max_gap), prefer_move=prefer_move)
+    if not rep.get('applied'):
+        return rep
+    moved = []
+    for nid, xy in cloud.items():
+        if before[nid][0] == xy[0] and before[nid][1] == xy[1]:
+            continue
+        n = nodes.get(nid) or nodes.get(int(nid) if nid.isdigit() else nid)
+        if n is None:
+            continue
+        n['x'], n['y'] = float(xy[0]), float(xy[1])
+        moved.append(nid)
+    # Drop Beziers on any segment touching a moved node.
+    moved_set = set(moved)
+    for rx in reactions.values():
+        for seg in (rx.get('segments') or {}).values():
+            if str(seg.get('from_node_id')) in moved_set or str(seg.get('to_node_id')) in moved_set:
+                seg['b1'] = None
+                seg['b2'] = None
+    rep['moved_nodes'] = len(moved)
+    return rep
 
 
 def _link_key(a, b):

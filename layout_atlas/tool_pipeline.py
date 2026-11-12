@@ -1,4 +1,4 @@
-"""Upload-a-GEM pipeline: match the model to expert structures, build a skeleton from them, then complete the rest.
+"""Upload-a-GEM pipeline: match the model to curated structures, build a skeleton from them, then complete the rest.
 
 Runs one job in its own process (started by tool_server.py, or by hand):
 
@@ -8,7 +8,7 @@ Runs one job in its own process (started by tool_server.py, or by hand):
 A job folder holds `upload/model.xml|json` and `options.json`; the pipeline writes `job.json` (state polled by the
 server), `skeleton.json/svg`, `map.*`, `modules.json`, `report.json`, `licenses.json` and `views/`.
 
-Step 1 (skeleton) uses ONLY existing expert structures plus network bridges; step 2 completes everything else
+Step 1 (skeleton) uses ONLY existing curated structures plus network bridges; step 2 completes everything else
 algorithmically.  Reuses: semantic_transfer.Mapper (complete equations), retrieval.Library (id/geometry candidates),
 ec_channel (EC candidates, strong-first selection), retrieval.bridges, drawing.pack_modules/complete/export and
 micromap_experiment.draw_case (P0-compatible drawing with label avoidance and libavoid routing).
@@ -28,14 +28,17 @@ from core import *
 LIMITS = dict(max_bytes=25 * 1024 * 1024, max_reactions=20000, full_routed_max_reactions=150, whole_map_max_reactions=3000, view_size=50)
 SOURCE_PATHS = False  # reuse the curated map's original curves (Escher Bezier chains) for the edges of matched structures
 ORIENTATION = 'full'  # 'off' | 'sides' (currency copies on the substrate / product side) | 'full' (also reactions outside the curated structures between their substrates and products)
-LAYOUT_STYLE = 'curated'  # 'legacy' | 'curated' (V7: Bezier curves from curated-map constraints; no orthogonal polylines). Deprecated alias: 'expert' → 'curated'.
+LAYOUT_STYLE = 'curated'  # 'legacy' | 'curated' (V7: Bezier curves from curated-map constraints; no orthogonal polylines).
 
 def normalize_layout_style(value):
-    """Map user/API layout_style to the canonical value. 'expert' is a deprecated alias of 'curated'."""
-    if value in ('curated', 'expert'):
+    """Map user/API layout_style to the canonical value."""
+    if value == 'curated':
         return 'curated'
     if value == 'legacy':
         return 'legacy'
+    # Accept the historical alias without advertising it.
+    if value == 'expert':
+        return 'curated'
     return 'curated'
 
 COMPLETION_CONTEXT = 'auto'  # 'auto' (V6: uncovered reactions are placed beside the glyphs of their own metabolites) | 'off'
@@ -878,8 +881,30 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
                 hr = metric['hotspot_repair']
                 log('  hotspot repair: ' + str({k: hr.get(k) for k in ('accepted_count', 'tries', 'rounds', 'seconds', 'improved')}))
             dump(folder / 'map.json', data)
-        # Shrink canvas to content so empty frame padding does not inflate blank/empty gates.
+        # Shorten remaining empty axis-aligned corridors (e.g. near-vertical BiGG
+        # padding with a few px of X drift that bake-time axis_tol used to miss).
         import composition as _comp_fit
+        spacing_now = composition_module.reaction_spacing_escher(data)
+        corridor_passes = []
+        for _cpass in range(3):
+            corridor = _comp_fit.compact_empty_corridors_escher(
+                data, spacing=spacing_now)
+            corridor_passes.append(corridor)
+            if not corridor.get('shortened'):
+                break
+            # Private transport arms may re-stretch after a midmarker slide; tuck them.
+            arm2 = composition_module.compact_long_arms_escher(data, currency(model))
+            corridor_passes[-1]['arms_followup'] = {
+                k: arm2.get(k) for k in ('shortened', 'pulled_midmarkers')}
+        metric['empty_corridor_escher'] = dict(
+            passes=corridor_passes,
+            shortened=sum(p.get('shortened') or 0 for p in corridor_passes),
+            length_removed=round(sum(p.get('length_removed') or 0 for p in corridor_passes), 2))
+        if composition_report is not None:
+            composition_report['empty_corridor_escher'] = metric['empty_corridor_escher']
+        if log and metric['empty_corridor_escher']['shortened']:
+            log(f"  empty-corridor compact (escher): {metric['empty_corridor_escher']}")
+        # Shrink canvas to content so empty frame padding does not inflate blank/empty gates.
         fit = _comp_fit.fit_canvas_to_content(data)
         metric['canvas_fit'] = fit
         if log and fit.get('applied'):
