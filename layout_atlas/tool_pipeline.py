@@ -847,14 +847,14 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         import composition as _comp_fit
         spacing_now = composition_module.reaction_spacing_escher(data)
         corridor = _comp_fit.compact_empty_corridors_escher(data, spacing=spacing_now)
-        # Arms follow-up only for heads left long by the corridor slide — a full
-        # ARM_MAX sweep retargets many private spokes and costs axis share.
-        if corridor.get('shortened') and corridor.get('moved_nodes'):
-            arm2 = composition_module.compact_long_arms_escher(
-                data, currency(model), max_arm=max(280.0, 1.6 * float(spacing_now or 150.0)),
-                target=min(180.0, float(corridor.get('max_gap') or 180.0)))
-            corridor['arms_followup'] = {
-                k: arm2.get(k) for k in ('shortened', 'pulled_midmarkers')}
+        # Whole-reaction corridor slides already keep private/EX partners attached;
+        # a broad arm sweep after that retargets many spokes and costs continuity.
+        # Collapse empty bands opened by the slide so neighbours can settle in.
+        if corridor.get('shortened'):
+            post_sq = composition_module.squeeze_escher(
+                data, max_gap=max(float(spacing_now or 150.0) * 1.25, 40.0))
+            corridor['post_squeeze'] = {
+                k: post_sq.get(k) for k in ('applied', 'dx', 'dy', 'max_gap')}
         metric['empty_corridor_escher'] = corridor
         if composition_report is not None:
             composition_report['empty_corridor_escher'] = corridor

@@ -968,7 +968,9 @@ def compact_empty_corridors_escher(data, max_gap=None, spacing=None):
     if max_gap is None:
         med = float(np.median(edge_lens)) if edge_lens else 150.0
         max_gap = max(med * 2.2, float(spacing or med) * 1.5, 180.0)
-    min_len = float(max_gap) * 2.5
+    # Extreme empty columns only — milder thresholds were tilting axis share and
+    # splitting curated structures via follow-up arm pulls.
+    min_len = float(max_gap) * 3.0
     candidates = [c for c in candidates if c[0] >= min_len]
     if not candidates:
         return dict(applied=False, shortened=0, max_gap=round(float(max_gap), 2),
@@ -980,8 +982,11 @@ def compact_empty_corridors_escher(data, max_gap=None, spacing=None):
     shortened = 0
     removed = 0.0
     moved = set()
+    max_shorten = 2
     candidates.sort(reverse=True)
     for length, rid, mid_id, met_id, vertical in candidates:
+        if shortened >= max_shorten:
+            break
         mid = nodes.get(mid_id); met = nodes.get(met_id)
         if mid is None or met is None or 'x' not in mid or 'x' not in met:
             continue
@@ -1014,6 +1019,10 @@ def compact_empty_corridors_escher(data, max_gap=None, spacing=None):
         if blocked:
             continue
         shared = len(holders.get(met_id, ())) > 1
+        if shared and not vertical:
+            # Horizontal shared corridors are often inter-block metabolic links;
+            # collapsing them splits structures and costs continuity.
+            continue
         if shared:
             # Translate the whole reaction unit toward the shared pool: mid + every
             # other metabolite on this reaction (including shared _e/_p partners).
