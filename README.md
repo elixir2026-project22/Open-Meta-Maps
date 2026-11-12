@@ -2,7 +2,7 @@
 
 Open Meta Maps turns a genome-scale metabolic model (GEM) into a complete, editable metabolic map. It has two parts: a curated-structure **Atlas** built from public community maps, and a **layout optimisation** pipeline that reuses matching Atlas geometry and completes the rest with Bézier connections.
 
-ELIXIR BioHackathon Europe 2026 **Project 22** (Open Pathway Maps). Layout benchmarks and the evaluation CLI are development aids, not the project goal.
+ELIXIR BioHackathon Europe 2026 **Project 22** (Open Pathway Maps).
 
 ## Workflow
 
@@ -10,7 +10,7 @@ ELIXIR BioHackathon Europe 2026 **Project 22** (Open Pathway Maps). Layout bench
 
 *Diagram source: `python3 tools/generate_workflow_svg.py` (optional `--check` writes a 700 px PNG preview).*
 
-Nothing is dropped: every reaction and metabolite of the model appears in the map. Stoichiometry and compartments are unchanged.
+Every reaction and metabolite of the model appears in the map. Stoichiometry and compartments are unchanged.
 
 ## Quick start
 
@@ -40,39 +40,52 @@ Open <http://127.0.0.1:8765/tool/index.html>. Upload an SBML or COBRA JSON model
 python3 project.py compose --gem examples/e_coli_core.xml --out results/e_coli_core/ --source-paths
 ```
 
-Layout evaluation (development aid): `pip install -r layout_atlas/requirements-eval.txt`, then `python3 project.py evaluate --gem MODEL.xml --map DIR/map.json`. See [docs/layout_evaluation.md](docs/layout_evaluation.md).
+Layout evaluation: `pip install -r layout_atlas/requirements-eval.txt`, then `python3 project.py evaluate --gem MODEL.xml --map DIR/map.json`. See [docs/layout_evaluation.md](docs/layout_evaluation.md).
 
 ---
 
 ## 1. Data construction — the curated-structure Atlas
 
-The Atlas stores reusable pathway modules (topology, reaction identity, geometry, licence) cut from public community maps. Default load: `data/open_core.sqlite` plus in-tree extensions. Counts from [`data/atlas_registry.json`](data/atlas_registry.json) (generated 2026-11-11; About uses the same file).
+The Atlas stores reusable pathway modules (topology, reaction identity, geometry, licence) cut from public community maps. Default load: `data/open_core.sqlite` plus in-tree extensions. Counts from [`data/atlas_registry.json`](data/atlas_registry.json) (generated 2026-11-12; About uses the same file).
+
+<img src="docs/images/atlas/atlas_overview.png" alt="Overview mosaic of all default Atlas modules, coloured by source, with a legend of module counts and unique-after-dedup counts." width="700">
+
+*All cut modules at thumbnail scale, grouped by source. Regenerate: `PYTHONPATH=layout_atlas python3 tools/atlas_module_figures.py overview`.*
 
 ### Sources and licences
 
-| Source | Modules | Licence |
-|---|---:|---|
-| Escher (22 community maps) | 13,047 | CC0-1.0 |
-| Reactome (release 97, 86 diagrams) | 3,405 | CC0 (data) |
-| WikiPathways (20261110; 1,245 semantic + 29,673 geometry-only) | 30,918 | CC0-1.0 |
-| Human-maps (130 official Escher JSON) | 8,540 | CC BY 4.0 |
-| BRENDA (194 pathway maps; layout possibly automatic) | 11,703 | CC BY 4.0 |
-| Metabolism Regulation (22 SBGN-ML maps) | 423 | CC BY 4.0 |
-| PANTHER (3.4/CD4.1, 8 maps) | 238 | CC BY 4.0 |
-| iCH360 (10 custom Escher maps; MIT) | 858 | MIT |
-| **Total (default load)** | **69,132** | |
+| Source | Modules | Unique after dedup | Licence |
+|---|---:|---:|---|
+| Escher (22 community maps) | 13,047 | 10,626 | CC0-1.0 |
+| Reactome (release 97, 115 diagrams) | 1,811 | 1,800 | CC0 (data) |
+| WikiPathways semantic (20261110) | 669 | 565 | CC0-1.0 |
+| WikiPathways geometry-only | 15,611 | 8,489 | CC0-1.0 |
+| Human-maps (130 official Escher JSON) | 4,690 | 4,551 | CC BY 4.0 |
+| BRENDA (194 pathway maps; layout possibly automatic) | 11,703 | 9,913 | CC BY 4.0 |
+| Metabolism Regulation (22 SBGN-ML maps) | 229 | 172 | CC BY 4.0 |
+| PANTHER (3.4/CD4.1, 8 maps) | 138 | 116 | CC BY 4.0 |
+| iCH360 (10 custom Escher maps) | 436 | 426 | MIT |
+| **Total (default load)** | **48,334** | **36,103** | |
 
-Not included: MicroMap, Yeast-maps, KEGG; iCH360 `compressed_map.json` (CP pseudo-reactions). Attribution: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Audit: [docs/licensing_audit.md](docs/licensing_audit.md). Source notes: [docs/data_sources.md](docs/data_sources.md).
+Totals count **cut modules** (reaction windows), not independent drawings: several modules can come from the same source map, and many windows nest inside larger ones from the same map. Dedup uses canonical reaction-id sets (geometry fingerprint for WikiPathways geometry-only windows). Stats: [`docs/images/atlas/atlas_overlap.json`](docs/images/atlas/atlas_overlap.json) via `tools/atlas_module_figures.py`.
+
+Attribution: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Source notes: [docs/data_sources.md](docs/data_sources.md).
+
+### Example modules
+
+<img src="docs/images/atlas/atlas_examples.svg" alt="Grid of example Atlas modules with source, map name and reaction count captions." width="700">
+
+*Two–three representative modules per source. Regenerate: `PYTHONPATH=layout_atlas python3 tools/atlas_module_figures.py examples`.*
 
 ### Extraction, identity and selection
 
-- **Cut** — maps are cut into reaction windows with documented extractors: in-repo Escher community cutter (`escher_community_windows`, parity-tested); BFS `diagram_modules` / `geometry_modules` for Reactome, WikiPathways, Human-maps, Metabolism Regulation, PANTHER and iCH360; BRENDA’s own extractor.
-- **Deduplicate** — near-duplicate windows are grouped into core families and geometric variants.
-- **Canonical ids** — where a unique crosswalk exists, reaction references are mapped to BiGG, MetaNetX and/or Rhea (Human-maps via Human-GEM; Metabolism Regulation via participant ChEBI; Escher / iCH360 already BiGG).
+- **Cut** — documented extractors: in-repo Escher community cutter (`escher_community_windows`, parity-tested); Stage B `diagram_modules` / `geometry_modules` (size-scaled roots, near-nested dedupe) for Reactome, WikiPathways, Human-maps, Metabolism Regulation, PANTHER and iCH360; BRENDA’s own extractor.
+- **Deduplicate** — near-duplicate windows grouped into core families and geometric variants; Stage B also drops near-nested crumbs (`nest_factor=2`).
+- **Canonical ids** — unique crosswalks map reaction references to BiGG, MetaNetX and/or Rhea where available (Human-maps via Human-GEM; Metabolism Regulation via participant ChEBI; Escher / iCH360 already BiGG).
 - **Provenance** — each module records source, map, licence and an `extraction` block (method, version, parameters, counts).
-- **Selection** — at compose time, coverage ranks first; among same-source biochemical matches with the same reaction set, the denser drawing is kept.
+- **Selection** — coverage ranks first; among same-source biochemical matches with the same reaction set, the denser drawing is kept.
 
-Details: [docs/atlas_data_management.md](docs/atlas_data_management.md) · on-disk layout: [data/README.md](data/README.md).
+Worked examples (cut boundaries, ID remap, cross-source dedup, provenance, compact selection): [docs/atlas_data_management.md](docs/atlas_data_management.md#worked-examples). On-disk layout: [data/README.md](data/README.md).
 
 ---
 
@@ -80,7 +93,7 @@ Details: [docs/atlas_data_management.md](docs/atlas_data_management.md) · on-di
 
 ### Matching and curated reuse
 
-Reactions of the input model are matched to Atlas modules (EC currentisation, Rhea metabolite scoring, name normalisation, weighted Jaccard, vicinity propagation). Exact curated matches, topology-only references and optional EC suggestions are kept apart and never merged into one reuse rate. EC similarity extension is **off by default** (`--ec`). See [docs/reaction_map_matching.md](docs/reaction_map_matching.md) · [docs/methodology.md](docs/methodology.md).
+Reactions of the input model are matched to Atlas modules (EC currentisation, Rhea metabolite scoring, name normalisation, weighted Jaccard, vicinity propagation). Report curated, topology-only and EC suggestions as separate rates in `reaction_provenance.json`. EC similarity extension is **off by default** (`--ec`). See [docs/reaction_map_matching.md](docs/reaction_map_matching.md) · [docs/methodology.md](docs/methodology.md).
 
 Matched geometry is kept as drawn (translated only). Everything else is placed by the Composer (`layout_style=curated` by default; `--layout-style legacy` is CLI-only for orthogonal libavoid).
 
@@ -94,13 +107,13 @@ Matched geometry is kept as drawn (translated only). Everything else is placed b
 | **Complete uncovered reactions** | Place free nodes around fixed anchors; optional context for currency-only reactions | `completion.py`, `context.py`, `completion_context.py` |
 | **Metabolite instances** | Extra visual copies of non-currency metabolites to shorten long edges; currency stays private `side:` glyphs | `instances.py`, `drawing.py` |
 | **Orientation** | Put free reactions between substrates and products; currency copies on the correct side | `orientation.py` |
-| **Composition & peripherals** | Pull related components in; shelf independents; attach exchange/transport; optional sub-module relocation inside large curated blocks (`OPM_EXPERT_SUBMODULE`) | `composition.py`, `peripheral.py`, `block_relocation.py` |
+| **Composition & peripherals** | Pull related components in; shelf independents; attach exchange/transport; optional relocation inside large curated blocks | `composition.py`, `peripheral.py`, `block_relocation.py` |
 | **Spacing / relaxation** | Soft-preserve curated shape; shorten edges; minimum node spacing | `geometry.py`, `global_layout.py` |
 | **Bézier connections** | Cubic Béziers from reaction templates; optional `--source-paths` for original Escher curves | `edge_style.py`, `source_paths.py`, `routing.py` |
 | **Labels** | Move labels among candidates to cut collisions | `label_placement.py` |
 | **Integrity** | Model hash, every reaction drawn, visual stoichiometry; protected shared glyphs must not split | `tool_pipeline.py` |
 
-**Determinism:** fixed layout seed `20261105` (`core.SEEDS`), ELK/fCoSE seeds, `PYTHONHASHSEED=0` on re-exec. No compose `--seed` yet; evaluate `--compare-map` measures displacement only.
+**Determinism:** fixed layout seed `20261105` (`core.SEEDS`), ELK/fCoSE seeds, `PYTHONHASHSEED=0` on re-exec. Displacement measured by `evaluate --compare-map` only.
 
 ### Layout rules (status)
 
@@ -113,12 +126,12 @@ Matched geometry is kept as drawn (translated only). Everything else is placed b
 | Respect compartments | Not yet | Used in packing/shelves; cross-compartment species metric still high |
 | Aspect / compactness | Partial | Shelf aspect target; independent components still linear shelves |
 | Reproducibility | Partial | Fixed seeds; no compose seed CLI |
-| Build on previous layout | Not yet | Displacement metric exists; not a compose objective |
+| Build on previous layout | Not yet | Displacement measured by evaluate `--compare-map` only |
 | Scale to GEMs | Partial | Global ≤3 000 + tiled views; large maps start routing-degraded |
 
 ### Evaluation
 
-Compose writes `layout_quality.evaluate` into `layout_issues.json` / `report.json`. `python3 project.py evaluate` adds Project 22 layout-benchmark metrics. See [docs/layout_evaluation.md](docs/layout_evaluation.md).
+Compose writes `layout_quality.evaluate` into `layout_issues.json` / `report.json`. `python3 project.py evaluate` adds layout-rules metrics via `evaluation/score.py`. See [docs/layout_evaluation.md](docs/layout_evaluation.md).
 
 | Target | Optimising stage(s) |
 |---|---|
@@ -129,9 +142,9 @@ Compose writes `layout_quality.evaluate` into `layout_issues.json` / `report.jso
 | Curated-structure continuity | Matching / rigid skeleton |
 | Exchange on periphery; aspect; blank space | Composition & packing |
 | Axis-aligned segments / axes; grid metabolites; chain turns; cycle placement; compartment packing | **Not yet optimised** |
-| Build-on-previous / Procrustes displacement | **Not yet optimised** (evaluate `--compare-map` only) |
+| Build-on-previous / Procrustes displacement | **Not yet optimised** (`evaluate --compare-map`) |
 
-Panel rule: layout targets (including backlog) stay on Detailed metrics; non-targets under Debug. Global flow-direction share is debug-only (forcing one reading direction would fight curated orientations).
+Layout targets (including backlog) stay on Detailed metrics; non-targets under Debug (including main flow-direction share).
 
 **Known gaps** ([docs/limitations.md](docs/limitations.md)): 2D component packing, harder orientation (incl. transporters), compartment-aware packing, stronger currency/biomass handling, crossing-aware composition acceptance, compose seed flag. Experimental off by default: `OPM_REGIONS`, `OPM_LOWCONF`, whole-block `OPM_BLOCK_RELOC`.
 
