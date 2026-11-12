@@ -520,11 +520,14 @@ def _mark_rect_occupied(occ, x0, y0, w, h):
     grid[iy0:iy1, ix0:ix1] = 1
 
 
-def _find_pocket_origin(occ, size_w, size_h, prefer_c, content_lo=None, content_hi=None):
+def _find_pocket_origin(occ, size_w, size_h, prefer_c, content_lo=None, content_hi=None,
+                        prefer_void=False):
     """Top-left origin for a ``size_w×size_h`` box inside empty cells nearest ``prefer_c``.
 
     When ``content_lo/hi`` are set, prefer slots that pull the combined aspect toward
     the 4:3–16:9 band (widen a tall map, avoid growing height on an already-wide map).
+    ``prefer_void`` ranks large empty neighbourhoods before tuck/centre (safer when
+    packing many tiles on large maps).
     """
     if occ is None:
         return None
@@ -585,19 +588,27 @@ def _find_pocket_origin(occ, size_w, size_h, prefer_c, content_lo=None, content_
                         + 0.05 * (max(0.0, content_lo[1] - y0) + max(0.0, (y0 + size_h) - content_hi[1])))
                 else:
                     aspect_pen = abs(math.log(max(nasp, 1e-9) / TARGET_ASPECT)) * 1e3
-            # Prefer slots tucked against occupied cells (true cracks beside the
-            # main mass), then near the main centre so TR floaters pull inward.
-            ring = 1
-            iy0b = max(0, iy - ring); iy1b = min(occ['ny'], iy + nh + ring)
-            ix0b = max(0, ix - ring); ix1b = min(occ['nx'], ix + nw + ring)
-            area_cells = (iy1b - iy0b) * (ix1b - ix0b)
-            empty_border = (integ[iy1b, ix1b] - integ[iy0b, ix1b]
-                            - integ[iy1b, ix0b] + integ[iy0b, ix0b])
-            border_empty = max(0, int(empty_border) - int(total))
-            border_cells = max(1, area_cells - nw * nh)
-            occupied_contact = border_cells - border_empty
-            tuck_pen = -float(occupied_contact)
-            score = (aspect_pen, expand_pen, tuck_pen, dist, iy, ix)
+            ring = 2
+            iy0 = max(0, iy - ring); iy1 = min(occ['ny'], iy + nh + ring)
+            ix0 = max(0, ix - ring); ix1 = min(occ['nx'], ix + nw + ring)
+            neigh = integ[iy1, ix1] - integ[iy0, ix1] - integ[iy1, ix0] + integ[iy0, ix0]
+            void_pen = -float(neigh)
+            if prefer_void:
+                score = (aspect_pen, expand_pen, void_pen, dist, iy, ix)
+            else:
+                # Prefer slots tucked against occupied cells, then near the main
+                # centre so TR floaters pull inward (small-map / few-tile packs).
+                ring1 = 1
+                iy0b = max(0, iy - ring1); iy1b = min(occ['ny'], iy + nh + ring1)
+                ix0b = max(0, ix - ring1); ix1b = min(occ['nx'], ix + nw + ring1)
+                area_cells = (iy1b - iy0b) * (ix1b - ix0b)
+                empty_border = (integ[iy1b, ix1b] - integ[iy0b, ix1b]
+                                - integ[iy1b, ix0b] + integ[iy0b, ix0b])
+                border_empty = max(0, int(empty_border) - int(total))
+                border_cells = max(1, area_cells - nw * nh)
+                occupied_contact = border_cells - border_empty
+                tuck_pen = -float(occupied_contact)
+                score = (aspect_pen, expand_pen, tuck_pen, dist, iy, ix)
             if best is None or score < best[0]:
                 best = (score, x0, y0)
     if best is None:
@@ -605,7 +616,7 @@ def _find_pocket_origin(occ, size_w, size_h, prefer_c, content_lo=None, content_
     return best[1], best[2]
 
 
-def pack_into_main_pockets(boxes, main_pts, spacing, prefer_c=None):
+def pack_into_main_pockets(boxes, main_pts, spacing, prefer_c=None, prefer_void=False):
     """Place boxes into empty pockets inside/flush with the main AABB.
 
     ``boxes``: list of ``(id, size_w, size_h)`` largest-first preferred.
@@ -613,6 +624,8 @@ def pack_into_main_pockets(boxes, main_pts, spacing, prefer_c=None):
     """
     if not boxes or len(main_pts) < 2:
         return {}, dict(placed=0, missed=len(boxes))
+    if prefer_void is False and len(boxes) > 20:
+        prefer_void = True
     cell = max(float(spacing) * POCKET_CELL_FRAC, 20.0)
     # Search primarily inside the main AABB; only a small flush strip outside so
     # small components fill the largest free regions before the canvas grows.
@@ -648,7 +661,8 @@ def pack_into_main_pockets(boxes, main_pts, spacing, prefer_c=None):
     placed = {}
     for bid, bw, bh in boxes:
         origin = _find_pocket_origin(occ, bw, bh, prefer_c,
-                                    content_lo=content_lo, content_hi=content_hi)
+                                    content_lo=content_lo, content_hi=content_hi,
+                                    prefer_void=prefer_void)
         if origin is None:
             continue
         placed[bid] = origin
@@ -757,12 +771,21 @@ def reflow_landscape(model, scene, blocks, cur):
         return _scene_aspect(pos)[0]
 
     # Prefer pocket-packing movables into empty space flush with main before an external shelf.
+    # When already in-band, only pull far outliers in (not every non-main tile) — packing
+    # hundreds of tiles into pockets collapses large maps toward a square and raises empty/cross.
+    prefer_c = main_pts.mean(0)
+    span = max(float(np.hypot(*(mhi - mlo))), 1.0)
+    if in_band0:
+        pack_ids = [i for i in sizes
+                    if float(np.hypot(*(centres[i] - prefer_c))) > 0.32 * span]
+    else:
+        pack_ids = list(sizes)
     pocket_boxes = sorted(
-        [(i, sizes[i][0], sizes[i][1]) for i in sizes],
+        [(i, sizes[i][0], sizes[i][1]) for i in pack_ids],
         key=lambda t: (-t[1] * t[2], t[0]))
     pocket_tl, pocket_rep = pack_into_main_pockets(
         pocket_boxes, main_pts, max(spacing_from_main(main_pts), 40.0),
-        prefer_c=main_pts.mean(0))
+        prefer_c=prefer_c, prefer_void=len(pocket_boxes) > 20)
     if in_band0 and not pocket_tl:
         report.update(aspect_after=round(aspect0, 3), reason='already_in_band',
                       pocket=pocket_rep)
