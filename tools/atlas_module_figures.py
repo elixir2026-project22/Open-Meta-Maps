@@ -4,7 +4,7 @@
   PYTHONPATH=layout_atlas python3 tools/atlas_module_figures.py all
 
 Writes under docs/images/atlas/:
-  atlas_overview.png          — 3×3 source panels; a legible sample of unique modules per source
+  atlas_overview.png          — row treemap of sources (area ∝ unique sets); every unique module as a tile, hero tiles per source
   atlas_examples.svg/.png     — 4×4 captioned example grid (distinct maps)
   atlas_overlap.json          — per-source counts, unique-after-dedup, nesting, pairwise overlap
   worked_*.svg/.png           — worked-example panels
@@ -271,7 +271,7 @@ def _drawable(m):
 
 
 def _module_features(m):
-    """Size, node count, density and log aspect — used only for sampling distance."""
+    """Size, node count, density, log aspect and branch count — used only for hero selection."""
     nodes = m.get('nodes') or []
     size = float(m.get('size') or 0)
     n = float(len(nodes))
@@ -281,15 +281,12 @@ def _module_features(m):
         aspect = math.log((xmax - xmin + 1e-9) / (ymax - ymin + 1e-9))
     else:
         aspect = 0.0
-    return (size, n, dens, aspect)
-
-
-def _allocate_even(k, n):
-    """Spread k slots over n strata; leftover slots go to the later (larger-size) strata."""
-    if n <= 0:
-        return []
-    base, rem = divmod(k, n)
-    return [base + (1 if i >= n - rem else 0) for i in range(n)]
+    degree = Counter()
+    for e in m.get('edges') or []:
+        degree[e['a']] += 1
+        degree[e['b']] += 1
+    branches = float(sum(1 for d in degree.values() if d >= 3))
+    return (size, n, dens, aspect, branches)
 
 
 def _farthest_point(items, k):
@@ -319,28 +316,33 @@ def _farthest_point(items, k):
     return sorted(picked, key=lambda m: (-(m.get('size') or 0), m['id']))
 
 
-def size_stratified_farthest_point(items, k):
-    """Up to k drawable modules, equally from size tertiles, farthest-point inside each tertile."""
-    items = [m for m in items if _drawable(m)]
-    if len(items) <= k:
-        return sorted(items, key=lambda m: (-(m.get('size') or 0), m['id']))
-    ordered = sorted(items, key=lambda m: (m.get('size') or 0, m['id']))
-    n = len(ordered)
-    strata = []
-    for i in range(3):
-        a = int(round(i * n / 3))
-        b = int(round((i + 1) * n / 3))
-        if b > a:
-            strata.append(ordered[a:b])
-    selected = []
-    for group, ck in zip(strata, _allocate_even(k, len(strata))):
-        selected.extend(_farthest_point(group, ck))
-    return sorted(selected, key=lambda m: (-(m.get('size') or 0), m['id']))
+def _median_edge(m):
+    pos = {n['key']: n['xy'] for n in m['nodes']}
+    lengths = [math.dist(pos[e['a']], pos[e['b']]) for e in m['edges'] if e['a'] in pos and e['b'] in pos]
+    return float(np.median(lengths)) if lengths else 0.0
 
 
-def _pil_draw_module(draw, m, x0, y0, cell, lw=None, node_r=None):
-    """Draw one module into a square cell. Stroke and node size scale with the cell."""
-    ink = (17, 17, 17)
+def _hero_score(m):
+    """Reaction count, weighted by how well the drawing fills a square tile and how evenly its nodes spread."""
+    xmin, ymin, xmax, ymax = _bbox(m['nodes'])
+    w, h = xmax - xmin, ymax - ymin
+    side = max(w, h, 1e-9)
+    squareness = min(w, h) / side
+    # An evenly spread drawing of n nodes has edges near side/sqrt(n); clumped drawings fall well below.
+    spread = min(1.0, _median_edge(m) / side * math.sqrt(len(m['nodes'])))
+    return (m.get('size') or 0) * math.sqrt(squareness) * spread
+
+
+def pick_heroes(items, k):
+    """k distinct shapes among the best-filling large modules: farthest-point inside the top score decile."""
+    ranked = sorted((m for m in items if _drawable(m)), key=lambda m: (-_hero_score(m), m['id']))
+    pool = ranked[:max(k, len(ranked) // 10)]
+    return _farthest_point(pool, k)
+
+
+def _pil_draw_module(draw, m, x0, y0, cw, ch=None, ink=(17, 17, 17)):
+    """Draw one module centred in a cw×ch cell. Strokes scale with the cell; markers drop out when they would blot."""
+    ch = cw if ch is None else ch
     nodes = m.get('nodes') or []
     edges = m.get('edges') or []
     if len(nodes) < 2 or not edges:
@@ -348,17 +350,19 @@ def _pil_draw_module(draw, m, x0, y0, cell, lw=None, node_r=None):
     xmin, ymin, xmax, ymax = _bbox(nodes)
     w = max(xmax - xmin, 1e-6)
     h = max(ymax - ymin, 1e-6)
+    cell = min(cw, ch)
     pad = cell * 0.12
-    scale = (cell - 2 * pad) / max(w, h)
-    cx = x0 + cell / 2
-    cy = y0 + cell / 2
+    scale = min((cw - 2 * pad) / w, (ch - 2 * pad) / h)
+    cx = x0 + cw / 2
+    cy = y0 + ch / 2
     mx = (xmin + xmax) / 2
     my = (ymin + ymax) / 2
     pos = {n['key']: (cx + (n['xy'][0] - mx) * scale, cy + (n['xy'][1] - my) * scale) for n in nodes}
-    if lw is None:
-        lw = max(2, int(round(cell * 0.015)))
-    r_r = node_r if node_r is not None else max(2.2, cell * 0.032)
-    r_m = max(2.0, cell * 0.026)
+    # Markers shrink with the drawn edge length so dense modules stay readable.
+    spacing = _median_edge(m) * scale
+    lw = max(2, int(round(cell * 0.012)))
+    r_r = max(1.5, min(cell * 0.032, spacing * 0.3))
+    r_m = min(cell * 0.026, spacing * 0.25)
     for e in edges:
         a, b = pos.get(e['a']), pos.get(e['b'])
         if a and b:
@@ -366,124 +370,176 @@ def _pil_draw_module(draw, m, x0, y0, cell, lw=None, node_r=None):
     for n in nodes:
         x, y = pos[n['key']]
         is_r = n.get('role') == 'reaction' or str(n.get('key', '')).startswith('r:')
-        if is_r:
+        if is_r or r_m < 2:
             draw.ellipse([x - r_r, y - r_r, x + r_r, y + r_r], fill=ink)
         else:
-            draw.ellipse([x - r_m, y - r_m, x + r_m, y + r_m], outline=ink, fill=(255, 255, 255), width=max(1, lw))
+            draw.ellipse([x - r_m, y - r_m, x + r_m, y + r_m], outline=ink, fill=(255, 255, 255), width=lw)
+
+
+def _water_fill(weights, floors, total):
+    """Areas proportional to weights, raised to per-item floors; the rest shares what remains."""
+    fixed = set()
+    while True:
+        free_w = sum(w for i, w in enumerate(weights) if i not in fixed)
+        free_a = total - sum(floors[i] for i in fixed)
+        areas = [floors[i] if i in fixed else free_a * w / free_w for i, w in enumerate(weights)]
+        short = {i for i, a in enumerate(areas) if i not in fixed and a < floors[i]}
+        if not short:
+            return areas
+        fixed |= short
+
+
+def _row_layout(areas, min_sizes, x, y, w, h):
+    """Split descending areas into full-width rows; pick the split that keeps every panel wide enough and closest to square."""
+    n = len(areas)
+    best = None
+    for mask in range(1 << (n - 1)):
+        rows, start = [], 0
+        for i in range(1, n):
+            if mask >> (i - 1) & 1:
+                rows.append(range(start, i))
+                start = i
+        rows.append(range(start, n))
+        rects, worst, feasible, ry = [None] * n, 1.0, True, y
+        for row in rows:
+            row_h = sum(areas[i] for i in row) / w
+            rx = x
+            for i in row:
+                rw = areas[i] / row_h
+                feasible &= rw >= min_sizes[i][0] and row_h >= min_sizes[i][1]
+                worst = max(worst, rw / row_h, row_h / rw)
+                rects[i] = (rx, ry, rw, row_h)
+                rx += rw
+            ry += row_h
+        key = (not feasible, worst)
+        if best is None or key < best[0]:
+            best = (key, rects)
+    return best[1]
+
+
+def _texture_cells(n, w, h, block_w, block_h):
+    """Largest near-square grid over w×h with at least n cells outside the top-left block_w×block_h; returns cell size and free cells in reading order."""
+    for cols in range(1, n + 2):
+        tw = w / cols
+        rows = max(1, int(h // tw))
+        th = h / rows
+        free = [(c, r) for r in range(rows) for c in range(cols) if not (c * tw < block_w and r * th < block_h)]
+        if len(free) >= n:
+            return tw, th, free[:n]
+    raise ValueError(f'{n} tiles do not fit in {w:.0f}×{h:.0f}')
 
 
 def write_overview_mosaic(by_src, summary, sets):
-    """Equal 3×3 source panels with a size-stratified sample of unique modules, readable at README width."""
+    """Row treemap of sources (area ∝ unique reaction sets), each filled with every unique module; hero tiles show the largest distinct shapes."""
     from PIL import Image, ImageDraw, ImageFont
 
-    final_w, final_h = 3600, 2700
     hi = 2  # draw at 2×, then downsample
-    canvas_w, canvas_h = final_w * hi, final_h * hi
-    pad = 40
-    gap = 24
-    title_h = 88
-    legend_h = 96
-    sample_k = 24
-    cell_min = 160 * hi
-    cols, rows = 6, 4
-    cell_gap = 10
+    final_w, final_h = 2400, 1350
+    W, H = final_w * hi, final_h * hi
+    pad, gap, inset, frame = 16 * hi, 8 * hi, 10 * hi, 3 * hi
+    legend_h = 58 * hi
+    hero_target = 170 * hi
+    hero_gap = 8 * hi
+    max_heroes = 6
+    hero_share = 0.28  # hero side as a share of the panel's shorter side
+    hero_block = 0.6  # hero block spans at most this share of the panel width and height
+    bold = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
+    regular = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
+    name_px, count_px, line_gap = 42, 30, 8
+    font_name = ImageFont.truetype(bold, name_px * hi)
+    font_count = ImageFont.truetype(regular, count_px * hi)
+    font_legend = ImageFont.truetype(regular, 27 * hi)
 
-    try:
-        font_title = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 44)
-        font_legend = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 36)
-    except Exception:
-        font_title = font_legend = ImageFont.load_default()
+    im = Image.new('RGB', (W, H), (255, 255, 255))
+    draw = ImageDraw.Draw(im)
+
+    def title_lines(names, counts, width):
+        """Full name if it fits, else the short one; counts on one line, or one count per line when narrow."""
+        name = next((n for n in names if draw.textlength(n, font=font_name) <= width), names[-1])
+        parts = [counts] if draw.textlength(counts, font=font_count) <= width else counts.split(' · ')
+        return [(name, font_name, name_px)] + [(t, font_count, count_px) for t in parts]
+
+    def title_height(lines):
+        return 2 * inset + sum(px for _, _, px in lines) * hi + line_gap * hi * (len(lines) - 1)
 
     reps = unique_representatives(by_src, sets)
     blocks = []
     for sk in SOURCE_ORDER:
-        items = reps.get(sk) or []
         info = summary['by_source'][sk]
-        shown = size_stratified_farthest_point(items, sample_k)
-        blocks.append(dict(sk=sk, items=shown, info=info, n_drawable=sum(1 for m in items if _drawable(m))))
+        items = [m for m in reps.get(sk) or [] if _drawable(m)]
+        if not items:
+            continue
+        counts = f"{info['modules']:,} cut · {info['unique_reaction_sets']:,} unique"
+        names = [SOURCE_LABEL.get(sk, sk), SOURCE_LABEL_SHORT.get(sk, sk)]
+        title_w = max(draw.textlength(names[-1], font=font_name), max(draw.textlength(t, font=font_count) for t in counts.split(' · ')))
+        # Smallest panel: the short title above one hero tile and a strip of texture.
+        min_w = max(title_w, hero_target) + 2 * (inset + frame) + gap
+        min_h = title_height(title_lines(names, counts, title_w)) + 1.5 * hero_target + inset + gap
+        blocks.append(dict(sk=sk, items=items, info=info, counts=counts, names=names, min_size=(min_w, min_h)))
 
-    assert len(blocks) == 9, f'overview expects 9 sources, got {len(blocks)}'
+    area_w, area_h = W - 2 * pad, H - 2 * pad - legend_h
+    areas = _water_fill([b['info']['unique_reaction_sets'] for b in blocks], [b['min_size'][0] * b['min_size'][1] for b in blocks], area_w * area_h)
+    order = sorted(range(len(blocks)), key=lambda i: (-areas[i], i))
+    rects = _row_layout([areas[i] for i in order], [blocks[i]['min_size'] for i in order], pad, pad, area_w, area_h)
 
-    grid_w = canvas_w - 2 * pad
-    grid_h = canvas_h - 2 * pad - legend_h
-    panel_w = (grid_w - 2 * gap) // 3
-    panel_h = (grid_h - 2 * gap) // 3
-    inner_w = panel_w - 16
-    inner_h = panel_h - title_h - 12
-    cell = min((inner_w - (cols - 1) * cell_gap) // cols, (inner_h - (rows - 1) * cell_gap) // rows)
-    if cell < cell_min:
-        raise RuntimeError(f'overview cell {cell}px is below the {cell_min}px minimum at {hi}×')
-    grid_pw = cols * cell + (cols - 1) * cell_gap
-    grid_ph = rows * cell + (rows - 1) * cell_gap
-
-    im = Image.new('RGB', (canvas_w, canvas_h), (255, 255, 255))
-    draw = ImageDraw.Draw(im)
-
-    for i, b in enumerate(blocks):
-        pr, pc = divmod(i, 3)
-        x0 = pad + pc * (panel_w + gap)
-        y0 = pad + pr * (panel_h + gap)
+    for i, (rx, ry, rw, rh) in zip(order, rects):
+        b = blocks[i]
+        x0, y0 = int(round(rx + gap / 2)), int(round(ry + gap / 2))
+        x1, y1 = int(round(rx + rw - gap / 2)), int(round(ry + rh - gap / 2))
         tint = _hex_rgb(SOURCE_TINT[b['sk']])
         stroke = _hex_rgb(SOURCE_STROKE[b['sk']])
-        draw.rectangle([x0, y0, x0 + panel_w - 1, y0 + panel_h - 1], fill=tint, outline=stroke, width=4)
-        info = b['info']
-        label = (
-            f"{SOURCE_LABEL.get(b['sk'], b['sk'])}  ·  "
-            f"{info['modules']:,} cut · {info['unique_reaction_sets']:,} unique · "
-            f"{len(b['items']):,} shown"
-        )
-        # Shrink the title font if the full counts would overflow the panel.
-        title_font = font_title
-        if draw.textlength(label, font=title_font) > panel_w - 28:
-            try:
-                title_font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 36)
-            except Exception:
-                title_font = font_title
-        if draw.textlength(label, font=title_font) > panel_w - 28:
-            label = (
-                f"{SOURCE_LABEL_SHORT.get(b['sk'], b['sk'])}  ·  "
-                f"{info['modules']:,} cut · {info['unique_reaction_sets']:,} unique · "
-                f"{len(b['items']):,} shown"
-            )
-        # Centre the title; keep it clear of the frame.
-        tx = x0 + (panel_w - draw.textlength(label, font=title_font)) / 2
-        draw.text((tx, y0 + 18), label, fill=(17, 17, 17), font=title_font)
+        draw.rectangle([x0, y0, x1, y1], fill=tint, outline=stroke, width=frame)
+        lines = title_lines(b['names'], b['counts'], x1 - x0 - 2 * (inset + frame))
+        ty = y0 + inset
+        for text, font, px in lines:
+            draw.text((x0 + inset, ty), text, fill=(17, 17, 17) if font is font_name else (55, 65, 81), font=font)
+            ty += (px + line_gap) * hi
+        title_h = title_height(lines)
 
-        gx = x0 + (panel_w - grid_pw) // 2
-        gy = y0 + title_h + (inner_h - grid_ph) // 2
-        for j, m in enumerate(b['items']):
-            r, c = divmod(j, cols)
-            if r >= rows:
-                break
-            _pil_draw_module(draw, m, gx + c * (cell + cell_gap), gy + r * (cell + cell_gap), cell)
+        cx0, cy0 = x0 + inset, y0 + title_h
+        cw, chh = x1 - x0 - 2 * inset, y1 - y0 - title_h - inset
+        # A block of square hero tiles at the top left, sized with the panel; every other unique module fills the grid around it.
+        hero = min(max(hero_target, hero_share * min(cw, chh)), chh / 2, cw)
+        hero_cols = int(max(1, (hero_block * cw + hero_gap) // (hero + hero_gap)))
+        hero_rows = int(max(1, (hero_block * chh + hero_gap) // (hero + hero_gap)))
+        heroes = pick_heroes(b['items'], min(max_heroes, hero_cols * hero_rows))
+        hero_cols = min(hero_cols, len(heroes))
+        for j, m in enumerate(heroes):
+            r, c = divmod(j, hero_cols)
+            hx, hy = cx0 + c * (hero + hero_gap), cy0 + r * (hero + hero_gap)
+            draw.rectangle([hx, hy, hx + hero - 1, hy + hero - 1], fill=(255, 255, 255), outline=stroke, width=2 * hi)
+            _pil_draw_module(draw, m, hx, hy, hero)
+        hero_ids = {m['id'] for m in heroes}
+        rest = sorted((m for m in b['items'] if m['id'] not in hero_ids), key=lambda m: (-(m.get('size') or 0), m['id']))
+        if not rest:
+            continue
+        tw, th, cells = _texture_cells(len(rest), cw, chh, hero_cols * (hero + hero_gap), math.ceil(len(heroes) / hero_cols) * (hero + hero_gap))
+        for m, (c, r) in zip(rest, cells):
+            _pil_draw_module(draw, m, cx0 + c * tw, cy0 + r * th, tw, th)
 
     legend = (
-        f"A deterministic size-stratified sample of unique reaction sets in each source  ·  "
+        f"Panel area scales with unique reaction sets  ·  every unique set is one tile; framed tiles are the largest distinct shapes  ·  "
         f"cut {summary['total_modules']:,}  ·  unique {summary['unique_reaction_sets_global']:,}  ·  "
-        f"up to {sample_k} modules shown per source"
+        f"nested {summary['modules_nested_in_larger_global']:,}"
     )
     lw = draw.textlength(legend, font=font_legend)
-    draw.text(((canvas_w - lw) / 2, canvas_h - legend_h + 24), legend, fill=(31, 41, 55), font=font_legend)
+    draw.text(((W - lw) / 2, H - pad - legend_h + 16 * hi), legend, fill=(31, 41, 55), font=font_legend)
 
     out = im.resize((final_w, final_h), Image.Resampling.LANCZOS)
     OUT.mkdir(parents=True, exist_ok=True)
     path = OUT / 'atlas_overview.png'
-    out.save(path, format='PNG', optimize=True)
-    _shrink_png(path, max_bytes=5_000_000)
+    _save_png_under(out, path, max_bytes=2_000_000)
     return path
 
 
-def _shrink_png(path: Path, max_bytes: int):
+def _save_png_under(im, path: Path, max_bytes: int):
+    """Save as PNG; fall back to fewer palette colours (same dimensions) until the file fits."""
     from PIL import Image
-    if path.stat().st_size <= max_bytes:
-        return
-    im = Image.open(path).convert('RGB')
-    for scale in (0.9, 0.8, 0.7, 0.6):
-        w, h = im.size
-        small = im.resize((max(1, int(w * scale)), max(1, int(h * scale))), Image.Resampling.LANCZOS)
-        small.save(path, format='PNG', optimize=True)
+    im.save(path, format='PNG', optimize=True)
+    for colours in (256, 128, 64):
         if path.stat().st_size <= max_bytes:
             return
+        im.quantize(colors=colours, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE).save(path, format='PNG', optimize=True)
 
 
 def _ellipsis(text, max_chars):

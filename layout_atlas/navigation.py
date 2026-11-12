@@ -94,7 +94,7 @@ def about():
     s_data = sec(
         '1. Data construction — the curated-structure Atlas',
         stats
-        + '<div class="fig"><img src="' + e(overview_rel) + '" alt="' + b('Overview of Atlas modules in nine equal source panels, each showing a legible sample of unique reaction sets') + '" width="700"/><p class="meta">' + b('Equal panels per source, each with a deterministic sample of unique reaction sets (up to 24 shown). Titles keep the exact cut and unique-after-dedup counts. Totals count cut windows, not independent drawings.') + '</p></div>'
+        + '<div class="fig"><img src="' + e(overview_rel) + '" alt="' + b('Overview of the Atlas: one panel per source, sized by its unique reaction sets and filled with every unique module') + '" width="700"/><p class="meta">' + b('One panel per source; panel area scales with its unique reaction sets, and every unique set is one tile. Framed tiles show the largest distinct shapes. Totals count cut windows, not independent drawings.') + '</p></div>'
         + '<h3>' + b('Sources and licences') + '</h3>' + tbl
         + '<p class="meta">' + b('WikiPathways semantic modules live in open_core.sqlite; geometry-only windows ship as an extension for repository size. Both load by default. Dedup stats: docs/images/atlas/atlas_overlap.json.') + '</p>'
         + '<p>' + b('The Atlas Browser tab searches these curated modules by EC, reaction, metabolite or model ID, source map and licence, and downloads selected modules as Escher JSON with a provenance/licence manifest (rebuild the search index with python3 tools/build_atlas_browser_index.py).') + '</p>'
