@@ -1,0 +1,997 @@
+{
+  "isolated_reactions": [],
+  "crossings": [
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "PGL"
+      ],
+      "metabolites": [
+        "6pgc_c",
+        "h_c"
+      ],
+      "x": 6454.4,
+      "y": 1480.8
+    },
+    {
+      "kind": "curated_curated",
+      "kind_legacy": "expert_expert",
+      "reactions": [
+        "ACALD",
+        "CS"
+      ],
+      "metabolites": [
+        "accoa_c",
+        "accoa_c"
+      ],
+      "x": 1766.7,
+      "y": 4350.1,
+      "currency_involved": false
+    },
+    {
+      "kind": "algorithm_curated",
+      "kind_legacy": "algorithm_expert",
+      "reactions": [
+        "ACALD",
+        "CS"
+      ],
+      "metabolites": [
+        "h_c",
+        "accoa_c"
+      ],
+      "x": 1899.2,
+      "y": 4342.1,
+      "currency_involved": true,
+      "curated_rid": "CS",
+      "algorithm_rid": "ACALD",
+      "curated_met": "accoa_c",
+      "algorithm_met": "h_c"
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "AKGt2r"
+      ],
+      "metabolites": [
+        "akg_c",
+        "h_c"
+      ],
+      "x": 4349.1,
+      "y": 3670.2
+    },
+    {
+      "kind": "algorithm_curated",
+      "kind_legacy": "algorithm_expert",
+      "reactions": [
+        "PGM",
+        "ENO"
+      ],
+      "metabolites": [
+        "2pg_c",
+        "pep_c"
+      ],
+      "x": 4592.2,
+      "y": 2674.2,
+      "currency_involved": false,
+      "curated_rid": "PGM",
+      "algorithm_rid": "ENO",
+      "curated_met": "2pg_c",
+      "algorithm_met": "pep_c"
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "ACKr"
+      ],
+      "metabolites": [
+        "ac_c",
+        "atp_c"
+      ],
+      "x": 1716.9,
+      "y": 4698.3
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "PPC"
+      ],
+      "metabolites": [
+        "co2_c",
+        "pep_c"
+      ],
+      "x": 1397.3,
+      "y": 3875.6
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "PPC"
+      ],
+      "metabolites": [
+        "h_c",
+        "oaa_c"
+      ],
+      "x": 1457.5,
+      "y": 3897.2
+    },
+    {
+      "kind": "curated_curated",
+      "kind_legacy": "expert_expert",
+      "reactions": [
+        "PPC",
+        "MALS"
+      ],
+      "metabolites": [
+        "oaa_c",
+        "accoa_c"
+      ],
+      "x": 2267.2,
+      "y": 4071.0,
+      "currency_involved": false
+    },
+    {
+      "kind": "curated_curated",
+      "kind_legacy": "expert_expert",
+      "reactions": [
+        "PPC",
+        "ME1"
+      ],
+      "metabolites": [
+        "oaa_c",
+        "pyr_c"
+      ],
+      "x": 1804.1,
+      "y": 3971.6,
+      "currency_involved": false
+    },
+    {
+      "kind": "curated_curated",
+      "kind_legacy": "expert_expert",
+      "reactions": [
+        "PPC",
+        "ME2"
+      ],
+      "metabolites": [
+        "oaa_c",
+        "pyr_c"
+      ],
+      "x": 1833.9,
+      "y": 3978.0,
+      "currency_involved": false
+    },
+    {
+      "kind": "algorithm_curated",
+      "kind_legacy": "algorithm_expert",
+      "reactions": [
+        "ATPM",
+        "SUCCt2_2"
+      ],
+      "metabolites": [
+        "atp_c",
+        "succ_c"
+      ],
+      "x": 4086.4,
+      "y": 3386.9,
+      "currency_involved": true,
+      "curated_rid": "SUCCt2_2",
+      "algorithm_rid": "ATPM",
+      "curated_met": "succ_c",
+      "algorithm_met": "atp_c"
+    },
+    {
+      "kind": "algorithm_algorithm",
+      "kind_legacy": "algorithm_algorithm",
+      "reactions": [
+        "ATPM",
+        "ADK1"
+      ],
+      "metabolites": [
+        "atp_c",
+        "adp_c"
+      ],
+      "x": 4060.6,
+      "y": 3324.2,
+      "currency_involved": true
+    },
+    {
+      "kind": "algorithm_curated",
+      "kind_legacy": "algorithm_expert",
+      "reactions": [
+        "ATPM",
+        "SUCCt2_2"
+      ],
+      "metabolites": [
+        "adp_c",
+        "succ_c"
+      ],
+      "x": 3984.8,
+      "y": 3372.3,
+      "currency_involved": true,
+      "curated_rid": "SUCCt2_2",
+      "algorithm_rid": "ATPM",
+      "curated_met": "succ_c",
+      "algorithm_met": "adp_c"
+    },
+    {
+      "kind": "curated_curated",
+      "kind_legacy": "expert_expert",
+      "reactions": [
+        "PPCK",
+        "MALS"
+      ],
+      "metabolites": [
+        "oaa_c",
+        "accoa_c"
+      ],
+      "x": 2251.7,
+      "y": 4079.0,
+      "currency_involved": false
+    },
+    {
+      "kind": "curated_curated",
+      "kind_legacy": "expert_expert",
+      "reactions": [
+        "PPCK",
+        "ME1"
+      ],
+      "metabolites": [
+        "oaa_c",
+        "pyr_c"
+      ],
+      "x": 1767.9,
+      "y": 3993.4,
+      "currency_involved": false
+    },
+    {
+      "kind": "curated_curated",
+      "kind_legacy": "expert_expert",
+      "reactions": [
+        "PPCK",
+        "ME2"
+      ],
+      "metabolites": [
+        "oaa_c",
+        "pyr_c"
+      ],
+      "x": 1797.4,
+      "y": 3998.6,
+      "currency_involved": false
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "ACt2r"
+      ],
+      "metabolites": [
+        "ac_e",
+        "h_e"
+      ],
+      "x": 1707.6,
+      "y": 5051.3
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "PYK"
+      ],
+      "metabolites": [
+        "h_c",
+        "pep_c"
+      ],
+      "x": 1169.4,
+      "y": 4096.6
+    },
+    {
+      "kind": "curated_curated",
+      "kind_legacy": "expert_expert",
+      "reactions": [
+        "BIOMASS_Ecoli_core_w_GAM",
+        "TALA"
+      ],
+      "metabolites": [
+        "3pg_c",
+        "e4p_c"
+      ],
+      "x": 4347.7,
+      "y": 2596.1,
+      "currency_involved": false
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "BIOMASS_Ecoli_core_w_GAM"
+      ],
+      "metabolites": [
+        "adp_c",
+        "akg_c"
+      ],
+      "x": 4599.5,
+      "y": 2464.1
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "BIOMASS_Ecoli_core_w_GAM"
+      ],
+      "metabolites": [
+        "akg_c",
+        "coa_c"
+      ],
+      "x": 4656.8,
+      "y": 2464.8
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "PYRt2"
+      ],
+      "metabolites": [
+        "h_e",
+        "pyr_e"
+      ],
+      "x": 614.0,
+      "y": 4356.8
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "CS"
+      ],
+      "metabolites": [
+        "accoa_c",
+        "h2o_c"
+      ],
+      "x": 2628.5,
+      "y": 4297.9
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "SUCCt2_2"
+      ],
+      "metabolites": [
+        "h_c",
+        "succ_c"
+      ],
+      "x": 4397.1,
+      "y": 3431.9
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "D_LACt2"
+      ],
+      "metabolites": [
+        "h_e",
+        "lac__D_e"
+      ],
+      "x": 1169.4,
+      "y": 5006.7
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "ETOHt2r"
+      ],
+      "metabolites": [
+        "etoh_e",
+        "h_e"
+      ],
+      "x": 2383.8,
+      "y": 5014.8
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "SUCDi"
+      ],
+      "metabolites": [
+        "fum_c",
+        "q8h2_c"
+      ],
+      "x": 3002.8,
+      "y": 3233.7
+    },
+    {
+      "kind": "algorithm_algorithm",
+      "kind_legacy": "algorithm_algorithm",
+      "reactions": [
+        "THD2",
+        "NADTRHD"
+      ],
+      "metabolites": [
+        "nad_c",
+        "nadh_c"
+      ],
+      "x": 352.2,
+      "y": 3974.8,
+      "currency_involved": true
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "FORt2"
+      ],
+      "metabolites": [
+        "for_e",
+        "h_e"
+      ],
+      "x": 1389.9,
+      "y": 5039.1
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "FUMt2_2"
+      ],
+      "metabolites": [
+        "fum_e",
+        "h_e"
+      ],
+      "x": 2734.9,
+      "y": 2754.6
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "FUMt2_2"
+      ],
+      "metabolites": [
+        "fum_c",
+        "h_c"
+      ],
+      "x": 2734.9,
+      "y": 2943.9
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "G6PDH2r"
+      ],
+      "metabolites": [
+        "g6p_c",
+        "nadp_c"
+      ],
+      "x": 5779.6,
+      "y": 1486.7
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "G6PDH2r"
+      ],
+      "metabolites": [
+        "6pgl_c",
+        "h_c"
+      ],
+      "x": 5859.5,
+      "y": 1486.7
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "GAPD"
+      ],
+      "metabolites": [
+        "13dpg_c",
+        "h_c"
+      ],
+      "x": 533.7,
+      "y": 4988.7
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "GLNS"
+      ],
+      "metabolites": [
+        "atp_c",
+        "glu__L_c"
+      ],
+      "x": 4119.3,
+      "y": 4245.9
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "GLNS"
+      ],
+      "metabolites": [
+        "adp_c",
+        "gln__L_c"
+      ],
+      "x": 4128.0,
+      "y": 4289.6
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "GLNS"
+      ],
+      "metabolites": [
+        "gln__L_c",
+        "h_c"
+      ],
+      "x": 4107.0,
+      "y": 4329.8
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "GLNabc"
+      ],
+      "metabolites": [
+        "gln__L_c",
+        "pi_c"
+      ],
+      "x": 4157.2,
+      "y": 4549.7
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "GLUN"
+      ],
+      "metabolites": [
+        "glu__L_c",
+        "nh4_c"
+      ],
+      "x": 4017.7,
+      "y": 4245.1
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "GLUt2r"
+      ],
+      "metabolites": [
+        "glu__L_c",
+        "h_c"
+      ],
+      "x": 4368.6,
+      "y": 4042.9
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "GND"
+      ],
+      "metabolites": [
+        "6pgc_c",
+        "nadp_c"
+      ],
+      "x": 818.5,
+      "y": 4516.0
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "GND"
+      ],
+      "metabolites": [
+        "co2_c",
+        "ru5p__D_c"
+      ],
+      "x": 866.4,
+      "y": 4515.8
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "ICDHyr"
+      ],
+      "metabolites": [
+        "icit_c",
+        "nadp_c"
+      ],
+      "x": 3432.3,
+      "y": 4298.8
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "ICDHyr"
+      ],
+      "metabolites": [
+        "akg_c",
+        "co2_c"
+      ],
+      "x": 3507.3,
+      "y": 4240.6
+    },
+    {
+      "kind": "curated_curated",
+      "kind_legacy": "expert_expert",
+      "reactions": [
+        "MALS",
+        "MDH"
+      ],
+      "metabolites": [
+        "accoa_c",
+        "oaa_c"
+      ],
+      "x": 2504.8,
+      "y": 3949.3,
+      "currency_involved": false
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "MALt2_2"
+      ],
+      "metabolites": [
+        "h_e",
+        "mal__L_e"
+      ],
+      "x": 2511.3,
+      "y": 3109.3
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "MALt2_2"
+      ],
+      "metabolites": [
+        "h_c",
+        "mal__L_c"
+      ],
+      "x": 2511.4,
+      "y": 3211.8
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "MDH"
+      ],
+      "metabolites": [
+        "h_c",
+        "oaa_c"
+      ],
+      "x": 2477.0,
+      "y": 3840.7
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "ME1"
+      ],
+      "metabolites": [
+        "nadh_c",
+        "pyr_c"
+      ],
+      "x": 2080.8,
+      "y": 3805.3
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "PDH"
+      ],
+      "metabolites": [
+        "coa_c",
+        "pyr_c"
+      ],
+      "x": 1460.1,
+      "y": 4353.1
+    },
+    {
+      "kind": "same_reaction",
+      "reactions": [
+        "PDH"
+      ],
+      "metabolites": [
+        "accoa_c",
+        "co2_c"
+      ],
+      "x": 1539.3,
+      "y": 4353.1
+    }
+  ],
+  "obstacle_hits": [
+    {
+      "kind": "node",
+      "reaction": "ATPM",
+      "metabolite": "adp_c",
+      "x": 4046.7,
+      "y": 3410.4
+    },
+    {
+      "kind": "node",
+      "reaction": "ADK1",
+      "metabolite": "adp_c",
+      "x": 4073.4,
+      "y": 3320.0
+    },
+    {
+      "kind": "node",
+      "reaction": "ATPS4r",
+      "metabolite": "atp_c",
+      "x": 3988.9,
+      "y": 3308.3
+    },
+    {
+      "kind": "node",
+      "reaction": "BIOMASS_Ecoli_core_w_GAM",
+      "metabolite": "g6p_c",
+      "x": 4659.3,
+      "y": 2489.2
+    },
+    {
+      "kind": "node",
+      "reaction": "BIOMASS_Ecoli_core_w_GAM",
+      "metabolite": "pep_c",
+      "x": 4659.5,
+      "y": 2503.9
+    },
+    {
+      "kind": "node",
+      "reaction": "CYTBD",
+      "metabolite": "q8_c",
+      "x": 591.7,
+      "y": 3898.3
+    },
+    {
+      "kind": "node",
+      "reaction": "SUCCt3",
+      "metabolite": "h_e",
+      "x": 4435.3,
+      "y": 3267.6
+    },
+    {
+      "kind": "node",
+      "reaction": "THD2",
+      "metabolite": "nadph_c",
+      "x": 354.4,
+      "y": 3997.9
+    },
+    {
+      "kind": "node",
+      "reaction": "GLUDy",
+      "metabolite": "h_c",
+      "x": 3852.5,
+      "y": 4018.5
+    },
+    {
+      "kind": "node",
+      "reaction": "NADTRHD",
+      "metabolite": "nadh_c",
+      "x": 399.0,
+      "y": 4007.5
+    }
+  ],
+  "curve_anomalies": [],
+  "worst_regions": [
+    {
+      "x": 3860.1,
+      "y": 3071.7,
+      "w": 400,
+      "h": 400,
+      "crossings": 3,
+      "obstacle_hits": 3,
+      "node_overlaps": 0,
+      "edges": 16,
+      "reactions": [
+        "ADK1",
+        "ATPM",
+        "ATPS4r",
+        "SUCCt2_2"
+      ]
+    },
+    {
+      "x": 260.1,
+      "y": 3671.7,
+      "w": 400,
+      "h": 400,
+      "crossings": 1,
+      "obstacle_hits": 3,
+      "node_overlaps": 0,
+      "edges": 25,
+      "reactions": [
+        "CYTBD",
+        "NADTRHD",
+        "THD2"
+      ]
+    },
+    {
+      "x": 4460.1,
+      "y": 2471.7,
+      "w": 400,
+      "h": 400,
+      "crossings": 1,
+      "obstacle_hits": 2,
+      "node_overlaps": 0,
+      "edges": 15,
+      "reactions": [
+        "BIOMASS_Ecoli_core_w_GAM",
+        "ENO",
+        "PGM"
+      ]
+    },
+    {
+      "x": 1660.1,
+      "y": 4271.7,
+      "w": 400,
+      "h": 400,
+      "crossings": 1,
+      "obstacle_hits": 0,
+      "node_overlaps": 0,
+      "edges": 12,
+      "reactions": [
+        "ACALD",
+        "CS"
+      ]
+    },
+    {
+      "x": 3660.1,
+      "y": 3871.7,
+      "w": 400,
+      "h": 400,
+      "crossings": 0,
+      "obstacle_hits": 1,
+      "node_overlaps": 0,
+      "edges": 11,
+      "reactions": [
+        "GLUDy"
+      ]
+    }
+  ],
+  "node_overlaps": [],
+  "split_structures": [
+    {
+      "structure": "ccdc9b32c395e30b382051b4#cc2",
+      "reactions": 4,
+      "pairs": 3,
+      "contiguous_pairs": 3,
+      "components": 2,
+      "contiguous_pair_share": 1.0
+    },
+    {
+      "structure": "ccdc9b32c395e30b382051b4#cc3",
+      "reactions": 4,
+      "pairs": 2,
+      "contiguous_pairs": 2,
+      "components": 2,
+      "contiguous_pair_share": 1.0
+    },
+    {
+      "structure": "7b4797d4d68a0ba87acb08a7",
+      "reactions": 2,
+      "pairs": 1,
+      "contiguous_pairs": 0,
+      "components": 2,
+      "contiguous_pair_share": 0.0
+    }
+  ],
+  "warnings": [],
+  "composition_moves": [
+    {
+      "kind": "related",
+      "reactions": [
+        "PFK",
+        "RPE",
+        "RPI",
+        "TKT1"
+      ],
+      "moved_px": 4558.4,
+      "anchors": [
+        "FBP",
+        "FRUpts2",
+        "PGI"
+      ]
+    },
+    {
+      "kind": "related",
+      "reactions": [
+        "PGK",
+        "PGM",
+        "BIOMASS_Ecoli_core_w_GAM",
+        "ENO"
+      ],
+      "moved_px": 2844.0,
+      "anchors": [
+        "ACALD",
+        "AKGDH",
+        "AKGt2r",
+        "CS"
+      ]
+    },
+    {
+      "kind": "related",
+      "reactions": [
+        "PGL",
+        "G6PDH2r"
+      ],
+      "moved_px": 1948.8,
+      "anchors": [
+        "BIOMASS_Ecoli_core_w_GAM",
+        "GLCpts",
+        "GND",
+        "PGI"
+      ]
+    }
+  ],
+  "peripheral": [
+    {
+      "exchange": "EX_for_e",
+      "transports": [
+        "FORt",
+        "FORt2"
+      ],
+      "xe": "for_e",
+      "xc": [
+        "for_c",
+        "for_c"
+      ],
+      "anchors": [
+        "PFL"
+      ],
+      "rank": 3,
+      "connection_px": [
+        867.8,
+        120.0
+      ],
+      "state": "not_attached",
+      "moved_px": 747.8,
+      "delta": [
+        -66.01240621381304,
+        -744.913221813913
+      ],
+      "keys": [
+        "copy:ad1e63f63a1a945d61fd5fd4:for_c",
+        "copy:ad1e63f63a1a945d61fd5fd4:for_e",
+        "inst:for_c:0",
+        "r:EX_for_e",
+        "r:FORt",
+        "r:FORt2",
+        "side:FORt2:h_c",
+        "side:FORt2:h_e"
+      ],
+      "reactions": [
+        "EX_for_e",
+        "FORt",
+        "FORt2"
+      ],
+      "gate": {
+        "exchange": "EX_for_e",
+        "transports": [
+          "FORt",
+          "FORt2"
+        ],
+        "decision": "rejected",
+        "reason": "more collisions (12 -> 13)",
+        "moved_px": 747.8,
+        "before": {
+          "collisions": 12,
+          "crossings": 29,
+          "long_edges": 85
+        },
+        "after": {
+          "collisions": 13,
+          "crossings": 32,
+          "long_edges": 85
+        }
+      },
+      "x": null
+    },
+    {
+      "exchange": "EX_lac__D_e",
+      "transports": [
+        "D_LACt2"
+      ],
+      "xe": "lac__D_e",
+      "xc": [
+        "lac__D_c"
+      ],
+      "anchors": [
+        "LDH_D"
+      ],
+      "rank": 3,
+      "connection_px": [
+        93.1,
+        120.0
+      ],
+      "state": "attached",
+      "in_place": true
+    }
+  ]
+}

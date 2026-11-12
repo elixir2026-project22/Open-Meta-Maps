@@ -1,0 +1,2499 @@
+[
+  {
+    "code": "U0001",
+    "module_id": "fc145f0882219442093f7ad4",
+    "source": "escher",
+    "map_name": "iAF1260.Cofactor_Biosynthesis",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 4,
+    "tier": "structure",
+    "reactions": [
+      "APRAUR",
+      "PMDPHT",
+      "RBFSa",
+      "RBFSb"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 4
+    }
+  },
+  {
+    "code": "U0002",
+    "module_id": "395571800d94622f5b46e640",
+    "source": "escher",
+    "map_name": "e_coli_core.Core metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 4,
+    "tier": "structure",
+    "reactions": [
+      "ACKr",
+      "ACt2r",
+      "EX_ac_e",
+      "PTAr"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 4
+    }
+  },
+  {
+    "code": "U0003",
+    "module_id": "1ec5139f7c5c10f2c5e0978e",
+    "source": "escher",
+    "map_name": "iAF1260.Lipopolysaccharide_(LPS)_Biosynthesis",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 4,
+    "tier": "structure",
+    "reactions": [
+      "A5PISO",
+      "KDOCT2",
+      "KDOPP",
+      "KDOPS"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 4
+    }
+  },
+  {
+    "code": "U0004",
+    "module_id": "e61f518722f0129920c868ea",
+    "source": "escher",
+    "map_name": "iAF1260.Nucleotide_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 4,
+    "tier": "structure",
+    "reactions": [
+      "AIRC2",
+      "AIRC3",
+      "PRAIS",
+      "PRASCSi"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 4
+    }
+  },
+  {
+    "code": "U0005",
+    "module_id": "30aac63faab1363ba35437d5",
+    "source": "escher",
+    "map_name": "iAF1260.Fatty_Acid_Biosynthesis",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 4,
+    "tier": "structure",
+    "reactions": [
+      "DHNPA",
+      "DHPS",
+      "DNMPPA",
+      "HPPK"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 4
+    }
+  },
+  {
+    "code": "U0006",
+    "module_id": "0af7d9e5c76e8e769cf2af5c",
+    "source": "wikipathways",
+    "map_name": "Hemesynthesis defects and porphyrias",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0",
+    "size": 4,
+    "tier": "structure",
+    "reactions": [
+      "HMBS",
+      "PPBNGS",
+      "UPP3S",
+      "UPPDC1"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 4
+    }
+  },
+  {
+    "code": "U0007",
+    "module_id": "79fe2b7d2b77ddd656a551cc",
+    "source": "human_maps",
+    "map_name": "Mitochondria (Human-GEM 2.1.1)",
+    "species": "Homo sapiens",
+    "license": "CC-BY-4.0",
+    "size": 4,
+    "tier": "structure",
+    "reactions": [
+      "EX_xan_e",
+      "PUNP7",
+      "XANt2",
+      "XPPT"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 4
+    }
+  },
+  {
+    "code": "U0008",
+    "module_id": "fbb2f287ba8f8ec9cf140c5e",
+    "source": "escher",
+    "map_name": "RECON1.Amino acid metabolism (partial)",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0",
+    "size": 4,
+    "tier": "structure",
+    "reactions": [
+      "4HGLSD",
+      "HPROx",
+      "PHCD",
+      "PHCHGS"
+    ],
+    "match_level": "complete_equation",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 4
+    }
+  },
+  {
+    "code": "U0009",
+    "module_id": "d0b2f91e06153609e0ac95e3",
+    "source": "escher",
+    "map_name": "iAF1260.Fatty_Acid_Biosynthesis",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 4,
+    "tier": "structure",
+    "reactions": [
+      "CDAPPA_HP",
+      "DASYN_HP",
+      "PGSA_HP",
+      "PSSA_HP"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "functional_layout_suggestion": 4
+    }
+  },
+  {
+    "code": "U0010",
+    "module_id": "9612d8b7e5cf3187e94bccb8",
+    "source": "escher",
+    "map_name": "iAF1260.Amino_Acid_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 4,
+    "tier": "structure",
+    "reactions": [
+      "DDPA",
+      "DHQS",
+      "DHQTi",
+      "SHK3Dr"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 4
+    }
+  },
+  {
+    "code": "U0011",
+    "module_id": "00c54c515ee06146622d7e52",
+    "source": "escher",
+    "map_name": "iAF1260.Cofactor_Biosynthesis",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 4,
+    "tier": "structure",
+    "reactions": [
+      "CYOO_HP",
+      "NO",
+      "NOt",
+      "SPODM"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 4
+    }
+  },
+  {
+    "code": "U0012",
+    "module_id": "6cc9bd26af76ab8234604692",
+    "source": "brenda",
+    "map_name": "arginine metabolism",
+    "species": "pathway-level; organism assignment not in source SVG",
+    "license": "CC-BY-4.0",
+    "size": 4,
+    "tier": "structure",
+    "reactions": [
+      "NDPK6",
+      "NTRARz",
+      "RNDR4",
+      "URIDK2r"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 4
+    }
+  },
+  {
+    "code": "U0013",
+    "module_id": "8712fb2d2c93157891f7955d",
+    "source": "human_maps",
+    "map_name": "Fructose and mannose metabolism (Human-GEM 2.1.1)",
+    "species": "Homo sapiens",
+    "license": "CC-BY-4.0",
+    "size": 4,
+    "tier": "structure",
+    "reactions": [
+      "GNNUC",
+      "GSNt2",
+      "GUAPRT",
+      "PUNP3"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 4
+    }
+  },
+  {
+    "code": "U0014",
+    "module_id": "6277d69313413bb453b2f574",
+    "source": "escher",
+    "map_name": "iAF1260.Amino_Acid_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "DHPTDCs",
+      "RHCCE"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0015",
+    "module_id": "19d06c419bcc63ec2069f11e",
+    "source": "escher",
+    "map_name": "iJO1366.Nucleotide metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "DCTPD",
+      "NDPK7"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0016",
+    "module_id": "4415b4f55e5ac17dc9068df1",
+    "source": "escher",
+    "map_name": "iJO1366.Nucleotide metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "GHMT2r",
+      "PRAGSr"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0017",
+    "module_id": "bad8d50f629cc919c24f60da",
+    "source": "escher",
+    "map_name": "iAF1260.Lipopolysaccharide_(LPS)_Biosynthesis",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "AGMHE",
+      "GMHEPAT"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0018",
+    "module_id": "2cd54673b189e0cd3f755e4d",
+    "source": "escher",
+    "map_name": "iAF1260.Lipopolysaccharide_(LPS)_Biosynthesis",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "GMHEPK",
+      "S7PI"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0019",
+    "module_id": "a1a95db63e42376b0151c620",
+    "source": "escher",
+    "map_name": "e_coli_core.Core metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "GND",
+      "RPE"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0020",
+    "module_id": "0906fdbc693f883f00094242",
+    "source": "reactome",
+    "map_name": "Biosynthesis of DHA-derived SPMs",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0-data",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "CYSS",
+      "SERAT"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0021",
+    "module_id": "fe899c688d25879afb52bb3a",
+    "source": "escher",
+    "map_name": "iAF1260.Amino_Acid_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "AGMT",
+      "ARGDC"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0022",
+    "module_id": "0e8a3b31b919a2c1f7a59c4c",
+    "source": "wikipathways",
+    "map_name": "Mevalonate arm of cholesterol biosynthesis pathway",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "DMATT",
+      "GRTT"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0023",
+    "module_id": "472b01ca42dd40d90841fe93",
+    "source": "escher",
+    "map_name": "RECON1.CARBOHYDRATE_METABOLISM",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "GFUCS",
+      "GMAND"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0024",
+    "module_id": "8619ebefaee3d070c2e5ac9a",
+    "source": "wikipathways",
+    "map_name": "Purine metabolism",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "DADK",
+      "NDPK8"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0025",
+    "module_id": "7786c582dc238bbd6705beec",
+    "source": "escher",
+    "map_name": "iJO1366.Central metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ACS",
+      "CS"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0026",
+    "module_id": "008549fb88e3b49158157249",
+    "source": "escher",
+    "map_name": "iAF1260.Cofactor_Biosynthesis",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "DMPPS",
+      "IPDPS"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0027",
+    "module_id": "0f45108b5742022843517ab1",
+    "source": "escher",
+    "map_name": "iAF1260.Cofactor_Biosynthesis",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "UAAGDS",
+      "UAMAGS"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0028",
+    "module_id": "eb237eb16dae058d6ff04ade",
+    "source": "escher",
+    "map_name": "iMM904.Central carbon metabolism",
+    "species": "Saccharomyces cerevisiae",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "FBA",
+      "TKT1"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0029",
+    "module_id": "0b18edcc7fd4a03f5f8c89b4",
+    "source": "ich360",
+    "map_name": "iCH360 full metabolic map",
+    "species": "Escherichia coli",
+    "license": "MIT",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "UAGCVT",
+      "UAPGR"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0030",
+    "module_id": "88b2dde75b6e0c280956f3e4",
+    "source": "escher",
+    "map_name": "iJO1366.Nucleotide metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ASPCT",
+      "DHORTS"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0031",
+    "module_id": "e3b721f1772b581b52429eed",
+    "source": "escher",
+    "map_name": "iAF1260.Amino_Acid_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ILETA",
+      "ILEabc"
+    ],
+    "match_level": "complete_equation",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0032",
+    "module_id": "af8635d9b87885fd3160939d",
+    "source": "escher",
+    "map_name": "iJO1366.Nucleotide metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ADSL2r",
+      "AICART"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0033",
+    "module_id": "fb0b678b086a47f6f0d223e7",
+    "source": "escher",
+    "map_name": "iJO1366.Nucleotide metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ADNUC",
+      "PUNP1"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0034",
+    "module_id": "4bafb41a492164d7cb750b3c",
+    "source": "escher",
+    "map_name": "iAF1260.Cofactor_Biosynthesis",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "DPR",
+      "MOHMT"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0035",
+    "module_id": "f3c133a3989c6459ae2dfbc9",
+    "source": "wikipathways",
+    "map_name": "Pyrimidine metabolism and related diseases",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "DURIK1",
+      "DURIPP"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0036",
+    "module_id": "c1d2ef7fb4477fcfdb8b9ccf",
+    "source": "escher",
+    "map_name": "iAF1260.Nucleotide_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "GARFT",
+      "GART"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0037",
+    "module_id": "38394c1f8f9ee12c4a402e34",
+    "source": "wikipathways",
+    "map_name": "Purine metabolism and related disorders",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ADPT",
+      "PUNP2"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0038",
+    "module_id": "8f5e845f97d1ca79ba66b8ca",
+    "source": "escher",
+    "map_name": "iAF1260.Amino_Acid_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "PGCD",
+      "PSERT"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0039",
+    "module_id": "6fc18a6a8dad714e1ed7e574",
+    "source": "escher",
+    "map_name": "iJO1366.Nucleotide and histidine biosynthesis",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "IMPC",
+      "IMPD"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0040",
+    "module_id": "70d952fa800bdd6ae5b8e933",
+    "source": "escher",
+    "map_name": "iAF1260.Amino_Acid_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "SDPTA",
+      "THDPS"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0041",
+    "module_id": "4a035bcce30cd8623ff16de9",
+    "source": "ich360",
+    "map_name": "Ion and metal uptake",
+    "species": "Escherichia coli",
+    "license": "MIT",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "DCYTt2",
+      "EX_dcyt_e"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0042",
+    "module_id": "43c009564854d4ef266cbe54",
+    "source": "panther",
+    "map_name": "Cholesterol biosynthesis",
+    "species": "PANTHER Pathway (multi-organism schematic)",
+    "license": "CC-BY-4.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "DHPPDA",
+      "GTPCII"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0043",
+    "module_id": "e29f0475886ec0ef481d0916",
+    "source": "escher",
+    "map_name": "iAF1260.Amino_Acid_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ASAD",
+      "ASPK"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0044",
+    "module_id": "d28535c71d3a1b97442150e4",
+    "source": "metabolismregulation",
+    "map_name": "iNOS pathway",
+    "species": "Homo sapiens",
+    "license": "CC-BY-4.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ADSK",
+      "SADT2"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0045",
+    "module_id": "d39870daaf7f02c1fc54c426",
+    "source": "escher",
+    "map_name": "iAF1260.Amino_Acid_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ALAR",
+      "DAAD"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0046",
+    "module_id": "b9ba68fd6cb136476db8fa3b",
+    "source": "escher",
+    "map_name": "e_coli_core.Core metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ETOHt2r",
+      "EX_etoh_e"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0047",
+    "module_id": "d9c859e17317dbed4a4c3413",
+    "source": "escher",
+    "map_name": "iMM904.Central carbon metabolism",
+    "species": "Saccharomyces cerevisiae",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ACALDt",
+      "PYRDC"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0048",
+    "module_id": "019e918d346ed1fd4fa90435",
+    "source": "human_maps",
+    "map_name": "Inositol phosphate metabolism (Human-GEM 2.1.1)",
+    "species": "Homo sapiens",
+    "license": "CC-BY-4.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "GALUi",
+      "PGMT"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0049",
+    "module_id": "6cb32159b02bb3f1eeef5f5f",
+    "source": "escher",
+    "map_name": "iAF1260.Nucleotide_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ADD",
+      "PUNP5"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0050",
+    "module_id": "3f19b0791e75f8b76eb1180e",
+    "source": "escher",
+    "map_name": "iAF1260.Fatty_Acid_Biosynthesis",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "BC10_new",
+      "CCP"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0051",
+    "module_id": "33caadd4e40f574f749745f5",
+    "source": "escher",
+    "map_name": "iMM904.Central carbon metabolism",
+    "species": "Saccharomyces cerevisiae",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "MTHFC",
+      "MTHFD"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0052",
+    "module_id": "dc59dd55597ad88172375aad",
+    "source": "escher",
+    "map_name": "iAF1260.Amino_Acid_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "PSCVT",
+      "SHKK"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0053",
+    "module_id": "887f0d5ed28892e399c537e8",
+    "source": "escher",
+    "map_name": "iAF1260.Amino_Acid_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "TRPS1",
+      "TRPS3"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0054",
+    "module_id": "02b63818137da854e58aa829",
+    "source": "reactome",
+    "map_name": "Metabolism of polyamines",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0-data",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "SHCHCS2",
+      "SUCBZS"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0055",
+    "module_id": "c14fd366d92d4954c46b1fa1",
+    "source": "escher",
+    "map_name": "iAF1260.Cofactor_Biosynthesis",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ASP1DC",
+      "PANTS"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0056",
+    "module_id": "2eeffbbff8224786d0bd28b8",
+    "source": "escher",
+    "map_name": "RECON1.Glycolysis TCA PPP",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "PPM",
+      "RPI"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0057",
+    "module_id": "18853a98d2789293abaa80e5",
+    "source": "escher",
+    "map_name": "RECON1.Glycolysis TCA PPP",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "EX_lac__L_e",
+      "L_LACt2r"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0058",
+    "module_id": "86e7ce0bc974f3d116e3d3d6",
+    "source": "escher",
+    "map_name": "iAF1260.Central_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "EDD",
+      "PGL"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0059",
+    "module_id": "30334b3c4d787d21ba2935b0",
+    "source": "escher",
+    "map_name": "iAF1260.Amino_Acid_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "G5SADs",
+      "P5CD"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0060",
+    "module_id": "0a51e7258759eaf77a3ad074",
+    "source": "ich360",
+    "map_name": "iCH360 full metabolic map",
+    "species": "Escherichia coli",
+    "license": "MIT",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "EX_val__L_e",
+      "VALabc"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0061",
+    "module_id": "7e2b795afe4aca7b83284528",
+    "source": "escher",
+    "map_name": "e_coli_core.Core metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "AKGt2r",
+      "ICDHyr"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0062",
+    "module_id": "5d485a75a62b04b4545806c0",
+    "source": "escher",
+    "map_name": "iMM904.Central carbon metabolism",
+    "species": "Saccharomyces cerevisiae",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "FBA2",
+      "TPI"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0063",
+    "module_id": "4e55280f85789f6d41c19eae",
+    "source": "escher",
+    "map_name": "iJO1366.Central metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "FBP",
+      "PGI"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0064",
+    "module_id": "afca91990b7150b64a848beb",
+    "source": "reactome",
+    "map_name": "Carnitine synthesis",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0-data",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "BIOMASS_HP_published",
+      "CYSabc"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0065",
+    "module_id": "b634021203b0db42f12d5f25",
+    "source": "escher",
+    "map_name": "RECON1.Amino acid metabolism (partial)",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "DKMPPD",
+      "UNK2"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0066",
+    "module_id": "2ccbc327024d736c84ad75c9",
+    "source": "escher",
+    "map_name": "iJO1366.Fatty acid biosynthesis (saturated)",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ACCOAC",
+      "KAS15"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0067",
+    "module_id": "a5fa74330aefaed5e8722544",
+    "source": "wikipathways",
+    "map_name": "Disorders in ketone body synthesis",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ACACT1r",
+      "OCOAT1"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0068",
+    "module_id": "cc41412a4e2ae9888d96706a",
+    "source": "escher",
+    "map_name": "iAF1260.Cofactor_Biosynthesis",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "CDPMEK",
+      "MECDPS"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0069",
+    "module_id": "d3986c241fcb416b318d20ca",
+    "source": "ich360",
+    "map_name": "iCH360 full metabolic map",
+    "species": "Escherichia coli",
+    "license": "MIT",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "EX_his__L_e",
+      "HISabc"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0070",
+    "module_id": "44ab7e376ecc97e16efcf555",
+    "source": "escher",
+    "map_name": "iAF1260.Cofactor_Biosynthesis",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ANS",
+      "ICHORS"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0071",
+    "module_id": "8a1578559b87e6e8aa5ddf93",
+    "source": "escher",
+    "map_name": "iAF1260.Lipopolysaccharide_(LPS)_Biosynthesis",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "MAN1PT2",
+      "PMANM"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0072",
+    "module_id": "275b4b48712bb907a6620527",
+    "source": "escher",
+    "map_name": "iJO1366.Nucleotide metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "GLUPRT",
+      "PRPPS"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0073",
+    "module_id": "0a51e7258759eaf77a3ad074",
+    "source": "ich360",
+    "map_name": "iCH360 full metabolic map",
+    "species": "Escherichia coli",
+    "license": "MIT",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "DSERt2",
+      "EX_ser__D_e"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0074",
+    "module_id": "76bf15e68968af50dd6f06bd",
+    "source": "escher",
+    "map_name": "iMM904.Central carbon metabolism",
+    "species": "Saccharomyces cerevisiae",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "TALA",
+      "TKT2"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0075",
+    "module_id": "687975eecca23131f4681701",
+    "source": "escher",
+    "map_name": "iAF1260.Amino_Acid_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "CHORM",
+      "CHORS"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0076",
+    "module_id": "6886ab4066ba78dfcd512594",
+    "source": "escher",
+    "map_name": "iAF1260.Amino_Acid_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "MTAN",
+      "SPMS"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0077",
+    "module_id": "a7602e40b89cebe46bcbdbeb",
+    "source": "escher",
+    "map_name": "iAF1260.Amino_Acid_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "HSDy",
+      "HSK"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0078",
+    "module_id": "0ad517eb0fa56564c26d2003",
+    "source": "escher",
+    "map_name": "iAF1260.Central_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "GAPD",
+      "PGK"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0079",
+    "module_id": "0e4fef519a4db5128cf20ed4",
+    "source": "escher",
+    "map_name": "iAF1260.Amino_Acid_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "MTRI",
+      "MTRK"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0080",
+    "module_id": "661a86241854fa5fc46c06b7",
+    "source": "escher",
+    "map_name": "e_coli_core.Core metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "FUM",
+      "ME1"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0081",
+    "module_id": "cf1b62ae2134f13d2d6d74fc",
+    "source": "escher",
+    "map_name": "RECON1.CARBOHYDRATE_METABOLISM",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "G6PDH1",
+      "G6PDH2r"
+    ],
+    "match_level": "complete_equation",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0082",
+    "module_id": "56bf3f62b1f7fb100dd07a71",
+    "source": "escher",
+    "map_name": "iAF1260.Amino_Acid_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "LEUTA",
+      "LEUabc"
+    ],
+    "match_level": "complete_equation",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0083",
+    "module_id": "0470d1a00e9c34496d860a31",
+    "source": "escher",
+    "map_name": "iJO1366.Central metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "KAS_HP2",
+      "U2GAAT"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0084",
+    "module_id": "4a035bcce30cd8623ff16de9",
+    "source": "ich360",
+    "map_name": "Ion and metal uptake",
+    "species": "Escherichia coli",
+    "license": "MIT",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "EX_phe__L_e",
+      "PHEt2r"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0085",
+    "module_id": "0e731052d9bafe1e09437c2b",
+    "source": "escher",
+    "map_name": "iJO1366.Nucleotide metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "DTMPK",
+      "NDPK4"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0086",
+    "module_id": "072f0e39f5c6e8045410cfbf",
+    "source": "escher",
+    "map_name": "iAF1260.Cofactor_Biosynthesis",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "PPCDC",
+      "PPNCL2"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0087",
+    "module_id": "1bfc1ea4aa1b61904ecf5227",
+    "source": "escher",
+    "map_name": "iAF1260.Lipopolysaccharide_(LPS)_Biosynthesis",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "G1PACT",
+      "UAGDP"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0088",
+    "module_id": "f2e9e6f9dd01c36eb9fad8c4",
+    "source": "human_maps",
+    "map_name": "Purine metabolism (Human-GEM 2.1.1)",
+    "species": "Homo sapiens",
+    "license": "CC-BY-4.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "OMPDC",
+      "ORPT"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0089",
+    "module_id": "a9ba659c48333a49138421dc",
+    "source": "escher",
+    "map_name": "iAF1260.Amino_Acid_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "CBPS",
+      "OCBT"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0090",
+    "module_id": "92a205a0b5d0b052ef591807",
+    "source": "escher",
+    "map_name": "RECON1.Carbohydrate metabolism",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "GALKr",
+      "GALT"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0091",
+    "module_id": "f68e9edc3b54e96d9fca39af",
+    "source": "escher",
+    "map_name": "iAF1260.Cofactor_Biosynthesis",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "G1SAT",
+      "GLUTRR"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0092",
+    "module_id": "f97ddadb10651ba79d89e859",
+    "source": "escher",
+    "map_name": "iAF1260.Cofactor_Biosynthesis",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "HBZOPT",
+      "OPHBDC"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0093",
+    "module_id": "ec634c7df2057b9a6f1cfd86",
+    "source": "reactome",
+    "map_name": "Metabolism of water-soluble vitamins and cofactors",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0-data",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "DPCOAK",
+      "PTPATi"
+    ],
+    "match_level": "complete_equation",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0094",
+    "module_id": "0a88c2858b432f1917853bff",
+    "source": "human_maps",
+    "map_name": "Glycolysis / Gluconeogenesis (Human-GEM 2.1.1)",
+    "species": "Homo sapiens",
+    "license": "CC-BY-4.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "PAPPT3",
+      "UDCPDP"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0095",
+    "module_id": "d786f26aa8d34de0194854e0",
+    "source": "escher",
+    "map_name": "iAF1260.Amino_Acid_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "PHETA1",
+      "PPNDH"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0096",
+    "module_id": "d3986c241fcb416b318d20ca",
+    "source": "ich360",
+    "map_name": "iCH360 full metabolic map",
+    "species": "Escherichia coli",
+    "license": "MIT",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "AAtr",
+      "EX_aa_e"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0097",
+    "module_id": "35ba9ec9941c0f9adb5a3606",
+    "source": "escher",
+    "map_name": "e_coli_core.Core metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "EX_pyr_e",
+      "PYRt2"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0098",
+    "module_id": "7c5adfc9a6c568a858ceefbe",
+    "source": "escher",
+    "map_name": "e_coli_core.Core metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ENO",
+      "PGM"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0099",
+    "module_id": "0f8afe42c6f4b73bececd7bd",
+    "source": "escher",
+    "map_name": "e_coli_core.Core metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "EX_glu__L_e",
+      "GLUt2r"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0100",
+    "module_id": "26cbddcf1315ac349345501d",
+    "source": "escher",
+    "map_name": "e_coli_core.Core metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "EX_mal__L_e",
+      "MALt2r"
+    ],
+    "match_level": "partial_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 1,
+      "topology_layout_suggestion": 1
+    }
+  },
+  {
+    "code": "U0101",
+    "module_id": "6a6de0ac8b9421b6587c6729",
+    "source": "escher",
+    "map_name": "iJO1366.Fatty acid biosynthesis (saturated)",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ACOATA",
+      "KAS14"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0102",
+    "module_id": "ee93deb11beb5f3c1c4aa962",
+    "source": "escher",
+    "map_name": "iAF1260.Cofactor_Biosynthesis",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "AMAOTr",
+      "DBTS"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0103",
+    "module_id": "a4f76e2f9febad0b386ae29b",
+    "source": "wikipathways",
+    "map_name": "Purine metabolism and related disorders",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ADSL1r",
+      "ADSS"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0104",
+    "module_id": "76f7655bc932e55ef81b091f",
+    "source": "escher",
+    "map_name": "iAF1260.Amino_Acid_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "PPND",
+      "TYRTA"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0105",
+    "module_id": "4485c6a4a2c37fe6ae269c78",
+    "source": "escher",
+    "map_name": "e_coli_core.Core metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ASPt2r",
+      "EX_asp__L_e"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0106",
+    "module_id": "1c21595be2bb4d316d58b1dd",
+    "source": "escher",
+    "map_name": "RECON1.Amino acid metabolism (partial)",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "THRD_L",
+      "THRS"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0107",
+    "module_id": "079c272b54af6929d66eeccc",
+    "source": "reactome",
+    "map_name": "Glycerophospholipid biosynthesis",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0-data",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ALAALAr",
+      "UGMDDS"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0108",
+    "module_id": "4630aa7d59d3646220d22523",
+    "source": "escher",
+    "map_name": "iMM904.Central carbon metabolism",
+    "species": "Saccharomyces cerevisiae",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "EX_fum_e",
+      "FUMt3"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0109",
+    "module_id": "aa21f99d7728cad82c3fce45",
+    "source": "wikipathways",
+    "map_name": "Purine metabolism and related disorders",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "DGK1",
+      "NDPK5"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0110",
+    "module_id": "3cc1f4aa258374f11c98abde",
+    "source": "ich360",
+    "map_name": "Murein biosynthesis",
+    "species": "Escherichia coli",
+    "license": "MIT",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "GF6PTA",
+      "PGAMT"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0111",
+    "module_id": "17c34ada9a2072faf6392629",
+    "source": "escher",
+    "map_name": "RECON1.Amino acid metabolism (partial)",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ACPS",
+      "PAPSR"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0112",
+    "module_id": "74aef71e16665a549f156f99",
+    "source": "escher",
+    "map_name": "iAF1260.Alternate_Carbon_Sources",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "DB4PS",
+      "FTHFLi"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0113",
+    "module_id": "eb43c55a9fff2f1ab12e2fe9",
+    "source": "escher",
+    "map_name": "iAF1260.Cofactor_Biosynthesis",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "DXPRIi",
+      "MEPCT"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0114",
+    "module_id": "30291f542eaea1630dc3c81a",
+    "source": "escher",
+    "map_name": "iAF1260.Amino_Acid_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ADMDC",
+      "METAT"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0115",
+    "module_id": "4485c6a4a2c37fe6ae269c78",
+    "source": "escher",
+    "map_name": "e_coli_core.Core metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ADNt2",
+      "EX_adn_e"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0116",
+    "module_id": "ecf99753328d1e02a7cf6a89",
+    "source": "escher",
+    "map_name": "RECON1.Amino acid metabolism (partial)",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ARGSL",
+      "ARGSS"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0117",
+    "module_id": "885181ba856794b5b2e5716a",
+    "source": "panther",
+    "map_name": "De novo purine biosynthesis",
+    "species": "PANTHER Pathway (multi-organism schematic)",
+    "license": "CC-BY-4.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "NADS1",
+      "NNATr"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0118",
+    "module_id": "614188d03bda89d859865525",
+    "source": "escher",
+    "map_name": "e_coli_core.Core metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "GLNS",
+      "GLNabc"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0119",
+    "module_id": "6060a68d31b59e76593cbc9c",
+    "source": "escher",
+    "map_name": "RECON1.Amino acid metabolism (partial)",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "P5CR",
+      "PROD2"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0120",
+    "module_id": "c445d77b880c264e8e3bb540",
+    "source": "escher",
+    "map_name": "iAF1260.Cofactor_Biosynthesis",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "NPHS",
+      "SUCBZL"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0121",
+    "module_id": "1a39750af6f7badbc954bd26",
+    "source": "reactome",
+    "map_name": "Glycerophospholipid biosynthesis",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0-data",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ALAD_L",
+      "AMAA"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0122",
+    "module_id": "119be3458d09df92cab4d5ce",
+    "source": "escher",
+    "map_name": "iAF1260.Cofactor_Biosynthesis",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "HETZK",
+      "TMPPP"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0123",
+    "module_id": "0b0d75fd91284788f8f4ddac",
+    "source": "human_maps",
+    "map_name": "Cholesterol metabolism (Human-GEM 2.1.1)",
+    "species": "Homo sapiens",
+    "license": "CC-BY-4.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "DAGK_HP",
+      "PEPT_HP"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0124",
+    "module_id": "f82896efd2c123dda033c628",
+    "source": "escher",
+    "map_name": "iAF1260.Amino_Acid_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "DAPE",
+      "SDPDS"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0125",
+    "module_id": "9c3c89111369c992847bc744",
+    "source": "escher",
+    "map_name": "RECON1.Amino acid metabolism (partial)",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "DDPGA",
+      "EHGLAT"
+    ],
+    "match_level": "complete_equation",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0126",
+    "module_id": "6231569d0f5d09be1a9e2045",
+    "source": "escher",
+    "map_name": "iAF1260.Amino_Acid_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "ASNN",
+      "ASNS2"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0127",
+    "module_id": "8fafb5471eb4cb430a5899af",
+    "source": "wikipathways",
+    "map_name": "Urea cycle and associated pathways",
+    "species": "Homo sapiens",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "GLUN",
+      "PUTA3"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0128",
+    "module_id": "4a035bcce30cd8623ff16de9",
+    "source": "ich360",
+    "map_name": "Ion and metal uptake",
+    "species": "Escherichia coli",
+    "license": "MIT",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "EX_thymd_e",
+      "THMDt2"
+    ],
+    "match_level": "geometry",
+    "partition": "open_core",
+    "provenance": {
+      "topology_layout_suggestion": 2
+    }
+  },
+  {
+    "code": "U0129",
+    "module_id": "cf63dc44ef2d0016e631065e",
+    "source": "escher",
+    "map_name": "iAF1260.Amino_Acid_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "IGPS",
+      "PRAIi"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  },
+  {
+    "code": "U0130",
+    "module_id": "ad6f497151bc4d514ade5765",
+    "source": "escher",
+    "map_name": "iAF1260.Amino_Acid_Metabolism",
+    "species": "Escherichia coli",
+    "license": "CC0-1.0",
+    "size": 2,
+    "tier": "small",
+    "reactions": [
+      "DHDPRy",
+      "DHDPS"
+    ],
+    "match_level": "reaction_reference",
+    "partition": "open_core",
+    "provenance": {
+      "expert_derived": 2
+    }
+  }
+]

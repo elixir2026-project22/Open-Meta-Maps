@@ -1,0 +1,145 @@
+{
+  "policy": "Per-module source licenses are preserved; research-partition content keeps its own terms.",
+  "layout_sources": [
+    {
+      "id": "ccdc9b32c395e30b382051b4",
+      "template_id": "690c9ede0285b7624f587a33",
+      "map_id": "7c6b94063f4f96699811411b",
+      "source": "escher",
+      "lineage": "3722cda5d0793e3429bf7668",
+      "license": "CC0-1.0",
+      "partition": "open_core",
+      "source_citation": null,
+      "source_sha256": "2caf3c036ff93f487a12c601adeb74353c174c96fc144730cc528b304b1141bc",
+      "original_instance": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/escher/e_coli_core/e_coli_core.Core metabolism.json"
+    },
+    {
+      "id": "da5dc1ed9131ee6811efdccc",
+      "template_id": "39a80d6c9b49b7441bf36db4",
+      "map_id": "4b63988fe370b86a460095c8",
+      "source": "escher",
+      "lineage": "98eb39ce6951a9ccddb74e62",
+      "license": "CC0-1.0",
+      "partition": "open_core",
+      "source_citation": null,
+      "source_sha256": "6f73cdfcf7f1282798256065d30e757a5866d17792a229dd689d10ecaf25fa2f",
+      "original_instance": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/escher/iMM904/iMM904.Central carbon metabolism.json"
+    },
+    {
+      "id": "d0031bc7d33a9b419f72d837",
+      "template_id": "3928f6d477efa2f22e46989b",
+      "map_id": "7c6b94063f4f96699811411b",
+      "source": "escher",
+      "lineage": "3722cda5d0793e3429bf7668",
+      "license": "CC0-1.0",
+      "partition": "open_core",
+      "source_citation": null,
+      "source_sha256": "2caf3c036ff93f487a12c601adeb74353c174c96fc144730cc528b304b1141bc",
+      "original_instance": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/escher/e_coli_core/e_coli_core.Core metabolism.json"
+    },
+    {
+      "id": "1b58b5bdca08f1a7bcffdf78",
+      "template_id": "8cb4f305d956103574fab0b2",
+      "map_id": "7c6b94063f4f96699811411b",
+      "source": "escher",
+      "lineage": "3722cda5d0793e3429bf7668",
+      "license": "CC0-1.0",
+      "partition": "open_core",
+      "source_citation": null,
+      "source_sha256": "2caf3c036ff93f487a12c601adeb74353c174c96fc144730cc528b304b1141bc",
+      "original_instance": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/escher/e_coli_core/e_coli_core.Core metabolism.json"
+    },
+    {
+      "id": "ebeeeab5abee4e62055a4540",
+      "template_id": "56c5d0fda73578319af0545f",
+      "map_id": "e63b0b880daf3cfba5d13db3",
+      "source": "escher",
+      "lineage": "bffa3f419844fce98eade412",
+      "license": "CC0-1.0",
+      "partition": "open_core",
+      "source_citation": null,
+      "source_sha256": "7953c04f54a00900371c114139cad6340de65a56be16511e93f40efde2450f17",
+      "original_instance": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/escher/iJO1366/iJO1366.Central metabolism.json"
+    },
+    {
+      "id": "7b4797d4d68a0ba87acb08a7",
+      "template_id": "1663e00d23c12c4fc242e28c",
+      "map_id": "da46e35a7e48228bd8b1af01",
+      "source": "wikipathways",
+      "lineage": "WP5570",
+      "license": "CC0-1.0",
+      "partition": "open_core",
+      "source_citation": null,
+      "source_sha256": "8b545576f209524b769fd9dc5f18d55a76891d4ee70838e09ed8b047276b3e06",
+      "original_instance": "data/source_inputs/raw/wp/Homo_sapiens/Hs_Glycerol_metabolism_including_linked_IMDs_WP5570_20250731.gpml"
+    },
+    {
+      "id": "24d29880e9ec2643d20ae478",
+      "template_id": "98d732015ac0be39f55872e9",
+      "map_id": "7c6b94063f4f96699811411b",
+      "source": "escher",
+      "lineage": "3722cda5d0793e3429bf7668",
+      "license": "CC0-1.0",
+      "partition": "open_core",
+      "source_citation": null,
+      "source_sha256": "2caf3c036ff93f487a12c601adeb74353c174c96fc144730cc528b304b1141bc",
+      "original_instance": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/escher/e_coli_core/e_coli_core.Core metabolism.json"
+    },
+    {
+      "id": "ad1e63f63a1a945d61fd5fd4",
+      "template_id": "f000334968af9ed2962bae04",
+      "map_id": "7c6b94063f4f96699811411b",
+      "source": "escher",
+      "lineage": "3722cda5d0793e3429bf7668",
+      "license": "CC0-1.0",
+      "partition": "open_core",
+      "source_citation": null,
+      "source_sha256": "2caf3c036ff93f487a12c601adeb74353c174c96fc144730cc528b304b1141bc",
+      "original_instance": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/escher/e_coli_core/e_coli_core.Core metabolism.json"
+    },
+    {
+      "id": "1c0bb5d12f134c4c808bcc26",
+      "template_id": "954489273de4ecdf1ec923c0",
+      "map_id": "7c6b94063f4f96699811411b",
+      "source": "escher",
+      "lineage": "3722cda5d0793e3429bf7668",
+      "license": "CC0-1.0",
+      "partition": "open_core",
+      "source_citation": null,
+      "source_sha256": "2caf3c036ff93f487a12c601adeb74353c174c96fc144730cc528b304b1141bc",
+      "original_instance": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/escher/e_coli_core/e_coli_core.Core metabolism.json"
+    },
+    {
+      "id": "08a14bf4c89172150e7da931",
+      "template_id": "7df7555093d5ca7edebfa0a5",
+      "map_id": "7c6b94063f4f96699811411b",
+      "source": "escher",
+      "lineage": "3722cda5d0793e3429bf7668",
+      "license": "CC0-1.0",
+      "partition": "open_core",
+      "source_citation": null,
+      "source_sha256": "2caf3c036ff93f487a12c601adeb74353c174c96fc144730cc528b304b1141bc",
+      "original_instance": "/agent/repos/OpenMetaMaps/data/source_inputs/raw/escher/e_coli_core/e_coli_core.Core metabolism.json"
+    },
+    {
+      "id": "ae7651aad391d98b398baa0d",
+      "template_id": "b52b2a4f3f2f4c69ba946619",
+      "map_id": "edfc1c3e5df12b309a20364e",
+      "source": "human_maps",
+      "lineage": "human_maps:subsystem/escher/cysteine_and_methionine_metabolism.json",
+      "license": "CC-BY-4.0",
+      "partition": "open_core",
+      "source_citation": {
+        "source": "human_maps",
+        "url": "https://github.com/SysBioChalmers/Human-maps",
+        "license": "CC-BY-4.0",
+        "license_uri": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "Human-maps (CC BY 4.0); https://github.com/SysBioChalmers/Human-maps",
+        "access_date": "2026-11-11",
+        "version": "2026-11-11"
+      },
+      "source_sha256": "fcd5410a3df7b7f85a113b811415173712bf906567c6bf6d92f41380448956a8",
+      "original_instance": "data/references/human_maps/subsystem/escher/cysteine_and_methionine_metabolism.json"
+    }
+  ]
+}
