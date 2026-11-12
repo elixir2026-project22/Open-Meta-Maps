@@ -904,6 +904,17 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         if log and fit.get('applied'):
             log(f"  canvas fit to content: {fit.get('content')} pad=40")
         dump(folder / 'map.json', data)
+        # Final label pass after late geometry (rigid restore / overlap clear / squeeze /
+        # hotspot). Root-cause stages already translate labels with nodes; this pass
+        # re-anchors any residual detach and re-resolves text↔curve conflicts on the
+        # finished glyph positions (early label_placement ran before those moves).
+        import label_placement as _lp_final
+        t_re = time.time()
+        metric['label_placement_final'] = dict(
+            _lp_final.optimize(data), seconds=round(time.time() - t_re, 1))
+        if log:
+            log(f"  label placement (final): {metric['label_placement_final']}")
+        dump(folder / 'map.json', data)
     elif not scalable and len(model['reactions']) <= 400:
         import edge_routing
         er = dict(mode=EDGE_ROUTING, before=edge_routing.measure(data, skip_edges))

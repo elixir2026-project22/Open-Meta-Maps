@@ -18,6 +18,9 @@ from collections import defaultdict
 PADX, PADY_UP, PADY_DOWN = 2.0, 14.0, 4.0
 CELL = 150.0
 DENSITY_THRESHOLD = 6  # if more than this many labels in a cell, consider hiding currency
+# Labels further than this from their glyph are treated as detached (must re-place).
+# Intentional side/diagonal candidates stay well below this; rigid-restore bugs were 300–1500 px.
+MAX_ANCHOR_DIST = 100.0
 CURRENCY_PATTERNS = {'atp', 'adp', 'amp', 'nad', 'nadh', 'nadp', 'nadph', 'coa', 'fad', 'fadh2',
                      'h2o', 'h', 'pi', 'ppi', 'co2', 'o2', 'nh4', 'gtp', 'gdp', 'gmp', 'ctp', 'cdp',
                      'cmp', 'utp', 'udp', 'ump', 'accoa', 'succoa', 'malacp', 'malcoa'}
@@ -116,22 +119,34 @@ def optimize(data, passes=10, hide_currency=True):
         current.append(r)
         put(i, r)
 
-    def candidates(L):
+    def near_candidates(L):
         x, y, w = L['cx'], L['cy'], L['w']
-        # More candidate positions for better placement in crowded areas
-        return [(L['box']['label_x'], L['box']['label_y']), 
+        # Positions beside the glyph (never the current far-away spot).
+        return [
                 # First ring: close to glyph
                 (x + 10, y + 4), (x - 10 - w, y + 4), (x - w / 2, y - 9), (x - w / 2, y + 19),
                 (x + 8, y - 8), (x + 8, y + 17), (x - 8 - w, y - 8), (x - 8 - w, y + 17),
                 # Second ring: further out for crowded places
-                (x + 26, y + 4), (x - 26 - w, y + 4), (x - w / 2, y - 24), (x - w / 2, y + 36), 
+                (x + 26, y + 4), (x - 26 - w, y + 4), (x - w / 2, y - 24), (x - w / 2, y + 36),
                 (x + 22, y - 22), (x + 22, y + 32), (x - 22 - w, y - 22), (x - 22 - w, y + 32),
                 # Third ring: even further for very dense regions
                 (x + 40, y + 4), (x - 40 - w, y + 4), (x - w / 2, y - 38), (x - w / 2, y + 52)]
 
-    def cost(i, rect):
+    def candidates(L):
+        return [(L['box']['label_x'], L['box']['label_y'])] + near_candidates(L)
+
+    def _anchor_dist(L, lx, ly):
+        return float(np.hypot(lx - L['cx'], ly - L['cy']))
+
+    def cost(i, rect, lx=None, ly=None):
         L = labels[i]
         c = 0.0
+        if lx is None:
+            lx, ly = L['box']['label_x'], L['box']['label_y']
+        # Detached labels (far from their glyph) are always costly so the greedy
+        # pass will pull them back even when they sit in empty space.
+        if _anchor_dist(L, lx, ly) > MAX_ANCHOR_DIST:
+            c += 50.0
         seen = set()
         for cell in _cells(rect[:2], rect[2:]):
             seen.update(grid.get(cell, ()))
@@ -159,7 +174,8 @@ def optimize(data, passes=10, hide_currency=True):
     before = sum(cost(i, current[i]) > 0 for i in range(len(labels)))
     moved = 0
     hidden = 0
-    
+    reanchored = 0
+
     # Identify dense regions for potential currency hiding
     dense_cells = set()
     if hide_currency:
@@ -169,7 +185,29 @@ def optimize(data, passes=10, hide_currency=True):
             cell = (int(cx // CELL), int(cy // CELL))
             cell_counts[cell] += 1
         dense_cells = {c for c, cnt in cell_counts.items() if cnt > DENSITY_THRESHOLD}
-    
+
+    # Safety: snap any already-detached label onto the best free near-glyph spot
+    # before the conflict-driven passes (root-cause stages should prevent this).
+    for i, L in enumerate(labels):
+        if L['box'].get('label_hidden'):
+            continue
+        if _anchor_dist(L, L['box']['label_x'], L['box']['label_y']) <= MAX_ANCHOR_DIST:
+            continue
+        best = None
+        for lx, ly in near_candidates(L):
+            rect = _rect(lx, ly, L['w'])
+            c = cost(i, rect, lx=lx, ly=ly)
+            if best is None or c < best[0] - 1e-9:
+                best = (c, lx, ly, rect)
+        if best is not None:
+            _, lx, ly, rect = best
+            drop(i, current[i])
+            current[i] = rect
+            put(i, rect)
+            L['box']['label_x'], L['box']['label_y'] = round(float(lx), 2), round(float(ly), 2)
+            moved += 1
+            reanchored += 1
+
     for p in range(passes):
         order = sorted(range(len(labels)), key=lambda i: -cost(i, current[i]))
         changed = 0
@@ -181,7 +219,7 @@ def optimize(data, passes=10, hide_currency=True):
             best = (c0, 0, None)
             for k, (lx, ly) in enumerate(candidates(L)[1:], start=1):
                 rect = _rect(lx, ly, L['w'])
-                c = cost(i, rect)
+                c = cost(i, rect, lx=lx, ly=ly)
                 if c < best[0] - 1e-9:
                     best = (c, k, (lx, ly, rect))
             if best[2] is not None:
@@ -194,7 +232,7 @@ def optimize(data, passes=10, hide_currency=True):
                 moved += 1
         if not changed:
             break
-    
+
     # After placement optimization, hide currency labels in still-conflicted dense regions
     after = sum(cost(i, current[i]) > 0 for i in range(len(labels)))
     if hide_currency and after > 0:
@@ -220,6 +258,77 @@ def optimize(data, passes=10, hide_currency=True):
             1 for i in range(len(labels))
             if not labels[i]['box'].get('label_hidden') and cost(i, current[i]) > 0
         )
-    
-    return dict(labels=len(labels), with_conflict_before=before, with_conflict_after=after, 
-                moves=moved, hidden_currency=hidden, dense_cells=len(dense_cells))
+
+    return dict(labels=len(labels), with_conflict_before=before, with_conflict_after=after,
+                moves=moved, reanchored=reanchored, hidden_currency=hidden, dense_cells=len(dense_cells))
+
+
+def reanchor_distant(data, max_dist=MAX_ANCHOR_DIST):
+    """Final safety pass: re-place any label whose offset from its glyph exceeds ``max_dist``.
+
+    Prefer fixing the stage that moved the node without the label; call this after late
+    geometry (rigid restore, overlap clear, squeeze) so a detached label cannot survive.
+    Only detached labels move; already-anchored and hidden labels are left alone.
+    """
+    import drawing
+    font = drawing.FONT
+    body = data[1]
+    nodes, reactions = body['nodes'], body['reactions']
+    # Build a lightweight label list with anchors.
+    items = []
+    for nid, n in nodes.items():
+        if n.get('node_type') != 'metabolite' or 'label_x' not in n or n.get('label_hidden'):
+            continue
+        items.append(dict(box=n, w=font.getlength(n.get('bigg_id', '')),
+                          cx=n['x'], cy=n['y']))
+    for rx in reactions.values():
+        if 'label_x' not in rx or rx.get('label_hidden'):
+            continue
+        mid = next((s['from_node_id'] for s in rx['segments'].values()
+                    if nodes[s['from_node_id']].get('node_type') == 'midmarker'), None)
+        if mid is None:
+            continue
+        items.append(dict(box=rx, w=font.getlength(rx['bigg_id']),
+                          cx=nodes[mid]['x'], cy=nodes[mid]['y']))
+    # Occupancy of already-good labels (and glyphs) so re-placed text avoids them.
+    occupied = []
+    for L in items:
+        if float(np.hypot(L['box']['label_x'] - L['cx'], L['box']['label_y'] - L['cy'])) <= max_dist:
+            occupied.append(_rect(L['box']['label_x'], L['box']['label_y'], L['w']))
+    for n in nodes.values():
+        if n.get('node_type') in ('metabolite', 'midmarker'):
+            occupied.append((n['x'] - 7, n['y'] - 7, n['x'] + 7, n['y'] + 7))
+
+    def _overlap(a, b):
+        return a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]
+
+    def _near(L):
+        x, y, w = L['cx'], L['cy'], L['w']
+        return [
+            (x + 10, y + 4), (x - 10 - w, y + 4), (x - w / 2, y - 9), (x - w / 2, y + 19),
+            (x + 8, y - 8), (x + 8, y + 17), (x - 8 - w, y - 8), (x - 8 - w, y + 17),
+            (x + 26, y + 4), (x - 26 - w, y + 4), (x - w / 2, y - 24), (x - w / 2, y + 36),
+            (x + 22, y - 22), (x + 22, y + 32), (x - 22 - w, y - 22), (x - 22 - w, y + 32),
+            (x + 40, y + 4), (x - 40 - w, y + 4), (x - w / 2, y - 38), (x - w / 2, y + 52),
+        ]
+
+    fixed = 0
+    for L in items:
+        dist = float(np.hypot(L['box']['label_x'] - L['cx'], L['box']['label_y'] - L['cy']))
+        if dist <= max_dist:
+            continue
+        best = None
+        for lx, ly in _near(L):
+            rect = _rect(lx, ly, L['w'])
+            hits = sum(1 for o in occupied if _overlap(rect, o))
+            score = (hits, float(np.hypot(lx - L['cx'], ly - L['cy'])))
+            if best is None or score < best[0]:
+                best = (score, lx, ly, rect)
+        if best is None:
+            continue
+        _, lx, ly, rect = best
+        L['box']['label_x'] = round(float(lx), 2)
+        L['box']['label_y'] = round(float(ly), 2)
+        occupied.append(rect)
+        fixed += 1
+    return dict(checked=len(items), reanchored=fixed, max_dist=max_dist)

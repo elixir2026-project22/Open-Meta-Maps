@@ -14,6 +14,7 @@ from pathlib import Path
 import numpy as np
 
 from core import INPUTS, ROOT, read, unify_map_scale
+from map_edit import set_node_xy, translate_node, translate_reaction_label
 
 # Angle (degrees) below which a Kabsch rotation is treated as "axes kept".
 AXES_ANGLE_DEG = 12.0
@@ -940,17 +941,34 @@ def clear_rigid_node_overlaps_escher(data, blocks, min_dist=12.0):
                 d = np.array([math.cos(ang), math.sin(ang)])
                 dist = 1.0
             step = d / dist * (min_dist - dist)
+            # Track midmarker deltas so reaction labels stay with their anchors.
+            mid_delta = {}
             if move_a and move_b:
-                nodes[a]['x'] = float(nodes[a]['x'] - step[0] / 2)
-                nodes[a]['y'] = float(nodes[a]['y'] - step[1] / 2)
-                nodes[b]['x'] = float(nodes[b]['x'] + step[0] / 2)
-                nodes[b]['y'] = float(nodes[b]['y'] + step[1] / 2)
+                dx_a, dy_a = -step[0] / 2, -step[1] / 2
+                dx_b, dy_b = step[0] / 2, step[1] / 2
+                translate_node(nodes[a], dx_a, dy_a, digits=6)
+                translate_node(nodes[b], dx_b, dy_b, digits=6)
+                if nodes[a].get('node_type') == 'midmarker':
+                    mid_delta[a] = (dx_a, dy_a)
+                if nodes[b].get('node_type') == 'midmarker':
+                    mid_delta[b] = (dx_b, dy_b)
             elif move_a:
-                nodes[a]['x'] = float(nodes[a]['x'] - step[0])
-                nodes[a]['y'] = float(nodes[a]['y'] - step[1])
+                dx_a, dy_a = -step[0], -step[1]
+                translate_node(nodes[a], dx_a, dy_a, digits=6)
+                if nodes[a].get('node_type') == 'midmarker':
+                    mid_delta[a] = (dx_a, dy_a)
             else:
-                nodes[b]['x'] = float(nodes[b]['x'] + step[0])
-                nodes[b]['y'] = float(nodes[b]['y'] + step[1])
+                dx_b, dy_b = step[0], step[1]
+                translate_node(nodes[b], dx_b, dy_b, digits=6)
+                if nodes[b].get('node_type') == 'midmarker':
+                    mid_delta[b] = (dx_b, dy_b)
+            if mid_delta:
+                for rx in reactions.values():
+                    for seg in (rx.get('segments') or {}).values():
+                        for end in (seg.get('from_node_id'), seg.get('to_node_id')):
+                            if end in mid_delta and nodes.get(end, {}).get('node_type') == 'midmarker':
+                                translate_reaction_label(rx, *mid_delta[end], digits=6)
+                                break
             moved += 1
         if not hit:
             break
@@ -1090,8 +1108,11 @@ def restore_rigid_group_escher(data, blocks):
         if sk not in snap:
             continue
         xy = np.asarray(snap[sk], float) + delta
-        nodes[nid]['x'] = float(xy[0])
-        nodes[nid]['y'] = float(xy[1])
+        dx, dy = set_node_xy(nodes[nid], float(xy[0]), float(xy[1]), digits=6)
+        # Reaction label rides with the midmarker (midmarkers have no label_x).
+        rx = next((r for r in reactions.values() if r.get('bigg_id') == rid), None)
+        if rx is not None:
+            translate_reaction_label(rx, dx, dy, digits=6)
         restored += 1
     # Metabolites: one primary glyph per bigg_id takes the absolute snap position;
     # additional glyphs for the same metabolite keep their offset to their reaction
@@ -1117,8 +1138,7 @@ def restore_rigid_group_escher(data, blocks):
         # Prefer a node flagged primary when present.
         entries_sorted = sorted(entries, key=lambda t: (not nodes[t[0]].get('node_is_primary', True), t[0]))
         primary_nid = entries_sorted[0][0]
-        nodes[primary_nid]['x'] = float(target[0])
-        nodes[primary_nid]['y'] = float(target[1])
+        set_node_xy(nodes[primary_nid], float(target[0]), float(target[1]), digits=6)
         restored += 1
         for nid, holders in entries_sorted[1:]:
             rid = next(iter(holders))
@@ -1127,8 +1147,10 @@ def restore_rigid_group_escher(data, blocks):
             if mnid is None or old is None:
                 # Fallback ring so centres stay clear of the primary glyph.
                 ang = (hash(nid) % 360) * math.pi / 180.0
-                nodes[nid]['x'] = float(target[0] + 14.0 * math.cos(ang))
-                nodes[nid]['y'] = float(target[1] + 14.0 * math.sin(ang))
+                set_node_xy(nodes[nid],
+                            float(target[0] + 14.0 * math.cos(ang)),
+                            float(target[1] + 14.0 * math.sin(ang)),
+                            digits=6)
             else:
                 # Translate with the midmarker: keep pre-restore stub vector.
                 stub = np.asarray([nodes[nid]['x'], nodes[nid]['y']], float) - np.asarray(old, float)
@@ -1137,8 +1159,10 @@ def restore_rigid_group_escher(data, blocks):
                     ang = (hash(nid) % 360) * math.pi / 180.0
                     stub = np.asarray([14.0 * math.cos(ang), 14.0 * math.sin(ang)], float)
                 new_mid = np.asarray([nodes[mnid]['x'], nodes[mnid]['y']], float)
-                nodes[nid]['x'] = float(new_mid[0] + stub[0])
-                nodes[nid]['y'] = float(new_mid[1] + stub[1])
+                set_node_xy(nodes[nid],
+                            float(new_mid[0] + stub[0]),
+                            float(new_mid[1] + stub[1]),
+                            digits=6)
             restored += 1
     # Drop Bezier handles on rigid segments so restyle can rebuild from nodes.
     for rx in reactions.values():
