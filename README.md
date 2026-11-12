@@ -178,16 +178,6 @@ Compose writes `layout_quality.evaluate` into `layout_issues.json` / `report.jso
 | **Stability** | Reproducibility across runs; displacement and Procrustes disparity against a previous map (`--previous`) | `stability.py` |
 | **Reference similarity** | Procrustes, distance correlation and kNN preservation against a reference SBGN map | `reference_sbgn.py` |
 
-### Acceptance criteria for changes
-
-A change to the layout pipeline is merged only when, on `e_coli_core` and `iIT341`:
-
-- no layout-benchmark metric gets worse, measured with the official layout-benchmark scorer;
-- every reaction and metabolite is drawn;
-- curated structures keep their internal geometry (translation only) and `--previous` pinned nodes do not move;
-- the canvas does not grow and no label is cropped;
-- compose time does not increase by more than 20%.
-
 ### Optimisation targets
 
 | Target | Optimising stage(s) |
