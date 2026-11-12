@@ -982,7 +982,7 @@ def compact_empty_corridors_escher(data, max_gap=None, spacing=None):
     shortened = 0
     removed = 0.0
     moved = set()
-    max_shorten = 2
+    max_shorten = 1
     candidates.sort(reverse=True)
     for length, rid, mid_id, met_id, vertical in candidates:
         if shortened >= max_shorten:
