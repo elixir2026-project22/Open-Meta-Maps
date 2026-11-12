@@ -517,7 +517,9 @@ def write_overview_mosaic(by_src, summary, sets):
         stroke = _hex_rgb(SOURCE_STROKE[b['sk']])
         draw.rectangle([x0, y0, x0 + bw2 - 1, y0 + bh2 - 1], fill=tint, outline=stroke, width=2)
         info = b['info']
-        label = f"{SOURCE_LABEL_SHORT.get(b['sk'], b['sk'])}  ·  {info['modules']:,} / {info['unique_reaction_sets']:,}"
+        label = f"{SOURCE_LABEL_SHORT.get(b['sk'], b['sk'])}  ·  {info['modules']:,} cut · {info['unique_reaction_sets']:,} unique"
+        if draw.textlength(label, font=font) > bw2 - 16:
+            font = font_bold_sm
         draw.text((x0 + 8, y0 + 5), label, fill=(17, 17, 17), font=font)
         tile_x, tile_y = x0 + 4, y0 + label_h
         tile_w, tile_h = max(bw2 - 8, 4), max(bh2 - label_h - 4, 4)

@@ -64,7 +64,7 @@ def about():
 
     s1 = sec(
         'About Open Meta Maps',
-        '<p><b>' + b('Two parts: a curated-structure Atlas from public community maps, and a layout optimisation pipeline that reuses matching geometry and completes the rest with Bézier connections.') + '</b></p><p>' + b('Open Meta Maps is ELIXIR BioHackathon Europe 2026 Project 22 (Open Pathway Maps). Every reaction and metabolite of the uploaded GEM is drawn; stoichiometry and compartments are unchanged.') + '</p><p class="meta">' + b('Map Generator: python3 project.py tool or ./start_tool.command. Examples: e_coli_core, iIT341, iMM904, iML1515. Viewer: pan, wheel/pinch zoom, minimap. Server exits when the last tab closes (~8 s); --keep-running disables that. Evaluate layouts with python3 project.py evaluate.') + '</p>',
+        '<p><b>' + b('Two parts: a curated-structure Atlas from public community maps, and a layout optimisation pipeline that reuses matching geometry and completes the rest with Bézier connections.') + '</b></p><p>' + b('Open Meta Maps is ELIXIR BioHackathon Europe 2026 ') + '<a href="https://github.com/elixir2026-project22">' + b('Project 22') + '</a>' + b(' (Open Pathway Maps). Every reaction and metabolite of the uploaded GEM is drawn; stoichiometry and compartments are unchanged.') + '</p><p class="meta">' + b('Map Generator: python3 project.py tool or ./start_tool.command. Examples: e_coli_core, iIT341, iMM904, iML1515. Viewer: pan, wheel/pinch zoom, minimap. Server exits when the last tab closes (~8 s); --keep-running disables that. Evaluate layouts with python3 project.py evaluate.') + '</p>',
     )
 
     about_path = ROOT / 'layout_atlas' / 'results' / 'about' / 'index.html'
