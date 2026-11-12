@@ -388,6 +388,10 @@ def _candidate_moves(data, scene, blocks, win, skip, expert, spacing, cross_rids
 
     if blocks and scene:
         for b in sorted(blocks, key=lambda x: x.get('id') or ''):
+            # Absolute same-map rigid groups must not translate — that raises
+            # curated×curated crossings while the headline gate ignores them.
+            if b.get('same_map_rigid'):
+                continue
             br = set(b.get('reaction_ids') or [])
             if not (br & focus_rids):
                 continue

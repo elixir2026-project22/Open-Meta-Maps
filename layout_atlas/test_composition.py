@@ -230,3 +230,15 @@ def test_squeeze_partial_stays_in_aspect_band():
     ys = [n['y'] for n in data[1]['nodes'].values()]
     aspect = (max(xs) - min(xs)) / max(max(ys) - min(ys), 1e-9)
     assert C.ASPECT_MIN - 0.02 <= aspect <= C.ASPECT_MAX + 0.02, aspect
+
+
+def test_pack_into_main_pockets_places_beside_main():
+    # Main cluster at origin; one free box should tuck into the empty pad, not far away.
+    main = [(0.0, 0.0), (40.0, 0.0), (0.0, 40.0), (40.0, 40.0),
+            (80.0, 0.0), (80.0, 40.0), (0.0, 80.0), (40.0, 80.0), (80.0, 80.0)]
+    boxes = [(1, 50.0, 40.0)]
+    placed, rep = C.pack_into_main_pockets(boxes, main, spacing=40.0, prefer_c=(40.0, 40.0))
+    assert 1 in placed, rep
+    x, y = placed[1]
+    # Within a modest halo of the main AABB.
+    assert -80 <= x <= 160 and -80 <= y <= 160

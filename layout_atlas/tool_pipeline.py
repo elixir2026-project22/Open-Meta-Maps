@@ -271,7 +271,7 @@ def save_gz(path, obj):
 
 
 def render_skeleton_svg(model, blocks, containers, bridges, anchors, status, path):
-    """Skeleton = expert modules (coloured by source library) plus network bridges; nothing else is drawn."""
+    """Skeleton = curated modules (coloured by source library) plus network bridges; nothing else is drawn."""
     from xml.sax.saxutils import escape
     g = model_graph(model)
     xs, ys = [], []
@@ -491,7 +491,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             lap('completion of unplaced nodes (fCoSE)')
         else:
             core = {k: list(v) for k, v in anchors.items() if k in g}
-        metric_completion = dict(method='modules placed as rigid groups (expert blocks + automatic modules)', unplaced=len(plan['missing']), **{k: v for k, v in plan['stats'].items() if k in ('auto_modules', 'auto_modules_linked_to_expert', 'auto_modules_not_linked')})
+        metric_completion = dict(method='modules placed as rigid groups (curated blocks + automatic modules)', unplaced=len(plan['missing']), **{k: v for k, v in plan['stats'].items() if k in ('auto_modules', 'auto_modules_linked_to_expert', 'auto_modules_not_linked')})
     elif COMPLETION == 'spaced':
         import completion
         core = completion.complete_spaced(g, anchors, iterations=350)
