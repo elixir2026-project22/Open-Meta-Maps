@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Crop an Open Meta Maps Escher map.json to a preview PNG.
 
-White background, content-tight crop, strokes and nodes scaled for a
-target width (default 2800 px). Labels are kept only when their font
-would stay readable at that width.
+White background, content-tight crop, every reaction and metabolite label
+of map.svg drawn. The default width keeps the smallest label at least
+MIN_LABEL_PX tall; strokes are widened when they would drop below
+TARGET_STROKE px.
 
   PYTHONPATH=layout_atlas python3 tools/render_map_preview.py map.json out.png
 """
@@ -11,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import io
+import math
 import re
 import sys
 from pathlib import Path
@@ -21,14 +23,15 @@ sys.path.insert(0, str(ROOT / 'layout_atlas'))
 from core import read  # noqa: E402
 import line_render  # noqa: E402
 
-# Target sizes in output pixels at --width. Nodes are capped so dense maps
-# stay as networks, not solid blobs.
+# Sizes in output pixels. SMALLEST_FONT is the smallest label font of
+# line_render in map units.
 TARGET_STROKE = 1.2
-MAX_NODE_PX = 2.2
-MIN_LABEL_PX = 7.0
+MIN_LABEL_PX = 8.0
+SMALLEST_FONT = 10.5
 CROP_PAD_FRAC = 0.03
-DEFAULT_WIDTH = 2800
-MAX_BYTES = 3_000_000
+MIN_WIDTH = 2800
+MAX_WIDTH = 8000
+MAX_BYTES = 5_000_000
 
 
 def _content_bbox(data):
@@ -62,20 +65,28 @@ def _content_bbox(data):
     return xmin - pad, ymin - pad, xmax + pad, ymax + pad
 
 
-def _scale_svg(svg: str, mul: float, labels: bool) -> str:
-    """Multiply stroke, radius and font sizes so they hit the target pixel size."""
+def _scale_svg(svg: str, mul: float) -> str:
+    """Multiply stroke, radius and marker sizes so strokes hit the target pixel size."""
 
     def num(attr, x):
         return f'{attr}="{float(x.group(1)) * mul:.3f}"'
 
     svg = re.sub(r'stroke-width="([0-9.]+)"', lambda m: num('stroke-width', m), svg)
     svg = re.sub(r'\br="([0-9.]+)"', lambda m: num('r', m), svg)
-    svg = re.sub(r'font-size="([0-9.]+)"', lambda m: num('font-size', m), svg)
     svg = re.sub(r'markerWidth="([0-9.]+)"', lambda m: num('markerWidth', m), svg)
     svg = re.sub(r'markerHeight="([0-9.]+)"', lambda m: num('markerHeight', m), svg)
-    if not labels:
-        svg = re.sub(r'<text\b[^>]*>.*?</text>', '', svg, flags=re.DOTALL)
     return svg
+
+
+def _split_label_halos(svg: str) -> str:
+    """Draw each label's halo and its glyphs as two texts; cairosvg ignores paint-order."""
+
+    def split(m):
+        attrs, body = m.group(1), m.group(2)
+        glyphs = re.sub(r'\s(stroke|stroke-width|paint-order)="[^"]*"', '', attrs)
+        return f'<text{attrs}>{body}</text><text{glyphs}>{body}</text>'
+
+    return re.sub(r'<text\b([^>]*paint-order="stroke"[^>]*)>(.*?)</text>', split, svg, flags=re.DOTALL)
 
 
 def _set_viewbox(svg: str, bbox, width: int, height: int) -> str:
@@ -85,7 +96,13 @@ def _set_viewbox(svg: str, bbox, width: int, height: int) -> str:
     return re.sub(r'<svg\b[^>]*>', new, svg, count=1)
 
 
-def render_preview(map_path: Path, out_path: Path, width: int = DEFAULT_WIDTH, max_bytes: int = MAX_BYTES) -> Path:
+def default_width(bbox) -> int:
+    """Width at which the smallest label is MIN_LABEL_PX tall, within MIN_WIDTH..MAX_WIDTH."""
+    bw = max(bbox[2] - bbox[0], 1.0)
+    return min(MAX_WIDTH, max(MIN_WIDTH, math.ceil(bw * MIN_LABEL_PX / SMALLEST_FONT)))
+
+
+def render_preview(map_path: Path, out_path: Path, width: int | None = None, max_bytes: int = MAX_BYTES) -> Path:
     from PIL import Image
     import cairosvg
 
@@ -96,18 +113,14 @@ def render_preview(map_path: Path, out_path: Path, width: int = DEFAULT_WIDTH, m
     svg = line_render.render(data)
     x0, y0, x1, y1 = _content_bbox(data)
     bw, bh = max(x1 - x0, 1.0), max(y1 - y0, 1.0)
+    if width is None:
+        width = default_width((x0, y0, x1, y1))
     height = max(1, int(round(width * bh / bw)))
     scale = width / bw  # map units -> output pixels
-    labels = (12.0 * scale) >= MIN_LABEL_PX
-    # Keep map-unit sizes unless a stroke would drop below TARGET_STROKE px;
-    # never let a primary node exceed MAX_NODE_PX in the output.
-    mul = 1.0
-    if 2.4 * scale < TARGET_STROKE:
-        mul = TARGET_STROKE / (2.4 * scale)
-    node_out = 5.0 * mul * scale  # line_render.PRIMARY_R
-    if node_out > MAX_NODE_PX:
-        mul = MAX_NODE_PX / (5.0 * scale)
-    svg = _scale_svg(svg, mul, labels=labels)
+    # Keep map-unit sizes unless a stroke would drop below TARGET_STROKE px.
+    mul = max(1.0, TARGET_STROKE / (2.4 * scale))
+    svg = _scale_svg(svg, mul)
+    svg = _split_label_halos(svg)
     svg = _set_viewbox(svg, (x0, y0, x1, y1), width, height)
     # Force the background rect to the viewBox.
     svg = re.sub(
@@ -121,15 +134,11 @@ def render_preview(map_path: Path, out_path: Path, width: int = DEFAULT_WIDTH, m
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     im.save(out_path, format='PNG', optimize=True)
-    if out_path.stat().st_size > max_bytes:
-        for q_w in (2600, 2400, 2200, 2000):
-            if q_w >= width:
-                continue
-            q_h = max(1, int(round(q_w * bh / bw)))
-            small = im.resize((q_w, q_h), Image.Resampling.LANCZOS)
-            small.save(out_path, format='PNG', optimize=True)
-            if out_path.stat().st_size <= max_bytes:
-                break
+    q_w = width
+    while out_path.stat().st_size > max_bytes and q_w > MIN_WIDTH:
+        q_w = max(MIN_WIDTH, int(q_w * 0.9))
+        q_h = max(1, int(round(q_w * bh / bw)))
+        im.resize((q_w, q_h), Image.Resampling.LANCZOS).save(out_path, format='PNG', optimize=True)
     return out_path
 
 
@@ -137,7 +146,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('map', type=Path, help='Escher map.json')
     p.add_argument('out', type=Path, help='output PNG')
-    p.add_argument('--width', type=int, default=DEFAULT_WIDTH)
+    p.add_argument('--width', type=int, default=None, help='output width in px (default: smallest label MIN_LABEL_PX tall)')
     p.add_argument('--max-bytes', type=int, default=MAX_BYTES)
     args = p.parse_args()
     path = render_preview(args.map, args.out, width=args.width, max_bytes=args.max_bytes)

@@ -76,7 +76,7 @@
     "degraded": [
       "routing: none (straight connections)"
     ],
-    "seconds": 91.8,
+    "seconds": 88.7,
     "network": {
       "canvas": [
         8462,
@@ -160,11 +160,11 @@
         "auto_modules_not_linked": 8,
         "missing_anchors": 0,
         "timings": {
-          "expert blocks (ELK)": 1.3,
-          "communities of uncovered reactions": 0.1,
-          "local layout of automatic modules": 5.3,
+          "curated blocks (ELK)": 0.7,
+          "communities of uncovered reactions": 0.0,
+          "local layout of automatic modules": 3.7,
           "module weights": 0.0,
-          "placement of all modules": 47.5,
+          "placement of all modules": 43.4,
           "anchors": 0.0
         },
         "expert_blocks": 130,
@@ -204,7 +204,7 @@
                 "aspect": 0.96,
                 "compactness": 0.592
               },
-              "seconds": 1.4
+              "seconds": 1.5
             },
             {
               "name": "stress_wide",
@@ -222,7 +222,7 @@
                 "aspect": 0.72,
                 "compactness": 0.532
               },
-              "seconds": 1.5
+              "seconds": 1.4
             },
             {
               "name": "skyline",
@@ -240,7 +240,7 @@
                 "aspect": 1.45,
                 "compactness": 0.738
               },
-              "seconds": 43.3,
+              "seconds": 39.2,
               "skyline": {
                 "aspect": 1.455,
                 "in_band": true,
@@ -563,8 +563,8 @@
       "scene_nodes": 2419,
       "routing_status": "none: straight connections between glyphs; structure edges use the structures' own lines or curves",
       "timings": {
-        "scene relaxation (sparse)": 8.1,
-        "export (no routing)": 4.8
+        "scene relaxation (sparse)": 7.4,
+        "export (no routing)": 4.5
       },
       "relax": {
         "optimizer_converged": false,
@@ -5064,7 +5064,7 @@
         }
       ],
       "note": "computed from the final map.json; crossings are counted on sampled final curves, source-split (algorithm×algorithm + algorithm×curated; curated×curated not in the headline) and role-split (main-metabolite vs currency-involved); worst_regions use uncapped counted crossings in true 400 px / stride-200 boxes; structure continuity scores reused curated structures; 120° opposite-side threshold is a Project 22 first guess; Detailed metrics keep only layout goals (one content bbox for size/aspect/blank)",
-      "seconds": 2.0,
+      "seconds": 1.9,
       "layout_style": "curated"
     },
     "edge_style": {
@@ -5083,7 +5083,7 @@
       "joint_fixed": 24,
       "joint_own_crossings_before": 50,
       "joint_own_crossings_after": 6,
-      "seconds": 24.0
+      "seconds": 22.3
     },
     "peripheral": {
       "modules": 44,
@@ -5122,7 +5122,7 @@
       "reanchored": 0,
       "hidden_currency": 52,
       "dense_cells": 48,
-      "seconds": 2.6
+      "seconds": 2.4
     },
     "hotspot_repair": {
       "enabled": true,
@@ -5654,13 +5654,13 @@
           "reaction": "MDH4"
         }
       ],
-      "rejected": 1407,
-      "tries": 1438,
+      "rejected": 1382,
+      "tries": 1413,
       "rounds": 3,
       "reject_reasons": {
         "label_overlap": 66,
-        "node_overlap": 266,
-        "no_crossing_drop": 1074,
+        "node_overlap": 258,
+        "no_crossing_drop": 1057,
         "no_real_drop": 1
       },
       "budget_s": 45.0,
@@ -5668,7 +5668,7 @@
         "window_crossings": 205,
         "window_edges": 287
       },
-      "setup_s": 0.79,
+      "setup_s": 0.9,
       "diagnosis": [
         {
           "total": 46,
@@ -5850,8 +5850,8 @@
         "main_metabolite": 134
       },
       "accepted_count": 31,
-      "search_s": 45.03,
-      "seconds": 45.93,
+      "search_s": 45.3,
+      "seconds": 46.27,
       "improved": true,
       "index_headline": 228
     },
@@ -8116,7 +8116,7 @@
         }
       ],
       "note": "computed from the final map.json; crossings are counted on sampled final curves, source-split (algorithm×algorithm + algorithm×curated; curated×curated not in the headline) and role-split (main-metabolite vs currency-involved); worst_regions use uncapped counted crossings in true 400 px / stride-200 boxes; structure continuity scores reused curated structures; 120° opposite-side threshold is a Project 22 first guess; Detailed metrics keep only layout goals (one content bbox for size/aspect/blank)",
-      "seconds": 2.0,
+      "seconds": 1.9,
       "layout_style": "curated"
     },
     "orientation": {
@@ -8416,12 +8416,12 @@
     "VALTA"
   ],
   "code_sha256": {
-    "tool_pipeline.py": "2da74bbf6b23450d00d694a89868c840fb7428b5f49124bd34e39a1c2be71b73",
+    "tool_pipeline.py": "cd3fe714908075884f26e8c63d966c95b48c8641e4be5e9bf7114dcacfd5de88",
     "ec_channel.py": "6414d3544fa9714d163e58f4b6415c2e5e80b45dbcb9367cf9166d40c5da0820",
-    "retrieval.py": "db2b8288b12cc194cdf0cc786c04ef4cca949fcd857a61494e0b734217cb5409",
-    "semantic_transfer.py": "dfcc42a2594095ba1c4c1225dfc4cfe6de556dde6f66b6cdc0419136a0e88cae",
-    "drawing.py": "b9404af7fcfd521c9640e647050a54d1cd31f21aa9776d0000790965d42a06fa"
+    "retrieval.py": "db3a45c0a152b849bd73125088a1e6590b42483dcfe2c87a06ced1540245b497",
+    "semantic_transfer.py": "bfccc46d5a91c00e7946574dac3c1ea45ba6bdc156029f9470d6e4766a9f3339",
+    "drawing.py": "81fbb44c0fdc9c4c0ae5df10f6e2c057e437d944a20892dee90d3fd1874e7b29"
   },
-  "seconds": 184.8,
+  "seconds": 176.7,
   "limits": "Matching depends on the model annotations; the skeleton covers only reactions with an expert structure; completion is algorithmic."
 }
