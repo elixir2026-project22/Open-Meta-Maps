@@ -1033,9 +1033,6 @@ def sbgn_ids(path):
     for g in root.iter():
         if local(g.tag) != 'glyph':
             continue
-        # Only top-level map glyphs (skip nested state/unit glyphs)
-        parent = None
-        # ElementTree has no parent pointer; collect all then filter by class.
         cls = (g.get('class') or '').strip()
         gid = g.get('id') or ''
         label = next((c.get('text') for c in g if local(c.tag) == 'label' and c.get('text')), None)
@@ -1075,9 +1072,6 @@ def layout_ids(path):
 
 def celldesigner_ids(path):
     """Reaction and species ids from a CellDesigner SBML export."""
-    raw = __import__('celldesigner', fromlist=['parse']).parse(path, resolve_identities=False)
-    # parse uses identity resolution; species keys are SBML ids (s_*)
-    # Prefer reaction name / id attributes from XML
     root = ET.parse(path).getroot()
 
     def local(tag):
