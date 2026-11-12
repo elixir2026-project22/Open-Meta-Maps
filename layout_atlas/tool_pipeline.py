@@ -416,11 +416,10 @@ def grid_skeleton_svg(model, blocks, path):
 def draw_map_from_previous(model, selected, folder, full_model=None, log=None):
     """Rebuild from ``--previous`` when ≥80% of reactions are already drawn.
 
-    Keeps the previous Escher geometry for every reaction still in the model (no global
-    relayout).  New reactions are reported; they are placed only when the normal path runs
-    (coverage below the skip threshold).  Rejects a full redraw unless the previous map is
-    sparse — matching the layout-transfer rule of pinning matched nodes and relaxing only
-    new ones.
+    Keeps the previous Escher geometry for every matched reaction (no global relayout).
+    New / leftover reactions are grafted beside drawn participants when possible, or
+    parked as a new component — never dropped.  A local relax of free nodes is only
+    kept when it lowers crossings substantially (see ``keep_local_relayout``).
     """
     import previous_layout as prev
     import layout_quality
@@ -432,14 +431,21 @@ def draw_map_from_previous(model, selected, folder, full_model=None, log=None):
     folder = Path(folder)
     folder.mkdir(parents=True, exist_ok=True)
     data, report = prev.filter_previous_map(PREVIOUS_MAP_PATH, model)
-    if report.get('new_reactions') and log:
-        log(f"  previous layout: {len(report['new_reactions'])} new reaction(s) not in prior map "
-            f"(left for a later compose without skip-packing): {report['new_reactions'][:12]}")
+    graft_report = None
+    if report.get('new_reactions'):
+        data, graft_report = prev.graft_new_reactions(data, model, report['new_reactions'])
+        report = dict(report, graft=graft_report)
+        if log:
+            log(f"  previous layout: grafted {graft_report['placed']} new reaction(s) "
+                f"(embedded {graft_report['embedded']}, new components {graft_report['new_components']})")
     if log:
+        extra = '' if not graft_report else f", +{graft_report['placed']} grafted"
         log(f"  previous layout: reused map ({report['kept_reactions']} reactions, "
-            f"{report['removed_reactions']} removed, {report['nodes']} nodes); skipped packing/redraw")
-    # Drop new reactions from the model view only for chemistry assert of drawn content;
-    # full model chemistry is checked against drawn reactions present in the map.
+            f"{report['removed_reactions']} removed, {report['nodes']} nodes{extra}); "
+            f"skipped packing/redraw")
+    # Optional local relayout gate: only accept if crossings drop substantially.
+    cross_before = int((layout_quality.evaluate(data)[0].get('core') or {}).get('crossings', {}).get('counted') or 0)
+    previous_relayout = dict(crossings_before=cross_before, crossings_after=cross_before, kept=False)
     dump(folder / 'map.json', data)
     try:
         Draft4Validator(read(ESCHER_SCHEMA)).validate(data)
@@ -463,11 +469,13 @@ def draw_map_from_previous(model, selected, folder, full_model=None, log=None):
     metric = dict(
         method='previous_layout', previous_layout=report,
         layout_quality_final=quality_summary,
-        completion=dict(method='previous_filter', **report),
+        completion=dict(method='previous_filter_graft', **report),
+        previous_relayout=previous_relayout,
         routing=dict(status='preserved_from_previous'),
         routing_attempts=[], orientation_mode=ORIENTATION,
         instance_optimization=dict(mode='off'), context_placement=dict(mode='off'),
-        completion_context=dict(mode='off'), protected=dict(mode='off'),
+        completion_context=dict(mode='off', previous_leftovers=graft_report),
+        protected=dict(mode='off'),
         node_overlap_kinds=None, expert_geometry=None, curated_axes=None,
         constraints={}, peripheral=None,
     )
@@ -485,7 +493,7 @@ def draw_map_from_previous(model, selected, folder, full_model=None, log=None):
         schema=4, model=model['id'], target_model_hash=original, modules=selected or [],
         bridges=[], containers=[], anchors={k: dict(xy=v) for k, v in (PREVIOUS_ANCHORS or {}).items()},
         display_positions={}, participants=[], reaction_status={},
-        note='Map rebuilt from --previous; packing skipped.'))
+        note='Map rebuilt from --previous; packing skipped; leftovers grafted.'))
     return metric
 
 
@@ -504,7 +512,8 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     from xml.sax.saxutils import escape
     full_model = full_model or model
     original = uid(model)
-    if PREVIOUS_REUSE_MAP and PREVIOUS_MAP_PATH and not scalable:
+    # High previous coverage: pin matched geometry and graft leftovers (no global pack/redraw).
+    if PREVIOUS_SKIP_PACK and PREVIOUS_MAP_PATH and not scalable:
         return draw_map_from_previous(model, selected, folder, full_model=full_model, log=log)
     g = CanonicalGraph(model_graph(model))
     bridges = retrieval.bridges(model, selected)
@@ -641,6 +650,26 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         if log:
             log(f"  anchor-driven placement: {completion_report['placed']} of {completion_report['candidates']} reactions placed {completion_report['tiers']}, attachment {completion_report['attachment_rate_before']['rate']} -> {completion_report['attachment_rate_after']['rate']}")
         scene = _pin_previous(scene)
+        # Pin-old / place-new: never drop reactions that lack ≥2 anchors — park leftovers.
+        if PREVIOUS_ANCHORS:
+            scene, leftover_report = prev.place_leftover_reactions(
+                model, scene, anchors=PREVIOUS_ANCHORS, cur=currency(model), min_embed_anchors=2)
+            if completion_report is not None:
+                completion_report['previous_leftovers'] = leftover_report
+            if log and leftover_report.get('placed'):
+                log(f"  previous leftovers: placed {leftover_report['placed']} "
+                    f"(embedded {leftover_report['embedded']}, "
+                    f"new components {leftover_report['new_components']})")
+            scene = _pin_previous(scene)
+    elif PREVIOUS_ANCHORS:
+        scene, leftover_report = prev.place_leftover_reactions(
+            model, scene, anchors=PREVIOUS_ANCHORS, cur=currency(model), min_embed_anchors=2)
+        completion_report = dict(method='previous_leftovers_only', previous_leftovers=leftover_report)
+        if log and leftover_report.get('placed'):
+            log(f"  previous leftovers: placed {leftover_report['placed']} "
+                f"(embedded {leftover_report['embedded']}, "
+                f"new components {leftover_report['new_components']})")
+        scene = _pin_previous(scene)
     peripheral_report = None
     instance_report = None
     if INSTANCES == 'auto' and not PREVIOUS_SKIP_PACK:
@@ -738,9 +767,34 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         # instances.optimize here doubled runtime on iIT341 without cutting ac crossings.
     import orientation as orientation_module
     scene = orientation_module.apply(model, scene, blocks, ORIENTATION, 'before_relax')
+    previous_relayout = None
     if scalable:
         scene, audit = gl.scalable_scene_relax(model, scene, blocks, extra_groups=plan['groups'])
         lap('scene relaxation (sparse)')
+    elif PREVIOUS_ANCHORS:
+        # Local relayout of free nodes only when it lowers crossings substantially;
+        # otherwise keep the pinned previous geometry and leftover parking.
+        import copy as _copy_prev
+        before_scene = _copy_prev.deepcopy(scene)
+        cross_before = prev.scene_segment_crossings(model, scene)
+        scene, audit = geometry.complete_scene(model, scene, blocks)
+        scene = _pin_previous(scene)
+        scene, _ = prev.place_leftover_reactions(
+            model, scene, anchors=PREVIOUS_ANCHORS, cur=currency(model), min_embed_anchors=2)
+        scene = _pin_previous(scene)
+        cross_after = prev.scene_segment_crossings(model, scene)
+        keep = prev.keep_local_relayout(cross_before, cross_after)
+        previous_relayout = dict(
+            crossings_before=cross_before, crossings_after=cross_after, kept=keep)
+        if not keep:
+            scene = before_scene
+            scene = _pin_previous(scene)
+            audit = dict(audit or {}, previous_relayout_reverted=True)
+        # complete_scene stamps scene['anchors']; a reverted snapshot may lack it.
+        scene['anchors'] = {k: list(v) for k, v in (scene.get('anchors') or anchors).items()}
+        if log:
+            log(f"  previous local relayout: crossings {cross_before} -> {cross_after} "
+                f"({'kept' if keep else 'reverted'})")
     else:
         scene, audit = geometry.complete_scene(model, scene, blocks)
     scene = orientation_module.apply(model, scene, blocks, ORIENTATION, 'after_relax')
@@ -1168,6 +1222,8 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     metric['regions'] = regions_report
     metric['context_placement'] = context_report if context_report is not None else dict(mode='off')
     metric['completion_context'] = completion_report if completion_report is not None else dict(mode='off')
+    if previous_relayout is not None:
+        metric['previous_relayout'] = previous_relayout
     metric['protected'] = protected_report if protected_report is not None else dict(mode='off')
     metric['node_overlap_kinds'] = node_overlap_kinds
     if protected_report is not None:

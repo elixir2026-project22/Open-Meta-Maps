@@ -135,3 +135,91 @@ def test_filter_previous_map_drops_removed_reactions(tmp_path):
     assert '2' in data[1]['nodes'] and '3' not in data[1]['nodes']
     assert report['new_reactions'] == ['NEW']
     assert report['removed_reactions'] == 1
+
+
+def test_place_leftover_reactions_never_drops_unanchored():
+    model = dict(
+        reactions=[
+            dict(id='OLD', metabolites={'a_c': -1, 'b_c': 1}, lower_bound=-1000, upper_bound=1000),
+            dict(id='NEW_EMBED', metabolites={'a_c': -1, 'b_c': 1}, lower_bound=-1000, upper_bound=1000),
+            dict(id='NEW_SOLO', metabolites={'z_c': -1, 'y_c': 1}, lower_bound=-1000, upper_bound=1000),
+        ],
+        metabolites=[dict(id='a_c'), dict(id='b_c'), dict(id='z_c'), dict(id='y_c')],
+    )
+    anchors = {'r:OLD': [0.0, 0.0], 'm:a_c': [-20.0, 0.0], 'm:b_c': [20.0, 0.0]}
+    scene = dict(
+        positions={
+            'r:OLD': [0.0, 0.0], 'm:a_c': [-20.0, 0.0], 'm:b_c': [20.0, 0.0],
+            'r:NEW_EMBED': [999.0, 999.0], 'r:NEW_SOLO': [888.0, 888.0],
+        },
+        participants={
+            ('OLD', 'a_c'): 'm:a_c', ('OLD', 'b_c'): 'm:b_c',
+            ('NEW_EMBED', 'a_c'): 'm:a_c', ('NEW_EMBED', 'b_c'): 'm:b_c',
+        },
+        copies={'m:a_c': 'a_c', 'm:b_c': 'b_c'},
+        labels={},
+    )
+    scene, report = prev.place_leftover_reactions(model, scene, anchors=anchors, cur=set(), min_embed_anchors=2)
+    assert report['placed'] == 2
+    assert report['embedded'] == 1
+    assert report['new_components'] == 1
+    assert 'r:NEW_EMBED' in scene['positions']
+    assert 'r:NEW_SOLO' in scene['positions']
+    # Solo reaction must gain metabolite glyphs so export coverage stays complete.
+    assert ('NEW_SOLO', 'z_c') in scene['participants']
+    assert ('NEW_SOLO', 'y_c') in scene['participants']
+    assert scene['participants'][('NEW_SOLO', 'z_c')] in scene['positions']
+    # Pinned old reaction stays put.
+    assert scene['positions']['r:OLD'] == [0.0, 0.0]
+    assert prev.unanchored_reaction_ids(model, anchors) == ['NEW_EMBED', 'NEW_SOLO']
+
+
+def test_keep_local_relayout_requires_substantial_crossing_drop():
+    assert not prev.keep_local_relayout(10, 9)
+    assert not prev.keep_local_relayout(10, 8)  # 20% < 25% share
+    assert prev.keep_local_relayout(10, 7)
+    assert not prev.keep_local_relayout(3, 2)  # drop 1 < vmin 2
+    assert prev.keep_local_relayout(8, 6)
+
+
+def test_graft_new_reactions_keeps_old_geometry_and_full_coverage():
+    body = {
+        'nodes': {
+            '1': dict(node_type='metabolite', bigg_id='a_c', node_is_primary=True, x=0.0, y=0.0),
+            '2': dict(node_type='midmarker', x=10.0, y=0.0),
+            '3': dict(node_type='metabolite', bigg_id='b_c', node_is_primary=True, x=20.0, y=0.0),
+        },
+        'reactions': {
+            'r1': dict(
+                bigg_id='KEEP',
+                metabolites=[dict(bigg_id='a_c', coefficient=-1), dict(bigg_id='b_c', coefficient=1)],
+                segments={
+                    '0': dict(from_node_id='2', to_node_id='1', b1=None, b2=None),
+                    '1': dict(from_node_id='2', to_node_id='3', b1=None, b2=None),
+                },
+            ),
+        },
+        'canvas': dict(x=0, y=0, width=100, height=100),
+    }
+    data = [{'map_name': 't', 'metadata': {
+        'source_reactions': {
+            'KEEP': dict(stoichiometry={'a_c': -1, 'b_c': 1}, lower_bound=-1000, upper_bound=1000),
+        },
+    }}, body]
+    model = dict(
+        reactions=[
+            dict(id='KEEP', metabolites={'a_c': -1, 'b_c': 1}, lower_bound=-1000, upper_bound=1000),
+            dict(id='NEW', metabolites={'a_c': -1, 'b_c': 1}, lower_bound=-1000, upper_bound=1000),
+            dict(id='SOLO', metabolites={'z_c': -1, 'y_c': 1}, lower_bound=-1000, upper_bound=1000),
+        ],
+        metabolites=[dict(id='a_c'), dict(id='b_c'), dict(id='z_c'), dict(id='y_c')],
+    )
+    out, report = prev.graft_new_reactions(data, model, ['NEW', 'SOLO'])
+    assert report['placed'] == 2
+    assert report['embedded'] >= 1
+    bigg = {rx['bigg_id'] for rx in out[1]['reactions'].values()}
+    assert bigg == {'KEEP', 'NEW', 'SOLO'}
+    # Old midmarker untouched.
+    assert out[1]['nodes']['2']['x'] == 10.0
+    assert 'NEW' in out[0]['metadata']['source_reactions']
+    assert 'SOLO' in out[0]['metadata']['source_reactions']

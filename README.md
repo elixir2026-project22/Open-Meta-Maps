@@ -40,7 +40,7 @@ Open <http://127.0.0.1:8765/tool/index.html>. Upload an SBML or COBRA JSON model
 python3 project.py compose --gem examples/e_coli_core.xml --out results/e_coli_core/ --source-paths
 ```
 
-Rebuild after a small model edit while keeping the previous layout: pass `--previous` with the prior `map.json`. Matched reaction midmarkers and primary metabolites are pinned; when at least 80% of reactions are already placed, module packing is skipped and only new nodes are completed around those anchors.
+Rebuild after a small model edit while keeping the previous layout: pass `--previous` with the prior `map.json`. Matched reaction midmarkers and primary metabolites are pinned by stable id; when at least 80% of reactions are already placed, module packing is skipped. New reactions are placed around those pins (≥2 drawn participants → embed; otherwise a new component). Leftovers without anchors are still parked so coverage stays complete. A local relax of free nodes is kept only when crossings drop substantially.
 
 ```sh
 python3 project.py compose --gem examples/e_coli_core_edited.xml --out results/e_coli_core_edited/ --source-paths --previous results/e_coli_core/map.json
