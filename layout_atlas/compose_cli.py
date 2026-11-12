@@ -13,7 +13,7 @@ import time
 from core import *
 import tool_server
 
-RESULT_FILES = ['job.json', 'map.json', 'map.svg', 'report.json', 'skeleton.json', 'skeleton.svg', 'modules.json', 'licenses.json', 'selected.json.gz', 'views.json']
+RESULT_FILES = ['job.json', 'map.json', 'map.svg', 'map.sbgn', 'map.sbml', 'map.celldesigner.xml', 'report.json', 'skeleton.json', 'skeleton.svg', 'modules.json', 'licenses.json', 'selected.json.gz', 'views.json']
 
 
 def run(gem, out, ec=False, no_library=False, library='windows', reaction_style='line', completion='spaced', source_paths=False, layout='global', orientation='full', block_layout='auto', instances='auto', context='auto', edge_routing='libavoid', completion_context='auto', layout_style='curated', previous=None):
