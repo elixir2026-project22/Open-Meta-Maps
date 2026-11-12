@@ -24,7 +24,7 @@ import sqlite3
 import sys
 import zlib
 
-from core import *
+from core import *  # ROOT via star
 import database
 from semantics import rhea_index, parse_gpml
 
@@ -112,7 +112,7 @@ def diagram_maps():
         out.append(diagram_map(database.wp_diagram(d, rhea)))
     acq = read(DATA / 'acquisition.json')
     for rec in acq['reactome_diagrams']:
-        p = BASE / rec['layout_path'] if rec.get('layout_path') else DATA / 'reactome' / (rec['id'] + '.json')
+        p = (ROOT / rec['layout_path']) if rec.get('layout_path') and (ROOT / rec['layout_path']).exists() else (DATA / 'reactome' / (rec['id'] + '.json'))
         try:
             out.append(diagram_map(database.reactome_diagram(p)))
         except Exception:

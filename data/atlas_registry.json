@@ -1,37 +1,37 @@
 {
   "schema_version": 1,
-  "generated": "2026-11-11",
+  "generated": "2026-11-12",
   "open_core": {
     "path": "data/open_core.sqlite",
-    "sha256": "79c55382ac4af8b745596c9d0575c8fc1d0f88760eb1abdef17459bdff4ea681",
-    "bytes": 67805184,
+    "sha256": "0eda9c4a657804211392d8190a44cddad57617cb75369a0645a842a248fc0a6a",
+    "bytes": 68083712,
     "maps": {
       "escher": 22,
-      "reactome": 86,
+      "reactome": 115,
       "wikipathways": 2215
     },
     "modules": {
       "escher": 13047,
-      "reactome": 3405,
-      "wikipathways": 1245
+      "reactome": 1811,
+      "wikipathways": 669
     },
     "modules_with_extensions": {
       "escher": 13047,
-      "reactome": 3405,
-      "wikipathways": 1245,
+      "reactome": 1811,
+      "wikipathways": 669,
       "brenda": 11703,
-      "human_maps": 8540,
-      "wikipathways_geometry": 29673,
-      "metabolismregulation": 423,
-      "panther": 238,
-      "ich360": 858
+      "human_maps": 4690,
+      "wikipathways_geometry": 15611,
+      "metabolismregulation": 229,
+      "panther": 138,
+      "ich360": 436
     },
-    "reactions": 89598,
+    "reactions": 75279,
     "licences": {
-      "CC0-1.0": 43965,
-      "CC0-1.0-data": 3405,
-      "CC-BY-4.0": 20904,
-      "MIT": 858
+      "CC0-1.0": 29327,
+      "CC0-1.0-data": 1811,
+      "CC-BY-4.0": 16760,
+      "MIT": 436
     }
   },
   "extensions": {
@@ -61,41 +61,182 @@
       "license": "CC-BY-4.0",
       "license_uri": "https://creativecommons.org/licenses/by/4.0/",
       "maps": 130,
-      "modules": 8540,
-      "families": 2439,
+      "modules": 4690,
+      "families": 1460,
       "admitted_to_open_core": true,
       "partition": "open_core",
       "import_policy": "official escher/ JSON only via database.escher_diagram + diagram_modules; SVG/BY-SA excluded",
-      "by_sa_note": "Companion SVG exports under the Human-maps repository embed Creative Commons Attribution-ShareAlike (CC BY-SA) metadata and are NOT imported. The official escher/ JSON maps that feed database.escher_diagram are CC BY 4.0; Atlas modules and SOURCE provenance record CC-BY-4.0 for those JSON inputs only.",
+      "by_sa_note": "Companion SVG exports under the Human-maps repository embed Creative Commons Attribution-ShareAlike (CC BY-SA) metadata and are NOT imported.",
       "access_date": "2026-11-11",
+      "version": "2026-11-11",
       "license_scope": "official escher/ JSON maps only",
       "reaction_namespace": "human.gem",
       "canonicalization": "Human-GEM reactions.tsv crosswalk → bigg.reaction / metanetx.reaction / rhea when annotated; MAR kept under human.gem",
       "extraction": {
         "methods": {
-          "diagram_modules": 8540
+          "diagram_modules": 4690
         },
-        "modules": 8540,
+        "modules": 4690,
         "atlas_schema_version": 1
-      }
+      },
+      "materialise": {
+        "fetched": [],
+        "cached": [
+          "compartment/escher/cytosol_1.json",
+          "compartment/escher/cytosol_2.json",
+          "compartment/escher/cytosol_3.json",
+          "compartment/escher/cytosol_4.json",
+          "compartment/escher/cytosol_5.json",
+          "compartment/escher/endoplasmic_reticulum.json",
+          "compartment/escher/extracellular.json",
+          "compartment/escher/golgi_apparatus.json",
+          "compartment/escher/lysosome.json",
+          "compartment/escher/mitochondria.json",
+          "compartment/escher/nucleus.json",
+          "compartment/escher/peroxisome.json",
+          "subsystem/escher/acyl_coa_hydrolysis.json",
+          "subsystem/escher/acylglycerides_metabolism.json",
+          "subsystem/escher/alanine_aspartate_and_glutamate_metabolism.json",
+          "subsystem/escher/alkaloids_biosynthesis.json",
+          "subsystem/escher/amino_sugar_and_nucleotide_sugar_metabolism.json",
+          "subsystem/escher/aminoacyl_trna_biosynthesis.json",
+          "subsystem/escher/androgen_metabolism.json",
+          "subsystem/escher/arginine_and_proline_metabolism.json",
+          "subsystem/escher/ascorbate_and_aldarate_metabolism.json",
+          "subsystem/escher/beta_alanine_metabolism.json",
+          "subsystem/escher/beta_oxidation_of_branched_chain_fatty_acids_mitochondrial.json",
+          "subsystem/escher/beta_oxidation_of_di_unsaturated_fatty_acids_n_6_mitochondrial.json",
+          "subsystem/escher/beta_oxidation_of_di_unsaturated_fatty_acids_n_6_peroxisomal.json",
+          "subsystem/escher/beta_oxidation_of_even_chain_fatty_acids_mitochondrial.json",
+          "subsystem/escher/beta_oxidation_of_odd_chain_fatty_acids_mitochondrial.json",
+          "subsystem/escher/beta_oxidation_of_phytanic_acid_peroxisomal.json",
+          "subsystem/escher/beta_oxidation_of_poly_unsaturated_fatty_acids_mitochondrial.json",
+          "subsystem/escher/beta_oxidation_of_unsaturated_fatty_acids_n_7_mitochondrial.json",
+          "subsystem/escher/beta_oxidation_of_unsaturated_fatty_acids_n_7_peroxisomal.json",
+          "subsystem/escher/beta_oxidation_of_unsaturated_fatty_acids_n_9_mitochondrial.json",
+          "subsystem/escher/beta_oxidation_of_unsaturated_fatty_acids_n_9_peroxisomal.json",
+          "subsystem/escher/bile_acid_biosynthesis.json",
+          "subsystem/escher/bile_acid_recycling.json",
+          "subsystem/escher/biopterin_metabolism.json",
+          "subsystem/escher/biotin_metabolism.json",
+          "subsystem/escher/blood_group_biosynthesis.json",
+          "subsystem/escher/butanoate_metabolism.json",
+          "subsystem/escher/c5_branched_dibasic_acid_metabolism.json",
+          "subsystem/escher/cholesterol_biosynthesis_1_bloch_pathway.json",
+          "subsystem/escher/cholesterol_biosynthesis_2.json",
+          "subsystem/escher/cholesterol_biosynthesis_3_kandustch_russell_pathway.json",
+          "subsystem/escher/cholesterol_metabolism.json",
+          "subsystem/escher/cysteine_and_methionine_metabolism.json",
+          "subsystem/escher/dietary_fiber_binding.json",
+          "subsystem/escher/eicosanoid_metabolism.json",
+          "subsystem/escher/estrogen_metabolism.json",
+          "subsystem/escher/ether_lipid_metabolism.json",
+          "subsystem/escher/fatty_acid_activation_cytosolic.json",
+          "subsystem/escher/fatty_acid_activation_endoplasmic_reticular.json",
+          "subsystem/escher/fatty_acid_biosynthesis_even_chain.json",
+          "subsystem/escher/fatty_acid_biosynthesis_odd_chain.json",
+          "subsystem/escher/fatty_acid_biosynthesis_unsaturated.json",
+          "subsystem/escher/fatty_acid_desaturation_even_chain.json",
+          "subsystem/escher/fatty_acid_desaturation_odd_chain.json",
+          "subsystem/escher/fatty_acid_elongation_even_chain.json",
+          "subsystem/escher/fatty_acid_elongation_odd_chain.json",
+          "subsystem/escher/fructose_and_mannose_metabolism.json",
+          "subsystem/escher/galactose_metabolism.json",
+          "subsystem/escher/glucocorticoid_biosynthesis.json",
+          "subsystem/escher/glutathione_metabolism.json",
+          "subsystem/escher/glycerolipid_metabolism.json",
+          "subsystem/escher/glycerophospholipid_metabolism.json",
+          "subsystem/escher/glycolysis_gluconeogenesis.json",
+          "subsystem/escher/glycosphingolipid_biosynthesis_ganglio_series.json",
+          "subsystem/escher/glycosphingolipid_biosynthesis_globo_series.json",
+          "subsystem/escher/glycosylphosphatidylinositol_gpi_anchor_biosynthesis.json",
+          "subsystem/escher/heme_degradation.json",
+          "subsystem/escher/hippurate_metabolism.json",
+          "subsystem/escher/histidine_metabolism.json",
+          "subsystem/escher/inositol_phosphate_metabolism.json",
+          "subsystem/escher/isolated.json",
+          "subsystem/escher/keratan_sulfate_degradation.json",
+          "subsystem/escher/leukotriene_metabolism.json",
+          "subsystem/escher/lipoic_acid_metabolism.json",
+          "subsystem/escher/lysine_metabolism.json",
+          "subsystem/escher/metabolism_of_other_amino_acids.json",
+          "subsystem/escher/n_glycan_metabolism.json",
+          "subsystem/escher/nicotinate_and_nicotinamide_metabolism.json",
+          "subsystem/escher/nucleotide_metabolism.json",
+          "subsystem/escher/o_glycan_metabolism.json",
+          "subsystem/escher/omega_3_fatty_acid_metabolism.json",
+          "subsystem/escher/omega_6_fatty_acid_metabolism.json",
+          "subsystem/escher/oxidative_phosphorylation.json",
+          "subsystem/escher/pentose_and_glucuronate_interconversions.json",
+          "subsystem/escher/pentose_phosphate_pathway.json",
+          "subsystem/escher/phenylalanine_metabolism.json",
+          "subsystem/escher/phenylalanine_tyrosine_and_tryptophan_biosynthesis.json",
+          "subsystem/escher/phosphatidylinositol_phosphate_metabolism.json",
+          "subsystem/escher/porphyrin_metabolism.json",
+          "subsystem/escher/propanoate_metabolism.json",
+          "subsystem/escher/protein_modification.json",
+          "subsystem/escher/purine_metabolism.json",
+          "subsystem/escher/pyrimidine_metabolism.json",
+          "subsystem/escher/pyruvate_metabolism.json",
+          "subsystem/escher/riboflavin_metabolism.json",
+          "subsystem/escher/ros_detoxification.json",
+          "subsystem/escher/serotonin_and_melatonin_biosynthesis.json",
+          "subsystem/escher/sphingolipid_metabolism.json",
+          "subsystem/escher/starch_and_sucrose_metabolism.json",
+          "subsystem/escher/steroid_metabolism.json",
+          "subsystem/escher/sulfur_metabolism.json",
+          "subsystem/escher/terpenoid_backbone_biosynthesis.json",
+          "subsystem/escher/thiamine_metabolism.json",
+          "subsystem/escher/transport_between_organelles.json",
+          "subsystem/escher/transport_endoplasmic_reticulum.json",
+          "subsystem/escher/transport_golgi_apparatus.json",
+          "subsystem/escher/transport_lysosome.json",
+          "subsystem/escher/transport_mitochondria.json",
+          "subsystem/escher/transport_nucleus.json",
+          "subsystem/escher/transport_peroxisome.json",
+          "subsystem/escher/transport_plasma_membrane_1.json",
+          "subsystem/escher/transport_plasma_membrane_2.json",
+          "subsystem/escher/transport_plasma_membrane_3.json",
+          "subsystem/escher/transport_plasma_membrane_4.json",
+          "subsystem/escher/transport_plasma_membrane_5.json",
+          "subsystem/escher/triacylglycerol_synthesis.json",
+          "subsystem/escher/tricarboxylic_acid_cycle_and_glyoxylate_dicarboxylate_metabolism.json",
+          "subsystem/escher/tryptophan_metabolism.json",
+          "subsystem/escher/tyrosine_metabolism.json",
+          "subsystem/escher/ubiquinone_synthesis.json",
+          "subsystem/escher/urea_cycle.json",
+          "subsystem/escher/vitamin_a_metabolism.json",
+          "subsystem/escher/vitamin_b12_metabolism.json",
+          "subsystem/escher/vitamin_b2_metabolism.json",
+          "subsystem/escher/vitamin_b6_metabolism.json",
+          "subsystem/escher/vitamin_c_metabolism.json",
+          "subsystem/escher/vitamin_d_metabolism.json",
+          "subsystem/escher/xenobiotics_metabolism.json"
+        ],
+        "failed": [],
+        "via": "remote"
+      },
+      "failures": [],
+      "excluded_modules": 0,
+      "seconds": 24.0
     },
     "wikipathways_geometry": {
       "source": "wikipathways",
       "release": "20261110",
       "license": "CC0-1.0",
       "license_url": "https://www.wikipathways.org/terms.html",
-      "modules": 29673,
+      "modules": 15611,
       "quality": "geometry_only",
       "extraction": {
         "methods": {
-          "geometry_modules": 29673
+          "geometry_modules": 15611
         },
-        "modules": 29673,
+        "modules": 15611,
         "atlas_schema_version": 1
       },
       "admitted_to_open_core": true,
       "partition": "open_core",
-      "note": "Stored as extension to keep open_core.sqlite under GitHub size limits; loaded by default with database.modules()",
+      "note": "Default extension; loaded by database.modules(). Kept out of open_core.sqlite for size.",
       "date": "2026-11-11"
     },
     "metabolismregulation": {
@@ -108,8 +249,8 @@
       "version": "94ac3074a5a648ce28736f949285214c1a1ca186",
       "access_date": "2026-11-11",
       "maps": 22,
-      "modules": 423,
-      "families": 47,
+      "modules": 229,
+      "families": 41,
       "admitted_to_open_core": true,
       "partition": "open_core",
       "import_policy": "gallery + atlas-downloads SBGN-ML via layout_atlas/sbgn.py + database.diagram_modules",
@@ -437,12 +578,11 @@
       },
       "decode_failures": [],
       "excluded_modules": 0,
-      "canonicalization": "Unique Rhea matches via participant ChEBI equations; native sbgn.process retained",
       "extraction": {
         "methods": {
-          "diagram_modules": 423
+          "diagram_modules": 229
         },
-        "modules": 423,
+        "modules": 229,
         "atlas_schema_version": 1
       }
     },
@@ -455,8 +595,8 @@
       "version": "3.4/CD4.1",
       "access_date": "2026-11-11",
       "maps": 8,
-      "modules": 238,
-      "families": 46,
+      "modules": 138,
+      "families": 30,
       "admitted_to_open_core": true,
       "partition": "open_core",
       "import_policy": "CellDesigner CD4.1 via celldesigner.decode + identity_labels + diagram_modules",
@@ -589,12 +729,11 @@
       "decode_failures": [],
       "excluded_modules": 0,
       "identity_layer": "layout_atlas/identity_labels.py",
-      "canonicalization": "Native celldesigner.reaction retained; no unique Rhea equation match for current ChEBI coverage",
       "extraction": {
         "methods": {
-          "diagram_modules": 238
+          "diagram_modules": 138
         },
-        "modules": 238,
+        "modules": 138,
         "atlas_schema_version": 1
       }
     },
@@ -607,8 +746,8 @@
       "version": "08dd4388096dcf0c88f36d7229c0b06688582744",
       "access_date": "2026-11-11",
       "maps": 10,
-      "modules": 858,
-      "families": 341,
+      "modules": 436,
+      "families": 199,
       "admitted_to_open_core": true,
       "partition": "open_core",
       "import_policy": "custom Escher JSON via database.escher_diagram + diagram_modules; compressed_map.json excluded (CP pseudo-reactions)",
@@ -813,9 +952,9 @@
       "zenodo_doi": "10.5281/zenodo.15048160",
       "extraction": {
         "methods": {
-          "diagram_modules": 858
+          "diagram_modules": 436
         },
-        "modules": 858,
+        "modules": 436,
         "atlas_schema_version": 1
       }
     }
@@ -823,11 +962,11 @@
   "input_manifest": {
     "version": "0.3-source-inputs",
     "files": 2380,
-    "sha256": "bdbdf3f5a04d613f8c472dc9ab3b321964aedeed8f5f79780e4c653581824ce8"
+    "sha256": "7f4395292411c6133c217386f317c4b26f04baae7d5abf6d5ace625dc942e9a8"
   },
   "source_registry": {
     "path": "data/source_inputs/source_registry.json",
-    "sha256": "b6dc13d93459bfeba4fca0c762ad0903fe1efee886b6d2e650e6cc6a537e8bba",
+    "sha256": "bdcdaf08edd913464ab063719248ad6f868f8e50dd4b56f4b36360d06d6ffade",
     "wikipathways_release": "20261110"
   },
   "extraction": {
@@ -895,118 +1034,7 @@
       "human_maps": {
         "method": "diagram_modules",
         "methods": {
-          "diagram_modules": 8540
-        },
-        "parameters": {
-          "max_roots": 24,
-          "window_sizes": [
-            1,
-            2,
-            4,
-            8,
-            12,
-            24
-          ]
-        },
-        "version": "atlas-extraction-1",
-        "inferred": false,
-        "maps": 130,
-        "modules": 8540,
-        "reactions_covered": 3938
-      },
-      "ich360": {
-        "method": "diagram_modules",
-        "methods": {
-          "diagram_modules": 858
-        },
-        "parameters": {
-          "max_roots": 24,
-          "window_sizes": [
-            1,
-            2,
-            4,
-            8,
-            12,
-            24
-          ]
-        },
-        "version": "atlas-extraction-1",
-        "inferred": false,
-        "maps": 10,
-        "modules": 858,
-        "reactions_covered": 382
-      },
-      "metabolismregulation": {
-        "method": "diagram_modules",
-        "methods": {
-          "diagram_modules": 423
-        },
-        "parameters": {
-          "max_roots": 24,
-          "window_sizes": [
-            1,
-            2,
-            4,
-            8,
-            12,
-            24
-          ]
-        },
-        "version": "atlas-extraction-1",
-        "inferred": false,
-        "maps": 22,
-        "modules": 423,
-        "reactions_covered": 106
-      },
-      "panther": {
-        "method": "diagram_modules",
-        "methods": {
-          "diagram_modules": 238
-        },
-        "parameters": {
-          "max_roots": 24,
-          "window_sizes": [
-            1,
-            2,
-            4,
-            8,
-            12,
-            24
-          ]
-        },
-        "version": "atlas-extraction-1",
-        "inferred": false,
-        "maps": 8,
-        "modules": 238,
-        "reactions_covered": 57
-      },
-      "reactome": {
-        "method": "diagram_modules",
-        "methods": {
-          "diagram_modules": 3405
-        },
-        "parameters": {
-          "max_roots": 24,
-          "window_sizes": [
-            1,
-            2,
-            4,
-            8,
-            12,
-            24
-          ]
-        },
-        "version": "atlas-extraction-1",
-        "inferred": false,
-        "maps": 86,
-        "modules": 3405,
-        "reactions_covered": 955
-      },
-      "wikipathways": {
-        "method": "geometry_modules",
-        "methods": {
-          "diagram_modules": 1245,
-          "geometry_modules": 29673
+          "diagram_modules": 4690
         },
         "parameters": {
           "max_roots": 24,
@@ -1018,13 +1046,148 @@
             12,
             24
           ],
+          "independent_only": true,
+          "root_policy": "all_roots_upto_48_else_max_roots_24",
+          "raw_windows_before_dedupe": 125,
+          "nest_factor": 2.0
+        },
+        "version": "atlas-extraction-1",
+        "inferred": false,
+        "maps": 130,
+        "modules": 4690,
+        "reactions_covered": 3947
+      },
+      "ich360": {
+        "method": "diagram_modules",
+        "methods": {
+          "diagram_modules": 436
+        },
+        "parameters": {
+          "max_roots": 24,
+          "window_sizes": [
+            1,
+            2,
+            4,
+            8,
+            12,
+            24
+          ],
+          "independent_only": true,
+          "root_policy": "all_roots_upto_48_else_max_roots_24",
+          "raw_windows_before_dedupe": 140,
+          "nest_factor": 2.0
+        },
+        "version": "atlas-extraction-1",
+        "inferred": false,
+        "maps": 10,
+        "modules": 436,
+        "reactions_covered": 382
+      },
+      "metabolismregulation": {
+        "method": "diagram_modules",
+        "methods": {
+          "diagram_modules": 229
+        },
+        "parameters": {
+          "max_roots": 9,
+          "window_sizes": [
+            1,
+            2,
+            4,
+            8,
+            12,
+            24
+          ],
+          "independent_only": true,
+          "root_policy": "all_roots_upto_48_else_max_roots_24",
+          "raw_windows_before_dedupe": 17,
+          "nest_factor": 2.0
+        },
+        "version": "atlas-extraction-1",
+        "inferred": false,
+        "maps": 22,
+        "modules": 229,
+        "reactions_covered": 106
+      },
+      "panther": {
+        "method": "diagram_modules",
+        "methods": {
+          "diagram_modules": 138
+        },
+        "parameters": {
+          "max_roots": 6,
+          "window_sizes": [
+            1,
+            2,
+            4,
+            8,
+            12,
+            24
+          ],
+          "independent_only": true,
+          "root_policy": "all_roots_upto_48_else_max_roots_24",
+          "raw_windows_before_dedupe": 6,
+          "nest_factor": 2.0
+        },
+        "version": "atlas-extraction-1",
+        "inferred": false,
+        "maps": 8,
+        "modules": 138,
+        "reactions_covered": 57
+      },
+      "reactome": {
+        "method": "diagram_modules",
+        "methods": {
+          "diagram_modules": 1811
+        },
+        "parameters": {
+          "max_roots": 9,
+          "window_sizes": [
+            1,
+            2,
+            4,
+            8,
+            12,
+            24
+          ],
+          "independent_only": true,
+          "root_policy": "all_roots_upto_48_else_max_roots_24",
+          "raw_windows_before_dedupe": 23,
+          "nest_factor": 2.0
+        },
+        "version": "atlas-extraction-1",
+        "inferred": false,
+        "maps": 86,
+        "modules": 1811,
+        "reactions_covered": 955
+      },
+      "wikipathways": {
+        "method": "geometry_modules",
+        "methods": {
+          "diagram_modules": 669,
+          "geometry_modules": 15611
+        },
+        "parameters": {
+          "max_roots": 7,
+          "window_sizes": [
+            1,
+            2,
+            4,
+            8,
+            12,
+            24
+          ],
+          "independent_only": true,
+          "nest_factor": 2.0,
+          "root_policy": "all_roots_upto_48_else_max_roots_24",
+          "raw_windows_before_dedupe": 17,
           "underlying": "diagram_modules over metabolite–metabolite GPML edges"
         },
         "version": "atlas-extraction-1",
         "inferred": false,
         "maps": 934,
-        "modules": 30918,
-        "reactions_covered": 10261
+        "modules": 16280,
+        "reactions_covered": 10263
       }
     }
   }

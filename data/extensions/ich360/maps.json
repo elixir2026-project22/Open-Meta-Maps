@@ -21,7 +21,7 @@
     "format": "escher",
     "events": 349,
     "glyphs": 2071,
-    "modules": 140,
+    "modules": 70,
     "audit": {}
   },
   {
@@ -46,7 +46,7 @@
     "format": "escher",
     "events": 90,
     "glyphs": 589,
-    "modules": 131,
+    "modules": 67,
     "audit": {}
   },
   {
@@ -71,7 +71,7 @@
     "format": "escher",
     "events": 6,
     "glyphs": 41,
-    "modules": 14,
+    "modules": 9,
     "audit": {}
   },
   {
@@ -96,7 +96,7 @@
     "format": "escher",
     "events": 60,
     "glyphs": 391,
-    "modules": 147,
+    "modules": 73,
     "audit": {}
   },
   {
@@ -121,7 +121,7 @@
     "format": "escher",
     "events": 44,
     "glyphs": 311,
-    "modules": 116,
+    "modules": 63,
     "audit": {}
   },
   {
@@ -146,7 +146,7 @@
     "format": "escher",
     "events": 25,
     "glyphs": 180,
-    "modules": 56,
+    "modules": 25,
     "audit": {}
   },
   {
@@ -171,7 +171,7 @@
     "format": "escher",
     "events": 30,
     "glyphs": 154,
-    "modules": 53,
+    "modules": 25,
     "audit": {}
   },
   {
@@ -196,7 +196,7 @@
     "format": "escher",
     "events": 19,
     "glyphs": 126,
-    "modules": 58,
+    "modules": 36,
     "audit": {}
   },
   {
@@ -221,7 +221,7 @@
     "format": "escher",
     "events": 31,
     "glyphs": 210,
-    "modules": 104,
+    "modules": 44,
     "audit": {}
   },
   {
@@ -246,7 +246,7 @@
     "format": "escher",
     "events": 13,
     "glyphs": 89,
-    "modules": 39,
+    "modules": 24,
     "audit": {}
   }
 ]

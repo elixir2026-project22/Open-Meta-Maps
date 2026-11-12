@@ -3,17 +3,17 @@
   "release": "20261110",
   "license": "CC0-1.0",
   "license_url": "https://www.wikipathways.org/terms.html",
-  "modules": 29673,
+  "modules": 15611,
   "quality": "geometry_only",
   "extraction": {
     "methods": {
-      "geometry_modules": 29673
+      "geometry_modules": 15611
     },
-    "modules": 29673,
+    "modules": 15611,
     "atlas_schema_version": 1
   },
   "admitted_to_open_core": true,
   "partition": "open_core",
-  "note": "Stored as extension to keep open_core.sqlite under GitHub size limits; loaded by default with database.modules()",
+  "note": "Default extension; loaded by database.modules(). Kept out of open_core.sqlite for size.",
   "date": "2026-11-11"
 }

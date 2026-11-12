@@ -16,8 +16,8 @@ Policy: the project redistributes **only** openly redistributable maps (CC0 / CC
 | Human-maps | 8,540 | CC BY 4.0 (JSON) | official `escher/` JSON only | OK — companion SVGs are CC BY-SA and are **not** imported |
 | Metabolism Regulation gallery | 423 | CC BY 4.0 | https://metabolismregulation.github.io/about/; SBGN-ML under `source_inputs/raw/metabolismregulation/` | OK (hand-drawn; attribution required) |
 | PANTHER Pathway | 238 | CC BY 4.0 | `data.pantherdb.org` CD4.1 CellDesigner; `source_inputs/raw/panther/` | OK (labels bridged via BiGG/ChEBI identity layer) |
-| iCH360 Visualisation | 858 | MIT | Repo-root `LICENSE` (MIT) covers `Visualisation/` (no carve-out; `Visualisation/readme.md` has no restrictive notes). Paper Data Availability points at GitHub. Zenodo deposit doi:10.5281/zenodo.15048160 of the same Visualisation tree is CC BY 4.0 (corroboration). Local: `data/terms/ich360_LICENSE.txt`, `data/terms/ich360_zenodo_15048160.html`. | OK (permissive; attribution / copyright notice retained) |
-| **Total (default load)** | **69,132** | | | |
+| iCH360 Visualisation | 503 | MIT | Repo-root `LICENSE` (MIT) covers `Visualisation/` (no carve-out; `Visualisation/readme.md` has no restrictive notes). Paper Data Availability points at GitHub. Zenodo deposit doi:10.5281/zenodo.15048160 of the same Visualisation tree is CC BY 4.0 (corroboration). Local: `data/terms/ich360_LICENSE.txt`, `data/terms/ich360_zenodo_15048160.html`. Stage B keeps size ≥4 only. | OK (permissive; attribution / copyright notice retained) |
+| **Total (default load)** | **68,777** | | | |
 
 ### Escher maps
 
@@ -39,7 +39,7 @@ The 22 maps come from the Escher community-maps repository (BiGG-based maps for 
 | Human-maps (official `escher/` JSON) | CC BY 4.0 | **Included** (8,540 modules via `database.escher_diagram`). Companion SVG exports are **CC BY-SA** and are **not** imported |
 | Metabolism Regulation gallery SBGN-ML | CC BY 4.0 | **Included** via `layout_atlas/sbgn.py` (`data/extensions/metabolismregulation/`). See [metabolismregulation_import.md](metabolismregulation_import.md). |
 | PANTHER Pathway CellDesigner | CC BY 4.0 | **Included** (8 metabolic CD4.1 maps → 238 modules) via `celldesigner.py` + `identity_labels.py`. See [panther_pilot.md](panther_pilot.md). |
-| iCH360 Visualisation Escher JSON | MIT | **Included** (10 maps → 858 modules; `compressed_map.json` excluded). See [ich360_import.md](ich360_import.md). |
+| iCH360 Visualisation Escher JSON | MIT | **Included** (10 maps → 503 Stage B modules, size ≥4; `compressed_map.json` excluded). See [ich360_import.md](ich360_import.md). |
 | `data/extensions/{units,source_paths,reaction_geometry_templates}` | derived from the open-core maps | inherits the Escher-map status above |
 | `data/identifier_bridge.json` (+ derived Mapper crosswalk) | BiGG↔ChEBI / EC from public model annotations; Mapper view built at load time | inherits the model licences above |
 

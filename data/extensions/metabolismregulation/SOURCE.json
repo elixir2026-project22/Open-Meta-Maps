@@ -8,8 +8,8 @@
   "version": "94ac3074a5a648ce28736f949285214c1a1ca186",
   "access_date": "2026-11-11",
   "maps": 22,
-  "modules": 423,
-  "families": 47,
+  "modules": 229,
+  "families": 41,
   "admitted_to_open_core": true,
   "partition": "open_core",
   "import_policy": "gallery + atlas-downloads SBGN-ML via layout_atlas/sbgn.py + database.diagram_modules",
@@ -337,12 +337,11 @@
   },
   "decode_failures": [],
   "excluded_modules": 0,
-  "canonicalization": "Unique Rhea matches via participant ChEBI equations; native sbgn.process retained",
   "extraction": {
     "methods": {
-      "diagram_modules": 423
+      "diagram_modules": 229
     },
-    "modules": 423,
+    "modules": 229,
     "atlas_schema_version": 1
   }
 }

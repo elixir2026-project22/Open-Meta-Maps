@@ -15,7 +15,7 @@
       "sha256": "ca9295b80c7ed3b988663a7d860a6f3334fb47ae567cb9efeb45053c6820092b",
       "events": 11,
       "glyphs": 48,
-      "modules": 33,
+      "modules": 14,
       "excluded": 1
     },
     {
@@ -24,7 +24,7 @@
       "sha256": "8da6a48fd7649931081a38deed59e5e142fad00e9b462c8eca51d4a9817a4130",
       "events": 25,
       "glyphs": 105,
-      "modules": 81,
+      "modules": 48,
       "excluded": 0
     },
     {
@@ -33,7 +33,7 @@
       "sha256": "ebb8486a9a697fb1bfe890eab1c11b8984e53a1cc700d47a6cbb56c9dd5397b1",
       "events": 12,
       "glyphs": 33,
-      "modules": 22,
+      "modules": 12,
       "excluded": 3
     },
     {
@@ -42,7 +42,7 @@
       "sha256": "6802c8fa6e7e0c9090e2e80ff3c6668f51b0ae9c2a4057279fd0e296b0d6e603",
       "events": 11,
       "glyphs": 32,
-      "modules": 25,
+      "modules": 16,
       "excluded": 1
     },
     {
@@ -51,7 +51,7 @@
       "sha256": "65a259ee31951febbed05a67296d99a23ae868f3956d5ccf577d3dc7f92c9f26",
       "events": 15,
       "glyphs": 43,
-      "modules": 49,
+      "modules": 30,
       "excluded": 3
     },
     {
@@ -60,7 +60,7 @@
       "sha256": "fa16bcce479e059721068370c29535aa941e8f195c5407f38a78db4b0856ab41",
       "events": 4,
       "glyphs": 35,
-      "modules": 6,
+      "modules": 3,
       "excluded": 8
     },
     {
@@ -69,7 +69,7 @@
       "sha256": "7f4eda2b8b50251e26c4375d83d8cbc4ce6bf49266a1948117a07861684a0c88",
       "events": 8,
       "glyphs": 43,
-      "modules": 16,
+      "modules": 9,
       "excluded": 3
     }
   ],

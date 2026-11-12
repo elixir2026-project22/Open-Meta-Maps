@@ -7,8 +7,8 @@
   "version": "3.4/CD4.1",
   "access_date": "2026-11-11",
   "maps": 8,
-  "modules": 238,
-  "families": 46,
+  "modules": 138,
+  "families": 30,
   "admitted_to_open_core": true,
   "partition": "open_core",
   "import_policy": "CellDesigner CD4.1 via celldesigner.decode + identity_labels + diagram_modules",
@@ -141,12 +141,11 @@
   "decode_failures": [],
   "excluded_modules": 0,
   "identity_layer": "layout_atlas/identity_labels.py",
-  "canonicalization": "Native celldesigner.reaction retained; no unique Rhea equation match for current ChEBI coverage",
   "extraction": {
     "methods": {
-      "diagram_modules": 238
+      "diagram_modules": 138
     },
-    "modules": 238,
+    "modules": 138,
     "atlas_schema_version": 1
   }
 }
