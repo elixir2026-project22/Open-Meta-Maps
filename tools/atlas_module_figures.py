@@ -4,13 +4,14 @@
   PYTHONPATH=layout_atlas python3 tools/atlas_module_figures.py all
 
 Writes under docs/images/atlas/:
-  atlas_overview.png          — landscape mosaic of all default-load modules
+  atlas_overview.png          — 3×3 source panels; a legible sample of unique modules per source
   atlas_examples.svg/.png     — 4×4 captioned example grid (distinct maps)
   atlas_overlap.json          — per-source counts, unique-after-dedup, nesting, pairwise overlap
   worked_*.svg/.png           — worked-example panels
 
-Figure rules: canvas sized to content (no crop), uniform cells within a panel,
-grid-aligned, labels clear of strokes, readable at README ~700 px width.
+Figure rules: compact rows and columns, uniform cells within a panel,
+grid-aligned, labels clear of strokes, no overlapping or cropped text,
+readable at README width (~900 px).
 """
 from __future__ import annotations
 
@@ -247,19 +248,6 @@ def _hex_rgb(h):
     return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
 
 
-def _tile_px(m):
-    # Ideal size before landscape fit-scale. Larger modules stay readable at README width.
-    s = int(m.get('size') or 1)
-    if s <= 2:
-        return 3
-    if s <= 4:
-        return 5
-    if s <= 8:
-        return 9
-    if s <= 16:
-        return 14
-    return 20
-
 
 def unique_representatives(by_src, sets):
     """One module per unique reaction set within each source (prefer denser / larger)."""
@@ -276,16 +264,86 @@ def unique_representatives(by_src, sets):
     return out
 
 
-def _pil_draw_module(draw, m, x0, y0, cell):
-    ink = (17, 17, 17)
-    if cell < 5:
-        # Small nested module: solid speck (shape not resolvable at this size).
-        draw.rectangle([x0, y0, x0 + max(cell - 1, 0), y0 + max(cell - 1, 0)], fill=ink)
-        return
+def _drawable(m):
     nodes = m.get('nodes') or []
     edges = m.get('edges') or []
-    if len(nodes) < 2:
-        draw.rectangle([x0, y0, x0 + cell - 1, y0 + cell - 1], outline=ink)
+    return len(nodes) >= 2 and bool(edges)
+
+
+def _module_features(m):
+    """Size, node count, density and log aspect — used only for sampling distance."""
+    nodes = m.get('nodes') or []
+    size = float(m.get('size') or 0)
+    n = float(len(nodes))
+    dens = module_density(m)
+    if len(nodes) >= 2:
+        xmin, ymin, xmax, ymax = _bbox(nodes)
+        aspect = math.log((xmax - xmin + 1e-9) / (ymax - ymin + 1e-9))
+    else:
+        aspect = 0.0
+    return (size, n, dens, aspect)
+
+
+def _allocate_even(k, n):
+    """Spread k slots over n strata; leftover slots go to the later (larger-size) strata."""
+    if n <= 0:
+        return []
+    base, rem = divmod(k, n)
+    return [base + (1 if i >= n - rem else 0) for i in range(n)]
+
+
+def _farthest_point(items, k):
+    """Deterministic farthest-point sample in z-scored feature space."""
+    if k <= 0:
+        return []
+    if len(items) <= k:
+        return list(items)
+    arr = np.array([_module_features(m) for m in items], dtype=float)
+    std = arr.std(axis=0)
+    std[std < 1e-12] = 1.0
+    arr = (arr - arr.mean(axis=0)) / std
+    order = sorted(range(len(items)), key=lambda i: (items[i].get('size') or 0, items[i]['id']))
+    first = order[len(order) // 2]
+    chosen = [first]
+    remaining = set(range(len(items))) - {first}
+    dmin = {i: float(np.linalg.norm(arr[i] - arr[first])) for i in remaining}
+    while len(chosen) < k and remaining:
+        nxt = max(remaining, key=lambda i: (dmin[i], items[i]['id']))
+        chosen.append(nxt)
+        remaining.remove(nxt)
+        for i in remaining:
+            d = float(np.linalg.norm(arr[i] - arr[nxt]))
+            if d < dmin[i]:
+                dmin[i] = d
+    picked = [items[i] for i in chosen]
+    return sorted(picked, key=lambda m: (-(m.get('size') or 0), m['id']))
+
+
+def size_stratified_farthest_point(items, k):
+    """Up to k drawable modules, equally from size tertiles, farthest-point inside each tertile."""
+    items = [m for m in items if _drawable(m)]
+    if len(items) <= k:
+        return sorted(items, key=lambda m: (-(m.get('size') or 0), m['id']))
+    ordered = sorted(items, key=lambda m: (m.get('size') or 0, m['id']))
+    n = len(ordered)
+    strata = []
+    for i in range(3):
+        a = int(round(i * n / 3))
+        b = int(round((i + 1) * n / 3))
+        if b > a:
+            strata.append(ordered[a:b])
+    selected = []
+    for group, ck in zip(strata, _allocate_even(k, len(strata))):
+        selected.extend(_farthest_point(group, ck))
+    return sorted(selected, key=lambda m: (-(m.get('size') or 0), m['id']))
+
+
+def _pil_draw_module(draw, m, x0, y0, cell, lw=None, node_r=None):
+    """Draw one module into a square cell. Stroke and node size scale with the cell."""
+    ink = (17, 17, 17)
+    nodes = m.get('nodes') or []
+    edges = m.get('edges') or []
+    if len(nodes) < 2 or not edges:
         return
     xmin, ymin, xmax, ymax = _bbox(nodes)
     w = max(xmax - xmin, 1e-6)
@@ -297,7 +355,10 @@ def _pil_draw_module(draw, m, x0, y0, cell):
     mx = (xmin + xmax) / 2
     my = (ymin + ymax) / 2
     pos = {n['key']: (cx + (n['xy'][0] - mx) * scale, cy + (n['xy'][1] - my) * scale) for n in nodes}
-    lw = 1 if cell >= 8 else 1
+    if lw is None:
+        lw = max(2, int(round(cell * 0.015)))
+    r_r = node_r if node_r is not None else max(2.2, cell * 0.032)
+    r_m = max(2.0, cell * 0.026)
     for e in edges:
         a, b = pos.get(e['a']), pos.get(e['b'])
         if a and b:
@@ -305,223 +366,110 @@ def _pil_draw_module(draw, m, x0, y0, cell):
     for n in nodes:
         x, y = pos[n['key']]
         is_r = n.get('role') == 'reaction' or str(n.get('key', '')).startswith('r:')
-        r = max(1.0, cell * 0.08) if is_r else max(0.9, cell * 0.07)
         if is_r:
-            draw.ellipse([x - r, y - r, x + r, y + r], fill=ink)
+            draw.ellipse([x - r_r, y - r_r, x + r_r, y + r_r], fill=ink)
         else:
-            draw.ellipse([x - r, y - r, x + r, y + r], outline=ink, fill=(255, 255, 255))
-
-
-def _shelf_pack(items, max_width, scale=1.0, gap=1):
-    """Pack variable-size tiles into shelves; return placements and block size."""
-    placements = []  # (m, x, y, cell)
-    x = y = 0
-    row_h = 0
-    width = 0
-    for m in items:
-        cell = max(2, int(round(_tile_px(m) * scale)))
-        if x > 0 and x + cell > max_width:
-            y += row_h + gap
-            x = 0
-            row_h = 0
-        placements.append((m, x, y, cell))
-        row_h = max(row_h, cell)
-        x += cell + gap
-        width = max(width, x)
-    height = y + row_h if placements else 0
-    return placements, width, height
-
-
-def _pack_to_box(items, max_w, max_h):
-    """Shelf-pack items into max_w×max_h by searching a fit scale (fills the box tightly)."""
-    if not items or max_w < 4 or max_h < 4:
-        return [], 1.0
-    # Large tiles first so shapes stay visible; small modules fill later rows.
-    ordered = sorted(items, key=lambda m: (-(m.get('size') or 0), m['id']))
-    lo, hi = 0.15, 3.0
-    best = ([], 0.15)
-    for _ in range(14):
-        mid = (lo + hi) / 2
-        placements, _, h = _shelf_pack(ordered, max_w, scale=mid)
-        if h <= max_h:
-            best = (placements, mid)
-            lo = mid
-        else:
-            hi = mid
-    placements, scale = best
-    if not placements:
-        placements, _, _ = _shelf_pack(ordered, max_w, scale=0.15)
-        return placements, 0.15
-    # If the last shelf is sparse and vertical slack remains, nudge scale up once.
-    _, _, h = _shelf_pack(ordered, max_w, scale=scale)
-    if h < max_h * 0.92 and scale < 2.8:
-        bumped = min(scale * 1.08, 3.0)
-        alt, _, ah = _shelf_pack(ordered, max_w, scale=bumped)
-        if ah <= max_h:
-            placements, scale = alt, bumped
-    return placements, scale
-
-
-def _squarify(areas, x, y, w, h):
-    """Squarified treemap: list of (area) → list of (x, y, w, h) in same order."""
-    if not areas or w <= 0 or h <= 0:
-        return [(x, y, max(w, 1), max(h, 1)) for _ in areas]
-    total = sum(areas) or 1.0
-    # Normalize to pixel area
-    px_areas = [a / total * w * h for a in areas]
-    out = [None] * len(px_areas)
-    items = list(enumerate(px_areas))
-
-    def worst(row, row_area, side):
-        if not row or side <= 0 or row_area <= 0:
-            return float('inf')
-        thickness = row_area / side
-        worst_ar = 0.0
-        for _, a in row:
-            if a <= 0:
-                continue
-            length = a / thickness
-            worst_ar = max(worst_ar, length / thickness, thickness / length)
-        return worst_ar
-
-    def layout_row(row, row_area, x0, y0, w0, h0, horizontal):
-        coords = {}
-        if horizontal:
-            side = w0
-            row_h = row_area / side if side else 0
-            cx = x0
-            for idx, a in row:
-                rw = a / row_h if row_h else 0
-                coords[idx] = (cx, y0, rw, row_h)
-                cx += rw
-        else:
-            side = h0
-            row_w = row_area / side if side else 0
-            cy = y0
-            for idx, a in row:
-                rh = a / row_w if row_w else 0
-                coords[idx] = (x0, cy, row_w, rh)
-                cy += rh
-        return coords
-
-    def squarify_rec(remaining, x0, y0, w0, h0):
-        if not remaining:
-            return
-        if len(remaining) == 1:
-            idx, a = remaining[0]
-            out[idx] = (x0, y0, w0, h0)
-            return
-        horizontal = w0 >= h0
-        side = h0 if horizontal else w0
-        row = [remaining[0]]
-        row_area = remaining[0][1]
-        i = 1
-        while i < len(remaining):
-            cand = row + [remaining[i]]
-            cand_area = row_area + remaining[i][1]
-            if worst(cand, cand_area, side) <= worst(row, row_area, side):
-                row = cand
-                row_area = cand_area
-                i += 1
-            else:
-                break
-        coords = layout_row(row, row_area, x0, y0, w0, h0, horizontal)
-        for idx, box in coords.items():
-            out[idx] = box
-        rest = remaining[i:]
-        if not rest:
-            return
-        if horizontal:
-            squarify_rec(rest, x0, y0 + coords[row[0][0]][3], w0, h0 - coords[row[0][0]][3])
-        else:
-            squarify_rec(rest, x0 + coords[row[0][0]][2], y0, w0 - coords[row[0][0]][2], h0)
-
-    squarify_rec(items, x, y, w, h)
-    return [out[i] if out[i] is not None else (x, y, 1, 1) for i in range(len(areas))]
+            draw.ellipse([x - r_m, y - r_m, x + r_m, y + r_m], outline=ink, fill=(255, 255, 255), width=max(1, lw))
 
 
 def write_overview_mosaic(by_src, summary, sets):
-    """Landscape (16:9) mosaic: unique-after-dedup tiles in a tight treemap; readable at README width."""
+    """Equal 3×3 source panels with a size-stratified sample of unique modules, readable at README width."""
     from PIL import Image, ImageDraw, ImageFont
 
-    canvas_w = 1800
-    canvas_h = 1012  # 16:9
-    pad = 10
-    label_h = 30
-    legend_h = 40
-    gap = 4
-    # Small sources share a bottom strip so labels stay readable (min height).
-    small_strip_h = 110
-    inner_x = pad
-    inner_y = pad
-    inner_w = canvas_w - 2 * pad
-    main_h = canvas_h - 2 * pad - legend_h - small_strip_h - gap
+    final_w, final_h = 3600, 2700
+    hi = 2  # draw at 2×, then downsample
+    canvas_w, canvas_h = final_w * hi, final_h * hi
+    pad = 40
+    gap = 24
+    title_h = 88
+    legend_h = 96
+    sample_k = 24
+    cell_min = 160 * hi
+    cols, rows = 6, 4
+    cell_gap = 10
 
     try:
-        font_sm = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 18)
-        font_bold = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 22)
-        font_bold_sm = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 18)
+        font_title = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 44)
+        font_legend = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 36)
     except Exception:
-        font_sm = font_bold = font_bold_sm = ImageFont.load_default()
+        font_title = font_legend = ImageFont.load_default()
 
     reps = unique_representatives(by_src, sets)
-    # Keep tiny sources out of the treemap so they are not crushed to <1px height.
-    small_keys = {'metabolismregulation', 'panther', 'ich360'}
-    main_blocks, small_blocks = [], []
+    blocks = []
     for sk in SOURCE_ORDER:
         items = reps.get(sk) or []
-        if not items:
-            continue
         info = summary['by_source'][sk]
-        block = dict(sk=sk, items=items, info=info, area=max(info['unique_reaction_sets'], 1))
-        (small_blocks if sk in small_keys else main_blocks).append(block)
+        shown = size_stratified_farthest_point(items, sample_k)
+        blocks.append(dict(sk=sk, items=shown, info=info, n_drawable=sum(1 for m in items if _drawable(m))))
 
-    boxes = _squarify([b['area'] for b in main_blocks], inner_x, inner_y, inner_w, main_h)
+    assert len(blocks) == 9, f'overview expects 9 sources, got {len(blocks)}'
+
+    grid_w = canvas_w - 2 * pad
+    grid_h = canvas_h - 2 * pad - legend_h
+    panel_w = (grid_w - 2 * gap) // 3
+    panel_h = (grid_h - 2 * gap) // 3
+    inner_w = panel_w - 16
+    inner_h = panel_h - title_h - 12
+    cell = min((inner_w - (cols - 1) * cell_gap) // cols, (inner_h - (rows - 1) * cell_gap) // rows)
+    if cell < cell_min:
+        raise RuntimeError(f'overview cell {cell}px is below the {cell_min}px minimum at {hi}×')
+    grid_pw = cols * cell + (cols - 1) * cell_gap
+    grid_ph = rows * cell + (rows - 1) * cell_gap
+
     im = Image.new('RGB', (canvas_w, canvas_h), (255, 255, 255))
     draw = ImageDraw.Draw(im)
 
-    def paint_block(b, x0, y0, bw2, bh2, font):
+    for i, b in enumerate(blocks):
+        pr, pc = divmod(i, 3)
+        x0 = pad + pc * (panel_w + gap)
+        y0 = pad + pr * (panel_h + gap)
         tint = _hex_rgb(SOURCE_TINT[b['sk']])
         stroke = _hex_rgb(SOURCE_STROKE[b['sk']])
-        draw.rectangle([x0, y0, x0 + bw2 - 1, y0 + bh2 - 1], fill=tint, outline=stroke, width=2)
+        draw.rectangle([x0, y0, x0 + panel_w - 1, y0 + panel_h - 1], fill=tint, outline=stroke, width=4)
         info = b['info']
-        label = f"{SOURCE_LABEL_SHORT.get(b['sk'], b['sk'])}  ·  {info['modules']:,} cut · {info['unique_reaction_sets']:,} unique"
-        if draw.textlength(label, font=font) > bw2 - 16:
-            font = font_bold_sm
-        draw.text((x0 + 8, y0 + 5), label, fill=(17, 17, 17), font=font)
-        tile_x, tile_y = x0 + 4, y0 + label_h
-        tile_w, tile_h = max(bw2 - 8, 4), max(bh2 - label_h - 4, 4)
-        placements, _ = _pack_to_box(b['items'], tile_w, tile_h)
-        for m, px, py, cell in placements:
-            if py + cell > tile_h:
-                continue
-            _pil_draw_module(draw, m, tile_x + px, tile_y + py, cell)
+        label = (
+            f"{SOURCE_LABEL.get(b['sk'], b['sk'])}  ·  "
+            f"{info['modules']:,} cut · {info['unique_reaction_sets']:,} unique · "
+            f"{len(b['items']):,} shown"
+        )
+        # Shrink the title font if the full counts would overflow the panel.
+        title_font = font_title
+        if draw.textlength(label, font=title_font) > panel_w - 28:
+            try:
+                title_font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 36)
+            except Exception:
+                title_font = font_title
+        if draw.textlength(label, font=title_font) > panel_w - 28:
+            label = (
+                f"{SOURCE_LABEL_SHORT.get(b['sk'], b['sk'])}  ·  "
+                f"{info['modules']:,} cut · {info['unique_reaction_sets']:,} unique · "
+                f"{len(b['items']):,} shown"
+            )
+        # Centre the title; keep it clear of the frame.
+        tx = x0 + (panel_w - draw.textlength(label, font=title_font)) / 2
+        draw.text((tx, y0 + 18), label, fill=(17, 17, 17), font=title_font)
 
-    for b, (bx, by, bw, bh) in zip(main_blocks, boxes):
-        bx, by, bw, bh = int(round(bx)), int(round(by)), int(round(bw)), int(round(bh))
-        x0, y0 = bx + gap // 2, by + gap // 2
-        bw2, bh2 = max(bw - gap, 24), max(bh - gap, label_h + 16)
-        paint_block(b, x0, y0, bw2, bh2, font_bold)
+        gx = x0 + (panel_w - grid_pw) // 2
+        gy = y0 + title_h + (inner_h - grid_ph) // 2
+        for j, m in enumerate(b['items']):
+            r, c = divmod(j, cols)
+            if r >= rows:
+                break
+            _pil_draw_module(draw, m, gx + c * (cell + cell_gap), gy + r * (cell + cell_gap), cell)
 
-    if small_blocks:
-        sy = pad + main_h + gap
-        sw = (inner_w - (len(small_blocks) - 1) * gap) // len(small_blocks)
-        for i, b in enumerate(small_blocks):
-            x0 = inner_x + i * (sw + gap)
-            paint_block(b, x0, sy, sw, small_strip_h, font_bold_sm)
-
-    ly = canvas_h - legend_h + 8
     legend = (
-        f"One tile per unique reaction set (after dedup) · cut {summary['total_modules']:,} · "
-        f"unique {summary['unique_reaction_sets_global']:,} · nested {summary['modules_nested_in_larger_global']:,} · "
-        f"tile size scales with reactions; tiny nested modules are solid specks"
+        f"A deterministic size-stratified sample of unique reaction sets in each source  ·  "
+        f"cut {summary['total_modules']:,}  ·  unique {summary['unique_reaction_sets_global']:,}  ·  "
+        f"up to {sample_k} modules shown per source"
     )
-    draw.text((pad, ly), legend, fill=(31, 41, 55), font=font_sm)
+    lw = draw.textlength(legend, font=font_legend)
+    draw.text(((canvas_w - lw) / 2, canvas_h - legend_h + 24), legend, fill=(31, 41, 55), font=font_legend)
 
+    out = im.resize((final_w, final_h), Image.Resampling.LANCZOS)
     OUT.mkdir(parents=True, exist_ok=True)
     path = OUT / 'atlas_overview.png'
-    im.save(path, format='PNG', optimize=True)
-    _shrink_png(path, max_bytes=3_500_000)
+    out.save(path, format='PNG', optimize=True)
+    _shrink_png(path, max_bytes=5_000_000)
     return path
 
 
