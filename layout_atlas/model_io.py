@@ -10,9 +10,12 @@
   annotations   list of dict(qualifier='{http://biomodels.net/biology-qualifiers/}is', uri='https://identifiers.org/...'): the element's own CV terms only
   coefficient   negative for reactants, positive for products, summed when a species appears twice, zero entries dropped
 
-The input rules are the ones the layout code relies on and are strict on purpose: exactly one model, no rules / events / initial assignments, constant numeric
-stoichiometry, finite non-negative coefficients, valid flux bounds, unique ids.  BiGG-style escaped ids (`M_`, `R_`, `G_` prefixes and `__45__` character codes) are
-decoded.  JSON input (COBRA / BiGG JSON) is returned as it is.
+The input rules are the ones the layout code relies on: exactly one model, finite non-negative stoichiometry
+coefficients (missing stoichiometry defaults to 1 for drawing; L2 stoichiometryMath / L3 variable species references
+use an evaluable constant when present, otherwise magnitude 1 on the reactant/product side), valid flux bounds,
+unique ids. Rules, events and initial assignments are ignored except when they supply a constant stoichiometry for a
+species reference. Modifiers are not reaction participants. BiGG-style escaped ids (`M_`, `R_`, `G_` prefixes and
+`__45__` character codes) are decoded.  JSON input (COBRA / BiGG JSON) is returned as it is.
 """
 import json
 import math
@@ -69,6 +72,76 @@ def _gene_rule(association):
     return ''
 
 
+def _eval_constant_math(ast, parameters):
+    """Return a finite float if `ast` is a constant expression over `parameters`, else None."""
+    import libsbml
+    if ast is None:
+        return None
+    t = ast.getType()
+    if t in (libsbml.AST_REAL, libsbml.AST_REAL_E, libsbml.AST_RATIONAL, libsbml.AST_INTEGER):
+        value = ast.getValue()
+        return float(value) if math.isfinite(value) else None
+    if t == libsbml.AST_NAME:
+        name = ast.getName()
+        if name in parameters and math.isfinite(parameters[name]):
+            return float(parameters[name])
+        return None
+    if t == libsbml.AST_MINUS and ast.getNumChildren() == 1:
+        child = _eval_constant_math(ast.getChild(0), parameters)
+        return None if child is None else -child
+    if t in (libsbml.AST_PLUS, libsbml.AST_TIMES) and ast.getNumChildren() >= 1:
+        total = 0.0 if t == libsbml.AST_PLUS else 1.0
+        for i in range(ast.getNumChildren()):
+            child = _eval_constant_math(ast.getChild(i), parameters)
+            if child is None:
+                return None
+            total = total + child if t == libsbml.AST_PLUS else total * child
+        return total
+    if t in (libsbml.AST_MINUS, libsbml.AST_DIVIDE) and ast.getNumChildren() == 2:
+        left = _eval_constant_math(ast.getChild(0), parameters)
+        right = _eval_constant_math(ast.getChild(1), parameters)
+        if left is None or right is None:
+            return None
+        if t == libsbml.AST_MINUS:
+            return left - right
+        if right == 0:
+            return None
+        return left / right
+    return None
+
+
+def _constant_assignments(model, parameters):
+    """Map of assignment / initial-assignment symbols to a constant float, or None if not constant."""
+    out = {}
+    for i in range(model.getNumInitialAssignments()):
+        item = model.getInitialAssignment(i)
+        out[item.getSymbol()] = _eval_constant_math(item.getMath(), parameters)
+    for i in range(model.getNumRules()):
+        rule = model.getRule(i)
+        if rule.isAssignment():
+            out[rule.getVariable()] = _eval_constant_math(rule.getMath(), parameters)
+    return out
+
+
+def _stoichiometry_magnitude(ref, parameters, assignments):
+    """Non-negative stoichiometry magnitude for drawing; variable / unevaluable cases become 1."""
+    if ref.isSetStoichiometryMath():
+        stoich_math = ref.getStoichiometryMath()
+        value = _eval_constant_math(stoich_math.getMath() if stoich_math is not None else None, parameters)
+        return 1.0 if value is None or value < 0 or not math.isfinite(value) else float(value)
+    variable = ref.isSetConstant() and not ref.getConstant()
+    if variable:
+        if ref.isSetId():
+            value = assignments.get(ref.getId(), None)
+            if value is not None and value >= 0 and math.isfinite(value):
+                return float(value)
+        return 1.0
+    if ref.isSetStoichiometry():
+        return ref.getStoichiometry()
+    # L2 default is 1; L3 unset means unknown — treat as 1 for drawing.
+    return 1.0
+
+
 def load_model(path):
     path = Path(path)
     if path.suffix.lower() == '.json':
@@ -83,8 +156,6 @@ def load_model(path):
     if model is None:
         first = log.getError(0).getMessage() if log.getNumErrors() else ''
         raise ValueError('Invalid SBML XML or not an SBML document with one model' + (': ' + ' '.join(first.split())[:200] if first else ''))
-    if model.getNumRules() or model.getNumEvents() or model.getNumInitialAssignments():
-        raise ValueError('Dynamic SBML rules, events and initial assignments are unsupported')
     species = [model.getSpecies(i) for i in range(model.getNumSpecies())]
     id_map = {s.getId(): _decode(s.getId(), 'M_') for s in species}
     if len(id_map) != len(species) or len(set(id_map.values())) != len(species):
@@ -106,6 +177,7 @@ def load_model(path):
             g = model_fbc.getGeneProduct(i)
             genes.append(dict(id=_decode(g.getId(), 'G_'), name=g.getName(), label=g.getLabel(), **_metadata(g)))
     parameters = {p.getId(): p.getValue() for p in (model.getParameter(i) for i in range(model.getNumParameters())) if p.isSetValue()}
+    assignments = _constant_assignments(model, parameters)
     reactions = []
     for k in range(model.getNumReactions()):
         reaction = model.getReaction(k)
@@ -114,12 +186,10 @@ def load_model(path):
         for sign, count, get in ((-1, reaction.getNumReactants(), reaction.getReactant), (1, reaction.getNumProducts(), reaction.getProduct)):
             for i in range(count):
                 ref = get(i)
-                if ref.isSetStoichiometryMath() or (ref.isSetConstant() and not ref.getConstant()):
-                    raise ValueError(f'Variable stoichiometry is unsupported: {rid}')
                 raw = ref.getSpecies()
                 if raw not in id_map:
                     raise ValueError(f'Unknown species {raw} in reaction {rid}')
-                value = ref.getStoichiometry() if ref.isSetStoichiometry() else 1.0
+                value = _stoichiometry_magnitude(ref, parameters, assignments)
                 if not math.isfinite(value) or value < 0:
                     raise ValueError(f'Invalid stoichiometry in reaction {rid}')
                 mid = id_map[raw]
