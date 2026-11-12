@@ -905,15 +905,16 @@ def module_detail(module_id, index=None):
 def thumbnail_svg(module, width=240, height=160):
     """Curated drawing preview matching docs/images/atlas/atlas_examples style.
 
-    Black edges, white metabolite nodes with black stroke, filled black reaction
-    nodes. Uniform scale + translate only (no rotate/mirror). Aspect preserved.
-    ViewBox hugs the content (small pad); CSS object-fit:cover fills the card.
+    Whole drawing visible (never cropped): viewBox = content bbox + 6% pad with
+    preserveAspectRatio=xMidYMid meet. Grey letterboxing comes from the CSS
+    frame (.ab-th), not from a mismatched SVG fill. Edges/nodes use screen-pixel
+    sizes via vector-effect=non-scaling-stroke (~1.2px / ~2.5px).
     """
     usable = [n for n in (module.get('nodes') or []) if n.get('xy') is not None]
     if not usable:
         return (
-            f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}">'
-            f'<rect width="100%" height="100%" fill="#fafafa"/>'
+            f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
+            f'width="{width}" height="{height}" preserveAspectRatio="xMidYMid meet">'
             f'<text x="12" y="{height // 2}" fill="#5b7480" font-size="12">No geometry</text></svg>'
         )
     # Drop exact coordinate duplicates that pile into unreadable clumps.
@@ -932,44 +933,54 @@ def thumbnail_svg(module, width=240, height=160):
     min_y, max_y = min(ys), max(ys)
     bw = (max_x - min_x) or 1.0
     bh = (max_y - min_y) or 1.0
-    # Small padding in content units (~4% of the longer span).
-    pad = 0.04 * max(bw, bh)
+    # 6% content pad, then grow the viewBox a little more so ~2.5px nodes are
+    # not clipped at the frame after meet.
+    pad = 0.06 * max(bw, bh)
     vb_x, vb_y = min_x - pad, min_y - pad
     vb_w, vb_h = bw + 2 * pad, bh + 2 * pad
-    # Stroke / node size relative to content so they stay readable when covered.
-    unit = max(vb_w / width, vb_h / height)
-    sw = round(1.15 * unit, 4)
-    r_rx = round(2.5 * unit, 4)
-    r_met = round(2.7 * unit, 4)
+    meet = min(width / vb_w, height / vb_h) or 1.0
+    r_rx = round(2.5 / meet, 6)
+    r_met = round(2.5 / meet, 6)
+    extra = max(r_rx, r_met) + (1.2 / meet)
+    vb_x -= extra
+    vb_y -= extra
+    vb_w += 2 * extra
+    vb_h += 2 * extra
+    meet = min(width / vb_w, height / vb_h) or 1.0
+    r_rx = round(2.5 / meet, 6)
+    r_met = round(2.5 / meet, 6)
 
     def pt(n):
         return (round(float(n['xy'][0]), 4), round(float(n['xy'][1]), 4))
 
     by_key = {n['key']: n for n in usable}
-    # No fixed width/height: viewBox is content-tight so CSS object-fit:cover
-    # can fill the card without internal letterboxing.
+    # Transparent SVG; .ab-th grey shows through meet letterboxing (no side bands).
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{vb_x:.4f} {vb_y:.4f} {vb_w:.4f} {vb_h:.4f}" '
+        f'width="{width}" height="{height}" preserveAspectRatio="xMidYMid meet" '
         f'role="img" aria-label="{xml_escape(str(module.get("name") or module.get("id") or "module"))}">'
-        f'<rect x="{vb_x:.4f}" y="{vb_y:.4f}" width="{vb_w:.4f}" height="{vb_h:.4f}" fill="#fafafa"/>'
     ]
+    ve = 'vector-effect="non-scaling-stroke"'
     for e in module.get('edges') or []:
         a, b = by_key.get(e.get('a')), by_key.get(e.get('b'))
         if not a or not b:
             continue
         (ax, ay), (bx, by) = pt(a), pt(b)
         parts.append(
-            f'<line x1="{ax}" y1="{ay}" x2="{bx}" y2="{by}" stroke="#111" stroke-width="{sw}" stroke-linecap="round"/>'
+            f'<line x1="{ax}" y1="{ay}" x2="{bx}" y2="{by}" stroke="#111" stroke-width="1.2" '
+            f'stroke-linecap="round" {ve}/>'
         )
     for n in usable:
         x, y = pt(n)
         title = xml_escape(str(n.get('label') or n.get('entity') or ''))
         if n.get('role') == 'reaction':
-            parts.append(f'<circle cx="{x}" cy="{y}" r="{r_rx}" fill="#111111"><title>{title}</title></circle>')
+            parts.append(
+                f'<circle cx="{x}" cy="{y}" r="{r_rx}" fill="#111111"><title>{title}</title></circle>'
+            )
         else:
             parts.append(
-                f'<circle cx="{x}" cy="{y}" r="{r_met}" fill="#ffffff" stroke="#111111" stroke-width="{sw}">'
-                f'<title>{title}</title></circle>'
+                f'<circle cx="{x}" cy="{y}" r="{r_met}" fill="#ffffff" stroke="#111111" '
+                f'stroke-width="1.2" {ve}><title>{title}</title></circle>'
             )
     parts.append('</svg>')
     return ''.join(parts)
@@ -1167,7 +1178,7 @@ def page_html():
 .ab-th::before{content:"Loading…";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--mute);pointer-events:none;z-index:1}
 .ab-th.is-ready::before,.ab-th.is-error::before{content:none}
 .ab-th.is-error::after{content:"Preview unavailable";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--mute);background:#fafafa}
-.ab-th img.th{position:absolute;inset:0;display:block;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:cover!important;object-position:center;opacity:0;transition:opacity .15s ease}
+.ab-th img.th{position:absolute;inset:0;display:block;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:contain!important;object-position:center;opacity:0;transition:opacity .15s ease}
 .ab-th.is-ready img.th{opacity:1}
 .ab-empty{color:var(--mute);padding:24px 0}
 .ab-detail{display:none}.ab-detail.on{display:block}

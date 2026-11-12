@@ -194,7 +194,11 @@ class TestQueryAndSpeciesHelpers:
         assert 'stroke="#111"' in svg
         assert 'fill="#111111"' in svg
         assert 'fill="#ffffff"' in svg
-        assert 'fill="#fafafa"' in svg
+        assert 'vector-effect="non-scaling-stroke"' in svg
+        assert 'preserveAspectRatio="xMidYMid meet"' in svg
+        # Frame grey lives on .ab-th so meet letterboxing has no visible side bands.
+        html = (ab.ROOT / 'layout_atlas' / 'results' / 'atlas_browser' / 'index.html').read_text(encoding='utf-8')
+        assert '.ab-th{' in html and 'background:#fafafa' in html
 
 
 class TestDownloadManifest:
@@ -282,8 +286,22 @@ class TestEscherExportAndThumbnail:
         assert '<circle' in svg
         assert '<line' in svg
         assert 'viewBox="' in svg
-        assert 'width="' not in svg.split('>', 1)[0]
+        assert 'preserveAspectRatio="xMidYMid meet"' in svg
+        assert 'vector-effect="non-scaling-stroke"' in svg
+        assert 'stroke-width="1.2"' in svg
         assert 'stroke="#111"' in svg
+
+    def test_thumbnail_viewbox_pads_content(self):
+        m = _mod('thumb')
+        # Known coords: reaction (0,0), mets (1,0) and (0,1) → bbox 0..1,0..1
+        svg = ab.thumbnail_svg(m)
+        head = svg.split('>', 1)[0]
+        assert 'preserveAspectRatio="xMidYMid meet"' in head
+        import re
+        vb = list(map(float, re.search(r'viewBox="([^"]+)"', head).group(1).split()))
+        # At least 6% pad, plus room for node radius so circles are not clipped.
+        assert vb[0] <= -0.06 and vb[1] <= -0.06
+        assert vb[2] >= 1.12 and vb[3] >= 1.12
 
     def test_count_label_pluralisation(self):
         assert ab._count_label(1, 'reaction') == '1 reaction'
@@ -317,6 +335,6 @@ class TestEscherExportAndThumbnail:
         assert 'windows' in html
         assert 'max-height:4.8em' in html
         assert 'aspect-ratio:3/2' in html
-        assert 'object-fit:cover' in html
+        assert 'object-fit:contain' in html
         assert 'reactionLabel' in html
         assert 'size_label' in html
