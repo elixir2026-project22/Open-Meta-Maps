@@ -21,6 +21,7 @@ def test_tool_page_has_result_download_helpers():
     # no hard-coded legacy download basenames in the download row
     assert "['map.svg','Download SVG']" not in html
     assert "['map.json','Download Escher JSON']" not in html
+    assert 'OpenMetaMaps_model_result' not in html
 
 
 def test_content_disposition_uses_result_filename():

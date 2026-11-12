@@ -244,11 +244,10 @@ def _resolve_map_filename(folder: Path, filename=None) -> str:
 
 
 def _result_export_names(folder: Path):
-    stem = output_names.stem_from_folder(folder)
     return [
-        output_names.result_filename(stem, 'sbgn'),
-        output_names.result_filename(stem, 'sbml'),
-        output_names.result_filename(stem, 'celldesigner.xml'),
+        output_names.map_export(folder, 'sbgn').name,
+        output_names.map_export(folder, 'sbml').name,
+        output_names.map_export(folder, 'celldesigner.xml').name,
     ]
 
 

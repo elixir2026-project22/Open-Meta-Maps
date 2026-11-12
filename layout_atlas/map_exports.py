@@ -1101,15 +1101,15 @@ def write_all_exports(folder, model_path=None, map_path=None, model=None, stem=N
         model = load_model(model_path)
     model_path = Path(model_path) if model_path else None
 
-    sbgn_name = output_names.result_filename(stem, 'sbgn')
-    sbml_name = output_names.result_filename(stem, 'sbml')
-    cd_name = output_names.result_filename(stem, 'celldesigner.xml')
+    sbgn_path = output_names.map_export(folder, 'sbgn', stem)
+    sbml_out = output_names.map_export(folder, 'sbml', stem)
+    cd_path = output_names.map_export(folder, 'celldesigner.xml', stem)
     sbml_path, temporary = _ensure_sbml_path(model_path, model, folder=folder)
     try:
-        write_sbgn(folder / sbgn_name, data, model, sbml_path=sbml_path)
-        write_sbml_layout(folder / sbml_name, sbml_path, data, model=model)
-        write_celldesigner(folder / cd_name, data, model)
+        write_sbgn(sbgn_path, data, model, sbml_path=sbml_path)
+        write_sbml_layout(sbml_out, sbml_path, data, model=model)
+        write_celldesigner(cd_path, data, model)
     finally:
         if temporary:
             Path(sbml_path).unlink(missing_ok=True)
-    return [sbgn_name, sbml_name, cd_name]
+    return [sbgn_path.name, sbml_out.name, cd_path.name]

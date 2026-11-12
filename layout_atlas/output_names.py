@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import re
+import time
 from pathlib import Path
 
 RESULT_PREFIX = 'OpenMetaMaps_'
@@ -123,8 +124,6 @@ def clear_stale_results(folder) -> None:
 
 def write_meta(folder, original_name: str, size: int | None = None, created: float | None = None) -> Path:
     """Persist the original model file name used to build result stems."""
-    import time
-
     folder = Path(folder)
     folder.mkdir(parents=True, exist_ok=True)
     payload = dict(
