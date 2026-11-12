@@ -121,7 +121,8 @@ def about():
         + '<p>' + b('Rules (crossings, overlaps, long edges, participant consistency, compartments, compactness, reproducibility, scale): status table in README. Compose writes layout_quality into layout_issues.json / report.json; python3 project.py evaluate adds layout-rules metrics.') + '</p>'
         + '<ul>'
         + '<li>' + b('Optimised (partially): crossings and unrelated overlaps; detour and bends; long lines and cofactor clones; participant placement; curated-structure continuity; periphery, aspect, blank space.') + '</li>'
-        + '<li>' + b('Not yet optimised: axis-aligned segments and axes; grid metabolites; chain turn angles; cycle placement; compartment packing; build-on-previous layout (evaluate --compare-map).') + '</li>'
+        + '<li>' + b('Not yet optimised: axis-aligned segments and axes; grid metabolites; chain turn angles; cycle placement; compartment packing.') + '</li>'
+        + '<li>' + b('Build-on-previous: compose --previous map.json pins matched nodes; evaluate --compare-map measures displacement.') + '</li>'
         + '<li>' + b('Gaps: 2D component packing, harder orientation, compose --seed. Details: docs/layout_evaluation.md · docs/limitations.md.') + '</li>'
         + '</ul>',
     )

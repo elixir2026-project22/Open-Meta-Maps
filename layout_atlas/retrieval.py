@@ -18,6 +18,40 @@ def layout_priority(m):
 
 FEATURES=['size','biochemical_level','port_mismatch','port_direction_cost','aspect','compactness','axis_fraction','source_support','initial_fit','external_degree_x_aspect','port_fraction_x_spread']
 
+# Large curated modules may still match when a few source reactions are absent from the
+# model: drop the missing reactions and keep the remaining frame.  Small windows stay exact.
+PARTIAL_MISS_MIN_SIZE = 8
+PARTIAL_MISS_MAX = 5
+
+
+def max_missing_reactions(size):
+    """How many source reactions a curated module of ``size`` may lack in the model."""
+    size = int(size or 0)
+    if size < PARTIAL_MISS_MIN_SIZE:
+        return 0
+    return min(PARTIAL_MISS_MAX, max(1, size // 8))
+
+
+def clip_atlas_module(module, keep_ids):
+    """Subset an Atlas module to reactions whose BiGG/id is in ``keep_ids``."""
+    keep_ids = set(keep_ids)
+    reactions = [r for r in module['reactions'] if r.get('id') in keep_ids]
+    rkeys = {r['key'] for r in reactions}
+    keep_nodes = set(rkeys)
+    for e in module.get('edges') or []:
+        if e.get('a') in rkeys or e.get('b') in rkeys:
+            keep_nodes.add(e['a'])
+            keep_nodes.add(e['b'])
+    nodes = [n for n in module.get('nodes') or [] if n.get('key') in keep_nodes]
+    edges = [e for e in module.get('edges') or [] if e.get('a') in keep_nodes and e.get('b') in keep_nodes]
+    dropped = sorted({r.get('id') for r in module['reactions'] if r.get('id') not in keep_ids})
+    out = dict(module)
+    out.update(reactions=reactions, nodes=nodes, edges=edges, size=len(reactions),
+               partial_source_size=int(module.get('size') or len(module.get('reactions') or [])),
+               missing_source_reactions=dropped)
+    return out
+
+
 @lru_cache(maxsize=1)
 def public_metabolite_links():
  """BiGG metabolite id -> ChEBI ids, from `data/identifier_bridge.json` (explicit annotations of the public BiGG / Human-GEM models, with their origin)."""
@@ -124,6 +158,7 @@ class Library:
   proposals=[];seen=set();info=target_info(model) if model else None;rlookup={r['id']:r for r in model['reactions']} if model else {};window_count=0;queried_reactions=set()
   # Exact topology gives the common search space; biochemical evidence ranks, not excludes, variants.
   query_list=list(windows(g,max_roots=max_roots,sizes=query_sizes));seen_windows={tuple(rs) for rs,_ in query_list}
+  forced_partial={}  # query reaction-tuple -> clipped Atlas module (robust large-block match)
   if info:
    reverse=defaultdict(set)
    for rid,refs in info[2].items():
@@ -132,18 +167,26 @@ class Library:
    added=0
    for m in sorted(self.modules.values(),key=lambda m:(-m['size'],m['id'])):
     if m['size']<2 or not m['reactions'] or not self.eligible(m,exclude_lineages,exclude_species,exclude_geometry):continue
-    ids=[];valid=True
+    ids=[];missing=0;ambiguous=False
     for sr in m['reactions']:
      choices=set()
      for ns,vs in sr.get('references',{}).items():
       for v in vs:choices.update(reverse[ns,str(v)])
-     if len(choices)!=1:valid=False;break
+     if len(choices)==0:
+      missing+=1;continue
+     if len(choices)!=1:ambiguous=True;break
      ids.append('r:'+next(iter(choices)))
+    if ambiguous:continue
+    allow=max_missing_reactions(m['size'])
+    if missing>allow or len(ids)<2:continue
     rs=tuple(sorted(ids))
-    if not valid or len(set(rs))!=len(rs) or rs in seen_windows:continue
+    if len(set(rs))!=len(rs) or rs in seen_windows:continue
     keys=set(rs)
     for rk in rs:keys.update(g[rk])
     query_list.append((rs,g.subgraph(keys).copy()));seen_windows.add(rs);added+=1
+    if missing>0:
+     clipped=clip_atlas_module(m,[x[2:] for x in ids])
+     forced_partial[rs]=clipped
     if added>=600:break
   for rs,tg in query_list:
    window_count+=1;queried_reactions.update(r[2:] for r in rs);sig=self.signature(tg);generic=nx.spring_layout(tg,seed=SEEDS[0],iterations=35,scale=1);targetports={k:len(set(g[k])-set(rs)) for k in tg if g.nodes[k]['role']=='metabolite'};pool=[]
@@ -158,6 +201,9 @@ class Library:
      if len(m['reactions'])!=len(rs):continue
      if all(any(set(vs)&set(target_refs[rk[2:]].get('rhea_master' if ns=='rhea' else ns,[])) for rk in rs for ns,vs in sr.get('references',{}).items()) for sr in m['reactions']):biological_templates.append(m)
     biological_templates=biological_templates[:24]
+   forced=forced_partial.get(rs)
+   if forced is not None and forced['id'] not in {b['id'] for b in biological_templates}:
+    biological_templates=[forced]+biological_templates
    if partial_fallback:source_templates=sorted([m for m in self.partial2 if len(m['nodes'])<=len(tg)],key=lambda m:(-len(m['nodes']),m['id']))[:18]
    source_templates=biological_templates+[m for m in source_templates if m['id'] not in {b['id'] for b in biological_templates}]
    for m in source_templates:
@@ -212,10 +258,12 @@ class Library:
        if source[sk]['role']=='metabolite' and isinstance(source[sk].get('entity'),str):
         if tk[2:] not in binding_candidates(source[sk]['entity'],[tk[2:]],mrefs):core_agrees=False
       biol=3 if ok_refs and core_agrees else 2 if ok_equations and core_agrees else 1 if any_ref and core_agrees else 0
-     ports=sum(bool(n) for n in targetports.values());srcports=sum(p.get('key') in {n['key'] for n in m['nodes']} for p in m['ports']);xy=np.array(list(positions.values()));extent=np.ptp(xy,axis=0);area=max(float(np.prod(extent)),.05);edgevec=[np.array(positions[a])-positions[b] for a,b in tg.edges() if a in positions and b in positions];axis=np.mean([min(abs(v[0]),abs(v[1]))/max(np.linalg.norm(v),1e-8)<.1 for v in edgevec]);initial=float(np.sqrt(np.mean([np.sum((positions[k]-generic[k])**2) for k in positions])))
+     if not positions:continue
+     ports=sum(bool(n) for n in targetports.values());srcports=sum(p.get('key') in {n['key'] for n in m['nodes']} for p in m['ports']);xy=np.array(list(positions.values()));extent=np.ptp(xy,axis=0);area=max(float(np.prod(extent)),.05);edgevec=[np.array(positions[a])-positions[b] for a,b in tg.edges() if a in positions and b in positions];axis=(np.mean([min(abs(v[0]),abs(v[1]))/max(np.linalg.norm(v),1e-8)<.1 for v in edgevec]) if edgevec else 0.0);initial=float(np.sqrt(np.mean([np.sum((positions[k]-generic[k])**2) for k in positions])))
      # Edge-role disagreement is geometric context, not a claim of biochemical equivalence.
      flow_cost=0;count=0
      for e in m['edges']:
+      if e.get('a') not in mp or e.get('b') not in mp:continue
       a,b=mp[e['a']],mp[e['b']]
       if e.get('flow') in ('substrate','product') and tg.edges[a,b].get('role'):
        flow_cost+=e['flow']!=tg.edges[a,b]['role'];count+=1

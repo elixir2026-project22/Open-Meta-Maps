@@ -313,7 +313,13 @@ def scene_longest_links(model, scene, cur, expert, top=10):
                 p90=round(float(np.percentile([r['length_px'] for r in rows], 90)), 1) if rows else 0.0)
 
 
-def place(model, scene, blocks, cur, skip=(), boundary_aware=False, prefer_ew=None):
+def place(model, scene, blocks, cur, skip=(), boundary_aware=False, prefer_ew=None, min_anchors=1):
+    """Place free reactions beside drawn metabolite anchors.
+
+    ``min_anchors``: require at least this many usable anchors (default 1 = T2 allowed).
+    With a previous layout, pass 2 so a new reaction is embedded only between already-drawn
+    participants; otherwise it stays a separate component (T3).
+    """
     """-> (new scene, report).
 
     ``boundary_aware``: place against final curated AABB face normals (after pack), not
@@ -423,7 +429,7 @@ def place(model, scene, blocks, cur, skip=(), boundary_aware=False, prefer_ew=No
                 for m, p in propagated:
                     anchors.append((m, np.array(p, float), _weight(degree[m]) * .6, None))
                     break
-            if not anchors:
+            if not anchors or len(anchors) < max(1, int(min_anchors)):
                 continue
             w = np.array([a[2] for a in anchors])
             target = (np.array([a[1] for a in anchors]) * w[:, None]).sum(0) / w.sum()

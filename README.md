@@ -40,6 +40,12 @@ Open <http://127.0.0.1:8765/tool/index.html>. Upload an SBML or COBRA JSON model
 python3 project.py compose --gem examples/e_coli_core.xml --out results/e_coli_core/ --source-paths
 ```
 
+Rebuild after a small model edit while keeping the previous layout: pass `--previous` with the prior `map.json`. Matched reaction midmarkers and primary metabolites are pinned; when at least 80% of reactions are already placed, module packing is skipped and only new nodes are completed around those anchors.
+
+```sh
+python3 project.py compose --gem examples/e_coli_core_edited.xml --out results/e_coli_core_edited/ --source-paths --previous results/e_coli_core/map.json
+```
+
 Layout evaluation: `pip install -r layout_atlas/requirements-eval.txt`, then `python3 project.py evaluate --gem MODEL.xml --map DIR/map.json`. See [docs/layout_evaluation.md](docs/layout_evaluation.md).
 
 ---
@@ -136,7 +142,7 @@ Matched geometry is kept as drawn (translated only). Everything else is placed b
 | Respect compartments | Not yet | Used in packing/shelves; cross-compartment species metric still high |
 | Aspect / compactness | Partial | Shelf aspect target; independent components still linear shelves |
 | Reproducibility | Partial | Fixed seeds; no compose seed CLI |
-| Build on previous layout | Not yet | Displacement measured by evaluate `--compare-map` only |
+| Build on previous layout | Partial | `--previous map.json` pins matched nodes; robust curated matching tolerates a few missing reactions |
 | Scale to GEMs | Partial | Global ≤3 000 + tiled views; large maps start routing-degraded |
 
 ### Evaluation
@@ -152,7 +158,7 @@ Compose writes `layout_quality.evaluate` into `layout_issues.json` / `report.jso
 | Curated-structure continuity | Matching / rigid skeleton |
 | Exchange on periphery; aspect; blank space | Composition & packing |
 | Axis-aligned segments / axes; grid metabolites; chain turns; cycle placement; compartment packing | **Not yet optimised** |
-| Build-on-previous / Procrustes displacement | **Not yet optimised** (`evaluate --compare-map`) |
+| Build-on-previous / Procrustes displacement | `--previous` pinning + robust curated matching; measure with `evaluate --compare-map` |
 
 Layout targets (including backlog) stay on Detailed metrics; non-targets under Debug (including main flow-direction share).
 

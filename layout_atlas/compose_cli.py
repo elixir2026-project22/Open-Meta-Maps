@@ -16,12 +16,17 @@ import tool_server
 RESULT_FILES = ['job.json', 'map.json', 'map.svg', 'report.json', 'skeleton.json', 'skeleton.svg', 'modules.json', 'licenses.json', 'selected.json.gz', 'views.json']
 
 
-def run(gem, out, ec=False, no_library=False, library='windows', reaction_style='line', completion='spaced', source_paths=False, layout='global', orientation='full', block_layout='auto', instances='auto', context='auto', edge_routing='libavoid', completion_context='auto', layout_style='curated'):
+def run(gem, out, ec=False, no_library=False, library='windows', reaction_style='line', completion='spaced', source_paths=False, layout='global', orientation='full', block_layout='auto', instances='auto', context='auto', edge_routing='libavoid', completion_context='auto', layout_style='curated', previous=None):
     gem, out = Path(gem).resolve(), Path(out).resolve()  # the pipeline runs in layout_atlas/, so paths must be absolute
     if not gem.is_file():
         raise SystemExit(f'GEM file not found: {gem}')
     if gem.suffix.lower() not in ('.xml', '.sbml', '.json'):
         raise SystemExit('The GEM must be an SBML .xml/.sbml or a COBRA/BiGG .json file.')
+    previous_path = None
+    if previous:
+        previous_path = Path(previous).resolve()
+        if not previous_path.is_file():
+            raise SystemExit(f'Previous map not found: {previous_path}')
     problems = tool_server.check_environment()
     if problems:
         raise SystemExit('The tool cannot run:\n  - ' + '\n  - '.join(problems))
@@ -33,7 +38,10 @@ def run(gem, out, ec=False, no_library=False, library='windows', reaction_style=
     (out / 'upload').mkdir()
     shutil.copy(gem, out / 'upload' / ('model' + gem.suffix.lower()))
     libraries = dict(core=not no_library, ec=bool(ec))
-    dump(out / 'options.json', dict(libraries=libraries, library=library, reaction_style=reaction_style, completion=completion, source_paths=bool(source_paths), layout=layout, orientation=orientation, block_layout=block_layout, instances=instances, context=context, edge_routing=edge_routing, completion_context=completion_context, layout_style=layout_style))
+    options = dict(libraries=libraries, library=library, reaction_style=reaction_style, completion=completion, source_paths=bool(source_paths), layout=layout, orientation=orientation, block_layout=block_layout, instances=instances, context=context, edge_routing=edge_routing, completion_context=completion_context, layout_style=layout_style)
+    if previous_path is not None:
+        options['previous'] = str(previous_path)
+    dump(out / 'options.json', options)
     import tool_pipeline as tp
     tp.Job(out).save()
     proc = subprocess.Popen([sys.executable, str(BASE / 'tool_pipeline.py'), str(out)], cwd=str(BASE), env=tool_server.tool_environment(),
