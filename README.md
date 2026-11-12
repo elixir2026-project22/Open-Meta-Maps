@@ -40,15 +40,15 @@ Open <http://127.0.0.1:8765/tool/index.html>. Upload an SBML or COBRA JSON model
 python3 project.py compose --gem examples/e_coli_core.xml --out results/e_coli_core/ --source-paths
 ```
 
-Outputs include `map.json` (Escher), `map.sbgn` (SBGN-ML Process Description), `map.sbml` (input SBML with Layout package), and `map.celldesigner.xml` (CellDesigner 4.x annotations). The Map Generator download row offers the same formats next to SVG/PNG.
+Outputs use `OpenMetaMaps_<name>_result.<ext>`, where `<name>` is the model file stem (sanitised). Formats: `.json` (Escher), `.sbgn` (SBGN-ML Process Description), `.sbml` (input SBML with Layout package), `.celldesigner.xml` (CellDesigner 4.x annotations), plus `.svg` / `.png`. The Map Generator download row offers the same formats.
 
-Rebuild after a small model edit while keeping the previous layout: pass `--previous` with the prior `map.json`. Matched reaction midmarkers and primary metabolites are pinned by stable id; when at least 80% of reactions are already placed, module packing is skipped and the previous Escher geometry is reused. New reactions are grafted on the chord between drawn substrate/product participants (opposite sides); leftovers without anchors are still parked so coverage stays complete. A local nudge of grafted midmarkers is kept when crossings do not worsen.
+Rebuild after a small model edit while keeping the previous layout: pass `--previous` with the prior result JSON. Matched reaction midmarkers and primary metabolites are pinned by stable id; when at least 80% of reactions are already placed, module packing is skipped and the previous Escher geometry is reused. New reactions are grafted on the chord between drawn substrate/product participants (opposite sides); leftovers without anchors are still parked so coverage stays complete. A local nudge of grafted midmarkers is kept when crossings do not worsen.
 
 ```sh
-python3 project.py compose --gem examples/e_coli_core_edited.xml --out results/e_coli_core_edited/ --source-paths --previous results/e_coli_core/map.json
+python3 project.py compose --gem examples/e_coli_core_edited.xml --out results/e_coli_core_edited/ --source-paths --previous results/e_coli_core/OpenMetaMaps_e_coli_core_result.json
 ```
 
-Layout evaluation: `pip install -r layout_atlas/requirements-eval.txt`, then `python3 project.py evaluate --gem MODEL.xml --map DIR/map.json`. See [docs/layout_evaluation.md](docs/layout_evaluation.md).
+Layout evaluation: `pip install -r layout_atlas/requirements-eval.txt`, then `python3 project.py evaluate --gem MODEL.xml --map DIR/OpenMetaMaps_<stem>_result.json`. See [docs/layout_evaluation.md](docs/layout_evaluation.md).
 
 ## 1. Data construction — the curated-structure Atlas
 
@@ -138,7 +138,7 @@ Matched geometry is kept as drawn (translated only). Everything else is placed b
 
 **Determinism:** fixed layout seed `20261105` (`core.SEEDS`), ELK/fCoSE seeds, `PYTHONHASHSEED=0` on re-exec. Displacement measured by `evaluate --compare-map` only.
 
-`--previous map.json` pins matched nodes and grafts leftovers.
+`--previous OpenMetaMaps_<stem>_result.json` pins matched nodes and grafts leftovers.
 
 **Known gaps** ([docs/limitations.md](docs/limitations.md)): 2D component packing, harder orientation (incl. transporters), compartment-aware packing, stronger currency/biomass handling, crossing-aware composition acceptance, compose seed flag. Experimental off by default: `OPM_REGIONS`, `OPM_LOWCONF`, whole-block `OPM_BLOCK_RELOC`.
 
@@ -156,14 +156,14 @@ Maps composed from the bundled example models. Every reaction and metabolite is 
 <em>Helicobacter pylori</em> iIT341 (554 reactions)
 </p>
 
-*Previews are cropped to content and draw every reaction and metabolite label of map.svg. Zoom in to read the labels. Regenerate: `PYTHONPATH=layout_atlas python3 tools/render_map_preview.py DIR/map.json docs/images/examples/NAME.png`.*
+*Previews are cropped to content and draw every reaction and metabolite label of the result SVG. Zoom in to read the labels. Regenerate: `PYTHONPATH=layout_atlas python3 tools/render_map_preview.py DIR/OpenMetaMaps_NAME_result.json docs/images/examples/NAME.png`.*
 
 **Download.** Result files of both maps are in [`example_results/`](example_results/) (file list: [example_results/README.md](example_results/README.md)).
 
-| Model | Escher JSON | SVG | PNG | Licences | Reaction provenance | Report |
-|---|---|---|---|---|---|---|
-| <code>e_coli_core</code> | [map.json](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/e_coli_core/map.json) | [map.svg](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/e_coli_core/map.svg) | [map.png](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/e_coli_core/map.png) | [licenses.json](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/e_coli_core/licenses.json) | [reaction_provenance.json](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/e_coli_core/reaction_provenance.json) | [report.json](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/e_coli_core/report.json) |
-| <code>iIT341</code> | [map.json](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/iIT341/map.json) | [map.svg](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/iIT341/map.svg) | [map.png](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/iIT341/map.png) | [licenses.json](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/iIT341/licenses.json) | [reaction_provenance.json](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/iIT341/reaction_provenance.json) | [report.json](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/iIT341/report.json) |
+| Model | Escher JSON | SVG | PNG | SBGN-ML | SBML Layout | CellDesigner | Licences | Provenance | Report |
+|---|---|---|---|---|---|---|---|---|---|
+| <code>e_coli_core</code> | [OpenMetaMaps_e_coli_core_result.json](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/e_coli_core/OpenMetaMaps_e_coli_core_result.json) | […_result.svg](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/e_coli_core/OpenMetaMaps_e_coli_core_result.svg) | […_result.png](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/e_coli_core/OpenMetaMaps_e_coli_core_result.png) | […_result.sbgn](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/e_coli_core/OpenMetaMaps_e_coli_core_result.sbgn) | […_result.sbml](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/e_coli_core/OpenMetaMaps_e_coli_core_result.sbml) | […_result.celldesigner.xml](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/e_coli_core/OpenMetaMaps_e_coli_core_result.celldesigner.xml) | [licenses.json](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/e_coli_core/licenses.json) | [reaction_provenance.json](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/e_coli_core/reaction_provenance.json) | [report.json](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/e_coli_core/report.json) |
+| <code>iIT341</code> | [OpenMetaMaps_iIT341_result.json](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/iIT341/OpenMetaMaps_iIT341_result.json) | […_result.svg](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/iIT341/OpenMetaMaps_iIT341_result.svg) | […_result.png](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/iIT341/OpenMetaMaps_iIT341_result.png) | […_result.sbgn](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/iIT341/OpenMetaMaps_iIT341_result.sbgn) | […_result.sbml](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/iIT341/OpenMetaMaps_iIT341_result.sbml) | […_result.celldesigner.xml](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/iIT341/OpenMetaMaps_iIT341_result.celldesigner.xml) | [licenses.json](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/iIT341/licenses.json) | [reaction_provenance.json](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/iIT341/reaction_provenance.json) | [report.json](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/iIT341/report.json) |
 
 ---
 
@@ -200,20 +200,23 @@ Layout targets (including backlog) stay on Detailed metrics; non-targets under D
 | Chain turns | Not yet | |
 | Cycle placement | Not yet | |
 | Reproducibility | Partial | Fixed seeds; no compose seed CLI |
-| Build on previous layout | Partial | `--previous map.json` reuses matched geometry and grafts leftovers |
+| Build on previous layout | Partial | `--previous OpenMetaMaps_<stem>_result.json` reuses matched geometry and grafts leftovers |
 | Scale to GEMs | Partial | Global ≤3 000 + tiled views; large maps start routing-degraded |
 
 ---
 
 ## Outputs
 
+Final map downloads are named `OpenMetaMaps_<name>_result.<ext>`, where `<name>` is the uploaded (or CLI) model file stem, sanitised to letters, digits, `-`, `_` and `.`.
+
 | Output | Description |
 |---|---|
-| `map.json` | Editable Escher map |
-| `map.sbgn` | SBGN-ML 0.3 Process Description (species, process glyphs with ports, arcs, compartments, clone markers) |
-| `map.sbml` | Input SBML with Layout package v1 (and Render when available); model ids and stoichiometry unchanged |
-| `map.celldesigner.xml` | CellDesigner 4.x SBML (`speciesAlias` bounds, base reactants/products, edit points) |
-| `map.svg` | Vector visualisation |
+| `OpenMetaMaps_<name>_result.json` | Editable Escher map |
+| `OpenMetaMaps_<name>_result.sbgn` | SBGN-ML 0.3 Process Description (species, process glyphs with ports, arcs, compartments, clone markers) |
+| `OpenMetaMaps_<name>_result.sbml` | Input SBML with Layout package v1 (and Render when available); model ids and stoichiometry unchanged |
+| `OpenMetaMaps_<name>_result.celldesigner.xml` | CellDesigner 4.x SBML (`speciesAlias` bounds, base reactants/products, edit points) |
+| `OpenMetaMaps_<name>_result.svg` | Vector visualisation |
+| `OpenMetaMaps_<name>_result.png` | Raster preview (Map Generator download) |
 | `report.json` | Coverage and layout-quality measures |
 | `reaction_provenance.json` | Per-reaction provenance and matching evidence |
 | `layout_issues.json` | Crossings, collisions and other layout problems |
