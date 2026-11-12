@@ -437,19 +437,30 @@ def compose(model, scene, blocks, cur):
             break
         prev_ids = ids
         moved_px = 0.0
+        accepted = 0
+        prefer = main_pts.mean(0)
         for i, bw, bh, clo in outliers:
             if i not in placed:
                 continue
             origin = placed[i]
+            old_c = clo + 0.5 * np.array([bw, bh], float)
+            new_c = np.array([origin[0] + 0.5 * bw, origin[1] + 0.5 * bh], float)
+            # Only pull inward (or sideways without fleeing the main mass).
+            if float(np.hypot(*(new_c - prefer))) > float(np.hypot(*(old_c - prefer))) + 80.0:
+                continue
             delta = np.array([origin[0], origin[1]], float) - clo
-            moved_px += float(np.hypot(*delta))
+            dlen = float(np.hypot(*delta))
+            if dlen < 1.0:
+                continue
+            moved_px += dlen
             move(i, delta)
+            accepted += 1
             report['arranged_independent'] += 1
-        iter_reps.append(dict(placed=len(placed), missed=len(boxes) - len(placed),
+        iter_reps.append(dict(placed=accepted, missed=len(boxes) - accepted,
                               moved_px=round(moved_px, 1),
                               **{k: v for k, v in prep.items()
                                  if k not in ('placed', 'missed')}))
-        if moved_px < 1.0:
+        if moved_px < 1.0 or accepted == 0:
             break
     if iter_reps:
         report['interior_repack'] = iter_reps
@@ -575,13 +586,20 @@ def _find_pocket_origin(occ, size_w, size_h, prefer_c, content_lo=None, content_
                         + 0.05 * (max(0.0, content_lo[1] - y0) + max(0.0, (y0 + size_h) - content_hi[1])))
                 else:
                     aspect_pen = abs(math.log(max(nasp, 1e-9) / TARGET_ASPECT)) * 1e3
-            # Prefer the largest free neighbourhood (big empty rects inside main AABB).
-            ring = 2
-            iy0 = max(0, iy - ring); iy1 = min(occ['ny'], iy + nh + ring)
-            ix0 = max(0, ix - ring); ix1 = min(occ['nx'], ix + nw + ring)
-            neigh = integ[iy1, ix1] - integ[iy0, ix1] - integ[iy1, ix0] + integ[iy0, ix0]
-            void_pen = -float(neigh)  # more empty neighbours → lower score
-            score = (aspect_pen, expand_pen, void_pen, dist, iy, ix)
+            # Prefer slots tucked against occupied cells (true cracks beside the
+            # main mass). Vast empty fringe voids park floaters farther out.
+            ring = 1
+            iy0b = max(0, iy - ring); iy1b = min(occ['ny'], iy + nh + ring)
+            ix0b = max(0, ix - ring); ix1b = min(occ['nx'], ix + nw + ring)
+            area_cells = (iy1b - iy0b) * (ix1b - ix0b)
+            empty_border = (integ[iy1b, ix1b] - integ[iy0b, ix1b]
+                            - integ[iy1b, ix0b] + integ[iy0b, ix0b])
+            border_empty = max(0, int(empty_border) - int(total))
+            border_cells = max(1, area_cells - nw * nh)
+            occupied_contact = border_cells - border_empty
+            tuck_pen = -float(occupied_contact)
+            # Dist to main centre beats raw void size so TR floaters pull inward.
+            score = (aspect_pen, expand_pen, tuck_pen, dist, iy, ix)
             if best is None or score < best[0]:
                 best = (score, x0, y0)
     if best is None:

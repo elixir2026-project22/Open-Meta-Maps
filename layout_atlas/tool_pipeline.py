@@ -847,8 +847,12 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         import composition as _comp_fit
         spacing_now = composition_module.reaction_spacing_escher(data)
         corridor = _comp_fit.compact_empty_corridors_escher(data, spacing=spacing_now)
-        if corridor.get('shortened'):
-            arm2 = composition_module.compact_long_arms_escher(data, currency(model))
+        # Arms follow-up only for heads left long by the corridor slide — a full
+        # ARM_MAX sweep retargets many private spokes and costs axis share.
+        if corridor.get('shortened') and corridor.get('moved_nodes'):
+            arm2 = composition_module.compact_long_arms_escher(
+                data, currency(model), max_arm=max(280.0, 1.6 * float(spacing_now or 150.0)),
+                target=min(180.0, float(corridor.get('max_gap') or 180.0)))
             corridor['arms_followup'] = {
                 k: arm2.get(k) for k in ('shortened', 'pulled_midmarkers')}
         metric['empty_corridor_escher'] = corridor
