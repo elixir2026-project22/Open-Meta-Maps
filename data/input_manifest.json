@@ -1,6 +1,6 @@
 {
   "version": "0.3-source-inputs",
-  "generated": "2026-11-11",
+  "generated": "2026-11-12",
   "files": {
     "archives/wp-Acetobacterium_woodii.zip": "9cf8a213ab92c2168e8c6b56f86b2a96474b7ff2cbfb746ee86d43d593d71374",
     "archives/wp-Acetobacterium_woodii.zip.provenance.json": "6155fc682a67b865769a6b14b56ad3dbe8db02e050f71c09dfad34d12d325723",
@@ -89,8 +89,8 @@
     "crosswalks/Human-GEM-reactions.SOURCE.json": "e567f55153a1cbd46a5dd5c7fee36f5846e1e47d573b7301df142ab67d5177f7",
     "crosswalks/Human-GEM-reactions.tsv": "fc24110e552538a88a0c40fbdcae4be4adc00485824b0d6c8773a08a3420405e",
     "crosswalks/human_gem_reaction_crosswalk.json": "942c62c5f933e7f538ded6ca047c63e55fd3ae48090b342e2562cf110e6caa03",
-    "map_observations.json.gz": "595dad5ec004512d94c9a81b6566f74d9fa5d7d73a0887ce9e6c90d198ccf44f",
-    "module_observations.json.gz": "85b051a859ef86750d016f788baa71d739b47ddb8ef58adba4a2633a1be8e45c",
+    "map_observations.json.gz": "a976ea388696143d86e5603554c79b9b2e9f32ae44b31eb16b230e051087c6f4",
+    "module_observations.json.gz": "b8aa1c0236203aeee57dc0ec6b102a43d99c6912ded4e12d786b13daf3fba12f",
     "origin.json": "5e5ae764406b78705f58867e2e4a0868dde534ea47677a537416a26ed4d9fa04",
     "raw/escher/RECON1/RECON1.Amino acid metabolism (partial).json": "e7e6cd3b2ea8acf064f721eb4c6c6b080f268c6f475558c379762a63e22dab11",
     "raw/escher/RECON1/RECON1.CARBOHYDRATE_METABOLISM.json": "240e70ca3f1e41ff4713092fc2b5b50bb5b23e618bd0aa1efeb9c4349a9d4d44",
@@ -2376,11 +2376,11 @@
     "raw/wp/Zea_mays/Zm_Carotenoid_biosynthesis_WP2205_20210521.gpml": "da35252bef07b45c927490f9ef1c18c4b805d21045ef356488f7b743b88e8ad0",
     "raw/wp/Zea_mays/Zm_Lycopene_biosynthesis_WP2204_20190917.gpml": "2f02f7601f281f9f44e2b602f9111ca8f483b190baddebb2d540de4ed87a3042",
     "raw/wp/Zea_mays/Zm_Vitamin_B9_(folate)_biosynthesis_pathway_WP2353_20250612.gpml": "d6ab3ea1ed102ed246f6cfa6ed5e877834dc4a40f0586c19d4328ee2c9bcbb70",
-    "source_registry.json": "b6dc13d93459bfeba4fca0c762ad0903fe1efee886b6d2e650e6cc6a537e8bba",
+    "source_registry.json": "bdcdaf08edd913464ab063719248ad6f868f8e50dd4b56f4b36360d06d6ffade",
     "terms/reactome.html": "799de2b67c7ce220d349f57df4ae878e66266bdbe14cc0dedba4133e7d5858df",
     "terms/reactome.html.provenance.json": "cf8755c836ed244553a330b41d2db4a6eec72ccac064b923953b3fbdedb1485a",
     "terms/wikipathways.html": "92b9b4359adf755ae4520167b3b108dcaf99b1961f819dad868c1633b11ed95a",
     "terms/wikipathways.html.provenance.json": "dd8004ce1b2c25e696f081aa4fd542627fa26a5babaae00e9241ba1e1c43e4a5",
-    "wikipathways_refresh.json": "35eaf2e6a4bf68e90051d4a0fa4fe136661c956e666040b447d013c15d3f22cd"
+    "wikipathways_refresh.json": "5c3ef82e525c598dcc876733c6ab3aa676783f47d1498c0ad0c4ed1398747ce1"
   }
 }

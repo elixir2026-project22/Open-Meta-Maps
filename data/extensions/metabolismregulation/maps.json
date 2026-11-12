@@ -22,10 +22,36 @@
     "language": "process description",
     "events": 9,
     "glyphs": 18,
-    "modules": 17,
+    "modules": 10,
     "audit": {
       "arc_unhandled:logic arc": 2,
       "decoded_process": 9
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 9,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 17,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 9,
+        "modules": 10,
+        "reactions_covered": 9,
+        "coverage": 1.0,
+        "independent_modules": 10
+      }
     }
   },
   {
@@ -51,9 +77,35 @@
     "language": "process description",
     "events": 9,
     "glyphs": 17,
-    "modules": 17,
+    "modules": 10,
     "audit": {
       "decoded_process": 9
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 9,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 17,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 9,
+        "modules": 10,
+        "reactions_covered": 9,
+        "coverage": 1.0,
+        "independent_modules": 10
+      }
     }
   },
   {
@@ -79,9 +131,35 @@
     "language": "process description",
     "events": 6,
     "glyphs": 12,
-    "modules": 7,
+    "modules": 5,
     "audit": {
       "decoded_process": 6
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 6,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 7,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 6,
+        "modules": 5,
+        "reactions_covered": 6,
+        "coverage": 1.0,
+        "independent_modules": 5
+      }
     }
   },
   {
@@ -107,10 +185,36 @@
     "language": "process description",
     "events": 13,
     "glyphs": 29,
-    "modules": 20,
+    "modules": 8,
     "audit": {
       "arc_unhandled:logic arc": 4,
       "decoded_process": 13
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 13,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 20,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 13,
+        "modules": 8,
+        "reactions_covered": 13,
+        "coverage": 1.0,
+        "independent_modules": 8
+      }
     }
   },
   {
@@ -136,9 +240,35 @@
     "language": "process description",
     "events": 26,
     "glyphs": 60,
-    "modules": 46,
+    "modules": 24,
     "audit": {
       "decoded_process": 26
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 26,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 46,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 26,
+        "modules": 24,
+        "reactions_covered": 26,
+        "coverage": 1.0,
+        "independent_modules": 24
+      }
     }
   },
   {
@@ -164,9 +294,35 @@
     "language": "process description",
     "events": 26,
     "glyphs": 60,
-    "modules": 46,
+    "modules": 24,
     "audit": {
       "decoded_process": 26
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 26,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 46,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 26,
+        "modules": 24,
+        "reactions_covered": 26,
+        "coverage": 1.0,
+        "independent_modules": 24
+      }
     }
   },
   {
@@ -192,10 +348,36 @@
     "language": "process description",
     "events": 7,
     "glyphs": 18,
-    "modules": 17,
+    "modules": 11,
     "audit": {
       "modifier_without_process": 2,
       "decoded_process": 7
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 7,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 17,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 7,
+        "modules": 11,
+        "reactions_covered": 7,
+        "coverage": 1.0,
+        "independent_modules": 11
+      }
     }
   },
   {
@@ -221,12 +403,38 @@
     "language": "process description",
     "events": 7,
     "glyphs": 18,
-    "modules": 8,
+    "modules": 6,
     "audit": {
       "modifier_without_process": 1,
       "substrate_not_entity_glyph": 2,
       "decoded_process_partial": 2,
       "decoded_process": 5
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 7,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 8,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 7,
+        "modules": 6,
+        "reactions_covered": 7,
+        "coverage": 1.0,
+        "independent_modules": 6
+      }
     }
   },
   {
@@ -252,13 +460,39 @@
     "language": "process description",
     "events": 20,
     "glyphs": 30,
-    "modules": 36,
+    "modules": 16,
     "audit": {
       "arc_unhandled:logic arc": 4,
       "substrate_not_entity_glyph": 4,
       "decoded_process_partial": 6,
       "decoded_process": 14,
       "product_not_entity_glyph": 2
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 20,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 36,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 20,
+        "modules": 16,
+        "reactions_covered": 20,
+        "coverage": 1.0,
+        "independent_modules": 16
+      }
     }
   },
   {
@@ -284,9 +518,35 @@
     "language": "process description",
     "events": 17,
     "glyphs": 48,
-    "modules": 46,
+    "modules": 23,
     "audit": {
       "decoded_process": 17
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 17,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 46,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 17,
+        "modules": 23,
+        "reactions_covered": 17,
+        "coverage": 1.0,
+        "independent_modules": 23
+      }
     }
   },
   {
@@ -312,10 +572,36 @@
     "language": "process description",
     "events": 11,
     "glyphs": 22,
-    "modules": 20,
+    "modules": 11,
     "audit": {
       "arc_unhandled:logic arc": 4,
       "decoded_process": 11
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 11,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 20,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 11,
+        "modules": 11,
+        "reactions_covered": 11,
+        "coverage": 1.0,
+        "independent_modules": 11
+      }
     }
   },
   {
@@ -341,9 +627,35 @@
     "language": "process description",
     "events": 9,
     "glyphs": 17,
-    "modules": 15,
+    "modules": 9,
     "audit": {
       "decoded_process": 9
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 9,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 15,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 9,
+        "modules": 9,
+        "reactions_covered": 9,
+        "coverage": 1.0,
+        "independent_modules": 9
+      }
     }
   },
   {
@@ -369,9 +681,35 @@
     "language": "process description",
     "events": 12,
     "glyphs": 26,
-    "modules": 18,
+    "modules": 9,
     "audit": {
       "decoded_process": 12
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 12,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 18,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 12,
+        "modules": 9,
+        "reactions_covered": 12,
+        "coverage": 1.0,
+        "independent_modules": 9
+      }
     }
   },
   {
@@ -397,9 +735,35 @@
     "language": "process description",
     "events": 7,
     "glyphs": 16,
-    "modules": 10,
+    "modules": 5,
     "audit": {
       "decoded_process": 7
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 7,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 10,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 7,
+        "modules": 5,
+        "reactions_covered": 7,
+        "coverage": 1.0,
+        "independent_modules": 5
+      }
     }
   },
   {
@@ -425,11 +789,37 @@
     "language": "process description",
     "events": 15,
     "glyphs": 31,
-    "modules": 24,
+    "modules": 12,
     "audit": {
       "decoded_process": 13,
       "substrate_not_entity_glyph": 2,
       "decoded_process_partial": 2
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 15,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 24,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 15,
+        "modules": 12,
+        "reactions_covered": 15,
+        "coverage": 1.0,
+        "independent_modules": 12
+      }
     }
   },
   {
@@ -460,6 +850,32 @@
       "decoded_process": 2,
       "substrate_not_entity_glyph": 2,
       "decoded_process_partial": 2
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 4,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 4,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 4,
+        "modules": 4,
+        "reactions_covered": 4,
+        "coverage": 1.0,
+        "independent_modules": 4
+      }
     }
   },
   {
@@ -488,6 +904,32 @@
     "modules": 2,
     "audit": {
       "decoded_process": 2
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 2,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 2,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 2,
+        "modules": 2,
+        "reactions_covered": 2,
+        "coverage": 1.0,
+        "independent_modules": 2
+      }
     }
   },
   {
@@ -513,9 +955,35 @@
     "language": "process description",
     "events": 11,
     "glyphs": 35,
-    "modules": 28,
+    "modules": 18,
     "audit": {
       "decoded_process": 11
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 11,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 28,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 11,
+        "modules": 18,
+        "reactions_covered": 11,
+        "coverage": 1.0,
+        "independent_modules": 18
+      }
     }
   },
   {
@@ -541,9 +1009,35 @@
     "language": "process description",
     "events": 11,
     "glyphs": 36,
-    "modules": 18,
+    "modules": 7,
     "audit": {
       "decoded_process": 11
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 11,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 18,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 11,
+        "modules": 7,
+        "reactions_covered": 11,
+        "coverage": 1.0,
+        "independent_modules": 7
+      }
     }
   },
   {
@@ -569,9 +1063,35 @@
     "language": "process description",
     "events": 3,
     "glyphs": 14,
-    "modules": 4,
+    "modules": 2,
     "audit": {
       "decoded_process": 3
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 3,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 4,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 3,
+        "modules": 2,
+        "reactions_covered": 3,
+        "coverage": 1.0,
+        "independent_modules": 2
+      }
     }
   },
   {
@@ -597,10 +1117,36 @@
     "language": "process description",
     "events": 7,
     "glyphs": 19,
-    "modules": 13,
+    "modules": 9,
     "audit": {
       "arc_unhandled:logic arc": 2,
       "decoded_process": 7
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 7,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 13,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 7,
+        "modules": 9,
+        "reactions_covered": 7,
+        "coverage": 1.0,
+        "independent_modules": 9
+      }
     }
   },
   {
@@ -626,9 +1172,35 @@
     "language": "process description",
     "events": 5,
     "glyphs": 12,
-    "modules": 7,
+    "modules": 4,
     "audit": {
       "decoded_process": 5
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 5,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 7,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 5,
+        "modules": 4,
+        "reactions_covered": 5,
+        "coverage": 1.0,
+        "independent_modules": 4
+      }
     }
   }
 ]

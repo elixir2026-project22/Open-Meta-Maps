@@ -1,785 +1,789 @@
 {
-  "maps": [
+  "maps": 130,
+  "modules": 4690,
+  "per_map": [
     {
-      "file": "compartment/escher/cytosol_1.json",
+      "id": "compartment/escher/cytosol_1.json",
       "events": 379,
-      "modules": 123,
-      "skipped": {}
+      "modules": 66,
+      "sha256": "2a0ad1f97d0927258c931dca7c5e797fb0a8f8ce6a80091e3d468c8ab7f2b194"
     },
     {
-      "file": "compartment/escher/cytosol_2.json",
+      "id": "compartment/escher/cytosol_2.json",
       "events": 925,
-      "modules": 120,
-      "skipped": {}
+      "modules": 61,
+      "sha256": "e7ab622f87f59a587f901e928366f933c0c43988f43130a3fd1ef34ade14241a"
     },
     {
-      "file": "compartment/escher/cytosol_3.json",
+      "id": "compartment/escher/cytosol_3.json",
       "events": 606,
-      "modules": 96,
-      "skipped": {}
+      "modules": 53,
+      "sha256": "9bc06eb3ece29d17ece5dabc72452afe53f8d113d872d5712d83381e0e442244"
     },
     {
-      "file": "compartment/escher/cytosol_4.json",
+      "id": "compartment/escher/cytosol_4.json",
       "events": 764,
-      "modules": 107,
-      "skipped": {}
-    },
-    {
-      "file": "compartment/escher/cytosol_5.json",
-      "events": 577,
-      "modules": 132,
-      "skipped": {}
-    },
-    {
-      "file": "compartment/escher/endoplasmic_reticulum.json",
-      "events": 951,
-      "modules": 85,
-      "skipped": {}
-    },
-    {
-      "file": "compartment/escher/extracellular.json",
-      "events": 156,
-      "modules": 52,
-      "skipped": {}
-    },
-    {
-      "file": "compartment/escher/golgi_apparatus.json",
-      "events": 318,
-      "modules": 120,
-      "skipped": {}
-    },
-    {
-      "file": "compartment/escher/lysosome.json",
-      "events": 364,
-      "modules": 114,
-      "skipped": {}
-    },
-    {
-      "file": "compartment/escher/mitochondria.json",
-      "events": 1202,
-      "modules": 104,
-      "skipped": {}
-    },
-    {
-      "file": "compartment/escher/nucleus.json",
-      "events": 156,
-      "modules": 90,
-      "skipped": {}
-    },
-    {
-      "file": "compartment/escher/peroxisome.json",
-      "events": 529,
-      "modules": 105,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/acyl_coa_hydrolysis.json",
-      "events": 102,
-      "modules": 86,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/acylglycerides_metabolism.json",
-      "events": 20,
-      "modules": 56,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/alanine_aspartate_and_glutamate_metabolism.json",
-      "events": 43,
-      "modules": 132,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/alkaloids_biosynthesis.json",
-      "events": 2,
-      "modules": 3,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/amino_sugar_and_nucleotide_sugar_metabolism.json",
-      "events": 39,
-      "modules": 113,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/aminoacyl_trna_biosynthesis.json",
-      "events": 21,
-      "modules": 22,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/androgen_metabolism.json",
-      "events": 36,
-      "modules": 98,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/arginine_and_proline_metabolism.json",
-      "events": 109,
-      "modules": 129,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/ascorbate_and_aldarate_metabolism.json",
-      "events": 16,
-      "modules": 36,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/beta_alanine_metabolism.json",
-      "events": 16,
-      "modules": 33,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/beta_oxidation_of_branched_chain_fatty_acids_mitochondrial.json",
-      "events": 13,
-      "modules": 35,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/beta_oxidation_of_di_unsaturated_fatty_acids_n_6_mitochondrial.json",
-      "events": 19,
-      "modules": 54,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/beta_oxidation_of_di_unsaturated_fatty_acids_n_6_peroxisomal.json",
-      "events": 19,
-      "modules": 57,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/beta_oxidation_of_even_chain_fatty_acids_mitochondrial.json",
-      "events": 63,
-      "modules": 109,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/beta_oxidation_of_odd_chain_fatty_acids_mitochondrial.json",
-      "events": 38,
-      "modules": 134,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/beta_oxidation_of_phytanic_acid_peroxisomal.json",
-      "events": 20,
-      "modules": 60,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/beta_oxidation_of_poly_unsaturated_fatty_acids_mitochondrial.json",
-      "events": 22,
-      "modules": 54,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/beta_oxidation_of_unsaturated_fatty_acids_n_7_mitochondrial.json",
-      "events": 17,
-      "modules": 49,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/beta_oxidation_of_unsaturated_fatty_acids_n_7_peroxisomal.json",
-      "events": 8,
-      "modules": 18,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/beta_oxidation_of_unsaturated_fatty_acids_n_9_mitochondrial.json",
-      "events": 21,
-      "modules": 64,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/beta_oxidation_of_unsaturated_fatty_acids_n_9_peroxisomal.json",
-      "events": 38,
-      "modules": 149,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/bile_acid_biosynthesis.json",
-      "events": 233,
-      "modules": 117,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/bile_acid_recycling.json",
-      "events": 33,
-      "modules": 70,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/biopterin_metabolism.json",
-      "events": 27,
-      "modules": 74,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/biotin_metabolism.json",
-      "events": 14,
-      "modules": 31,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/blood_group_biosynthesis.json",
-      "events": 45,
-      "modules": 127,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/butanoate_metabolism.json",
-      "events": 14,
-      "modules": 22,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/c5_branched_dibasic_acid_metabolism.json",
-      "events": 9,
-      "modules": 27,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/cholesterol_biosynthesis_1_bloch_pathway.json",
-      "events": 31,
-      "modules": 116,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/cholesterol_biosynthesis_2.json",
-      "events": 4,
-      "modules": 8,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/cholesterol_biosynthesis_3_kandustch_russell_pathway.json",
-      "events": 16,
-      "modules": 43,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/cholesterol_metabolism.json",
-      "events": 57,
-      "modules": 79,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/cysteine_and_methionine_metabolism.json",
-      "events": 46,
-      "modules": 140,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/dietary_fiber_binding.json",
-      "events": 12,
-      "modules": 42,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/eicosanoid_metabolism.json",
-      "events": 66,
-      "modules": 76,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/estrogen_metabolism.json",
-      "events": 67,
-      "modules": 101,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/ether_lipid_metabolism.json",
-      "events": 16,
-      "modules": 35,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/fatty_acid_activation_cytosolic.json",
-      "events": 93,
-      "modules": 74,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/fatty_acid_activation_endoplasmic_reticular.json",
-      "events": 59,
-      "modules": 35,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/fatty_acid_biosynthesis_even_chain.json",
-      "events": 34,
-      "modules": 115,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/fatty_acid_biosynthesis_odd_chain.json",
-      "events": 29,
-      "modules": 98,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/fatty_acid_biosynthesis_unsaturated.json",
-      "events": 33,
-      "modules": 90,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/fatty_acid_desaturation_even_chain.json",
-      "events": 14,
-      "modules": 35,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/fatty_acid_desaturation_odd_chain.json",
-      "events": 2,
-      "modules": 3,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/fatty_acid_elongation_even_chain.json",
-      "events": 20,
       "modules": 58,
-      "skipped": {}
+      "sha256": "5601d3736df74d8868430d1aee541dd8f4ddd4cfdf97e45151dbbe6a3d22ed3a"
     },
     {
-      "file": "subsystem/escher/fatty_acid_elongation_odd_chain.json",
-      "events": 12,
-      "modules": 31,
-      "skipped": {}
+      "id": "compartment/escher/cytosol_5.json",
+      "events": 577,
+      "modules": 66,
+      "sha256": "c93f3c3411d8ea1091ac0dcf0f9f1996ff68175bf4bf8b1fd1ceaea0a63d2d04"
     },
     {
-      "file": "subsystem/escher/fructose_and_mannose_metabolism.json",
-      "events": 23,
-      "modules": 74,
-      "skipped": {}
+      "id": "compartment/escher/endoplasmic_reticulum.json",
+      "events": 951,
+      "modules": 50,
+      "sha256": "3324c375fdc1c212e4b4da90e9c1c7ec849a675412b3d5c5df49bb711ff67e5a"
     },
     {
-      "file": "subsystem/escher/galactose_metabolism.json",
-      "events": 19,
-      "modules": 38,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/glucocorticoid_biosynthesis.json",
-      "events": 11,
-      "modules": 22,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/glutathione_metabolism.json",
-      "events": 18,
-      "modules": 47,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/glycerolipid_metabolism.json",
-      "events": 111,
-      "modules": 91,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/glycerophospholipid_metabolism.json",
-      "events": 107,
-      "modules": 89,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/glycolysis_gluconeogenesis.json",
-      "events": 46,
-      "modules": 125,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/glycosphingolipid_biosynthesis_ganglio_series.json",
-      "events": 37,
-      "modules": 159,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/glycosphingolipid_biosynthesis_globo_series.json",
-      "events": 11,
-      "modules": 33,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/glycosylphosphatidylinositol_gpi_anchor_biosynthesis.json",
-      "events": 32,
-      "modules": 118,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/heme_degradation.json",
-      "events": 4,
-      "modules": 6,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/hippurate_metabolism.json",
-      "events": 2,
-      "modules": 3,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/histidine_metabolism.json",
-      "events": 22,
-      "modules": 68,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/inositol_phosphate_metabolism.json",
-      "events": 93,
-      "modules": 152,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/isolated.json",
-      "events": 157,
-      "modules": 56,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/keratan_sulfate_degradation.json",
-      "events": 76,
-      "modules": 123,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/leukotriene_metabolism.json",
-      "events": 177,
-      "modules": 120,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/lipoic_acid_metabolism.json",
-      "events": 5,
-      "modules": 6,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/lysine_metabolism.json",
-      "events": 42,
-      "modules": 114,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/metabolism_of_other_amino_acids.json",
-      "events": 23,
-      "modules": 59,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/n_glycan_metabolism.json",
-      "events": 95,
-      "modules": 130,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/nicotinate_and_nicotinamide_metabolism.json",
-      "events": 37,
-      "modules": 101,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/nucleotide_metabolism.json",
-      "events": 136,
-      "modules": 97,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/o_glycan_metabolism.json",
-      "events": 19,
-      "modules": 38,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/omega_3_fatty_acid_metabolism.json",
-      "events": 75,
-      "modules": 99,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/omega_6_fatty_acid_metabolism.json",
-      "events": 60,
-      "modules": 106,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/oxidative_phosphorylation.json",
-      "events": 10,
-      "modules": 15,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/pentose_and_glucuronate_interconversions.json",
-      "events": 17,
-      "modules": 47,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/pentose_phosphate_pathway.json",
-      "events": 27,
-      "modules": 77,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/phenylalanine_metabolism.json",
-      "events": 6,
-      "modules": 8,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/phenylalanine_tyrosine_and_tryptophan_biosynthesis.json",
+      "id": "compartment/escher/extracellular.json",
       "events": 156,
-      "modules": 138,
-      "skipped": {}
+      "modules": 34,
+      "sha256": "719dc181eed03e3130c2f4af3c463dfb568b4775009bf1302fbb634f980a2aee"
     },
     {
-      "file": "subsystem/escher/phosphatidylinositol_phosphate_metabolism.json",
-      "events": 24,
+      "id": "compartment/escher/golgi_apparatus.json",
+      "events": 318,
+      "modules": 63,
+      "sha256": "8fe04ecb5a5e8ba4ec4f10c38b7e62d8ce31f1092de7fe4580ee5c1b6945ad71"
+    },
+    {
+      "id": "compartment/escher/lysosome.json",
+      "events": 364,
+      "modules": 57,
+      "sha256": "703da4ec5c5a01a21af07421b3b6c294903bb5064b9c17ef0dc0e12c60f5fde2"
+    },
+    {
+      "id": "compartment/escher/mitochondria.json",
+      "events": 1202,
+      "modules": 57,
+      "sha256": "a5fa8e8a24fbdaba05049397754ed8a914dd5efda0d5fdea467047944ed094e2"
+    },
+    {
+      "id": "compartment/escher/nucleus.json",
+      "events": 156,
+      "modules": 47,
+      "sha256": "9870aaf5effb9caf65a781c66720614efac4a06e19b772bb632f28d3d5b758d8"
+    },
+    {
+      "id": "compartment/escher/peroxisome.json",
+      "events": 529,
+      "modules": 57,
+      "sha256": "e94ba7c5e576210b8815862644f152f9c185228d06510b0b5e60b659cf20a758"
+    },
+    {
+      "id": "subsystem/escher/acyl_coa_hydrolysis.json",
+      "events": 102,
       "modules": 45,
-      "skipped": {}
+      "sha256": "46339107834e81d1e05b558b0b4f487ffeeb2e52a05da89967654fd91bed1578"
     },
     {
-      "file": "subsystem/escher/porphyrin_metabolism.json",
-      "events": 28,
-      "modules": 75,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/propanoate_metabolism.json",
-      "events": 28,
-      "modules": 68,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/protein_modification.json",
-      "events": 8,
-      "modules": 19,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/purine_metabolism.json",
-      "events": 113,
-      "modules": 101,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/pyrimidine_metabolism.json",
-      "events": 79,
-      "modules": 105,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/pyruvate_metabolism.json",
-      "events": 35,
-      "modules": 110,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/riboflavin_metabolism.json",
-      "events": 7,
-      "modules": 13,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/ros_detoxification.json",
-      "events": 10,
-      "modules": 12,
-      "skipped": {}
-    },
-    {
-      "file": "subsystem/escher/serotonin_and_melatonin_biosynthesis.json",
+      "id": "subsystem/escher/acylglycerides_metabolism.json",
       "events": 20,
-      "modules": 64,
-      "skipped": {}
+      "modules": 34,
+      "sha256": "c6aa1c83c93c73e3aae9e906f275adc32ea5c1db8c6791acc641db848ad52056"
     },
     {
-      "file": "subsystem/escher/sphingolipid_metabolism.json",
-      "events": 130,
-      "modules": 108,
-      "skipped": {}
+      "id": "subsystem/escher/alanine_aspartate_and_glutamate_metabolism.json",
+      "events": 43,
+      "modules": 78,
+      "sha256": "f48f7fd02e2e20580178c04cac21c81b12b674c662ee740260de97d157e2aa4e"
     },
     {
-      "file": "subsystem/escher/starch_and_sucrose_metabolism.json",
+      "id": "subsystem/escher/alkaloids_biosynthesis.json",
+      "events": 2,
+      "modules": 1,
+      "sha256": "9ea1d88d70e40ac2fd19ce094c725ec9d34bc259a401c7452f0d73c9e993bd49"
+    },
+    {
+      "id": "subsystem/escher/amino_sugar_and_nucleotide_sugar_metabolism.json",
+      "events": 39,
+      "modules": 51,
+      "sha256": "a2a106fbaf8ad88760f215f92e28ddd951cee183f7c01b9926de612a5e5d43af"
+    },
+    {
+      "id": "subsystem/escher/aminoacyl_trna_biosynthesis.json",
+      "events": 21,
+      "modules": 20,
+      "sha256": "a51a3c9367cb9759eba0bb4497a8e0f816090cfa341f5901a118f7b31e4be268"
+    },
+    {
+      "id": "subsystem/escher/androgen_metabolism.json",
+      "events": 36,
+      "modules": 63,
+      "sha256": "2b7f85d1a927227ad8f2e294e7938dc15074d4cef4920ad920cf5efd8ea92e64"
+    },
+    {
+      "id": "subsystem/escher/arginine_and_proline_metabolism.json",
+      "events": 109,
+      "modules": 60,
+      "sha256": "ee4d022d7a59edb2148d77e95733d5e3635ad618eebe97bc110ea871fbed0416"
+    },
+    {
+      "id": "subsystem/escher/ascorbate_and_aldarate_metabolism.json",
+      "events": 16,
+      "modules": 15,
+      "sha256": "acb8e1e941a30e7ed133e8cb1b05d12f5a216dd8f6a0dcaf04c150e533984e7d"
+    },
+    {
+      "id": "subsystem/escher/beta_alanine_metabolism.json",
+      "events": 16,
+      "modules": 16,
+      "sha256": "dd145f5880f25bd0f46cab0491cd79235f463b29d8bed9aa63504efadb37d63b"
+    },
+    {
+      "id": "subsystem/escher/beta_oxidation_of_branched_chain_fatty_acids_mitochondrial.json",
+      "events": 13,
+      "modules": 22,
+      "sha256": "e195a589863032d3cc3206b29d57f9e7282e86317e6289c5e0b7259de7203d41"
+    },
+    {
+      "id": "subsystem/escher/beta_oxidation_of_di_unsaturated_fatty_acids_n_6_mitochondrial.json",
+      "events": 19,
+      "modules": 38,
+      "sha256": "a913eb3fea51e145db41746e03837f2dd9421878d6fbafe060032fae84c22895"
+    },
+    {
+      "id": "subsystem/escher/beta_oxidation_of_di_unsaturated_fatty_acids_n_6_peroxisomal.json",
+      "events": 19,
+      "modules": 37,
+      "sha256": "c8b8891ecc516b9b6f2732e4ca1a6bf6751fbc6f51fcbb806df60fb6d1b1ff57"
+    },
+    {
+      "id": "subsystem/escher/beta_oxidation_of_even_chain_fatty_acids_mitochondrial.json",
+      "events": 63,
+      "modules": 55,
+      "sha256": "fa364d057713e5dcc2608ff6af5025c3ea8d131d01316558499b02fe59e68b0d"
+    },
+    {
+      "id": "subsystem/escher/beta_oxidation_of_odd_chain_fatty_acids_mitochondrial.json",
       "events": 38,
-      "modules": 89,
-      "skipped": {}
+      "modules": 57,
+      "sha256": "991589c3ecc5834305bbe7f568935a1941db96a98dd274e80adb1576b28d7664"
     },
     {
-      "file": "subsystem/escher/steroid_metabolism.json",
-      "events": 97,
-      "modules": 109,
-      "skipped": {}
+      "id": "subsystem/escher/beta_oxidation_of_phytanic_acid_peroxisomal.json",
+      "events": 20,
+      "modules": 37,
+      "sha256": "393dd5fb23fb52522aea8b4beff00320082f2fbfddae435b8d7373d45a4e59de"
     },
     {
-      "file": "subsystem/escher/sulfur_metabolism.json",
+      "id": "subsystem/escher/beta_oxidation_of_poly_unsaturated_fatty_acids_mitochondrial.json",
+      "events": 22,
+      "modules": 22,
+      "sha256": "cb2eaedb149db143c1629a36b296d65bc7c79aafa239b60254c5d486dcae6089"
+    },
+    {
+      "id": "subsystem/escher/beta_oxidation_of_unsaturated_fatty_acids_n_7_mitochondrial.json",
       "events": 17,
       "modules": 30,
-      "skipped": {}
+      "sha256": "e9944a3a49407e9fdd6958e2ac58404db87628b0406739da345909352a46c091"
     },
     {
-      "file": "subsystem/escher/terpenoid_backbone_biosynthesis.json",
-      "events": 18,
+      "id": "subsystem/escher/beta_oxidation_of_unsaturated_fatty_acids_n_7_peroxisomal.json",
+      "events": 8,
+      "modules": 6,
+      "sha256": "6f69b8dedd1232d3e30b089c6c36b3fe18c41e2e26c2d52b2ea0e87d1f0cadb6"
+    },
+    {
+      "id": "subsystem/escher/beta_oxidation_of_unsaturated_fatty_acids_n_9_mitochondrial.json",
+      "events": 21,
       "modules": 40,
-      "skipped": {}
+      "sha256": "7ab16d44e765cd2023de3e3c6338393135e17cda77d7a85ba286ec7d366437bb"
     },
     {
-      "file": "subsystem/escher/thiamine_metabolism.json",
-      "events": 7,
+      "id": "subsystem/escher/beta_oxidation_of_unsaturated_fatty_acids_n_9_peroxisomal.json",
+      "events": 38,
+      "modules": 57,
+      "sha256": "456d1b5a8c780f880a849db93ee250636513acd7b62c09fad62152b7ad88346e"
+    },
+    {
+      "id": "subsystem/escher/bile_acid_biosynthesis.json",
+      "events": 233,
+      "modules": 60,
+      "sha256": "924c4b6c9a6ebd6a3e4a035f656dbb56e3ff4430b242d0e9abbf38817419df39"
+    },
+    {
+      "id": "subsystem/escher/bile_acid_recycling.json",
+      "events": 33,
+      "modules": 45,
+      "sha256": "468efc6935bf77ad290d2143260bf919eab1ce0fbb19cc13fcc6054869ab941f"
+    },
+    {
+      "id": "subsystem/escher/biopterin_metabolism.json",
+      "events": 27,
+      "modules": 46,
+      "sha256": "6dd1fcb10194499e405913392ec2aa09df323229600f7915643947c15ad7fbba"
+    },
+    {
+      "id": "subsystem/escher/biotin_metabolism.json",
+      "events": 14,
+      "modules": 22,
+      "sha256": "875fc002811c8b71f4859c5d6f10e21b7a55ebf88acc131a9bf04c05a065cb4a"
+    },
+    {
+      "id": "subsystem/escher/blood_group_biosynthesis.json",
+      "events": 45,
+      "modules": 54,
+      "sha256": "a310a5c64004943994ca49d9b6bdf60d39d9c954e395e0fa6b7d66819aea40a2"
+    },
+    {
+      "id": "subsystem/escher/butanoate_metabolism.json",
+      "events": 14,
+      "modules": 11,
+      "sha256": "ca15c4816055d08a996d5e5bdd5a0d261e7a1d9e6b53239c87f78248b044d6a3"
+    },
+    {
+      "id": "subsystem/escher/c5_branched_dibasic_acid_metabolism.json",
+      "events": 9,
+      "modules": 10,
+      "sha256": "4a66ff99b18c16883eb06e258df3f2c9fbcf224058cb7870f500692c8c3ccf74"
+    },
+    {
+      "id": "subsystem/escher/cholesterol_biosynthesis_1_bloch_pathway.json",
+      "events": 31,
+      "modules": 45,
+      "sha256": "dcfea847edc6f68027e860b0764523d425eda20d4c77e3c6af5ed23eec674dae"
+    },
+    {
+      "id": "subsystem/escher/cholesterol_biosynthesis_2.json",
+      "events": 4,
+      "modules": 5,
+      "sha256": "b48ac0d7062cc52301ba1f83bae2eff405fc0bb0e1b854d0ace8dcdc4ca48e4c"
+    },
+    {
+      "id": "subsystem/escher/cholesterol_biosynthesis_3_kandustch_russell_pathway.json",
+      "events": 16,
+      "modules": 29,
+      "sha256": "01c2e23f033a1c9791505747058e1f94afad11708a53e984dbaa944c8ce2a5b4"
+    },
+    {
+      "id": "subsystem/escher/cholesterol_metabolism.json",
+      "events": 57,
+      "modules": 38,
+      "sha256": "f12a867bcbefc8ad1f0349cfcf5a8b5207cd210d758aa13ffccf51b757fa4f01"
+    },
+    {
+      "id": "subsystem/escher/cysteine_and_methionine_metabolism.json",
+      "events": 46,
+      "modules": 62,
+      "sha256": "fcd5410a3df7b7f85a113b811415173712bf906567c6bf6d92f41380448956a8"
+    },
+    {
+      "id": "subsystem/escher/dietary_fiber_binding.json",
+      "events": 12,
+      "modules": 21,
+      "sha256": "e08a8e8443629bc48c37907c48441d172d93bb07a8014798f3b97793433d4a6d"
+    },
+    {
+      "id": "subsystem/escher/eicosanoid_metabolism.json",
+      "events": 66,
+      "modules": 45,
+      "sha256": "ac797ce43aa8659d9a89bc35eb234c9953e154656ea31cca805bea2ab9b3be82"
+    },
+    {
+      "id": "subsystem/escher/estrogen_metabolism.json",
+      "events": 67,
+      "modules": 54,
+      "sha256": "98ee9379f9d60f9c266764b52d4a2a8d6068e74aad24d9e7a36d06e9e55c4bd2"
+    },
+    {
+      "id": "subsystem/escher/ether_lipid_metabolism.json",
+      "events": 16,
+      "modules": 15,
+      "sha256": "b32e54df8e6b6399badaa527a5f8bbb328db28e05cddc3d18652c64fc5cbf388"
+    },
+    {
+      "id": "subsystem/escher/fatty_acid_activation_cytosolic.json",
+      "events": 93,
+      "modules": 47,
+      "sha256": "0f5d2890204a51a3e65b3d3486f538f124c9a46e524ede0d1777a563da52ba72"
+    },
+    {
+      "id": "subsystem/escher/fatty_acid_activation_endoplasmic_reticular.json",
+      "events": 59,
+      "modules": 29,
+      "sha256": "fb3f9b5c813fc5d482a1080e418ddfb3765a5b3a5f4abb23eb4201ae6b703e5a"
+    },
+    {
+      "id": "subsystem/escher/fatty_acid_biosynthesis_even_chain.json",
+      "events": 34,
+      "modules": 47,
+      "sha256": "97ec38c2d28c1d667eb20aa10ce9022c4d378cad50c0cca8249f83bf3d2af5f1"
+    },
+    {
+      "id": "subsystem/escher/fatty_acid_biosynthesis_odd_chain.json",
+      "events": 29,
+      "modules": 40,
+      "sha256": "77e8f13bedd80e57a3cd8c405980a281245d22ab82c0f8a340ed11a0b0b3c982"
+    },
+    {
+      "id": "subsystem/escher/fatty_acid_biosynthesis_unsaturated.json",
+      "events": 33,
+      "modules": 52,
+      "sha256": "6cb9a5c7b400b0d15b723ec422208e9ccca4e20bf3c40304797bd8506ade00fc"
+    },
+    {
+      "id": "subsystem/escher/fatty_acid_desaturation_even_chain.json",
+      "events": 14,
+      "modules": 21,
+      "sha256": "5b465bf2cebf6055824586e7181aef8f7524f4451063bd7aa26a1fbb0ba07466"
+    },
+    {
+      "id": "subsystem/escher/fatty_acid_desaturation_odd_chain.json",
+      "events": 2,
+      "modules": 1,
+      "sha256": "4b7007a0ca6b999a2dcdb4ecf54b838d7b5afabb3e68218e116828eb3c796a11"
+    },
+    {
+      "id": "subsystem/escher/fatty_acid_elongation_even_chain.json",
+      "events": 20,
+      "modules": 40,
+      "sha256": "9f0a0ac7706455458d970e03ad09ea7547dbd412c8f4e9ae6e8d5208a055cbb9"
+    },
+    {
+      "id": "subsystem/escher/fatty_acid_elongation_odd_chain.json",
+      "events": 12,
+      "modules": 19,
+      "sha256": "b399de8398859edc2564f9173023167ff35d8fb09b248b1376af5af73ea9b2a8"
+    },
+    {
+      "id": "subsystem/escher/fructose_and_mannose_metabolism.json",
+      "events": 23,
+      "modules": 42,
+      "sha256": "e9ce116619c47b50f4d94460c78e5362ada1607ba6f29945bde2f2df830e0cb6"
+    },
+    {
+      "id": "subsystem/escher/galactose_metabolism.json",
+      "events": 19,
+      "modules": 26,
+      "sha256": "30344d0f3b741e0e981a35307c5f5a59230b9efe61367664731cb5d8fc3df44a"
+    },
+    {
+      "id": "subsystem/escher/glucocorticoid_biosynthesis.json",
+      "events": 11,
       "modules": 13,
-      "skipped": {}
+      "sha256": "e845e930d47339f608cac3299e6b65fabbfd05ea34994708c4860f16c2efb5f4"
     },
     {
-      "file": "subsystem/escher/transport_between_organelles.json",
+      "id": "subsystem/escher/glutathione_metabolism.json",
+      "events": 18,
+      "modules": 29,
+      "sha256": "561754097ad155b2ce8b47a1bf85e4375df67db91bc8760cb8747a5ae7ec2bab"
+    },
+    {
+      "id": "subsystem/escher/glycerolipid_metabolism.json",
+      "events": 111,
+      "modules": 51,
+      "sha256": "f065d4b69b29808f0927d645ecb4b209bc8426305eb8782eb4059f13d2c1cd7f"
+    },
+    {
+      "id": "subsystem/escher/glycerophospholipid_metabolism.json",
+      "events": 107,
+      "modules": 44,
+      "sha256": "790044788f7a9770b8d8d9a96e5830bcc687440a347ea506fb03bc51963e264c"
+    },
+    {
+      "id": "subsystem/escher/glycolysis_gluconeogenesis.json",
+      "events": 46,
+      "modules": 59,
+      "sha256": "7dfb91f5c0ed728913e1168632fc0f559362698f500c3128cb28f36ecb481762"
+    },
+    {
+      "id": "subsystem/escher/glycosphingolipid_biosynthesis_ganglio_series.json",
+      "events": 37,
+      "modules": 76,
+      "sha256": "5f19e438db54b0998e7c613f62fb02ea0fbb1e754a94e8cd5e9524feb29bc23e"
+    },
+    {
+      "id": "subsystem/escher/glycosphingolipid_biosynthesis_globo_series.json",
+      "events": 11,
+      "modules": 14,
+      "sha256": "90b82d818cf2f443cdd8943d5d0de788e98285d585bba6d4167e8f9ac7dcd06c"
+    },
+    {
+      "id": "subsystem/escher/glycosylphosphatidylinositol_gpi_anchor_biosynthesis.json",
+      "events": 32,
+      "modules": 49,
+      "sha256": "78901eb3542b1e0c96773750b161e9a8fcc9abf2dafa7869bf2eaecc90c8b4a8"
+    },
+    {
+      "id": "subsystem/escher/heme_degradation.json",
+      "events": 4,
+      "modules": 3,
+      "sha256": "ee65ac9800e314dcacccf5a97344ab1eb298359ed83284925085d9a8395f0a8f"
+    },
+    {
+      "id": "subsystem/escher/hippurate_metabolism.json",
+      "events": 2,
+      "modules": 1,
+      "sha256": "21cb6dedd4ae20f55ebe964640a844ffa1ff9755fa4c3b2d29975203db66b46e"
+    },
+    {
+      "id": "subsystem/escher/histidine_metabolism.json",
+      "events": 22,
+      "modules": 42,
+      "sha256": "defadaed7cc7ce370b938243ac1f8fed023d1a99536536a8701dcf807c82dc51"
+    },
+    {
+      "id": "subsystem/escher/inositol_phosphate_metabolism.json",
+      "events": 93,
+      "modules": 71,
+      "sha256": "5c423f5c5008529dcf747e4dd10d50ea5ee45c6774794e0986c1aeab5042923b"
+    },
+    {
+      "id": "subsystem/escher/isolated.json",
+      "events": 157,
+      "modules": 36,
+      "sha256": "80e632401c2808d7f0b38f786f3e39ed2f036bdd6732456f523822426abab1c4"
+    },
+    {
+      "id": "subsystem/escher/keratan_sulfate_degradation.json",
+      "events": 76,
+      "modules": 62,
+      "sha256": "7011c9a0d7ea677212aa744bd005f3ed346e418a47585a58a9e222e72771ab97"
+    },
+    {
+      "id": "subsystem/escher/leukotriene_metabolism.json",
+      "events": 177,
+      "modules": 66,
+      "sha256": "32fb2d676f86a13410261a61ab84545bbc1c130f15e722d5b7b0902a80270984"
+    },
+    {
+      "id": "subsystem/escher/lipoic_acid_metabolism.json",
+      "events": 5,
+      "modules": 4,
+      "sha256": "1aec59ed1690af262438fea9b92b3dbf5d78b4c294ad3c7c596da7ec5a8a27e9"
+    },
+    {
+      "id": "subsystem/escher/lysine_metabolism.json",
+      "events": 42,
+      "modules": 75,
+      "sha256": "008e20d236f6b59ddb2fb90a84ced55428456bce1b0cd4994fb8b651c0fb2df3"
+    },
+    {
+      "id": "subsystem/escher/metabolism_of_other_amino_acids.json",
+      "events": 23,
+      "modules": 35,
+      "sha256": "1861779c9819b513d590613b2d21ee833f2525d2a35df57f4424791bc2058967"
+    },
+    {
+      "id": "subsystem/escher/n_glycan_metabolism.json",
+      "events": 95,
+      "modules": 71,
+      "sha256": "cb96d24579555b6b1160ee47483ab7df2653dc8d97979eb2a7c971cc18c11ba8"
+    },
+    {
+      "id": "subsystem/escher/nicotinate_and_nicotinamide_metabolism.json",
+      "events": 37,
+      "modules": 45,
+      "sha256": "6d98cb180e823dfb28a638089ea623cb4c1cacab6e08317a864058626482c574"
+    },
+    {
+      "id": "subsystem/escher/nucleotide_metabolism.json",
+      "events": 136,
+      "modules": 54,
+      "sha256": "48873fe4b554657219a03faebd6762602dea037456b41accb4937df2dc6753db"
+    },
+    {
+      "id": "subsystem/escher/o_glycan_metabolism.json",
+      "events": 19,
+      "modules": 24,
+      "sha256": "fd074a51b406d493f6f6566c92b4a10a63a66cf446f89f4821c0b82020bdec2c"
+    },
+    {
+      "id": "subsystem/escher/omega_3_fatty_acid_metabolism.json",
+      "events": 75,
+      "modules": 52,
+      "sha256": "62d296e6a45b7e881cf873e3bab06c8f368fa09164a17d7775b962704f9ac7a7"
+    },
+    {
+      "id": "subsystem/escher/omega_6_fatty_acid_metabolism.json",
+      "events": 60,
+      "modules": 53,
+      "sha256": "923163d9b8922c5d245b9d886ce2fc2e5fa7dc41fd3679ced440776c2accb120"
+    },
+    {
+      "id": "subsystem/escher/oxidative_phosphorylation.json",
+      "events": 10,
+      "modules": 12,
+      "sha256": "8b300552a9dfa105978792f5f7938a7c79131932ba728e2b1c19f0897cc6bfcc"
+    },
+    {
+      "id": "subsystem/escher/pentose_and_glucuronate_interconversions.json",
+      "events": 17,
+      "modules": 29,
+      "sha256": "f77b1fb332abb6490f2022d472888f6a2447404aee30206725d693ae288ba7f0"
+    },
+    {
+      "id": "subsystem/escher/pentose_phosphate_pathway.json",
+      "events": 27,
+      "modules": 47,
+      "sha256": "4d405f86467bf652206de96f5ae4c94f9dcb067b2038aef2f06becf954ce0343"
+    },
+    {
+      "id": "subsystem/escher/phenylalanine_metabolism.json",
+      "events": 6,
+      "modules": 4,
+      "sha256": "0a88ff771fb8e9b61e253bd2897d242a6cff4da9303a146e744ce08a91a2ba22"
+    },
+    {
+      "id": "subsystem/escher/phenylalanine_tyrosine_and_tryptophan_biosynthesis.json",
+      "events": 156,
+      "modules": 70,
+      "sha256": "048625802a3ff26d7049d9ce82b375e1f62257e004ad6f503fc7d481854e50ab"
+    },
+    {
+      "id": "subsystem/escher/phosphatidylinositol_phosphate_metabolism.json",
+      "events": 24,
+      "modules": 27,
+      "sha256": "a1d68fb2c7077c2fc641df3446b350663f25a374e55a2eea8f90bcbf66798cef"
+    },
+    {
+      "id": "subsystem/escher/porphyrin_metabolism.json",
+      "events": 28,
+      "modules": 45,
+      "sha256": "93248fd22409641f87cd70d1e5f1e85dc455a7d0df40997c42e8add4be1685c9"
+    },
+    {
+      "id": "subsystem/escher/propanoate_metabolism.json",
+      "events": 28,
+      "modules": 45,
+      "sha256": "f684821d2a2a20f093e5535af742f559518afb0d866d18f5b20167ed17f216cb"
+    },
+    {
+      "id": "subsystem/escher/protein_modification.json",
+      "events": 8,
+      "modules": 7,
+      "sha256": "afdfd104cd74eaecafdb078ca2e19622ab47342ed8d89762b09548ab090524e5"
+    },
+    {
+      "id": "subsystem/escher/purine_metabolism.json",
+      "events": 113,
+      "modules": 53,
+      "sha256": "d289fe596dd429456ff2087b185c97ea20e40ef9fc8c5b94f70699649354ee53"
+    },
+    {
+      "id": "subsystem/escher/pyrimidine_metabolism.json",
+      "events": 79,
+      "modules": 51,
+      "sha256": "fe054abb149a774a8ec97681c9c6a0efe75ff6ede046a20e18eebfdf121e9781"
+    },
+    {
+      "id": "subsystem/escher/pyruvate_metabolism.json",
+      "events": 35,
+      "modules": 46,
+      "sha256": "ccc845fb419c613cf9208cfbdebe01265e038778a713f269f745240f58e3623c"
+    },
+    {
+      "id": "subsystem/escher/riboflavin_metabolism.json",
+      "events": 7,
+      "modules": 9,
+      "sha256": "3475ed112b123fdbf240d3bdb6a836199795b54663d831239bfd16eddf4403fa"
+    },
+    {
+      "id": "subsystem/escher/ros_detoxification.json",
+      "events": 10,
+      "modules": 8,
+      "sha256": "0564720b0a1065aca3dd7d81732a36c18ff534b2fb6d070d2a5d992955df9cb9"
+    },
+    {
+      "id": "subsystem/escher/serotonin_and_melatonin_biosynthesis.json",
+      "events": 20,
+      "modules": 38,
+      "sha256": "360cdbaaffd5fd51d514256874bdb69f4019564e7be24a48712a4790809a0284"
+    },
+    {
+      "id": "subsystem/escher/sphingolipid_metabolism.json",
+      "events": 130,
+      "modules": 56,
+      "sha256": "782e0469c16c1c535543725b6b279fce92f991f678ec31bd2d22b2817df87cb9"
+    },
+    {
+      "id": "subsystem/escher/starch_and_sucrose_metabolism.json",
+      "events": 38,
+      "modules": 44,
+      "sha256": "5f7e4783dde3fa853c0897622f5a771721deeb4250698bd6ce17587b0b3d7083"
+    },
+    {
+      "id": "subsystem/escher/steroid_metabolism.json",
+      "events": 97,
+      "modules": 52,
+      "sha256": "6b8133795818b73d92c54659a9cdf362292c13944af52bdc900ad586a8d9add8"
+    },
+    {
+      "id": "subsystem/escher/sulfur_metabolism.json",
+      "events": 17,
+      "modules": 22,
+      "sha256": "f617a1f82b8c3be0c22e09baba83184bcfd6dfe3d18b2e0abb9e5c169e895c84"
+    },
+    {
+      "id": "subsystem/escher/terpenoid_backbone_biosynthesis.json",
+      "events": 18,
+      "modules": 20,
+      "sha256": "465f06c65fff20136fd140698add6131a13e9d7ec8f6008cf11cdebfb4adb2f2"
+    },
+    {
+      "id": "subsystem/escher/thiamine_metabolism.json",
+      "events": 7,
+      "modules": 9,
+      "sha256": "33e6a0eef6a8f4bc29df6f851b044984170324d72076686c945c0aaf7f10b3e5"
+    },
+    {
+      "id": "subsystem/escher/transport_between_organelles.json",
       "events": 122,
       "modules": 25,
-      "skipped": {}
+      "sha256": "b44bc298678ac9a0844a6a7ea1f237fd29a454c00c91c40a801a3941e95c0d9f"
     },
     {
-      "file": "subsystem/escher/transport_endoplasmic_reticulum.json",
+      "id": "subsystem/escher/transport_endoplasmic_reticulum.json",
       "events": 454,
       "modules": 26,
-      "skipped": {}
+      "sha256": "3f561912bbb0d453d1bcffe89eb2580522fcfe8c0e45bf4d154ff9868529fedd"
     },
     {
-      "file": "subsystem/escher/transport_golgi_apparatus.json",
+      "id": "subsystem/escher/transport_golgi_apparatus.json",
       "events": 114,
       "modules": 29,
-      "skipped": {}
+      "sha256": "b1a4f722690c198e430ae771aaa5888892c65af0671251939776fe22aaa7362f"
     },
     {
-      "file": "subsystem/escher/transport_lysosome.json",
+      "id": "subsystem/escher/transport_lysosome.json",
       "events": 185,
       "modules": 27,
-      "skipped": {}
+      "sha256": "487e6811a0426e781ecf4ec408ca4f35523570415576f2ada331e11abac27c8e"
     },
     {
-      "file": "subsystem/escher/transport_mitochondria.json",
+      "id": "subsystem/escher/transport_mitochondria.json",
       "events": 547,
       "modules": 25,
-      "skipped": {}
+      "sha256": "59a52ccc7220c770c3a361a79d92bdcb78eb56f5f37803d400f66247c9e51577"
     },
     {
-      "file": "subsystem/escher/transport_nucleus.json",
+      "id": "subsystem/escher/transport_nucleus.json",
       "events": 95,
       "modules": 32,
-      "skipped": {}
+      "sha256": "0be6e7e7187a1c02f8a418aa6c2bac692fa4537ba460ed3d1b72b40c18b437b3"
     },
     {
-      "file": "subsystem/escher/transport_peroxisome.json",
+      "id": "subsystem/escher/transport_peroxisome.json",
       "events": 198,
       "modules": 25,
-      "skipped": {}
+      "sha256": "add69ba9a3b093641e394ec265508852a0fc31673e9f4a52ebd0fd18e403913c"
     },
     {
-      "file": "subsystem/escher/transport_plasma_membrane_1.json",
+      "id": "subsystem/escher/transport_plasma_membrane_1.json",
       "events": 512,
       "modules": 25,
-      "skipped": {}
+      "sha256": "c5a9a094eb6741ccc18978fc39869a5c4a14a2c966b27d899d8386d3c5727443"
     },
     {
-      "file": "subsystem/escher/transport_plasma_membrane_2.json",
+      "id": "subsystem/escher/transport_plasma_membrane_2.json",
       "events": 415,
       "modules": 25,
-      "skipped": {}
+      "sha256": "f425ba20150d111c6bbfd3e6e899222e3bdea44dea554b9ebe77e48fad9a2da5"
     },
     {
-      "file": "subsystem/escher/transport_plasma_membrane_3.json",
+      "id": "subsystem/escher/transport_plasma_membrane_3.json",
       "events": 473,
       "modules": 25,
-      "skipped": {}
+      "sha256": "6082530859fd96b3e1483373eab14e6a8c109cb027305f6307231c385edc23f8"
     },
     {
-      "file": "subsystem/escher/transport_plasma_membrane_4.json",
+      "id": "subsystem/escher/transport_plasma_membrane_4.json",
       "events": 473,
       "modules": 25,
-      "skipped": {}
+      "sha256": "87576df8d00a8747c7254d8edc0ed80463920b1e2f6ceefeb14a63680cb49955"
     },
     {
-      "file": "subsystem/escher/transport_plasma_membrane_5.json",
+      "id": "subsystem/escher/transport_plasma_membrane_5.json",
       "events": 1047,
       "modules": 25,
-      "skipped": {}
+      "sha256": "8485f212f8c7ea06d956889d850862e341a28faba8004930521803b218a0ac4c"
     },
     {
-      "file": "subsystem/escher/triacylglycerol_synthesis.json",
+      "id": "subsystem/escher/triacylglycerol_synthesis.json",
       "events": 3,
       "modules": 3,
-      "skipped": {}
+      "sha256": "5488f850d771eca3c71e56a06253e3034cbf0d1a0c47a7f423f282e27b3b226b"
     },
     {
-      "file": "subsystem/escher/tricarboxylic_acid_cycle_and_glyoxylate_dicarboxylate_metabolism.json",
+      "id": "subsystem/escher/tricarboxylic_acid_cycle_and_glyoxylate_dicarboxylate_metabolism.json",
       "events": 36,
-      "modules": 105,
-      "skipped": {}
+      "modules": 60,
+      "sha256": "6ed144316d3ec2595ac9684ac2086275e8a91e92d6e72c730cf1e57ca5958a97"
     },
     {
-      "file": "subsystem/escher/tryptophan_metabolism.json",
+      "id": "subsystem/escher/tryptophan_metabolism.json",
       "events": 20,
-      "modules": 35,
-      "skipped": {}
+      "modules": 24,
+      "sha256": "5d040262fda6836ff94f8cdb89df957380d8d0bde6079caa4e48ce655be1505c"
     },
     {
-      "file": "subsystem/escher/tyrosine_metabolism.json",
+      "id": "subsystem/escher/tyrosine_metabolism.json",
       "events": 87,
-      "modules": 97,
-      "skipped": {}
+      "modules": 48,
+      "sha256": "a93ebe686b4175e7f6fb6387471c69bfeac9fc40df12aa676adebe367abd7794"
     },
     {
-      "file": "subsystem/escher/ubiquinone_synthesis.json",
+      "id": "subsystem/escher/ubiquinone_synthesis.json",
       "events": 11,
-      "modules": 22,
-      "skipped": {}
+      "modules": 16,
+      "sha256": "3ce5d776c9227f44f7e72c4c3fe50de39a37005d180e42b4a3e46cd255c8750d"
     },
     {
-      "file": "subsystem/escher/urea_cycle.json",
+      "id": "subsystem/escher/urea_cycle.json",
       "events": 1,
       "modules": 1,
-      "skipped": {}
+      "sha256": "8e12ca426f21d52ba4dd878431203ee7eeb27c5ecb437cc615d294bc4e2d6ca1"
     },
     {
-      "file": "subsystem/escher/vitamin_a_metabolism.json",
+      "id": "subsystem/escher/vitamin_a_metabolism.json",
       "events": 15,
-      "modules": 35,
-      "skipped": {}
+      "modules": 15,
+      "sha256": "e8a663693b558d11d512221b9ff0ad7802def8d3c92b5d673a74b4590479a8f6"
     },
     {
-      "file": "subsystem/escher/vitamin_b12_metabolism.json",
+      "id": "subsystem/escher/vitamin_b12_metabolism.json",
       "events": 3,
-      "modules": 4,
-      "skipped": {}
+      "modules": 2,
+      "sha256": "d7b60032246cce65245d004d2d7a45969d33b63f1c1b91d78b5643e4fcbb54f0"
     },
     {
-      "file": "subsystem/escher/vitamin_b2_metabolism.json",
+      "id": "subsystem/escher/vitamin_b2_metabolism.json",
       "events": 2,
       "modules": 2,
-      "skipped": {}
+      "sha256": "737b1888d7d6f9e09cf0bb40c5a81c8823672c7460ec5a909760ffd82b11406b"
     },
     {
-      "file": "subsystem/escher/vitamin_b6_metabolism.json",
+      "id": "subsystem/escher/vitamin_b6_metabolism.json",
       "events": 11,
-      "modules": 31,
-      "skipped": {}
+      "modules": 15,
+      "sha256": "49b3137b7152a419a16deeec051724b0136f25ede4fcad3cb832149fcebbc96d"
     },
     {
-      "file": "subsystem/escher/vitamin_c_metabolism.json",
+      "id": "subsystem/escher/vitamin_c_metabolism.json",
       "events": 2,
       "modules": 2,
-      "skipped": {}
+      "sha256": "122d23d5fde07aeebb1f86d3f4f2ac0b89538169a1efbfa691fb07c0b13f79e8"
     },
     {
-      "file": "subsystem/escher/vitamin_d_metabolism.json",
+      "id": "subsystem/escher/vitamin_d_metabolism.json",
       "events": 26,
-      "modules": 62,
-      "skipped": {}
+      "modules": 40,
+      "sha256": "e55f620e3cd4dda013b84ea99d6d62dd2b85a7dab300b9e435433f90aec434d0"
     },
     {
-      "file": "subsystem/escher/xenobiotics_metabolism.json",
+      "id": "subsystem/escher/xenobiotics_metabolism.json",
       "events": 155,
-      "modules": 81,
-      "skipped": {}
+      "modules": 46,
+      "sha256": "cf0f13bcf80f5b286a5be0d46116d9b7e09cd6b06726e758d560f3f8060410de"
     }
   ],
+  "failures": [],
+  "excluded": [],
   "zero_module_maps": []
 }

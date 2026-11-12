@@ -7,8 +7,8 @@
   "version": "08dd4388096dcf0c88f36d7229c0b06688582744",
   "access_date": "2026-11-11",
   "maps": 10,
-  "modules": 858,
-  "families": 341,
+  "modules": 436,
+  "families": 199,
   "admitted_to_open_core": true,
   "partition": "open_core",
   "import_policy": "custom Escher JSON via database.escher_diagram + diagram_modules; compressed_map.json excluded (CP pseudo-reactions)",
@@ -213,9 +213,9 @@
   "zenodo_doi": "10.5281/zenodo.15048160",
   "extraction": {
     "methods": {
-      "diagram_modules": 858
+      "diagram_modules": 436
     },
-    "modules": 858,
+    "modules": 436,
     "atlas_schema_version": 1
   }
 }

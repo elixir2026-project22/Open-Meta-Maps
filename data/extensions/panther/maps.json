@@ -26,6 +26,32 @@
       "decoded_with_controls": 6,
       "incomplete_participant_identity_or_stoichiometry": 1,
       "branch_geometry_not_decoded": 1
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 6,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 6,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 6,
+        "modules": 6,
+        "reactions_covered": 6,
+        "coverage": 1.0,
+        "independent_modules": 6
+      }
     }
   },
   {
@@ -50,11 +76,37 @@
     "format": "celldesigner",
     "events": 11,
     "glyphs": 48,
-    "modules": 33,
+    "modules": 14,
     "audit": {
       "decoded_direct_no_controls": 9,
       "decoded_with_controls": 2,
       "branch_geometry_not_decoded": 1
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 11,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 33,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 11,
+        "modules": 14,
+        "reactions_covered": 11,
+        "coverage": 1.0,
+        "independent_modules": 14
+      }
     }
   },
   {
@@ -79,9 +131,35 @@
     "format": "celldesigner",
     "events": 25,
     "glyphs": 105,
-    "modules": 81,
+    "modules": 48,
     "audit": {
       "decoded_with_controls": 25
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 25,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 81,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 25,
+        "modules": 48,
+        "reactions_covered": 25,
+        "coverage": 1.0,
+        "independent_modules": 48
+      }
     }
   },
   {
@@ -106,11 +184,37 @@
     "format": "celldesigner",
     "events": 12,
     "glyphs": 33,
-    "modules": 22,
+    "modules": 12,
     "audit": {
       "decoded_with_controls": 12,
       "branch_geometry_not_decoded": 2,
       "incomplete_participant_identity_or_stoichiometry": 1
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 12,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 22,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 12,
+        "modules": 12,
+        "reactions_covered": 12,
+        "coverage": 1.0,
+        "independent_modules": 12
+      }
     }
   },
   {
@@ -135,11 +239,37 @@
     "format": "celldesigner",
     "events": 11,
     "glyphs": 32,
-    "modules": 25,
+    "modules": 16,
     "audit": {
       "decoded_with_controls": 7,
       "incomplete_participant_identity_or_stoichiometry": 1,
       "decoded_direct_no_controls": 4
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 11,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 25,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 11,
+        "modules": 16,
+        "reactions_covered": 11,
+        "coverage": 1.0,
+        "independent_modules": 16
+      }
     }
   },
   {
@@ -164,10 +294,36 @@
     "format": "celldesigner",
     "events": 15,
     "glyphs": 43,
-    "modules": 49,
+    "modules": 30,
     "audit": {
       "decoded_with_controls": 15,
       "incomplete_participant_identity_or_stoichiometry": 3
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 15,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 49,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 15,
+        "modules": 30,
+        "reactions_covered": 15,
+        "coverage": 1.0,
+        "independent_modules": 30
+      }
     }
   },
   {
@@ -192,11 +348,37 @@
     "format": "celldesigner",
     "events": 4,
     "glyphs": 35,
-    "modules": 6,
+    "modules": 3,
     "audit": {
       "decoded_with_controls": 4,
       "incomplete_participant_identity_or_stoichiometry": 6,
       "branch_geometry_not_decoded": 2
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 4,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 6,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 4,
+        "modules": 3,
+        "reactions_covered": 4,
+        "coverage": 1.0,
+        "independent_modules": 3
+      }
     }
   },
   {
@@ -221,11 +403,37 @@
     "format": "celldesigner",
     "events": 8,
     "glyphs": 43,
-    "modules": 16,
+    "modules": 9,
     "audit": {
       "decoded_with_controls": 8,
       "incomplete_participant_identity_or_stoichiometry": 2,
       "branch_geometry_not_decoded": 1
+    },
+    "extraction": {
+      "method": "diagram_modules",
+      "version": "atlas-extraction-1",
+      "parameters": {
+        "max_roots": 8,
+        "window_sizes": [
+          1,
+          2,
+          4,
+          8,
+          12,
+          24
+        ],
+        "independent_only": true,
+        "root_policy": "all_roots_upto_48_else_max_roots_24",
+        "raw_windows_before_dedupe": 16,
+        "nest_factor": 2.0
+      },
+      "counts": {
+        "source_events": 8,
+        "modules": 9,
+        "reactions_covered": 8,
+        "coverage": 1.0,
+        "independent_modules": 9
+      }
     }
   }
 ]

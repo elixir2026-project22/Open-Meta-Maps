@@ -20,9 +20,9 @@
   "admitted_to_open_core": false,
   "source_maps": 1075,
   "source_map_ids_by_source": {
+    "escher": 22,
     "reactome": 115,
-    "wikipathways": 938,
-    "escher": 22
+    "wikipathways": 938
   },
   "licenses": {
     "CC0-1.0": 960,
@@ -33,9 +33,7 @@
   "geometry_only": "WikiPathways maps without reaction identity are segmented by shape only (pseudo-reactions = drawn interactions between metabolite glyphs) and flagged quality=geometry_only; maps that also have semantic units are not duplicated.",
   "extraction": {
     "methods": {
-      "geometry_modules": 1890,
-      "escher_community_windows": 768,
-      "diagram_modules": 305
+      "units_library.decompose": 2963
     },
     "modules": 2963,
     "atlas_schema_version": 1
