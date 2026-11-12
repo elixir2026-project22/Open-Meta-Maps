@@ -103,7 +103,7 @@ def build() -> str:
   {lines(atlas_cx, ATLAS_Y + 28, ['Atlas'], size=16, weight='700', fill='#1f2937', gap=0)}
   {lines(atlas_cx, ATLAS_Y + 54, [
       'curated pathway structures',
-      'Escher · WikiPathways · Reactome',
+      'cut modules · canonical ids · provenance',
       'identity · topology · geometry · licence',
   ], size=12, fill='#374151', gap=17)}
 

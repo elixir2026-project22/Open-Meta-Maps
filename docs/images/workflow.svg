@@ -10,7 +10,7 @@
   <rect x="232" y="30" width="300" height="112" rx="10" fill="#e7f4ee" stroke="#3f8f6b" stroke-width="1.5"/>
   <text x="382.0" y="58" text-anchor="middle" font-size="16" font-weight="700" fill="#1f2937">Atlas</text>
   <text x="382.0" y="84" text-anchor="middle" font-size="12" fill="#374151">curated pathway structures</text>
-<text x="382.0" y="101" text-anchor="middle" font-size="12" fill="#374151">Escher · WikiPathways · Reactome</text>
+<text x="382.0" y="101" text-anchor="middle" font-size="12" fill="#374151">cut modules · canonical ids · provenance</text>
 <text x="382.0" y="118" text-anchor="middle" font-size="12" fill="#374151">identity · topology · geometry · licence</text>
 
   <!-- Layout Composer frame; title inside, left of the vertical retrieval arrow -->

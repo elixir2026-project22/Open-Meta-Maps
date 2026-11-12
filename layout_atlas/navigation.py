@@ -3,6 +3,7 @@
   python3 layout_atlas/navigation.py
 
 Counts and licences come from data/atlas_registry.json.
+Structure mirrors README: intro → data construction (Atlas) → layout optimisation → outputs / licensing.
 """
 import html
 import json
@@ -42,36 +43,88 @@ def about():
 
     def sec(t, inner):
         return f'<section class="panel"><h2>{b(t)}</h2>{inner}</section>'
-    s1 = sec('About Open Meta Maps', '<p><b>' + b('Collect public community-drawn pathway layouts, reuse them for a genome-scale model, and complete the rest algorithmically.') + '</b></p><p>' + b('Open Meta Maps is ELIXIR BioHackathon Europe 2026 Project 22 (Open Pathway Maps). The Atlas stores reusable structures extracted from community-drawn maps; the Layout Composer matches them to an uploaded GEM, keeps curated geometry where it fits, and places every remaining reaction. Layout benchmarks and the evaluation CLI are development aids, not the project goal.') + '</p>')
-    steps = [('1', 'Build the Atlas', 'Pathway structures (topology, reaction identity, geometry, licence) are extracted from public community maps and stored with provenance.'), ('2', 'Match and transfer', 'For an uploaded model, matching structures are retrieved; exact matches, topology-only references and optional EC suggestions are kept clearly apart.'), ('3', 'Complete with Bézier layout', 'Reactions without reusable curated geometry are placed by the algorithm; Bézier connections, labels and layout-quality checks follow. Nothing from the model is dropped.')]
-    s2 = sec('How it works', '<div class="steps3">' + ''.join((f'<div class="card"><b>{n}</b><h3>{b(tt)}</h3><p class="meta">{b(d)}</p></div>' for n, tt, d in steps)) + '</div><p>' + b('Every generated map passes an integrity check that reactions, stoichiometry and compartments are preserved. That check is not a validation of the biological correctness of the model.') + '</p>')
-    by_line = ' · '.join((f'{k} {_fmt(v)}' for k, v in [('escher', mods['escher']), ('reactome', mods['reactome']), ('wikipathways', mods['wikipathways'] + mods['wikipathways_geometry']), ('human_maps', mods['human_maps']), ('brenda', mods['brenda']), ('metabolismregulation', mods['metabolismregulation']), ('panther', mods['panther']), ('ich360', mods.get('ich360', 0))]))
-    s3 = sec('The Atlas', '<div class="stats">' + ui.stat(_fmt(total), 'module structures (default Atlas)') + ui.stat(_fmt(core_sum), 'open-core SQLite modules') + ui.stat(_fmt(oc['reactions']), 'reactions in open-core') + '</div><p class="meta">' + b('Default Atlas module counts by source (open-core SQLite plus default extensions; from data/atlas_registry.json):') + ' <span class="dn">' + e(by_line) + '</span></p><p class="meta">' + b('WikiPathways appears as semantic modules in open_core.sqlite plus a geometry-only extension kept separate for repository size; both load by default.') + '</p>')
 
     def row(*cells):
         return '<tr>' + ''.join((f'<td>{c}</td>' for c in cells)) + '</tr>'
-    th = ''.join((f'<th>{b(h)}</th>' for h in ['Source', 'What is used', 'Modules', 'Licence', 'Status']))
+
+    s1 = sec(
+        'About Open Meta Maps',
+        '<p><b>' + b('Two parts: a curated-structure Atlas from public community maps, and a layout optimisation pipeline that reuses matching geometry and completes the rest with Bézier connections.') + '</b></p><p>' + b('Open Meta Maps is ELIXIR BioHackathon Europe 2026 Project 22 (Open Pathway Maps). Every reaction and metabolite of the uploaded GEM is drawn; stoichiometry and compartments are unchanged. Layout benchmarks and the evaluation CLI are development aids, not the project goal.') + '</p><p class="meta">' + b('Map Generator: python3 project.py tool or ./start_tool.command. Examples: e_coli_core, iIT341, iMM904, iML1515. Viewer: pan, wheel/pinch zoom, minimap. Server exits when the last tab closes (~8 s); --keep-running disables that.') + '</p>',
+    )
+
+    by_line = ' · '.join((f'{k} {_fmt(v)}' for k, v in [('escher', mods['escher']), ('reactome', mods['reactome']), ('wikipathways', mods['wikipathways'] + mods['wikipathways_geometry']), ('human_maps', mods['human_maps']), ('brenda', mods['brenda']), ('metabolismregulation', mods['metabolismregulation']), ('panther', mods['panther']), ('ich360', mods.get('ich360', 0))]))
     dflt = b('Used by default')
     wp_mods = mods['wikipathways'] + mods['wikipathways_geometry']
+    th = ''.join((f'<th>{b(h)}</th>' for h in ['Source', 'What is used', 'Modules', 'Licence', 'Status']))
     tbl = '<div class="tablewrap"><table><thead><tr>' + th + '</tr></thead><tbody>' + row('Escher', b(f"{oc['maps']['escher']} community maps"), _fmt(mods['escher']), 'CC0-1.0', dflt) + row('Reactome', b(f"release 97 · {oc['maps']['reactome']} diagrams"), _fmt(mods['reactome']), 'CC0 (data)', dflt) + row('WikiPathways', b(f"release 20261110 · {oc['maps']['wikipathways']} maps; {_fmt(mods['wikipathways'])} semantic + {_fmt(mods['wikipathways_geometry'])} geometry-only modules"), _fmt(wp_mods), 'CC0-1.0', dflt) + row('Human-maps', b(f"{ext['human_maps']['maps']} official Escher JSON maps (SVG/BY-SA not imported)"), _fmt(mods['human_maps']), 'CC BY 4.0', dflt) + row('BRENDA', b(f"{ext['brenda']['pathways']} pathway maps; layout possibly automatic"), _fmt(mods['brenda']), 'CC BY 4.0', dflt) + row('Metabolism Regulation', b(f"{ext['metabolismregulation']['maps']} SBGN-ML gallery maps (hand-drawn)"), _fmt(mods['metabolismregulation']), 'CC BY 4.0', dflt) + row('PANTHER', b(f"version {ext['panther']['version']} · {ext['panther']['maps']} CellDesigner maps"), _fmt(mods['panther']), 'CC BY 4.0', dflt) + row('iCH360', b(f"{ext['ich360']['maps']} custom Escher maps (compressed_map excluded)"), _fmt(mods.get('ich360', 0)), 'MIT', dflt) + '</tbody></table></div>'
+
+    s_data = sec(
+        '1. Data construction — the curated-structure Atlas',
+        '<div class="stats">' + ui.stat(_fmt(total), 'module structures (default Atlas)') + ui.stat(_fmt(core_sum), 'open-core SQLite modules') + ui.stat(_fmt(oc['reactions']), 'reactions in open-core') + '</div>'
+        + '<p class="meta">' + b('Default Atlas module counts by source (open-core SQLite plus default extensions; from data/atlas_registry.json):') + ' <span class="dn">' + e(by_line) + '</span></p>'
+        + '<p class="meta">' + b('WikiPathways appears as semantic modules in open_core.sqlite plus a geometry-only extension kept separate for repository size; both load by default.') + '</p>'
+        + '<h3>' + b('Sources and licences') + '</h3>' + tbl
+        + '<p>' + b('MicroMap and Yeast-maps are not included. KEGG is not an Atlas source. Full attribution: THIRD_PARTY_NOTICES.md. Evidence notes: docs/licensing_audit.md.') + '</p>'
+        + '<h3>' + b('Extraction, identity and selection') + '</h3>'
+        + '<ul>'
+        + '<li><b>' + b('Cut') + '</b>: ' + b('documented extractors — in-repo Escher community cutter (escher_community_windows, parity-tested); BFS diagram/geometry windows for Reactome, WikiPathways, Human-maps, Metabolism Regulation, PANTHER and iCH360; BRENDA’s own extractor.') + '</li>'
+        + '<li><b>' + b('Deduplicate') + '</b>: ' + b('near-duplicate windows grouped into core families and geometric variants.') + '</li>'
+        + '<li><b>' + b('Canonical ids') + '</b>: ' + b('unique crosswalks map reaction references to BiGG, MetaNetX and/or Rhea where available (Human-maps via Human-GEM; Metabolism Regulation via participant ChEBI; Escher / iCH360 already BiGG).') + '</li>'
+        + '<li><b>' + b('Provenance') + '</b>: ' + b('each module records source, map, licence and an extraction block (method, version, parameters, counts).') + '</li>'
+        + '<li><b>' + b('Selection') + '</b>: ' + b('coverage ranks first; among same-source biochemical matches with the same reaction set, the denser drawing is kept.') + '</li>'
+        + '</ul>'
+        + '<p class="meta">' + b('Details: docs/atlas_data_management.md · data/README.md.') + '</p>',
+    )
+
+    s_layout = sec(
+        '2. Layout optimisation algorithm',
+        '<h3>' + b('Matching and curated reuse') + '</h3>'
+        + '<p>' + b('Reactions are matched to Atlas modules (EC currentisation, Rhea metabolite scoring, name normalisation, weighted Jaccard, vicinity propagation). Exact curated matches, topology-only references and optional EC suggestions are kept apart and never merged into one reuse rate. EC similarity extension is off by default (CLI --ec; Map Generator checkbox). Matched geometry is kept as drawn; the rest uses layout_style=curated (Bézier). Orthogonal libavoid remains CLI --layout-style legacy only. Details: docs/reaction_map_matching.md · docs/methodology.md.') + '</p>'
+        + '<h3>' + b('Layout stages') + '</h3>'
+        + '<p>' + b('After matching, the Composer keeps curated blocks rigid, completes uncovered reactions, orients free reactions, composes stray components, draws Bézier connections and places labels. Small models take the full path; mid-size models use a global plan then the same curated Bézier pass; larger models keep a skeleton and draw ~50-reaction views on demand. Full stage table: README §2.') + '</p>'
+        + '<ul>'
+        + '<li>' + b('Rigid skeleton and completion: drawing.pack_modules, completion.complete_spaced, completion_context.place, instances.optimize (currency stays private side glyphs).') + '</li>'
+        + '<li>' + b('Orientation, composition, peripherals: orientation.apply (default full); composition.compose and peripheral.attach on; whole-block relocation off unless OPM_BLOCK_RELOC=on.') + '</li>'
+        + '<li>' + b('Bézier curated style (edge_style.apply), optional --source-paths; labels via label_placement.optimize; integrity via tool_pipeline.check_integrity.') + '</li>'
+        + '</ul>'
+        + '<h3>' + b('Layout rules and evaluation') + '</h3>'
+        + '<p>' + b('Rules (crossings, overlaps, long edges, participant consistency, compartments, compactness, reproducibility, scale): mostly partial; compartment respect and build-on-previous-layout are not yet product goals. Compose writes layout_quality into layout_issues.json / report.json; python3 project.py evaluate adds Project 22 metrics (pip install -r layout_atlas/requirements-eval.txt).') + '</p>'
+        + '<ul>'
+        + '<li>' + b('Optimised (partially): crossings and unrelated overlaps (Bézier / spacing); detour and bends (Bézier); long lines and cofactor clones (instances / composition); participant placement (orientation); curated-structure continuity (matching / skeleton); periphery, aspect, blank space (composition).') + '</li>'
+        + '<li>' + b('Not yet optimised: axis-aligned segments and axes; grid metabolites; chain turn angles; cycle placement; compartment packing; build-on-previous layout (evaluate --compare-map only).') + '</li>'
+        + '<li>' + b('Gaps: 2D component packing, harder orientation, compose --seed. Experimental off by default: OPM_REGIONS, OPM_LOWCONF, whole-block OPM_BLOCK_RELOC. Details: docs/layout_evaluation.md · docs/limitations.md.') + '</li>'
+        + '</ul>',
+    )
+
+    s_out = sec(
+        'Outputs and reproducibility',
+        '<p>' + b('Every result contains:') + '</p><ul>'
+        + '<li><b>' + b('Reaction provenance') + '</b>: ' + b('curated (community layout), topology-only suggestion, functional (EC) suggestion, bridge or generated, with matching evidence') + '</li>'
+        + '<li><b>' + b('Layout quality') + '</b></li>'
+        + '<li><b>' + b('Generation settings') + '</b></li>'
+        + '<li><b>' + b('Licensing metadata') + '</b> (<code>licenses.json</code>)</li>'
+        + '</ul>'
+        + '<p>' + b('Curated-geometry reuse, topology-only references and EC suggestions are reported separately and never merged into one reuse rate. Integrity checks that reactions, stoichiometry and compartments are preserved — not biological correctness of the model.') + '</p>'
+        + '<p class="meta">' + b('Report files') + ': <code>report.json</code> · <code>reaction_provenance.json</code> · <code>licenses.json</code> · ' + b('Software version') + f': v{e(version)} · ' + b('Registry generated') + f': {e(reg.get("generated", ""))}</p>',
+    )
+
+    s_lic = sec(
+        'Licensing',
+        '<p>' + b('The software is MIT (LICENSE). The default Atlas mixes CC0, CC BY 4.0 and MIT (iCH360) sources; reuse must keep the attributions in THIRD_PARTY_NOTICES.md.') + '</p>',
+    )
+
     about_path = ROOT / 'layout_atlas' / 'results' / 'about' / 'index.html'
-
-    def doc_href(path):
-        # Relative targets resolve to allowlisted /docs/... routes on the tool server;
-        # from disk they open the repo markdown files next to the checkout.
-        return ui.rel(about_path, path)
-
-    def doc_a(label, path):
-        return f'<a href="{doc_href(path)}">{b(label)}</a>'
-    s4 = sec('Data sources and licensing', tbl + '<p>' + b('MicroMap and Yeast-maps are not included. KEGG is not an Atlas source. Full attribution:') + ' ' + doc_a('THIRD_PARTY_NOTICES.md', 'THIRD_PARTY_NOTICES.md') + '. ' + b('Evidence notes:') + ' ' + doc_a('docs/licensing_audit.md', 'docs/licensing_audit.md') + '.</p><p>' + b('The software is MIT') + ' (' + doc_a('LICENSE', 'LICENSE') + '). ' + b('The default Atlas mixes CC0 and CC BY 4.0 sources, so the Atlas and maps generated from it are distributed under CC BY 4.0; reuse must keep the attributions in') + ' ' + doc_a('THIRD_PARTY_NOTICES.md', 'THIRD_PARTY_NOTICES.md') + '.</p>')
-    s5 = sec('Matching and layout defaults', '<ul><li>' + b('Matching uses EC currentisation (ExPASy), Rhea metabolite scoring for EC disambiguation, name normalisation, weighted Jaccard (currency metabolites half-weighted), and vicinity propagation for BRENDA. Details:') + ' ' + doc_a('docs/reaction_map_matching.md', 'docs/reaction_map_matching.md') + '.</li><li>' + b('EC similarity extension is optional and off by default (CLI --ec; Map Generator checkbox). Recommendation:') + ' ' + doc_a('docs/ec_extension_recommendation.md', 'docs/ec_extension_recommendation.md') + '.</li><li>' + b('Layout default is Bézier / layout_style=curated (the former name expert remains accepted as a deprecated alias). Orthogonal libavoid remains available only as CLI --layout-style legacy.') + '</li><li>' + b('Map Generator: python3 project.py tool or ./start_tool.command. Examples: e_coli_core, iIT341, iMM904, iML1515. Viewer supports pan, wheel/pinch zoom and a minimap. The server exits when the last browser tab closes (grace ~8 s); pass --keep-running to disable.') + '</li><li>' + b('Layout evaluation CLI (development aid): pip install -r layout_atlas/requirements-eval.txt, then python3 project.py evaluate --gem MODEL.xml --map DIR/map.json. See') + ' ' + doc_a('docs/layout_evaluation.md', 'docs/layout_evaluation.md') + '.</li></ul>')
-    s5b = sec('Layout after curated reuse', '<p>' + b('After matching, the Composer keeps curated blocks rigid, completes uncovered reactions, orients free reactions, composes stray components, draws Bézier connections and places labels. Full stage table and layout rule status:') + ' ' + doc_a('README (Layout after curated reuse)', 'README.md') + '.</p><ul><li>' + b('Rigid skeleton and completion: drawing.pack_modules, completion.complete_spaced, completion_context.place, instances.optimize (currency stays private side glyphs).') + '</li><li>' + b('Orientation, composition, peripherals: orientation.apply (default full); composition.compose and peripheral.attach on; whole-block relocation off unless OPM_BLOCK_RELOC=on.') + '</li><li>' + b('Bézier curated style (edge_style.apply), optional --source-paths; labels via label_placement.optimize; integrity via tool_pipeline.check_integrity.') + '</li><li>' + b('Layout rules (crossings, overlaps, long edges, participant consistency, compartments, compactness, reproducibility, scale): mostly partial; compartment respect and build-on-previous-layout not yet product goals. Gaps: 2D component packing, harder orientation, compose --seed.') + '</li></ul>')
-    s6 = sec('Reproducibility', '<p>' + b('Every result contains:') + '</p><ul><li><b>' + b('Reaction provenance') + '</b>: ' + b('curated (community layout), topology-only suggestion, functional (EC) suggestion, bridge or generated, with matching evidence') + '</li><li><b>' + b('Layout quality') + '</b></li><li><b>' + b('Generation settings') + '</b></li><li><b>' + b('Licensing metadata') + '</b> (<code>licenses.json</code>)</li></ul><p>' + b('Curated-geometry reuse, topology-only references and EC suggestions are reported separately and never merged into one reuse rate.') + '</p><p class="meta">' + b('Report files') + ': <code>report.json</code> · <code>reaction_provenance.json</code> · <code>licenses.json</code> · ' + b('Software version') + f': v{e(version)} · ' + b('Registry generated') + f': {e(reg.get("generated", ""))}</p>')
-    cards = ''.join((f'<a class="card" href="{doc_href(path)}" style="text-decoration:none"><h3>{b(en)}</h3></a>' for en, path in [('Installation', 'docs/installation.md'), ('Data sources', 'docs/data_sources.md'), ('Reaction–map matching', 'docs/reaction_map_matching.md'), ('Methodology', 'docs/methodology.md'), ('Layout evaluation', 'docs/layout_evaluation.md'), ('Limitations', 'docs/limitations.md'), ('Third-party notices', 'THIRD_PARTY_NOTICES.md'), ('Atlas data layout', 'data/README.md')]))
-    s7 = sec('Documentation', '<div class="grid">' + cards + '</div>')
+    cards = ''.join((f'<a class="card" href="{ui.rel(about_path, path)}" style="text-decoration:none"><h3>{b(en)}</h3></a>' for en, path in [('Installation', 'docs/installation.md'), ('Data sources', 'docs/data_sources.md'), ('Atlas data management', 'docs/atlas_data_management.md'), ('Reaction–map matching', 'docs/reaction_map_matching.md'), ('Methodology', 'docs/methodology.md'), ('Layout evaluation', 'docs/layout_evaluation.md'), ('Limitations', 'docs/limitations.md'), ('Third-party notices', 'THIRD_PARTY_NOTICES.md'), ('Atlas data layout', 'data/README.md')]))
+    s_docs = sec('Documentation', '<div class="grid">' + cards + '</div>')
     d = ROOT / 'layout_atlas' / 'results' / 'about'
     d.mkdir(parents=True, exist_ok=True)
-    ui.write(d / 'index.html', 'About / Provenance', s1 + s2 + s3 + s4 + s5 + s5b + s6 + s7, section='about', lead=b('Purpose, Atlas sources, matching defaults and licensing for Open Meta Maps.'))
+    ui.write(
+        d / 'index.html',
+        'About / Provenance',
+        s1 + s_data + s_layout + s_out + s_lic + s_docs,
+        section='about',
+        lead=b('Curated-structure Atlas construction and layout optimisation for Open Meta Maps.'),
+    )
 
 def generate():
     home()
