@@ -33,7 +33,13 @@ ALLOWED_LICENSE = re.compile(
     r'(?i)^(CC0(?:-1\.0)?(?:-data)?|CC-?BY(?:-4\.0)?|MIT)$'
 )
 PAGE_DEFAULT = 24
+MANIFEST_POLICY = 'Per-module source licences preserved; CC BY requires attribution_text'
 CANON_NS = ('bigg.reaction', 'metanetx.reaction', 'rhea', 'ec-code')
+# Dedup key namespaces (README unique-after-dedup counts, atlas_overlap.json, data export).
+DEDUP_NS = (
+    'bigg.reaction', 'metanetx.reaction', 'rhea', 'reactome', 'ec-code',
+    'human.gem', 'sbgn.process', 'celldesigner.reaction',
+)
 QUALITY_INFO = {
     'semantic_transfer': (
         'Curated reaction layout',
@@ -196,6 +202,37 @@ def canonical_reaction_ids(module):
     return tuple(sorted(set(out)))
 
 
+def source_key(m):
+    """Atlas source name; WikiPathways geometry-only drawings are their own source."""
+    src = m.get('source') or '?'
+    if src == 'wikipathways' and m.get('quality') == 'geometry_only':
+        return 'wikipathways_geometry'
+    return src
+
+
+def primary_reaction_id(r, src):
+    refs = r.get('references') or {}
+    for ns in DEDUP_NS:
+        vals = [v for v in (refs.get(ns) or []) if v]
+        if vals:
+            return f'{ns}:{sorted(vals)[0]}'
+    rid = r.get('id')
+    return f'native:{src}:{rid}' if rid is not None else f'native:{src}:?'
+
+
+def reaction_set(m):
+    """Dedup key: canonical reaction-id set (geometry fingerprint for geometry-only drawings)."""
+    src = m.get('source') or '?'
+    rx = m.get('reactions') or []
+    if rx:
+        return frozenset(primary_reaction_id(r, src) for r in rx)
+    fp = m.get('geometry_fingerprint')
+    if fp:
+        return frozenset([f'geometry:{fp}'])
+    ents = sorted({n.get('entity') for n in (m.get('nodes') or []) if n.get('entity')})
+    return frozenset([f'entities:{",".join(ents)}']) if ents else frozenset()
+
+
 def reaction_set_signature(module):
     ids = canonical_reaction_ids(module)
     if not ids:
@@ -239,8 +276,8 @@ def _collect_ids(module, bridge_ec):
     return sorted(rx), sorted(ec), sorted(met)
 
 
-def record_from_module(module, bridge_ec=None, attribution_fallback=None, store='core'):
-    bridge_ec = bridge_ec if bridge_ec is not None else {}
+def module_card(module, attribution_fallback=None, store='core'):
+    """Licence-admitted module summary (manifest fields); None for licences outside CC0 / CC BY / MIT."""
     lic = module.get('license') or module.get('licence') or ''
     if not license_ok(lic):
         return None
@@ -251,31 +288,36 @@ def record_from_module(module, bridge_ec=None, attribution_fallback=None, store=
     )
     if not attr and attribution_fallback:
         attr = attribution_string(attribution_fallback.get(source), source)
-    rx, ec, met = _collect_ids(module, bridge_ec)
-    name = module.get('name') or ''
-    map_id = module.get('map_id') or ''
-    lineage = module.get('lineage') or ''
-    map_tokens = sorted(set(_tokens(name, map_id, lineage, source, *name.split('.'))))
-    rx_canon = list(canonical_reaction_ids(module))
     return dict(
         id=module['id'],
         store=store,
         source=source,
-        name=name,
-        map_id=map_id,
-        lineage=lineage,
+        name=module.get('name') or '',
+        map_id=module.get('map_id') or '',
+        lineage=module.get('lineage') or '',
         species=module.get('species') or '',
         license=lic,
         attribution=attr,
-        size=int(module.get('size') or len(module.get('reactions') or []) or len(rx_canon) or 0),
+        size=int(module.get('size') or len(module.get('reactions') or []) or 0),
         quality=module.get('quality') or '',
+    )
+
+
+def record_from_module(module, bridge_ec=None, attribution_fallback=None, store='core'):
+    card = module_card(module, attribution_fallback, store)
+    if card is None:
+        return None
+    rx, ec, met = _collect_ids(module, bridge_ec if bridge_ec is not None else {})
+    name = card['name']
+    card.update(
         rx_sig=reaction_set_signature(module),
-        rx_canon=rx_canon,
+        rx_canon=list(canonical_reaction_ids(module)),
         rx=rx,
         ec=ec,
         met=met,
-        map=map_tokens,
+        map=sorted(set(_tokens(name, card['map_id'], card['lineage'], card['source'], *name.split('.')))),
     )
+    return card
 
 
 def registry_fingerprint():
@@ -802,10 +844,11 @@ def meta(index=None):
     )
 
 
-def load_module(module_id, index=None):
-    idx = index or load_index()
-    card = (idx.get('_by_id') or {}).get(module_id)
-    store = (card or {}).get('store') or 'core'
+def load_module(module_id, index=None, store=None):
+    """Full module payload; `store` ('core' or an extension name) skips the index lookup."""
+    if store is None:
+        idx = index or load_index()
+        store = ((idx.get('_by_id') or {}).get(module_id) or {}).get('store') or 'core'
     if store == 'core':
         if not OPEN_CORE.is_file():
             return None
@@ -1100,6 +1143,30 @@ def attribution_text(module_or_card):
     return f'{base}. Licence: {lic}.'
 
 
+def manifest_row(card):
+    """One provenance/licence manifest record (Atlas Browser download and `data export`)."""
+    return dict(
+        module_id=card['id'],
+        source=card['source'],
+        map_name=card['name'],
+        map_id=card['map_id'],
+        species=card.get('species') or '',
+        reaction_count=card['size'],
+        license=card['license'],
+        attribution=card.get('attribution') or '',
+        attribution_text=attribution_text(card),
+    )
+
+
+def module_file(module_id):
+    return re.sub(r'[^A-Za-z0-9._-]+', '_', module_id)[:80] + '.json'
+
+
+def module_json(module):
+    """Escher JSON text for one module, as written into downloads."""
+    return json.dumps(module_to_escher(module), ensure_ascii=False, indent=2) + '\n'
+
+
 def download_manifest(module_ids, index=None, fmt='json'):
     idx = index or load_index()
     by = idx.get('_by_id') or {m['id']: m for m in idx['modules']}
@@ -1110,17 +1177,7 @@ def download_manifest(module_ids, index=None, fmt='json'):
         if not card:
             missing.append(mid)
             continue
-        rows.append(dict(
-            module_id=card['id'],
-            source=card['source'],
-            map_name=card['name'],
-            map_id=card['map_id'],
-            species=card.get('species') or '',
-            reaction_count=card['size'],
-            license=card['license'],
-            attribution=card.get('attribution') or '',
-            attribution_text=attribution_text(card),
-        ))
+        rows.append(manifest_row(card))
     if fmt == 'csv':
         buf = io.StringIO()
         fields = ['module_id', 'source', 'map_name', 'map_id', 'species', 'reaction_count',
@@ -1133,7 +1190,7 @@ def download_manifest(module_ids, index=None, fmt='json'):
     payload = dict(
         format_version=1,
         generated=str(date.today()),
-        policy='Per-module source licences preserved; CC BY requires attribution_text',
+        policy=MANIFEST_POLICY,
         modules=rows,
         missing=missing,
     )
@@ -1154,12 +1211,11 @@ def build_download_zip(module_ids, index=None):
                 missing.append(row['module_id'])
                 continue
             try:
-                data = module_to_escher(mod)
+                text = module_json(mod)
             except Exception:
                 missing.append(row['module_id'])
                 continue
-            safe = re.sub(r'[^A-Za-z0-9._-]+', '_', row['module_id'])[:80]
-            zf.writestr(f'modules/{safe}.json', json.dumps(data, ensure_ascii=False, indent=2) + '\n')
+            zf.writestr(f"modules/{module_file(row['module_id'])}", text)
         if missing:
             zf.writestr('missing.txt', '\n'.join(missing) + '\n')
     return buf.getvalue(), rows, missing

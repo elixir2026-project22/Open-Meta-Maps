@@ -43,3 +43,6 @@
 # optional evaluation models (fetched on demand; see examples/eval_models/manifest.json)
 /examples/eval_models/downloaded/
 
+
+# data export archives (`python3 project.py data export`)
+/dist/

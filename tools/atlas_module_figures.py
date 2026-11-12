@@ -28,12 +28,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'layout_atlas'))
 
 from core import DATA  # noqa: E402
+from atlas_browser import reaction_set, source_key  # noqa: E402
 
 OUT = ROOT / 'docs' / 'images' / 'atlas'
-CANON_PREF = (
-    'bigg.reaction', 'metanetx.reaction', 'rhea', 'reactome', 'ec-code',
-    'human.gem', 'sbgn.process', 'celldesigner.reaction',
-)
 SOURCE_ORDER = [
     'escher', 'reactome', 'wikipathways', 'wikipathways_geometry',
     'human_maps', 'brenda', 'metabolismregulation', 'panther', 'ich360',
@@ -83,35 +80,6 @@ SOURCE_STROKE = {
     'panther': '#9a5a6a',
     'ich360': '#5a6670',
 }
-
-
-def source_key(m):
-    src = m.get('source') or '?'
-    if src == 'wikipathways' and m.get('quality') == 'geometry_only':
-        return 'wikipathways_geometry'
-    return src
-
-
-def primary_reaction_id(r, src):
-    refs = r.get('references') or {}
-    for ns in CANON_PREF:
-        vals = [v for v in (refs.get(ns) or []) if v]
-        if vals:
-            return f'{ns}:{sorted(vals)[0]}'
-    rid = r.get('id')
-    return f'native:{src}:{rid}' if rid is not None else f'native:{src}:?'
-
-
-def reaction_set(m):
-    src = m.get('source') or '?'
-    rx = m.get('reactions') or []
-    if rx:
-        return frozenset(primary_reaction_id(r, src) for r in rx)
-    fp = m.get('geometry_fingerprint')
-    if fp:
-        return frozenset([f'geometry:{fp}'])
-    ents = sorted({n.get('entity') for n in (m.get('nodes') or []) if n.get('entity')})
-    return frozenset([f'entities:{",".join(ents)}']) if ents else frozenset()
 
 
 def load_modules():
