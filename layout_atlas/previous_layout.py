@@ -446,8 +446,10 @@ def escher_crossings(data):
 def relax_grafted_midmarkers(data, grafted_mids, step=10.0, radii=(1, 2, 3, 4, 6)):
     """Nudge grafted midmarkers (and their private currency stubs) to cut crossings.
 
-    Matched previous geometry is never moved.  Returns (data, report).
+    Matched previous geometry is never moved.  Node moves go through ``map_edit``
+    helpers so metabolite / midmarker labels stay attached.  Returns (data, report).
     """
+    from map_edit import set_node_xy, translate_node, translate_reaction_label
     if not grafted_mids:
         return data, dict(moved=0, crossings_before=None, crossings_after=None)
     header, body = data[0], dict(data[1])
@@ -483,35 +485,45 @@ def relax_grafted_midmarkers(data, grafted_mids, step=10.0, radii=(1, 2, 3, 4, 6
                         priv.add(nid)
         return priv
 
+    def restore_base(base, base_rx_labels):
+        for nid, xy in base.items():
+            set_node_xy(nodes[nid], xy[0], xy[1])
+        for rx, lab in base_rx_labels:
+            if 'label_x' in rx:
+                rx['label_x'], rx['label_y'] = lab
+
     for rid, mid_nid in grafted_mids.items():
         mid_nid = str(mid_nid)
         if mid_nid not in nodes:
             continue
         priv = private_nodes(rid, mid_nid)
-        base = {nid: [nodes[nid]['x'], nodes[nid]['y']] for nid in [mid_nid, *priv]}
+        base = {nid: [float(nodes[nid]['x']), float(nodes[nid]['y'])] for nid in [mid_nid, *priv]}
+        base_rx_labels = [
+            (rx, [float(rx['label_x']), float(rx['label_y'])])
+            for rx in reactions.values()
+            if rx.get('bigg_id') == rid and 'label_x' in rx
+        ]
         best = escher_crossings(data)
-        best_pos = {nid: list(xy) for nid, xy in base.items()}
+        best_delta = (0.0, 0.0)
         improved = False
         for dx, dy in offsets:
-            for nid, xy in base.items():
-                nodes[nid]['x'] = xy[0] + dx
-                nodes[nid]['y'] = xy[1] + dy
-            for rx in reactions.values():
-                if rx.get('bigg_id') == rid:
-                    rx['label_x'] = nodes[mid_nid]['x'] + 10
-                    rx['label_y'] = nodes[mid_nid]['y'] - 10
+            restore_base(base, base_rx_labels)
+            for nid in base:
+                translate_node(nodes[nid], dx, dy)
+            for rx, _lab in base_rx_labels:
+                translate_reaction_label(rx, dx, dy)
             cur = escher_crossings(data)
             if cur is not None and best is not None and cur < best:
                 best = cur
-                best_pos = {nid: [nodes[nid]['x'], nodes[nid]['y']] for nid in base}
+                best_delta = (dx, dy)
                 improved = True
-        for nid, xy in best_pos.items():
-            nodes[nid]['x'], nodes[nid]['y'] = xy
-        for rx in reactions.values():
-            if rx.get('bigg_id') == rid:
-                rx['label_x'] = nodes[mid_nid]['x'] + 10
-                rx['label_y'] = nodes[mid_nid]['y'] - 10
+        restore_base(base, base_rx_labels)
         if improved:
+            dx, dy = best_delta
+            for nid in base:
+                translate_node(nodes[nid], dx, dy)
+            for rx, _lab in base_rx_labels:
+                translate_reaction_label(rx, dx, dy)
             moved += 1
     after = escher_crossings(data)
     return data, dict(

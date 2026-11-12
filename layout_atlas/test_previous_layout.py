@@ -113,6 +113,49 @@ def test_keep_local_relayout_requires_substantial_crossing_drop():
     assert prev.keep_local_relayout(8, 6)
 
 
+def test_relax_grafted_midmarkers_keeps_labels_with_nodes():
+    """Local graft relax must move labels via map_edit helpers."""
+    body = {
+        'nodes': {
+            'm1': dict(node_type='metabolite', bigg_id='a_c', node_is_primary=True,
+                       x=0.0, y=0.0, label_x=5.0, label_y=-5.0),
+            'r1': dict(node_type='midmarker', x=50.0, y=0.0),
+            'm2': dict(node_type='metabolite', bigg_id='b_c', node_is_primary=True,
+                       x=100.0, y=0.0, label_x=105.0, label_y=-5.0),
+            'side': dict(node_type='metabolite', bigg_id='h_c', node_is_primary=False,
+                         x=50.0, y=20.0, label_x=55.0, label_y=15.0),
+        },
+        'reactions': {
+            'rx': dict(
+                bigg_id='NEW',
+                label_x=60.0, label_y=-10.0,
+                metabolites=[dict(bigg_id='a_c', coefficient=-1),
+                             dict(bigg_id='b_c', coefficient=1),
+                             dict(bigg_id='h_c', coefficient=1)],
+                segments={
+                    '0': dict(from_node_id='r1', to_node_id='m1', b1=None, b2=None),
+                    '1': dict(from_node_id='r1', to_node_id='m2', b1=None, b2=None),
+                    '2': dict(from_node_id='r1', to_node_id='side', b1=None, b2=None),
+                },
+            ),
+        },
+        'canvas': dict(x=0, y=0, width=200, height=100),
+    }
+    data = [{'map_name': 't', 'metadata': {}}, body]
+    # Force a move by shifting base then relaxing toward origin-ish offsets.
+    out, report = prev.relax_grafted_midmarkers(data, {'NEW': 'r1'}, step=10.0, radii=(1, 2))
+    assert report['crossings_before'] is not None
+    # Private side stub label offset preserved relative to node.
+    side = out[1]['nodes']['side']
+    assert abs((side['label_x'] - side['x']) - 5.0) < 1e-6
+    assert abs((side['label_y'] - side['y']) - (-5.0)) < 1e-6
+    rx = out[1]['reactions']['rx']
+    mid = out[1]['nodes']['r1']
+    # Reaction label moved by the same delta as the midmarker from the initial pose.
+    assert abs((rx['label_x'] - mid['x']) - 10.0) < 1e-6
+    assert abs((rx['label_y'] - mid['y']) - (-10.0)) < 1e-6
+
+
 def test_graft_new_reactions_places_midmarker_between_sides():
     body = {
         'nodes': {
