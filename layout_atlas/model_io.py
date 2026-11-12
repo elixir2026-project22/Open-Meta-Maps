@@ -8,7 +8,10 @@
        genes=[dict(id, name, label, annotations, notes)])
 
   annotations   list of dict(qualifier='{http://biomodels.net/biology-qualifiers/}is', uri='https://identifiers.org/...'): the element's own CV terms only
-  coefficient   negative for reactants, positive for products, summed when a species appears twice, zero entries dropped
+  coefficient   negative for reactants, positive for products; when a species appears on both sides the net
+                coefficient is stored (0 when the sides cancel). Gross participation decides whether the
+                species is kept: a cancelling A -> A (or SBGN-style same glyph as input and output) stays
+                as coefficient 0 so the reaction still has participants and is drawn on both roles.
 
 The input rules are the ones the layout code relies on: exactly one model, finite non-negative stoichiometry
 coefficients (missing stoichiometry defaults to 1 for drawing; L2 stoichiometryMath / L3 variable species references
@@ -182,8 +185,9 @@ def load_model(path):
     for k in range(model.getNumReactions()):
         reaction = model.getReaction(k)
         rid = _decode(reaction.getId(), 'R_')
-        coefficients = {}
+        consumed, produced = {}, {}
         for sign, count, get in ((-1, reaction.getNumReactants(), reaction.getReactant), (1, reaction.getNumProducts(), reaction.getProduct)):
+            bag = consumed if sign < 0 else produced
             for i in range(count):
                 ref = get(i)
                 raw = ref.getSpecies()
@@ -193,7 +197,19 @@ def load_model(path):
                 if not math.isfinite(value) or value < 0:
                     raise ValueError(f'Invalid stoichiometry in reaction {rid}')
                 mid = id_map[raw]
-                coefficients[mid] = coefficients.get(mid, 0) + sign * value
+                bag[mid] = bag.get(mid, 0) + value
+        # Net stoichiometry for chemistry; keep coefficient 0 when both sides cancel so gross
+        # participation still lists the species (A -> A and A + B -> A + C).
+        # Iterate in SBML reactant-then-product order (not set union hash order).
+        coefficients = {}
+        for mid in {**consumed, **produced}:
+            s = float(consumed.get(mid, 0.0))
+            p = float(produced.get(mid, 0.0))
+            net = p - s
+            if s > 0 and p > 0 and abs(net) <= 1e-12:
+                coefficients[mid] = 0.0
+            elif abs(net) > 1e-12:
+                coefficients[mid] = net
         # COBRA Level 2 stores bounds as kinetic-law parameters.
         legacy = {}
         law = reaction.getKineticLaw()
@@ -218,7 +234,7 @@ def load_model(path):
         if any(math.isnan(b) for b in bounds) or bounds[0] > bounds[1]:
             raise ValueError(f'Invalid flux bounds in reaction {rid}')
         reactions.append(dict(id=rid, name=reaction.getName(), **_metadata(reaction), gene_reaction_rule=rule,
-                              metabolites={m: c for m, c in coefficients.items() if c}, lower_bound=bounds[0], upper_bound=bounds[1]))
+                              metabolites=coefficients, lower_bound=bounds[0], upper_bound=bounds[1]))
     if not metabolites or not reactions or len({r['id'] for r in reactions}) != len(reactions):
         raise ValueError('Model must contain metabolites and reactions with unique IDs')
     return dict(id=model.getId(), name=model.getName(), **_metadata(model), metabolites=metabolites, reactions=reactions, genes=genes)

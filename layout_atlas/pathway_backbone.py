@@ -15,6 +15,8 @@ Only the coordinates of this region are computed; the caller places the region a
 import networkx as nx
 import numpy as np
 
+from core import participation_roles
+
 DX, DY = 150.0, 95.0
 
 
@@ -29,11 +31,11 @@ def layered(reactions, region, cur=None):
     for mid, rids in shared.items():
         D.add_node('s:' + mid)
         for rid in rids:
-            coeff = reactions[rid]['metabolites'][mid]
-            if coeff < 0:
-                D.add_edge('s:' + mid, 'r:' + rid)   # substrate -> reaction
-            else:
-                D.add_edge('r:' + rid, 's:' + mid)   # reaction -> product
+            for role_c in participation_roles(reactions[rid]['metabolites'][mid]):
+                if role_c < 0:
+                    D.add_edge('s:' + mid, 'r:' + rid)   # substrate -> reaction
+                else:
+                    D.add_edge('r:' + rid, 's:' + mid)   # reaction -> product
     # cut cycles: reverse the closing edge of every cycle found by DFS (deterministic order)
     while True:
         try:
@@ -143,9 +145,12 @@ def find_chain(reactions, rids, cur):
         coeff = reactions[rid]['metabolites']
         along = 0
         if nxt is not None:      # forward along the chain means: the link metabolite is a product of this reaction in its allowed direction
-            along = 1 if coeff[nxt] * d > 0 else -1
+            c = coeff[nxt]
+            # Coefficient 0 is dual-role, not a backwards vote.
+            along = 0 if c == 0 else (1 if c * d > 0 else -1)
         elif prv is not None:
-            along = 1 if coeff[prv] * d < 0 else -1
+            c = coeff[prv]
+            along = 0 if c == 0 else (1 if c * d < 0 else -1)
         votes += along
     if votes < 0:
         best, links = best[::-1], links[::-1]

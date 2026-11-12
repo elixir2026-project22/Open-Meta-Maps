@@ -177,6 +177,8 @@ def normalize_model(model, job):
         r['annotations'] = cobra_annotations(r)
         r.setdefault('lower_bound', -1000.)
         r.setdefault('upper_bound', 1000.)
+        # Gross participation (keys present), not net stoichiometry: coefficient 0 means
+        # a species on both sides with cancelling amounts and still counts as a participant.
         if not isinstance(r.get('metabolites'), dict) or not r['metabolites']:
             raise Failure('bad_format', f"Reaction {r.get('id')} has no stoichiometry.")
     ids = {m['id'] for m in model['metabolites']}

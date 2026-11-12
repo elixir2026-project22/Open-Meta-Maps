@@ -101,12 +101,21 @@ def render(data, kinds=None):
         coefficient = {}
         for m in r.get('metabolites', []):
             coefficient.setdefault(m['bigg_id'], m['coefficient'])
+        # Coefficient 0 draws two legs (substrate then product); track which leg we are on.
+        dual_leg = {}
         for path in _terminals(r, nodes):
             end = nodes[path[-1]]
             if end.get('node_type') != 'metabolite':
                 continue
             keep = (rid, end.get('bigg_id')) in preserved
-            product = coefficient.get(end.get('bigg_id'), 1) > 0
+            mid = end.get('bigg_id')
+            c = coefficient.get(mid, 1)
+            if c == 0:
+                n = dual_leg.get(mid, 0)
+                dual_leg[mid] = n + 1
+                product = n >= 1  # first substrate, second product (arrowhead)
+            else:
+                product = c > 0
             d_curve, curved = _curved_path(r, path, nodes)
             entry = source_paths.get((rid, end.get('bigg_id')))
             if (curved or entry is not None) and (rid, end.get('bigg_id')) not in routed_edges:  # the expert's own line: Bezier segments or the polyline of an original connector, stored in the map as Escher segments
@@ -123,7 +132,6 @@ def render(data, kinds=None):
             if keep:
                 path = [path[0], path[-1]]  # edge of an expert structure: keep the structure's own straight connection, not the routed detour
             pts = ' L'.join(f"{nodes[k]['x']:.1f},{nodes[k]['y']:.1f}" for k in path)
-            product = coefficient.get(end.get('bigg_id'), 1) > 0
             arrows = f' marker-end="{mark}"' if (product or reversible) else ''
             title = f'<title>{escape(rid)} {escape(r.get("name") or "")} - {escape(epv.LABELS[kind]) if kind in epv.LABELS else "unclassified"}</title>'
             (top_lines if keep else lines).append(f'<path data-rx="{escape(rid)}" data-met="{escape(end.get("bigg_id") or "")}"{kind_attr}{_currency_attr(end)} d="M{pts}" stroke="{EDGE}" stroke-width="{2.4 if keep else 1.3}"{"" if keep else " stroke-opacity=\".7\""} stroke-linejoin="round" stroke-linecap="round" fill="none"{arrows}>{title}</path>')
