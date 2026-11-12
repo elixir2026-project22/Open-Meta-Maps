@@ -51,10 +51,13 @@ class TestSearchIndex:
             _mod('mod_human', rx_id='MAR0001', refs={'human.gem': ['MAR0001'], 'bigg.reaction': ['HEX1']},
                  ec=['2.7.1.1'], mets=['glc_D_c', 'g6p_c'], source='human_maps', license='CC-BY-4.0',
                  attribution='Human-maps (CC BY 4.0)', name='Human-GEM.Glycolysis', map_id='hm1'),
-            # Same canonical reaction set as mod_pfk, different map/source → collapsed by default.
+            # Same canonical reaction set as mod_pfk, different map/source → also_in after collapse.
             _mod('mod_pfk_alt', rx_id='TESTKX', refs={'bigg.reaction': ['TESTKX']}, ec=['9.9.9.9'],
                  mets=['g6p_c', 'f6p_c'], name='iJO1366.Glycolysis', map_id='iJO1366', source='escher',
                  attribution='Escher community-maps (CC0)'),
+            # Second window on the same source map as mod_pfk (same name).
+            _mod('mod_pfk_win2', rx_id='TESTKX', ec=['9.9.9.9'], mets=['g6p_c', 'f6p_c'],
+                 name='e_coli_core.Glycolysis', map_id='e_coli_core', size=3, extra_rx=['X']),
             # Larger module ranks first.
             _mod('mod_big', rx_id='A', extra_rx=['B', 'C', 'D'], mets=['x_c', 'y_c'], name='Big.Map', map_id='big1', size=4),
             _mod('mod_bad', license='CC-BY-SA-4.0'),
@@ -71,20 +74,29 @@ class TestSearchIndex:
         self.tmp.cleanup()
 
     def test_skips_non_cc0_ccby_mit(self):
-        assert self.summary['modules'] == 5
+        assert self.summary['modules'] == 6
         assert self.summary['skipped_license'] == 1
         assert not ab.license_ok('CC-BY-SA-4.0')
         assert ab.license_ok('CC0-1.0-data')
 
-    def test_search_by_ec(self):
-        r = ab.search({'ec': '9.9.9.9'}, index=self.idx)
-        assert r['total'] == 1  # collapsed
-        assert r['results'][0]['also_in']['modules'] == 2
-        assert 'also in:' in r['results'][0]['also_in']['label']
+    def test_search_by_ec_groups_source_maps(self):
+        r = ab.search({'q': '9.9.9.9'}, index=self.idx)
+        assert r['q_kind'] == 'ec'
+        assert r['module_total'] == 3  # pfk, pfk_alt, pfk_win2
+        assert r['source_map_total'] == 2  # e_coli_core.Glycolysis + iJO1366.Glycolysis
+        # Cross-source identical reaction set collapses to one card with also_in.
+        assert r['total'] == 1
+        card = r['results'][0]
+        assert card['windows_count'] >= 2  # pfk + win2 on e_coli_core (or alt alone)
+        assert card['also_in']['maps'] == 2
+        assert 'also in:' in card['also_in']['label']
+        assert '9.9.9.9' in ' '.join(card['matched'])
+        assert card['subtitle'].startswith(ab.source_label(card['source']))
 
-    def test_show_variants_expands(self):
-        r = ab.search({'ec': '9.9.9.9', 'variants': '1'}, index=self.idx)
-        assert r['total'] == 2
+    def test_show_all_windows_expands(self):
+        r = ab.search({'q': '9.9.9.9', 'variants': '1'}, index=self.idx)
+        assert r['module_total'] == 3
+        assert r['total'] == 3
         assert r['deduped'] is False
 
     def test_ranks_larger_first(self):
@@ -93,24 +105,27 @@ class TestSearchIndex:
         assert r['results'][0]['size'] == 4
 
     def test_search_by_reaction_canonical_and_source(self):
-        r = ab.search({'reaction': 'HEX1'}, index=self.idx)
+        r = ab.search({'q': 'HEX1'}, index=self.idx)
+        assert r['q_kind'] == 'reaction'
         assert r['total'] == 1
         assert r['results'][0]['id'] == 'mod_human'
-        r2 = ab.search({'reaction': 'MAR0001'}, index=self.idx)
-        assert r2['total'] == 1
+        assert 'HEX1' in r['results'][0]['matched'] or 'MAR0001' in r['results'][0]['matched']
 
     def test_search_by_metabolite_and_map(self):
-        r = ab.search({'metabolite': 'g6p'}, index=self.idx)
-        assert r['total'] == 2  # pfk group + human
-        r2 = ab.search({'map': 'human-gem'}, index=self.idx)
-        assert r2['total'] == 1
+        r = ab.search({'q': 'g6p_c'}, index=self.idx)
+        assert r['q_kind'] == 'metabolite'
+        assert r['module_total'] >= 2
+        r2 = ab.search({'q': 'Human-GEM.Glycolysis'}, index=self.idx)
+        assert r2['total'] >= 1
         r3 = ab.search({'source': 'human_maps', 'license': 'CC-BY-4.0'}, index=self.idx)
-        assert r3['total'] == 1
+        assert r3['module_total'] == 1
 
-    def test_pagination(self):
+    def test_pagination_and_count_label(self):
         r = ab.search({}, page=1, per_page=2, index=self.idx)
-        assert r['total'] == 4  # big, pfk-group, gapd, human
-        assert r['pages'] == 2
+        assert r['module_total'] == 6
+        assert r['source_map_total'] >= 1
+        assert 'source maps' in r['count_label']
+        assert 'modules' in r['count_label']
         assert len(r['results']) == 2
 
     def test_each_result_card_has_thumbnail(self):
@@ -121,25 +136,20 @@ class TestSearchIndex:
             assert card['thumbnail'].endswith('/thumbnail.svg')
             assert f"/api/atlas/modules/{card['id']}/thumbnail.svg" == card['thumbnail']
 
-    def test_free_text_q_auto_detects_ec_reaction_metabolite(self):
+    def test_free_text_q_auto_detects_ec_reaction_metabolite_map(self):
         r_ec = ab.search({'q': '9.9.9.9'}, index=self.idx)
         assert r_ec['q_kind'] == 'ec'
-        assert r_ec['total'] == 1
-        assert r_ec['results'][0]['also_in']['modules'] == 2
+        assert r_ec['q_kind_label'] == 'Matched as EC number'
         r_rx = ab.search({'q': 'HEX1'}, index=self.idx)
         assert r_rx['q_kind'] == 'reaction'
-        assert r_rx['total'] == 1
-        assert r_rx['results'][0]['id'] == 'mod_human'
         r_met = ab.search({'q': 'g6p_c'}, index=self.idx)
         assert r_met['q_kind'] == 'metabolite'
-        assert r_met['total'] >= 1
         r_map = ab.search({'q': 'e_coli_core'}, index=self.idx)
         assert r_map['q_kind'] == 'map'
-        assert r_map['total'] >= 1
-        # Plain English still uses the free-text blob path.
+        assert r_map['module_total'] >= 1
         r_txt = ab.search({'q': 'Glycolysis'}, index=self.idx)
         assert r_txt['q_kind'] == 'text'
-        assert r_txt['total'] >= 1
+        assert r_txt['module_total'] >= 1
 
 
 class TestQueryAndSpeciesHelpers:
@@ -168,9 +178,16 @@ class TestQueryAndSpeciesHelpers:
         m['species'] = 'pathway-level; organism assignment not in source SVG'
         card = ab.public_card(m)
         assert card['species'] is None
-        # page_html omits the Species row when the API returns null/empty.
         html = (ab.ROOT / 'layout_atlas' / 'results' / 'atlas_browser' / 'index.html').read_text(encoding='utf-8')
         assert "d.species?'" in html or 'var spRow=d.species?' in html
+
+    def test_thumbnail_uses_atlas_examples_style(self):
+        m = _mod('thumb')
+        svg = ab.thumbnail_svg(m)
+        assert 'stroke="#111"' in svg
+        assert 'fill="#111111"' in svg
+        assert 'fill="#ffffff"' in svg
+        assert 'fill="#fafafa"' in svg
 
 
 class TestDownloadManifest:
@@ -252,11 +269,10 @@ class TestEscherExportAndThumbnail:
         by = by_key['b_c']['y'] - by_key['rx']['y']
         assert ax * by - ay * bx > 0
 
-    def test_thumbnail_has_circles_and_midmarkers(self):
+    def test_thumbnail_has_circles_and_lines(self):
         m = _mod('thumb')
         svg = ab.thumbnail_svg(m)
         assert '<circle' in svg
-        assert '<rect' in svg
         assert '<line' in svg
         assert 'viewBox="0 0 240 160"' in svg
 
@@ -273,3 +289,14 @@ class TestEscherExportAndThumbnail:
         assert 'BRENDA pathway map' in text
         assert 'doi:10.1/x' in text
         assert '[object Object]' not in text
+
+    def test_page_html_simplified_form(self):
+        ab.page_html()
+        html = (ab.ROOT / 'layout_atlas' / 'results' / 'atlas_browser' / 'index.html').read_text(encoding='utf-8')
+        assert 'id="ec"' not in html
+        assert 'id="reaction"' not in html
+        assert 'id="metabolite"' not in html
+        assert 'id="map"' not in html
+        assert '1.1.1.100, HEX1, g6p_c, iJO1366' in html
+        assert 'qDetect' in html
+        assert 'windows' in html

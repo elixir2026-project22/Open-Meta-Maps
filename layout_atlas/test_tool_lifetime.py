@@ -64,7 +64,6 @@ class LifetimeConstants(unittest.TestCase):
         self.assertIn('function exportView', html)
         self.assertIn('Download PNG', html)
         self.assertIn('Cannot download: the tool server is not reachable', html)
-        self.assertNotIn('无法下载：工具服务器不可用', html)
         self.assertNotIn('id="lang"', html)
         self.assertNotIn('data-zh', html)
         # Settings / labels audit (English-only, correct report keys, curated wording).

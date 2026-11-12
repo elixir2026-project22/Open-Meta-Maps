@@ -58,6 +58,23 @@ SOURCE_COLORS = {
     'panther': '#5b6b8a',
     'ich360': '#128781',
 }
+SOURCE_LABELS = {
+    'escher': 'Escher',
+    'wikipathways': 'WikiPathways',
+    'reactome': 'Reactome',
+    'human_maps': 'Human maps',
+    'brenda': 'BRENDA',
+    'metabolismregulation': 'Metabolism Regulation',
+    'panther': 'PANTHER',
+    'ich360': 'iCH360',
+}
+Q_KIND_LABELS = {
+    'ec': 'Matched as EC number',
+    'reaction': 'Matched as reaction ID',
+    'metabolite': 'Matched as metabolite ID',
+    'map': 'Matched as map / model',
+    'text': 'Matched as free text',
+}
 
 _index = None
 _payload_cache = {}
@@ -469,32 +486,130 @@ def _group_key(m):
     return sig if sig else f"id:{m['id']}"
 
 
-def _collapse(hits):
-    """Collapse identical canonical reaction sets; keep larger/better representative first."""
-    groups = {}
+def source_label(code):
+    return SOURCE_LABELS.get(code, code or '')
+
+
+def _map_key(m):
+    return (m.get('source') or '', m.get('name') or m.get('map_id') or m.get('id') or '')
+
+
+def _query_matches(m, ec='', rx='', met='', mmap='', q=''):
+    """Return (matched_id_list, hit_count) for ranking and card subtitles."""
+    matched = []
+    seen = set()
+
+    def add(token):
+        t = str(token or '').strip()
+        if not t:
+            return
+        key = _norm(t)
+        if key in seen:
+            return
+        # Prefer the bare id over a namespaced duplicate (e.g. HEX1 over bigg.reaction:hex1).
+        bare = key.split(':', 1)[-1]
+        if ':' in key and bare in seen:
+            return
+        if ':' not in key:
+            # Replace any prior namespaced form of the same bare id.
+            for i, prev in enumerate(list(matched)):
+                if _norm(prev).endswith(':' + key) or _norm(prev) == key:
+                    matched[i] = t
+                    seen.discard(_norm(prev))
+                    seen.add(key)
+                    return
+        seen.add(key)
+        matched.append(t)
+
+    def collect(values, query):
+        qn = _norm(query)
+        if not qn:
+            return
+        # Prefer the user's typed token for the subtitle (preserve casing).
+        hit = False
+        for v in values or []:
+            if qn in _norm(v) or _norm(v).endswith(':' + qn):
+                hit = True
+                break
+        if hit:
+            add(query)
+            return
+        for v in values or []:
+            if qn in _norm(v):
+                add(v)
+
+    collect(m.get('ec'), ec)
+    collect(m.get('rx'), rx)
+    collect(m.get('met'), met)
+    collect(m.get('map'), mmap)
+    qn = _norm(q)
+    if qn:
+        for bucket in (m.get('ec'), m.get('rx'), m.get('met'), m.get('map')):
+            hit = False
+            for v in bucket or []:
+                if qn in _norm(v) or _norm(v).endswith(':' + qn):
+                    hit = True
+                    break
+            if hit:
+                add(q)
+        # Free-text name hit still counts toward ranking even without an id token.
+        blob = ' '.join([m.get('name') or '', m.get('map_id') or '', m.get('lineage') or ''])
+        if qn in _norm(blob) and not matched:
+            add(q)
+    return matched, len(matched)
+
+
+def _compactness(m):
+    """Lower is more compact (prefer smaller windows when hit counts tie)."""
+    return int(m.get('size') or 0), _quality_rank(m.get('quality')), m.get('id') or ''
+
+
+def _group_by_source_map(hits, show_all_windows=False):
+    """One representative per source map; other windows kept for the badge."""
+    by_map = {}
     order = []
     for m in hits:
-        key = _group_key(m)
-        if key not in groups:
-            groups[key] = []
+        key = _map_key(m)
+        if key not in by_map:
+            by_map[key] = []
             order.append(key)
-        groups[key].append(m)
-    out = []
+        by_map[key].append(m)
+    cards = []
     for key in order:
-        members = groups[key]
-        members.sort(key=lambda r: (-r['size'], _quality_rank(r.get('quality')), r['source'], r['id']))
-        rep = members[0]
-        out.append((rep, members))
-    # Rank groups by representative size (more complete first).
-    out.sort(key=lambda pair: (-pair[0]['size'], -len(pair[1]), _quality_rank(pair[0].get('quality')), pair[0]['name'], pair[0]['id']))
+        members = by_map[key]
+        members.sort(key=lambda r: (-int(r.get('_hits') or 0),) + _compactness(r))
+        if show_all_windows:
+            for m in members:
+                cards.append((m, [m], members))
+        else:
+            cards.append((members[0], members, members))
+    return cards
+
+
+def _collapse_cross_source(map_cards):
+    """Collapse identical reaction sets across sources into one card with also_in."""
+    by_sig = {}
+    for rep, windows, all_on_map in map_cards:
+        sig = rep.get('rx_sig') or f"id:{rep['id']}"
+        by_sig.setdefault(sig, []).append((rep, windows, all_on_map))
+    out = []
+    for sig, group in by_sig.items():
+        # Prefer most query hits, then most compact window as the visible card.
+        group.sort(key=lambda t: (-int(t[0].get('_hits') or 0),) + _compactness(t[0]))
+        rep, windows, all_on_map = group[0]
+        peers = [t[0] for t in group]
+        out.append((rep, windows, all_on_map, peers))
+    out.sort(key=lambda t: (-int(t[0].get('_hits') or 0), -int(t[0].get('size') or 0),
+                            -len({_map_key(p) for p in t[3]}), t[0].get('name') or '', t[0].get('id') or ''))
     return out
 
 
 def search(filters=None, page=1, per_page=PAGE_DEFAULT, index=None):
-    """Filter modules. Dedup by canonical reaction set unless variants=1.
+    """Filter modules and group by source map (one card per map).
 
     Free-text `q` auto-routes EC / reaction / metabolite / model-map shaped
-    tokens so the dedicated fields are optional.
+    tokens. Default listing collapses windows on the same source map and links
+    identical reaction sets across sources via also_in.
     """
     filters = filters or {}
     idx = index or load_index()
@@ -505,9 +620,10 @@ def search(filters=None, page=1, per_page=PAGE_DEFAULT, index=None):
     rx = filters.get('reaction') or filters.get('reaction_id') or ''
     met = filters.get('metabolite') or filters.get('metabolite_id') or ''
     mmap = filters.get('map') or filters.get('map_id') or filters.get('model') or ''
-    q = (filters.get('q') or filters.get('query') or '').strip()
+    q_raw = (filters.get('q') or filters.get('query') or '').strip()
     show_variants = _truthy(filters.get('variants') or filters.get('show_variants'))
-    q_kind = classify_query(q) if q else 'text'
+    q_kind = classify_query(q_raw) if q_raw else None
+    q = q_raw
     # Route free-text into the matching field when the dedicated field is empty.
     if q and q_kind == 'ec' and not ec:
         ec, q = q, ''
@@ -537,13 +653,31 @@ def search(filters=None, page=1, per_page=PAGE_DEFAULT, index=None):
                              ' '.join(m['rx'][:40]), ' '.join(m['ec'][:20]), ' '.join(m['met'][:40])])
             if _norm(q) not in _norm(blob):
                 continue
+        matched, n_hits = _query_matches(m, ec=ec, rx=rx, met=met, mmap=mmap, q=q_raw)
+        m = dict(m)
+        m['_hits'] = n_hits
+        m['_matched'] = matched
         hits.append(m)
 
+    module_total = len(hits)
+    map_cards = _group_by_source_map(hits, show_all_windows=False)
+    source_map_total = len(map_cards)
     if show_variants:
-        # Already size-desc from index build; keep that order.
-        items = [(m, [m]) for m in hits]
+        # Expand every window as its own card (still carry peer maps for also_in).
+        expanded = []
+        collapsed = _collapse_cross_source(map_cards)
+        peer_by_sig = {}
+        for rep, _w, _a, peers in collapsed:
+            peer_by_sig[rep.get('rx_sig') or f"id:{rep['id']}"] = peers
+        for rep, windows, all_on_map in map_cards:
+            for w in windows:
+                sig = w.get('rx_sig') or f"id:{w['id']}"
+                expanded.append((w, [w], all_on_map, peer_by_sig.get(sig) or [w]))
+        items = expanded
+        items.sort(key=lambda t: (-int(t[0].get('_hits') or 0), -int(t[0].get('size') or 0),
+                                  t[0].get('name') or '', t[0].get('id') or ''))
     else:
-        items = _collapse(hits)
+        items = _collapse_cross_source(map_cards)
 
     per_page = max(1, min(int(per_page or PAGE_DEFAULT), 100))
     page = max(1, int(page or 1))
@@ -553,53 +687,82 @@ def search(filters=None, page=1, per_page=PAGE_DEFAULT, index=None):
         page = pages
     start = (page - 1) * per_page
     slice_ = items[start:start + per_page]
-    results = [public_card(rep, variants=members) for rep, members in slice_]
+    results = [
+        public_card(rep, windows=windows, peers=peers, matched=rep.get('_matched') or [])
+        for rep, windows, _all_on_map, peers in slice_
+    ]
     return dict(
         total=total,
+        module_total=module_total,
+        source_map_total=source_map_total,
         page=page,
         per_page=per_page,
         pages=pages,
         deduped=not show_variants,
-        q_kind=q_kind if (filters.get('q') or filters.get('query')) else None,
+        q_kind=q_kind,
+        q_kind_label=Q_KIND_LABELS.get(q_kind) if q_kind else None,
+        count_label=f"{source_map_total:,} source maps · {module_total:,} modules",
         results=results,
         filters={k: v for k, v in filters.items() if v not in (None, '')},
     )
 
 
-def public_card(m, variants=None):
-    variants = variants or [m]
-    sources = sorted({v['source'] for v in variants})
-    maps = sorted({(v['source'], v.get('name') or v.get('map_id') or '') for v in variants})
+def public_card(m, windows=None, peers=None, matched=None, variants=None):
+    """Build a result card. `windows` = same source map; `peers` = cross-source same rx set."""
+    windows = windows or [m]
+    peers = peers or [m]
+    matched = list(matched or m.get('_matched') or [])
+    # Back-compat for older call sites that pass variants=.
+    if variants and windows == [m]:
+        windows = variants
+        peers = variants
+    peer_maps = sorted({_map_key(v) for v in peers})
     also = None
-    if len(variants) > 1:
+    if len(peer_maps) > 1:
+        sources = sorted({v.get('source') for v in peers if v.get('source')})
         also = dict(
-            modules=len(variants),
+            modules=len(peers),
             sources=len(sources),
-            maps=len(maps),
-            label=f"also in: {len(sources)} sources / {len(maps)} maps",
+            maps=len(peer_maps),
+            label=f"also in: {len(sources)} sources / {len(peer_maps)} maps",
         )
     q = quality_label(m.get('quality'))
     sp = species_display(m.get('species'))
+    src = m.get('source') or ''
+    match_bits = ', '.join(matched[:6])
+    subtitle = source_label(src)
+    if match_bits:
+        subtitle = f"{subtitle} · matches {match_bits}"
     return dict(
         id=m['id'],
-        source=m['source'],
+        source=src,
+        source_label=source_label(src),
         name=m['name'],
         map_id=m['map_id'],
+        subtitle=subtitle,
+        matched=matched,
         species=sp,
         license=m['license'],
-        attribution=attribution_string(m.get('attribution'), m.get('source') or ''),
+        attribution=attribution_string(m.get('attribution'), src),
         size=m['size'],
         quality=m.get('quality') or '',
         quality_label=q['label'],
         quality_tip=q['tip'],
         rx_sig=m.get('rx_sig') or '',
         also_in=also,
+        windows_count=len(windows),
+        windows=[dict(
+            id=w['id'], source=w.get('source') or '', name=w.get('name') or '',
+            map_id=w.get('map_id') or '', size=w.get('size') or 0,
+            license=w.get('license') or '',
+            thumbnail=f"/api/atlas/modules/{w['id']}/thumbnail.svg",
+        ) for w in windows],
         variants=[dict(
             id=v['id'], source=v['source'], name=v['name'], map_id=v.get('map_id') or '',
             license=v.get('license') or '',
             attribution=attribution_string(v.get('attribution'), v.get('source') or ''),
             size=v.get('size') or 0,
-        ) for v in variants],
+        ) for v in peers],
         thumbnail=f"/api/atlas/modules/{m['id']}/thumbnail.svg",
     )
 
@@ -613,7 +776,7 @@ def meta(index=None):
         registry_sha256=idx.get('registry_sha256'),
         sources=sorted((idx.get('sources') or {}).items()),
         licences=sorted((idx.get('licences') or {}).items()),
-        filters=['q', 'ec', 'reaction', 'metabolite', 'map', 'source', 'license', 'variants'],
+        filters=['q', 'source', 'license', 'variants'],
     )
 
 
@@ -717,28 +880,38 @@ def module_detail(module_id, index=None):
 
 
 def thumbnail_svg(module, width=240, height=160):
-    """Curated drawing preview: metabolite circles, reaction midmarkers, connecting lines.
+    """Curated drawing preview matching docs/images/atlas/atlas_examples style.
 
-    Uniform scale + translate only (no rotate/mirror). Fit-to-box with padding; no cropping.
+    Black edges, white metabolite nodes with black stroke, filled black reaction
+    nodes. Uniform scale + translate only (no rotate/mirror). Aspect preserved.
     """
     usable = [n for n in (module.get('nodes') or []) if n.get('xy') is not None]
     if not usable:
         return (
             f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}">'
+            f'<rect width="100%" height="100%" fill="#fafafa"/>'
             f'<text x="12" y="{height // 2}" fill="#5b7480" font-size="12">No geometry</text></svg>'
         )
+    # Drop exact coordinate duplicates that pile into unreadable clumps.
+    seen_xy = set()
+    deduped = []
+    for n in usable:
+        key = (round(float(n['xy'][0]), 4), round(float(n['xy'][1]), 4), n.get('role'))
+        if key in seen_xy:
+            continue
+        seen_xy.add(key)
+        deduped.append(n)
+    usable = deduped or usable
     xs = [n['xy'][0] for n in usable]
     ys = [n['xy'][1] for n in usable]
     min_x, max_x = min(xs), max(xs)
     min_y, max_y = min(ys), max(ys)
     bw = (max_x - min_x) or 1.0
     bh = (max_y - min_y) or 1.0
-    pad = 14.0
+    pad = 18.0
     scale = min((width - 2 * pad) / bw, (height - 2 * pad) / bh)
-    # Center content inside the box.
     ox = (width - bw * scale) / 2
     oy = (height - bh * scale) / 2
-    color = SOURCE_COLORS.get(module.get('source'), '#128781')
 
     def pt(n):
         return (round(ox + (n['xy'][0] - min_x) * scale, 2), round(oy + (n['xy'][1] - min_y) * scale, 2))
@@ -747,28 +920,26 @@ def thumbnail_svg(module, width=240, height=160):
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}" '
         f'role="img" aria-label="{xml_escape(str(module.get("name") or module.get("id") or "module"))}">'
+        f'<rect width="100%" height="100%" fill="#fafafa"/>'
     ]
     for e in module.get('edges') or []:
         a, b = by_key.get(e.get('a')), by_key.get(e.get('b'))
         if not a or not b:
             continue
         (ax, ay), (bx, by) = pt(a), pt(b)
-        parts.append(f'<line x1="{ax}" y1="{ay}" x2="{bx}" y2="{by}" stroke="#9baab4" stroke-width="1.4" stroke-linecap="round"/>')
-    for n in usable:
-        if n.get('role') == 'reaction':
-            continue
-        x, y = pt(n)
-        title = xml_escape(str(n.get('label') or n.get('entity') or ''))
         parts.append(
-            f'<circle cx="{x}" cy="{y}" r="4.2" fill="#fff" stroke="#167e83" stroke-width="1.6">'
-            f'<title>{title}</title></circle>'
+            f'<line x1="{ax}" y1="{ay}" x2="{bx}" y2="{by}" stroke="#111" stroke-width="1.05" stroke-linecap="round"/>'
         )
     for n in usable:
-        if n.get('role') != 'reaction':
-            continue
         x, y = pt(n)
-        # Midmarker (small square), matching the map-preview reaction glyph.
-        parts.append(f'<rect x="{x - 3}" y="{y - 3}" width="6" height="6" fill="{color}" rx="0.5"/>')
+        title = xml_escape(str(n.get('label') or n.get('entity') or ''))
+        if n.get('role') == 'reaction':
+            parts.append(f'<circle cx="{x}" cy="{y}" r="2.2" fill="#111111"><title>{title}</title></circle>')
+        else:
+            parts.append(
+                f'<circle cx="{x}" cy="{y}" r="2.4" fill="#ffffff" stroke="#111111" stroke-width="1.05">'
+                f'<title>{title}</title></circle>'
+            )
     parts.append('</svg>')
     return ''.join(parts)
 
@@ -974,16 +1145,16 @@ def page_html():
 button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
 .filters .grow{flex:1;min-width:min(280px,100%)}
 .ab-also{font-size:12px;color:var(--mute);margin:0 0 6px}
+.ab-detect{font-size:12px;color:var(--mute);margin:4px 0 0;min-height:1.2em}
+.ab-wins{font-size:12px;margin:0 0 6px}
+.ab-wins button{font:inherit;font-size:12px;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:999px;padding:1px 10px;cursor:pointer}
+.ab-wins ul{margin:6px 0 0;padding-left:18px;color:var(--mute)}
 .tip{border-bottom:1px dotted var(--mute);cursor:help}
 </style>'''
-    body = css_extra + '''
+    body = css_extra + r'''
 <div id="listView" class="ab-list">
 <form class="filters" id="filters" autocomplete="off">
-<label class="grow">Search<input type="search" name="q" id="q" placeholder="name, EC, reaction, metabolite or model"></label>
-<label>EC number<input name="ec" id="ec" placeholder="1.1.1.1"></label>
-<label>Reaction ID<input name="reaction" id="reaction" placeholder="BiGG / Rhea / source"></label>
-<label>Metabolite ID<input name="metabolite" id="metabolite" placeholder="g6p / chebi:…"></label>
-<label>Map / model<input name="map" id="map" placeholder="map id or name"></label>
+<label class="grow">Search<input type="search" name="q" id="q" placeholder="1.1.1.100, HEX1, g6p_c, iJO1366"><span class="ab-detect" id="qDetect"></span></label>
 <label>Source database<select name="source" id="source"><option value="">All</option></select></label>
 <label>Licence<select name="license" id="license"><option value="">All</option></select></label>
 <button type="submit" class="primary">Search</button>
@@ -991,7 +1162,7 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
 </form>
 <div class="ab-toolbar">
 <label class="sel"><input type="checkbox" id="selPage"> Select all on page</label>
-<label class="sel"><input type="checkbox" id="showVariants"> Show all layout variants</label>
+<label class="sel"><input type="checkbox" id="showVariants"> Show all windows</label>
 <span class="count" id="count">Loading index…</span>
 <button type="button" id="dlSel" disabled>Download selected</button>
 </div>
@@ -1008,7 +1179,7 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
 var $=function(id){return document.getElementById(id)};
 var state={page:1,per:24,selected:{},lastIds:[],detail:null,cards:{}};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
-function params(){var f=$('filters'),o={};['q','ec','reaction','metabolite','map','source','license'].forEach(function(k){var v=f[k].value.trim();if(v)o[k]=v});o.page=state.page;o.per_page=state.per;if($('showVariants').checked)o.variants='1';return o}
+function params(){var f=$('filters'),o={};['q','source','license'].forEach(function(k){var v=f[k].value.trim();if(v)o[k]=v});o.page=state.page;o.per_page=state.per;if($('showVariants').checked)o.variants='1';return o}
 function qs(o){return Object.keys(o).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(o[k])}).join('&')}
 function selCount(){return Object.keys(state.selected).length}
 function syncDl(){$('dlSel').disabled=!selCount();$('dlSel').textContent=selCount()?'Download selected ('+selCount()+')':'Download selected'}
@@ -1070,13 +1241,18 @@ if(!window.__abThumbScroll){
 function card(m){
  var checked=state.selected[m.id]?' checked':'';
  var also=m.also_in?'<p class="ab-also">'+esc(m.also_in.label)+'</p>':'';
+ var wins='';
+ if(m.windows_count&&m.windows_count>1){
+  wins='<p class="ab-wins"><button type="button" class="winbtn" data-id="'+esc(m.id)+'">'+esc(m.windows_count)+' windows</button><ul class="winlist" id="wins-'+esc(m.id)+'" hidden></ul></p>';
+ }
  var thumb=m.thumbnail||'';
+ var sub=m.subtitle||((m.source_label||m.source||'')+(m.matched&&m.matched.length?' · matches '+m.matched.join(', '):''));
  return '<article class="card ab-card'+(state.selected[m.id]?' sel':'')+'" data-id="'+esc(m.id)+'">'
   +'<label class="chk" onclick="event.stopPropagation()"><input type="checkbox" data-id="'+esc(m.id)+'"'+checked+'></label>'
   +'<div class="ab-th" data-src="'+esc(thumb)+'"><img class="th" alt="" decoding="async" data-src="'+esc(thumb)+'" src="'+TH_PLACEHOLDER+'"></div>'
   +'<h2 class="dn">'+esc(m.name||m.id)+'</h2>'
-  +'<p class="meta">'+esc(m.source)+' · '+esc(m.name||m.map_id)+'</p>'+also
-  +'<div class="tags"><span class="tag src-'+esc(m.source)+'">'+esc(m.source)+'</span>'
+  +'<p class="meta">'+esc(sub)+'</p>'+also+wins
+  +'<div class="tags"><span class="tag src-'+esc(m.source)+'">'+esc(m.source_label||m.source)+'</span>'
   +'<span class="tag">'+esc(m.size)+' reactions</span>'
   +'<span class="tag lic">'+esc(m.license)+'</span></div></article>'}
 function render(data){
@@ -1084,8 +1260,9 @@ function render(data){
  state.cards={};(data.results||[]).forEach(function(m){state.cards[m.id]=m});
  $('grid').innerHTML=(data.results||[]).map(card).join('')||'<p class="ab-empty">No modules match these filters.</p>';
  wireThumbs();
- var kind=data.deduped===false?'layout variants':'modules';
- $('count').textContent=data.total.toLocaleString()+' '+kind+' · page '+data.page+' / '+data.pages;
+ $('qDetect').textContent=data.q_kind_label||detectKind($('q').value)||'';
+ var label=data.count_label||((data.source_map_total||data.total||0).toLocaleString()+' source maps · '+(data.module_total||0).toLocaleString()+' modules');
+ $('count').textContent=label+' · page '+data.page+' / '+data.pages;
  var p=$('pager'),html='',i,start=Math.max(1,data.page-3),end=Math.min(data.pages,data.page+3);
  if(data.page>1)html+='<a href="#" data-p="'+(data.page-1)+'">‹</a>';
  for(i=start;i<=end;i++)html+=i===data.page?'<span>'+i+'</span>':'<a href="#" data-p="'+i+'">'+i+'</a>';
@@ -1098,12 +1275,34 @@ function search(){
  $('count').textContent='Searching…';
  fetch('/api/atlas/search?'+qs(params())).then(function(r){return r.json()}).then(render)
   .catch(function(){$('count').textContent='Search failed.'})}
+function detectKind(q){
+ q=String(q||'').trim();if(!q)return '';
+ if(/^\d+(\.\d+){1,3}(\.-)?$/i.test(q))return 'Matched as EC number';
+ if(/^chebi:/i.test(q)||/^[a-z][a-z0-9]*_[a-z0-9]+$/i.test(q))return 'Matched as metabolite ID';
+ if(/^[A-Za-z][A-Za-z0-9_-]*(\.[A-Za-z0-9_.-]+)?$/.test(q)&&(q.indexOf('.')>=0||/^i[A-Z0-9]/i.test(q)||/_(core|GEM)$/i.test(q)||/^[ei][A-Z]{2}\d/i.test(q)))return 'Matched as map / model';
+ if(/^(rhea|reactome|metanetx\.reaction):/i.test(q))return 'Matched as reaction ID';
+ if(/^[A-Za-z][A-Za-z0-9_.-]{1,40}$/.test(q)&&q.indexOf(' ')<0&&(q===q.toUpperCase()||/\d/.test(q)))return 'Matched as reaction ID';
+ return 'Matched as free text'}
+$('q').addEventListener('input',function(){$('qDetect').textContent=detectKind($('q').value)});
 $('filters').onsubmit=function(e){e.preventDefault();state.page=1;search()};
-$('reset').onclick=function(){['q','ec','reaction','metabolite','map'].forEach(function(k){$(k).value=''});$('source').value='';$('license').value='';$('showVariants').checked=false;state.page=1;search()};
+$('reset').onclick=function(){$('q').value='';$('source').value='';$('license').value='';$('showVariants').checked=false;$('qDetect').textContent='';state.page=1;search()};
 $('showVariants').onchange=function(){state.page=1;search()};
 $('pager').onclick=function(e){var a=e.target.closest('[data-p]');if(!a)return;e.preventDefault();state.page=+a.getAttribute('data-p');search()};
 function toggleSel(cb){if(!cb)return;if(cb.checked)state.selected[cb.getAttribute('data-id')]=1;else delete state.selected[cb.getAttribute('data-id')];syncDl();var art=cb.closest('.ab-card');if(art)art.classList.toggle('sel',cb.checked)}
 $('grid').onclick=function(e){
+ var win=e.target.closest('.winbtn');
+ if(win){e.preventDefault();e.stopPropagation();
+  var id=win.getAttribute('data-id'),list=$('wins-'+id),card=state.cards[id];
+  if(!list||!card)return;
+  if(list.hidden){
+   list.innerHTML=(card.windows||[]).map(function(w){
+    return '<li><a href="#" class="tomod" data-id="'+esc(w.id)+'">'+esc(w.name||w.id)+'</a> · '+esc(w.size)+' reactions</li>';
+   }).join('');
+   list.hidden=false;
+  }else list.hidden=true;
+  return}
+ var tomod=e.target.closest('a.tomod');
+ if(tomod){e.preventDefault();e.stopPropagation();openDetail(tomod.getAttribute('data-id'));return}
  var cb=e.target.closest('input[type=checkbox][data-id]');
  if(cb){toggleSel(cb);return}
  var card=e.target.closest('.ab-card');if(card)openDetail(card.getAttribute('data-id'))};

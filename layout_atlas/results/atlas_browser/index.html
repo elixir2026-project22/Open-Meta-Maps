@@ -118,15 +118,15 @@ button.lnk{font:inherit;background:none;border:0;color:var(--accent);cursor:poin
 button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
 .filters .grow{flex:1;min-width:min(280px,100%)}
 .ab-also{font-size:12px;color:var(--mute);margin:0 0 6px}
+.ab-detect{font-size:12px;color:var(--mute);margin:4px 0 0;min-height:1.2em}
+.ab-wins{font-size:12px;margin:0 0 6px}
+.ab-wins button{font:inherit;font-size:12px;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:999px;padding:1px 10px;cursor:pointer}
+.ab-wins ul{margin:6px 0 0;padding-left:18px;color:var(--mute)}
 .tip{border-bottom:1px dotted var(--mute);cursor:help}
 </style>
 <div id="listView" class="ab-list">
 <form class="filters" id="filters" autocomplete="off">
-<label class="grow">Search<input type="search" name="q" id="q" placeholder="name, EC, reaction, metabolite or model"></label>
-<label>EC number<input name="ec" id="ec" placeholder="1.1.1.1"></label>
-<label>Reaction ID<input name="reaction" id="reaction" placeholder="BiGG / Rhea / source"></label>
-<label>Metabolite ID<input name="metabolite" id="metabolite" placeholder="g6p / chebi:…"></label>
-<label>Map / model<input name="map" id="map" placeholder="map id or name"></label>
+<label class="grow">Search<input type="search" name="q" id="q" placeholder="1.1.1.100, HEX1, g6p_c, iJO1366"><span class="ab-detect" id="qDetect"></span></label>
 <label>Source database<select name="source" id="source"><option value="">All</option></select></label>
 <label>Licence<select name="license" id="license"><option value="">All</option></select></label>
 <button type="submit" class="primary">Search</button>
@@ -134,7 +134,7 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
 </form>
 <div class="ab-toolbar">
 <label class="sel"><input type="checkbox" id="selPage"> Select all on page</label>
-<label class="sel"><input type="checkbox" id="showVariants"> Show all layout variants</label>
+<label class="sel"><input type="checkbox" id="showVariants"> Show all windows</label>
 <span class="count" id="count">Loading index…</span>
 <button type="button" id="dlSel" disabled>Download selected</button>
 </div>
@@ -151,7 +151,7 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
 var $=function(id){return document.getElementById(id)};
 var state={page:1,per:24,selected:{},lastIds:[],detail:null,cards:{}};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
-function params(){var f=$('filters'),o={};['q','ec','reaction','metabolite','map','source','license'].forEach(function(k){var v=f[k].value.trim();if(v)o[k]=v});o.page=state.page;o.per_page=state.per;if($('showVariants').checked)o.variants='1';return o}
+function params(){var f=$('filters'),o={};['q','source','license'].forEach(function(k){var v=f[k].value.trim();if(v)o[k]=v});o.page=state.page;o.per_page=state.per;if($('showVariants').checked)o.variants='1';return o}
 function qs(o){return Object.keys(o).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(o[k])}).join('&')}
 function selCount(){return Object.keys(state.selected).length}
 function syncDl(){$('dlSel').disabled=!selCount();$('dlSel').textContent=selCount()?'Download selected ('+selCount()+')':'Download selected'}
@@ -213,13 +213,18 @@ if(!window.__abThumbScroll){
 function card(m){
  var checked=state.selected[m.id]?' checked':'';
  var also=m.also_in?'<p class="ab-also">'+esc(m.also_in.label)+'</p>':'';
+ var wins='';
+ if(m.windows_count&&m.windows_count>1){
+  wins='<p class="ab-wins"><button type="button" class="winbtn" data-id="'+esc(m.id)+'">'+esc(m.windows_count)+' windows</button><ul class="winlist" id="wins-'+esc(m.id)+'" hidden></ul></p>';
+ }
  var thumb=m.thumbnail||'';
+ var sub=m.subtitle||((m.source_label||m.source||'')+(m.matched&&m.matched.length?' · matches '+m.matched.join(', '):''));
  return '<article class="card ab-card'+(state.selected[m.id]?' sel':'')+'" data-id="'+esc(m.id)+'">'
   +'<label class="chk" onclick="event.stopPropagation()"><input type="checkbox" data-id="'+esc(m.id)+'"'+checked+'></label>'
   +'<div class="ab-th" data-src="'+esc(thumb)+'"><img class="th" alt="" decoding="async" data-src="'+esc(thumb)+'" src="'+TH_PLACEHOLDER+'"></div>'
   +'<h2 class="dn">'+esc(m.name||m.id)+'</h2>'
-  +'<p class="meta">'+esc(m.source)+' · '+esc(m.name||m.map_id)+'</p>'+also
-  +'<div class="tags"><span class="tag src-'+esc(m.source)+'">'+esc(m.source)+'</span>'
+  +'<p class="meta">'+esc(sub)+'</p>'+also+wins
+  +'<div class="tags"><span class="tag src-'+esc(m.source)+'">'+esc(m.source_label||m.source)+'</span>'
   +'<span class="tag">'+esc(m.size)+' reactions</span>'
   +'<span class="tag lic">'+esc(m.license)+'</span></div></article>'}
 function render(data){
@@ -227,8 +232,9 @@ function render(data){
  state.cards={};(data.results||[]).forEach(function(m){state.cards[m.id]=m});
  $('grid').innerHTML=(data.results||[]).map(card).join('')||'<p class="ab-empty">No modules match these filters.</p>';
  wireThumbs();
- var kind=data.deduped===false?'layout variants':'modules';
- $('count').textContent=data.total.toLocaleString()+' '+kind+' · page '+data.page+' / '+data.pages;
+ $('qDetect').textContent=data.q_kind_label||detectKind($('q').value)||'';
+ var label=data.count_label||((data.source_map_total||data.total||0).toLocaleString()+' source maps · '+(data.module_total||0).toLocaleString()+' modules');
+ $('count').textContent=label+' · page '+data.page+' / '+data.pages;
  var p=$('pager'),html='',i,start=Math.max(1,data.page-3),end=Math.min(data.pages,data.page+3);
  if(data.page>1)html+='<a href="#" data-p="'+(data.page-1)+'">‹</a>';
  for(i=start;i<=end;i++)html+=i===data.page?'<span>'+i+'</span>':'<a href="#" data-p="'+i+'">'+i+'</a>';
@@ -241,12 +247,34 @@ function search(){
  $('count').textContent='Searching…';
  fetch('/api/atlas/search?'+qs(params())).then(function(r){return r.json()}).then(render)
   .catch(function(){$('count').textContent='Search failed.'})}
+function detectKind(q){
+ q=String(q||'').trim();if(!q)return '';
+ if(/^\d+(\.\d+){1,3}(\.-)?$/i.test(q))return 'Matched as EC number';
+ if(/^chebi:/i.test(q)||/^[a-z][a-z0-9]*_[a-z0-9]+$/i.test(q))return 'Matched as metabolite ID';
+ if(/^[A-Za-z][A-Za-z0-9_-]*(\.[A-Za-z0-9_.-]+)?$/.test(q)&&(q.indexOf('.')>=0||/^i[A-Z0-9]/i.test(q)||/_(core|GEM)$/i.test(q)||/^[ei][A-Z]{2}\d/i.test(q)))return 'Matched as map / model';
+ if(/^(rhea|reactome|metanetx\.reaction):/i.test(q))return 'Matched as reaction ID';
+ if(/^[A-Za-z][A-Za-z0-9_.-]{1,40}$/.test(q)&&q.indexOf(' ')<0&&(q===q.toUpperCase()||/\d/.test(q)))return 'Matched as reaction ID';
+ return 'Matched as free text'}
+$('q').addEventListener('input',function(){$('qDetect').textContent=detectKind($('q').value)});
 $('filters').onsubmit=function(e){e.preventDefault();state.page=1;search()};
-$('reset').onclick=function(){['q','ec','reaction','metabolite','map'].forEach(function(k){$(k).value=''});$('source').value='';$('license').value='';$('showVariants').checked=false;state.page=1;search()};
+$('reset').onclick=function(){$('q').value='';$('source').value='';$('license').value='';$('showVariants').checked=false;$('qDetect').textContent='';state.page=1;search()};
 $('showVariants').onchange=function(){state.page=1;search()};
 $('pager').onclick=function(e){var a=e.target.closest('[data-p]');if(!a)return;e.preventDefault();state.page=+a.getAttribute('data-p');search()};
 function toggleSel(cb){if(!cb)return;if(cb.checked)state.selected[cb.getAttribute('data-id')]=1;else delete state.selected[cb.getAttribute('data-id')];syncDl();var art=cb.closest('.ab-card');if(art)art.classList.toggle('sel',cb.checked)}
 $('grid').onclick=function(e){
+ var win=e.target.closest('.winbtn');
+ if(win){e.preventDefault();e.stopPropagation();
+  var id=win.getAttribute('data-id'),list=$('wins-'+id),card=state.cards[id];
+  if(!list||!card)return;
+  if(list.hidden){
+   list.innerHTML=(card.windows||[]).map(function(w){
+    return '<li><a href="#" class="tomod" data-id="'+esc(w.id)+'">'+esc(w.name||w.id)+'</a> · '+esc(w.size)+' reactions</li>';
+   }).join('');
+   list.hidden=false;
+  }else list.hidden=true;
+  return}
+ var tomod=e.target.closest('a.tomod');
+ if(tomod){e.preventDefault();e.stopPropagation();openDetail(tomod.getAttribute('data-id'));return}
  var cb=e.target.closest('input[type=checkbox][data-id]');
  if(cb){toggleSel(cb);return}
  var card=e.target.closest('.ab-card');if(card)openDetail(card.getAttribute('data-id'))};
