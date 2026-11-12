@@ -90,6 +90,13 @@ class LifetimeConstants(unittest.TestCase):
         # bye only on pagehide/unload — not on download clicks
         self.assertIn("addEventListener('pagehide',bye)", html)
         self.assertNotIn('download].forEach', html)  # sanity: keep lean helpers
+        # Run log (#slog): rewrite only on change; stick-to-bottom only when already near bottom;
+        # preserve window scroll across updates (same pageYOffset pattern as the steps box).
+        self.assertIn("txt!==lg.textContent", html)
+        self.assertIn("lg.scrollHeight-lg.scrollTop-lg.clientHeight<8", html)
+        self.assertIn("lg.scrollTop=near?lg.scrollHeight:st", html)
+        self.assertIn("if(window.pageYOffset!==wy)window.scrollTo(0,wy)", html)
+        self.assertNotIn('lg.scrollTop=lg.scrollHeight;', html)
 
 
 class IdleWatch(unittest.TestCase):
