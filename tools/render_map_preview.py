@@ -2,7 +2,7 @@
 """Crop an Open Meta Maps Escher result JSON to a preview PNG.
 
 White background, content-tight crop, every reaction and metabolite label
-of map.svg drawn. The default width keeps the smallest label at least
+of the result SVG drawn. The default width keeps the smallest label at least
 MIN_LABEL_PX tall; strokes are widened when they would drop below
 TARGET_STROKE px.
 

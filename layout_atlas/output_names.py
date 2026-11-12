@@ -110,7 +110,13 @@ def find_map_json(folder) -> Path | None:
 
 
 def clear_stale_results(folder) -> None:
-    """Remove previous final map files (new names and legacy map.*) from a job folder."""
+    """Remove previous result downloads and map.original.json from a job folder.
+
+    Deletes every OpenMetaMaps_*_result.* file in the folder root, plus any
+    map.json / map.svg / map.sbgn / map.sbml / map.celldesigner.xml / map.png
+    and map.original.json sitting beside them, so the next compose or tool run
+    starts from an empty download set.
+    """
     folder = Path(folder)
     for path in folder.glob(f'{RESULT_PREFIX}*{RESULT_SUFFIX}.*'):
         if path.is_file():
@@ -122,14 +128,14 @@ def clear_stale_results(folder) -> None:
         (folder / name).unlink(missing_ok=True)
 
 
-def write_meta(folder, original_name: str, size: int | None = None, created: float | None = None) -> Path:
+def write_meta(folder, original_name: str, size: int | None = None) -> Path:
     """Persist the original model file name used to build result stems."""
     folder = Path(folder)
     folder.mkdir(parents=True, exist_ok=True)
     payload = dict(
         original_name=Path(original_name).name,
         bytes=int(size if size is not None else 0),
-        created=float(created if created is not None else time.time()),
+        created=time.time(),
     )
     path = folder / 'meta.json'
     path.write_text(json.dumps(payload))
