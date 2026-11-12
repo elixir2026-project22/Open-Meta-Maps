@@ -145,6 +145,13 @@ Maps composed from the bundled example models. Every reaction and metabolite is 
 
 *Previews are cropped to content, 2800 px wide. Labels are kept only when they stay readable at that width. Regenerate: `PYTHONPATH=layout_atlas python3 tools/render_map_preview.py DIR/map.json docs/images/examples/NAME.png`.*
 
+**Download.** Result files of both maps are in [`example_results/`](example_results/) (file list: [example_results/README.md](example_results/README.md)).
+
+| Model | Escher JSON | SVG | PNG | Licences | Reaction provenance | Report |
+|---|---|---|---|---|---|---|
+| <code>e_coli_core</code> | [map.json](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/e_coli_core/map.json) | [map.svg](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/e_coli_core/map.svg) | [map.png](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/e_coli_core/map.png) | [licenses.json](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/e_coli_core/licenses.json) | [reaction_provenance.json](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/e_coli_core/reaction_provenance.json) | [report.json](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/e_coli_core/report.json) |
+| <code>iIT341</code> | [map.json](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/iIT341/map.json) | [map.svg](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/iIT341/map.svg) | [map.png](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/iIT341/map.png) | [licenses.json](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/iIT341/licenses.json) | [reaction_provenance.json](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/iIT341/reaction_provenance.json) | [report.json](https://github.com/elixir2026-project22/Open-Meta-Maps/raw/main/example_results/iIT341/report.json) |
+
 ---
 
 ## 3. Evaluation criteria
