@@ -121,8 +121,8 @@ def about():
         + '<p>' + b('Reactions are matched to Atlas modules (EC currentisation, Rhea metabolite scoring, name normalisation, weighted Jaccard, vicinity propagation). Report curated, topology-only and optional EC suggestions as separate rates in reaction_provenance.json. EC similarity extension is off by default (CLI --ec). Matched geometry is kept as drawn; the rest uses layout_style=curated (Bézier). Orthogonal libavoid remains CLI --layout-style legacy only. Details: docs/reaction_map_matching.md · docs/methodology.md.') + '</p>'
         + '<h3>' + b('Layout stages') + '</h3>'
         + '<p>' + b('After matching, the Composer keeps curated blocks rigid, completes uncovered reactions, orients free reactions, composes stray components, draws Bézier connections and places labels. Small models take the full path; mid-size models use a global plan then the same curated Bézier pass; larger models keep a skeleton and draw ~50-reaction views on demand. Each stage lists the layout targets it optimises in the README §2 table: rigid skeleton and matching keep curated-structure continuity; instances and composition/peripherals shorten long lines and cofactor clones and place exchange on the periphery, aspect and blank space; orientation sets participant placement; spacing/relaxation and Bézier connections (with the quality gate) reduce connection crossings, unrelated overlaps, detours, hooks and bends.') + '</p>'
-        + '<p>' + b('Determinism: fixed layout seed 20261105 (core.SEEDS), ELK/fCoSE seeds, PYTHONHASHSEED=0 on re-exec. Displacement measured by evaluate --compare-map only. compose --previous map.json pins matched nodes and grafts leftovers.') + '</p>'
-        + '<p>' + b('Known gaps (docs/limitations.md): 2D component packing, harder orientation (incl. transporters), compartment-aware packing, stronger currency/biomass handling, crossing-aware composition acceptance, compose seed flag. Experimental off by default: OPM_REGIONS, OPM_LOWCONF, whole-block OPM_BLOCK_RELOC.') + '</p>'
+        + '<p>' + b('Determinism: fixed layout seed 20261105 (core.SEEDS), ELK/fCoSE seeds, PYTHONHASHSEED=0 on re-exec. Displacement measured by evaluate --compare-map only. compose --previous OpenMetaMaps_<stem>_result.json pins matched nodes and grafts leftovers.') + '</p>'
+        + '<p>' + b('Known gaps (docs/limitations.md): 2D component packing, harder orientation (incl. transporters), compartment-aware packing, stronger currency/biomass handling, crossing-aware composition acceptance, compose seed flag. Experimental off by default: OPM_REGIONS, OPM_LOWCONF, whole-block OPM_BLOCK_RELOC.') + '</p>'>>>>>>> 63ca368 (Name final map downloads OpenMetaMaps_<stem>_result.<ext>)
         + '<h3>' + b('Example output') + '</h3>'
         + '<p>' + b('Maps composed from the bundled example models. Every reaction and metabolite is drawn.') + '</p>'
         + '<div class="fig">'
@@ -143,7 +143,7 @@ def about():
         'Outputs',
         '<ul>'
         + '<li><b>' + b('Reaction provenance') + '</b>: ' + b('curated (community layout), topology-only suggestion, functional (EC) suggestion, bridge or generated, with matching evidence') + '</li>'
-        + '<li><b>' + b('Download formats') + '</b>: ' + b('Escher JSON, SBGN-ML Process Description, SBML with Layout, CellDesigner SBML') + '</li>'
+        + '<li><b>' + b('Download formats') + '</b>: ' + b('OpenMetaMaps_<name>_result.{json,sbgn,sbml,celldesigner.xml,svg,png} (Escher JSON, SBGN-ML, SBML Layout, CellDesigner, SVG, PNG)') + '</li>'
         + '<li><b>' + b('Layout quality') + '</b> · <b>' + b('Generation settings') + '</b> · <b>' + b('Licensing metadata') + '</b> (<code>licenses.json</code>)</li>'
         + '</ul>'
         + '<p>' + b('Integrity check: all reactions drawn; stoichiometry and compartments unchanged.') + '</p>'

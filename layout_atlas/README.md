@@ -12,7 +12,7 @@ This directory is the Python package behind Open Meta Maps. It builds a metaboli
 | `python3 project.py setup` | one-time build of the edge routers (needs `g++` or `clang++`, see below) |
 | `python3 project.py catalog` | rebuild the module catalog pages from the Atlas |
 
-A run writes `map.json` (Escher), `map.svg`, `report.json`, `reaction_provenance.json`, `layout_issues.json`, `licenses.json`, `skeleton.json` and `modules.json` into the output folder. `reaction_provenance.json` labels every reaction as curated (community layout), topology-only suggestion, functional (EC) suggestion, bridge or generated. Report curated, topology-only and EC suggestions as separate rates.
+A run writes `OpenMetaMaps_<name>_result.json` (Escher), matching `.svg` / `.sbgn` / `.sbml` / `.celldesigner.xml`, plus `report.json`, `reaction_provenance.json`, `layout_issues.json`, `licenses.json`, `skeleton.json` and `modules.json` into the output folder (`<name>` is the model file stem). `reaction_provenance.json` labels every reaction as curated (community layout), topology-only suggestion, functional (EC) suggestion, bridge or generated. Report curated, topology-only and EC suggestions as separate rates.
 
 ## Pipeline and main modules
 
