@@ -878,11 +878,11 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         if os.environ.get('OPM_HOTSPOT_REPAIR', 'on') != 'off':
             import hotspot_repair
             codes_early = module_codes(blocks) if blocks else {}
-            expert_structures_early = [
+            curated_structures_early = [
                 dict(id=b.get('id') or b.get('template_id'), code=codes_early.get(b.get('id')),
                      reactions=list(b['reaction_ids']))
                 for b in blocks if len(b.get('reaction_ids') or []) >= 2]
-            data[0].setdefault('metadata', {})['expert_structures'] = expert_structures_early
+            data[0].setdefault('metadata', {})['expert_structures'] = curated_structures_early
             # After absolute rigid restore, more windows need search than the default
             # mass-scaled budget covers (e_coli formate cluster alone was 15 crossings).
             n_rx = len(model['reactions'])
@@ -892,7 +892,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             hs_k = 10 if n_rx < 200 else 8
             metric['hotspot_repair'] = hotspot_repair.repair(
                 data, model=model, scene=scene, blocks=blocks, skip_edges=skip_edges, log=log,
-                structures=expert_structures_early, k=hs_k, max_accepts=100, budget_s=hs_budget,
+                structures=curated_structures_early, k=hs_k, max_accepts=100, budget_s=hs_budget,
                 max_rounds=8)
             if log:
                 hr = metric['hotspot_repair']

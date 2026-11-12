@@ -19,8 +19,7 @@ atlas data export). Packing geometry on main matches the #43 merge (`43f32b2`).
    pocket slots prefer tuck-against-content + centre distance on small packs.
 4. **Landscape reflow** only pocket-packs far outliers when already in the 4:3–16:9
    band (avoids collapsing large maps toward a square).
-5. **Wording**: `tool_pipeline` layout-style docs/logs use `curated`; the deprecated
-   `expert` layout_style alias is removed.
+5. **Wording**: `tool_pipeline` layout-style docs and logs use `curated`.
 
 ## Gates vs `7044342` (main)
 
