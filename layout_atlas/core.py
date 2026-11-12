@@ -51,13 +51,27 @@ def currency(model):
   if chem(m['id']) in CURRENCY or m.get('name','').lower() in names or set(xrefs(m.get('annotations',[])).get('bigg.metabolite',[]))&CURRENCY:out.add(m['id'])
  return out
 
+def participation_roles(coefficient):
+ """Signed edge roles for one net stoichiometric coefficient.
+
+ A species on both sides with cancelling amounts is stored as 0 and draws as
+ both substrate and product (gross participation, not net stoichiometry).
+ """
+ c=float(coefficient)
+ if c<0:return (c,)
+ if c>0:return (c,)
+ return (-1.0,1.0)
+
 def model_graph(model):
  g=nx.Graph();cur=currency(model);met={m['id']:m for m in model['metabolites']}
  for r in model['reactions']:
   rk='r:'+r['id'];g.add_node(rk,role='reaction',reversible=r['lower_bound']<0<r['upper_bound'],compartment='|'.join(sorted({met[m].get('compartment','unknown') for m in r['metabolites']})))
   for mid,c in r['metabolites'].items():
    if mid in cur:continue
-   mk='m:'+mid;g.add_node(mk,role='metabolite',compartment=met[mid].get('compartment','unknown'));g.add_edge(rk,mk,coefficient=float(c),role='substrate' if c<0 else 'product')
+   mk='m:'+mid;g.add_node(mk,role='metabolite',compartment=met[mid].get('compartment','unknown'))
+   # Undirected graph: one edge; coefficient 0 means dual participation (both roles).
+   role='substrate' if c<0 else ('product' if c>0 else 'both')
+   g.add_edge(rk,mk,coefficient=float(c),role=role)
  return g
 
 class CanonicalGraph(nx.Graph):

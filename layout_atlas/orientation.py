@@ -28,7 +28,7 @@ import math
 
 import numpy as np
 
-from core import currency
+from core import currency, participation_roles
 
 SIDE_K = 0.27
 SIDE_MIN = 32.0
@@ -54,7 +54,9 @@ def _split(reaction, participants, positions, cur, only_core=True):
         key = participants.get((reaction['id'], mid))
         if key is None or key not in positions:
             continue
-        (subs if coefficient < 0 else prods).append(np.array(positions[key], float))
+        pt = np.array(positions[key], float)
+        for role_c in participation_roles(coefficient):
+            (subs if role_c < 0 else prods).append(pt)
     return subs, prods
 
 
@@ -179,7 +181,8 @@ def place_side_glyphs(model, positions, participants, cur, params=None, fixed_di
                 continue
             key = participants.get((r['id'], mid))
             if key is not None and key.startswith('side:'):
-                groups[-1 if coefficient < 0 else 1].append(key)
+                for role_c in participation_roles(coefficient):
+                    groups[-1 if role_c < 0 else 1].append(key)
         for sign, keys in groups.items():
             for i, key in enumerate(keys):
                 offset = (i - (len(keys) - 1) / 2) * spr

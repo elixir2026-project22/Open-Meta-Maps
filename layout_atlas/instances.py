@@ -26,6 +26,8 @@ from collections import Counter, defaultdict
 import numpy as np
 from scipy.spatial import cKDTree
 
+from core import participation_roles
+
 NEAR = 250.0
 LINK = 260.0
 FAR = 1000.0
@@ -120,8 +122,10 @@ def optimize(model, scene, blocks, cur, summary=True, reuse=True, split=True):
                 continue
             centre = np.array(pos['r:' + rid], float)
             radius = max(160.0, len(core) * 46 / (2 * np.pi))
-            subs = [m for m in core if r['metabolites'][m] < 0]
-            prods = [m for m in core if r['metabolites'][m] >= 0]
+            subs, prods = [], []
+            for m in core:
+                for role_c in participation_roles(r['metabolites'][m]):
+                    (subs if role_c < 0 else prods).append(m)
             if SUMMARY_LAYOUT == 'columns':
                 # two columns: substrates in one column on the left of the reaction point, products in one on the right, each ordered by where the
                 # metabolite is drawn elsewhere (top to bottom), so the connections form two fans instead of a ring (a ring sends lines in every direction)

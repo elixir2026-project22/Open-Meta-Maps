@@ -15,6 +15,8 @@ Only the coordinates of this region are computed; the caller places the region a
 import networkx as nx
 import numpy as np
 
+from core import participation_roles
+
 DX, DY = 150.0, 95.0
 
 
@@ -29,11 +31,11 @@ def layered(reactions, region, cur=None):
     for mid, rids in shared.items():
         D.add_node('s:' + mid)
         for rid in rids:
-            coeff = reactions[rid]['metabolites'][mid]
-            if coeff < 0:
-                D.add_edge('s:' + mid, 'r:' + rid)   # substrate -> reaction
-            else:
-                D.add_edge('r:' + rid, 's:' + mid)   # reaction -> product
+            for role_c in participation_roles(reactions[rid]['metabolites'][mid]):
+                if role_c < 0:
+                    D.add_edge('s:' + mid, 'r:' + rid)   # substrate -> reaction
+                else:
+                    D.add_edge('r:' + rid, 's:' + mid)   # reaction -> product
     # cut cycles: reverse the closing edge of every cycle found by DFS (deterministic order)
     while True:
         try:

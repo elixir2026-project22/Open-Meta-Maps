@@ -10,6 +10,7 @@ from pathlib import Path
 
 import numpy as np
 
+from core import participation_roles
 from curated_axes import _absolute_from_escher
 
 # Skip block packing when at least this share of model reactions have a previous pin.
@@ -328,10 +329,11 @@ def graft_new_reactions(data, model, new_reaction_ids, min_embed_anchors=2):
             if not nid or nid not in nodes:
                 continue
             xy = np.array([nodes[nid]['x'], nodes[nid]['y']], float)
-            if coeff * sign < 0:
-                sub_pts.append(xy)
-            else:
-                prod_pts.append(xy)
+            for role_c in participation_roles(coeff):
+                if role_c * sign < 0:
+                    sub_pts.append(xy)
+                else:
+                    prod_pts.append(xy)
         mid_xy, axis, kind = _graft_axis_and_mid(sub_pts, prod_pts, park, i)
         both_sides = bool(sub_pts) and bool(prod_pts)
         if both_sides and (len(sub_pts) + len(prod_pts)) >= max(1, int(min_embed_anchors)):
@@ -345,7 +347,6 @@ def graft_new_reactions(data, model, new_reaction_ids, min_embed_anchors=2):
         sid = 0
         sub_i = prod_i = 0
         for mid, coeff in r['metabolites'].items():
-            role = 'substrate' if coeff * sign < 0 else 'product'
             # Currency always gets a local side stub beside the midmarker (never a long
             # spoke to a distant primary — those dominate add-back crossings).
             reuse = (
@@ -353,29 +354,32 @@ def graft_new_reactions(data, model, new_reaction_ids, min_embed_anchors=2):
                 and mid in met_nodes
                 and met_nodes[mid] in nodes
             )
-            if reuse:
-                met_nid = met_nodes[mid]
-            else:
-                met_nid = fresh('m')
-                side = -1.0 if role == 'substrate' else 1.0
-                idx = sub_i if role == 'substrate' else prod_i
-                if role == 'substrate':
-                    sub_i += 1
-                else:
-                    prod_i += 1
-                perp = np.array([-axis[1], axis[0]])
-                # Currency stubs sit closer; new core mets a bit further out.
-                along = 28.0 if mid in cur else (50.0 + 12.0 * (idx % 3))
-                xy = mid_xy + axis * (side * along) + perp * (16.0 * ((idx // 3) - 0.5))
-                nodes[met_nid] = dict(
-                    node_type='metabolite', bigg_id=mid, name=mid,
-                    node_is_primary=False if mid in cur else True,
-                    x=float(xy[0]), y=float(xy[1]),
-                    label_x=float(xy[0] + 10), label_y=float(xy[1] - 10))
-                if mid not in cur:
-                    met_nodes[mid] = met_nid
-            segs[str(sid)] = dict(from_node_id=mid_nid, to_node_id=met_nid, b1=None, b2=None)
-            sid += 1
+            met_nid = None
+            for role_c in participation_roles(coeff):
+                role = 'substrate' if role_c * sign < 0 else 'product'
+                if reuse:
+                    met_nid = met_nodes[mid]
+                elif met_nid is None:
+                    met_nid = fresh('m')
+                    side = -1.0 if role == 'substrate' else 1.0
+                    idx = sub_i if role == 'substrate' else prod_i
+                    if role == 'substrate':
+                        sub_i += 1
+                    else:
+                        prod_i += 1
+                    perp = np.array([-axis[1], axis[0]])
+                    # Currency stubs sit closer; new core mets a bit further out.
+                    along = 28.0 if mid in cur else (50.0 + 12.0 * (idx % 3))
+                    xy = mid_xy + axis * (side * along) + perp * (16.0 * ((idx // 3) - 0.5))
+                    nodes[met_nid] = dict(
+                        node_type='metabolite', bigg_id=mid, name=mid,
+                        node_is_primary=False if mid in cur else True,
+                        x=float(xy[0]), y=float(xy[1]),
+                        label_x=float(xy[0] + 10), label_y=float(xy[1] - 10))
+                    if mid not in cur:
+                        met_nodes[mid] = met_nid
+                segs[str(sid)] = dict(from_node_id=mid_nid, to_node_id=met_nid, b1=None, b2=None)
+                sid += 1
         reactions[fresh('rx')] = dict(
             bigg_id=rid, name=r.get('name') or rid,
             reversibility=bool(r.get('lower_bound', 0) < 0 < r.get('upper_bound', 0)),
