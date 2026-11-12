@@ -1,46 +1,44 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 240" width="640" height="240" font-family="ui-monospace,Menlo,monospace">
-<rect width="640" height="240" fill="#fff"/>
-<text x="20" y="28" font-size="13" font-weight="700" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" fill="#1f2937">Provenance fields on one module</text>
-<text x="28" y="56" font-size="12" fill="#374151">source:   escher</text>
-<text x="28" y="78" font-size="12" fill="#374151">map:      RECON1.Inositol retinol metabolism</text>
-<text x="28" y="100" font-size="12" fill="#374151">license:  CC0-1.0</text>
-<text x="28" y="122" font-size="12" fill="#374151">method:   escher_community_windows</text>
-<text x="28" y="144" font-size="12" fill="#374151">version:  atlas-extraction-1</text>
-<text x="28" y="166" font-size="12" fill="#374151">size:     8 reactions</text>
-<rect x="470" y="48" width="140" height="140" rx="8" fill="#fafafa" stroke="#d0d7de"/>
-<line x1="521.40" y1="97.65" x2="526.35" y2="125.67" stroke="#374151" stroke-width="1.0" stroke-linecap="round"/>
-<line x1="521.40" y1="97.65" x2="521.66" y2="88.58" stroke="#374151" stroke-width="1.0" stroke-linecap="round"/>
-<line x1="504.74" y1="100.35" x2="526.35" y2="125.67" stroke="#374151" stroke-width="1.0" stroke-linecap="round"/>
-<line x1="504.74" y1="100.35" x2="486.80" y2="88.97" stroke="#374151" stroke-width="1.0" stroke-linecap="round"/>
-<line x1="592.94" y1="97.34" x2="561.09" y2="89.62" stroke="#374151" stroke-width="1.0" stroke-linecap="round"/>
-<line x1="592.94" y1="97.34" x2="560.80" y2="101.80" stroke="#374151" stroke-width="1.0" stroke-linecap="round"/>
-<line x1="592.94" y1="97.34" x2="593.20" y2="91.17" stroke="#374151" stroke-width="1.0" stroke-linecap="round"/>
-<line x1="592.94" y1="97.34" x2="551.68" y2="142.03" stroke="#374151" stroke-width="1.0" stroke-linecap="round"/>
-<line x1="543.18" y1="147.42" x2="529.98" y2="144.18" stroke="#374151" stroke-width="1.0" stroke-linecap="round"/>
-<line x1="543.18" y1="147.42" x2="551.68" y2="142.03" stroke="#374151" stroke-width="1.0" stroke-linecap="round"/>
-<line x1="554.92" y1="131.94" x2="553.13" y2="125.49" stroke="#374151" stroke-width="1.0" stroke-linecap="round"/>
-<line x1="554.92" y1="131.94" x2="551.68" y2="142.03" stroke="#374151" stroke-width="1.0" stroke-linecap="round"/>
-<line x1="524.77" y1="134.69" x2="526.35" y2="125.67" stroke="#374151" stroke-width="1.0" stroke-linecap="round"/>
-<line x1="524.77" y1="134.69" x2="529.98" y2="144.18" stroke="#374151" stroke-width="1.0" stroke-linecap="round"/>
-<line x1="541.83" y1="141.26" x2="529.98" y2="144.18" stroke="#374151" stroke-width="1.0" stroke-linecap="round"/>
-<line x1="541.83" y1="141.26" x2="551.68" y2="142.03" stroke="#374151" stroke-width="1.0" stroke-linecap="round"/>
-<line x1="589.57" y1="96.82" x2="593.20" y2="91.17" stroke="#374151" stroke-width="1.0" stroke-linecap="round"/>
-<line x1="589.57" y1="96.82" x2="551.68" y2="142.03" stroke="#374151" stroke-width="1.0" stroke-linecap="round"/>
-<circle cx="521.66" cy="88.58" r="1.8" fill="#197d87"/>
-<circle cx="526.35" cy="125.67" r="1.8" fill="#197d87"/>
-<circle cx="553.13" cy="125.49" r="1.8" fill="#197d87"/>
-<circle cx="486.80" cy="88.97" r="1.8" fill="#197d87"/>
-<circle cx="560.80" cy="101.80" r="1.8" fill="#197d87"/>
-<circle cx="551.68" cy="142.03" r="1.8" fill="#197d87"/>
-<circle cx="593.20" cy="91.17" r="1.8" fill="#197d87"/>
-<circle cx="561.09" cy="89.62" r="1.8" fill="#197d87"/>
-<circle cx="529.98" cy="144.18" r="1.8" fill="#197d87"/>
-<circle cx="521.40" cy="97.65" r="1.8" fill="#d77d38"/>
-<circle cx="504.74" cy="100.35" r="1.8" fill="#d77d38"/>
-<circle cx="592.94" cy="97.34" r="1.8" fill="#d77d38"/>
-<circle cx="543.18" cy="147.42" r="1.8" fill="#d77d38"/>
-<circle cx="554.92" cy="131.94" r="1.8" fill="#d77d38"/>
-<circle cx="524.77" cy="134.69" r="1.8" fill="#d77d38"/>
-<circle cx="541.83" cy="141.26" r="1.8" fill="#d77d38"/>
-<circle cx="589.57" cy="96.82" r="1.8" fill="#d77d38"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 260" width="700" height="260" font-family="ui-monospace,Menlo,monospace">
+<rect width="700" height="260" fill="#fff"/>
+<text x="20" y="24" font-size="13" font-weight="700" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" fill="#111">Provenance fields on one module</text>
+<text x="28" y="52" font-size="12" fill="#374151">source:   escher</text>
+<text x="28" y="72" font-size="12" fill="#374151">map:      RECON1.LIPID_METABOLISM</text>
+<text x="28" y="92" font-size="12" fill="#374151">license:  CC0-1.0</text>
+<text x="28" y="112" font-size="12" fill="#374151">method:   escher_community_windows</text>
+<text x="28" y="132" font-size="12" fill="#374151">version:  atlas-extraction-1</text>
+<text x="28" y="152" font-size="12" fill="#374151">size:     8 reactions</text>
+<text x="28" y="172" font-size="12" fill="#374151">also_in:  Escher, Human-maps</text>
+<rect x="530" y="48" width="140" height="140" rx="8" fill="#fafafa" stroke="#d0d7de"/>
+<line x1="600.00" y1="147.30" x2="600.00" y2="137.93" stroke="#111" stroke-width="1.0" stroke-linecap="round"/>
+<line x1="600.00" y1="147.30" x2="600.00" y2="154.33" stroke="#111" stroke-width="1.0" stroke-linecap="round"/>
+<line x1="600.00" y1="91.04" x2="600.00" y2="98.07" stroke="#111" stroke-width="1.0" stroke-linecap="round"/>
+<line x1="600.00" y1="91.04" x2="600.00" y2="81.67" stroke="#111" stroke-width="1.0" stroke-linecap="round"/>
+<line x1="600.00" y1="133.24" x2="600.00" y2="126.20" stroke="#111" stroke-width="1.0" stroke-linecap="round"/>
+<line x1="600.00" y1="133.24" x2="600.00" y2="137.93" stroke="#111" stroke-width="1.0" stroke-linecap="round"/>
+<line x1="596.72" y1="159.96" x2="600.00" y2="168.40" stroke="#111" stroke-width="1.0" stroke-linecap="round"/>
+<line x1="596.72" y1="159.96" x2="600.00" y2="154.33" stroke="#111" stroke-width="1.0" stroke-linecap="round"/>
+<line x1="600.00" y1="116.83" x2="600.00" y2="126.20" stroke="#111" stroke-width="1.0" stroke-linecap="round"/>
+<line x1="600.00" y1="116.83" x2="600.00" y2="107.45" stroke="#111" stroke-width="1.0" stroke-linecap="round"/>
+<line x1="600.00" y1="102.76" x2="600.00" y2="107.45" stroke="#111" stroke-width="1.0" stroke-linecap="round"/>
+<line x1="600.00" y1="102.76" x2="600.00" y2="98.07" stroke="#111" stroke-width="1.0" stroke-linecap="round"/>
+<line x1="600.00" y1="74.63" x2="600.00" y2="67.60" stroke="#111" stroke-width="1.0" stroke-linecap="round"/>
+<line x1="600.00" y1="74.63" x2="600.00" y2="81.67" stroke="#111" stroke-width="1.0" stroke-linecap="round"/>
+<line x1="603.28" y1="159.96" x2="600.00" y2="168.40" stroke="#111" stroke-width="1.0" stroke-linecap="round"/>
+<line x1="603.28" y1="159.96" x2="600.00" y2="154.33" stroke="#111" stroke-width="1.0" stroke-linecap="round"/>
+<circle cx="600.00" cy="154.33" r="1.8" fill="#ffffff" stroke="#111111" stroke-width="1.0"/>
+<circle cx="600.00" cy="126.20" r="1.8" fill="#ffffff" stroke="#111111" stroke-width="1.0"/>
+<circle cx="600.00" cy="98.07" r="1.8" fill="#ffffff" stroke="#111111" stroke-width="1.0"/>
+<circle cx="600.00" cy="137.93" r="1.8" fill="#ffffff" stroke="#111111" stroke-width="1.0"/>
+<circle cx="600.00" cy="67.60" r="1.8" fill="#ffffff" stroke="#111111" stroke-width="1.0"/>
+<circle cx="600.00" cy="168.40" r="1.8" fill="#ffffff" stroke="#111111" stroke-width="1.0"/>
+<circle cx="600.00" cy="107.45" r="1.8" fill="#ffffff" stroke="#111111" stroke-width="1.0"/>
+<circle cx="600.00" cy="81.67" r="1.8" fill="#ffffff" stroke="#111111" stroke-width="1.0"/>
+<circle cx="600.00" cy="147.30" r="1.8" fill="#111111"/>
+<circle cx="600.00" cy="91.04" r="1.8" fill="#111111"/>
+<circle cx="600.00" cy="133.24" r="1.8" fill="#111111"/>
+<circle cx="596.72" cy="159.96" r="1.8" fill="#111111"/>
+<circle cx="600.00" cy="116.83" r="1.8" fill="#111111"/>
+<circle cx="600.00" cy="102.76" r="1.8" fill="#111111"/>
+<circle cx="600.00" cy="74.63" r="1.8" fill="#111111"/>
+<circle cx="603.28" cy="159.96" r="1.8" fill="#111111"/>
 </svg>

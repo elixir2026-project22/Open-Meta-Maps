@@ -4,13 +4,13 @@
   PYTHONPATH=layout_atlas python3 tools/atlas_module_figures.py all
 
 Writes under docs/images/atlas/:
-  atlas_overview.png          — dense mosaic of all default-load modules
-  atlas_examples.svg/.png     — n×m captioned example grid
+  atlas_overview.png          — landscape mosaic of all default-load modules
+  atlas_examples.svg/.png     — 4×4 captioned example grid (distinct maps)
   atlas_overlap.json          — per-source counts, unique-after-dedup, nesting, pairwise overlap
-  worked_*.svg/.png           — worked-example panels for atlas_data_management.md
+  worked_*.svg/.png           — worked-example panels
 
-Figure rules: canvas sized to content (no crop), uniform cells, grid-aligned,
-labels kept clear of strokes. Mosaic PNG kept under ~3 MB; SVGs only for small panels.
+Figure rules: canvas sized to content (no crop), uniform cells within a panel,
+grid-aligned, labels clear of strokes, readable at README ~700 px width.
 """
 from __future__ import annotations
 
@@ -34,8 +34,6 @@ CANON_PREF = (
     'bigg.reaction', 'metanetx.reaction', 'rhea', 'reactome', 'ec-code',
     'human.gem', 'sbgn.process', 'celldesigner.reaction',
 )
-
-# Display order and subtle region tints (light fills behind thumbnails).
 SOURCE_ORDER = [
     'escher', 'reactome', 'wikipathways', 'wikipathways_geometry',
     'human_maps', 'brenda', 'metabolismregulation', 'panther', 'ich360',
@@ -48,6 +46,18 @@ SOURCE_LABEL = {
     'human_maps': 'Human-maps',
     'brenda': 'BRENDA',
     'metabolismregulation': 'Metabolism Regulation',
+    'panther': 'PANTHER',
+    'ich360': 'iCH360',
+}
+# Short labels for tight example-grid captions
+SOURCE_LABEL_SHORT = {
+    'escher': 'Escher',
+    'reactome': 'Reactome',
+    'wikipathways': 'WikiPathways',
+    'wikipathways_geometry': 'WP geometry',
+    'human_maps': 'Human-maps',
+    'brenda': 'BRENDA',
+    'metabolismregulation': 'Metabolism Reg.',
     'panther': 'PANTHER',
     'ich360': 'iCH360',
 }
@@ -74,26 +84,6 @@ SOURCE_STROKE = {
     'ich360': '#5a6670',
 }
 
-# Representative example picks: (source_key, prefer_size, name_substr or None)
-EXAMPLE_SPEC = [
-    ('escher', 8, 'glycolysis'),
-    ('escher', 12, 'TCA'),
-    ('escher', 4, None),
-    ('reactome', 8, None),
-    ('reactome', 4, None),
-    ('wikipathways', 8, None),
-    ('wikipathways', 4, None),
-    ('wikipathways_geometry', 8, None),
-    ('human_maps', 8, None),
-    ('human_maps', 12, None),
-    ('ich360', 8, None),
-    ('ich360', 4, None),
-    ('brenda', 8, None),
-    ('brenda', 4, None),
-    ('metabolismregulation', 8, None),
-    ('panther', 4, None),
-]
-
 
 def source_key(m):
     src = m.get('source') or '?'
@@ -117,8 +107,6 @@ def reaction_set(m):
     rx = m.get('reactions') or []
     if rx:
         return frozenset(primary_reaction_id(r, src) for r in rx)
-    # Geometry-only WikiPathways windows often store no chemical reaction ids;
-    # fall back to the geometry fingerprint so dedup stays meaningful.
     fp = m.get('geometry_fingerprint')
     if fp:
         return frozenset([f'geometry:{fp}'])
@@ -127,7 +115,6 @@ def reaction_set(m):
 
 
 def load_modules():
-    """Load default Atlas modules (open-core sqlite + extension gzips)."""
     atlas = DATA / 'atlas.sqlite'
     open_core = DATA / 'open_core.sqlite'
     if open_core.exists() and (not atlas.exists() or atlas.stat().st_size < open_core.stat().st_size // 2):
@@ -156,13 +143,12 @@ def compute_overlap(mods):
             global_set_to_ids[rs].append((key, m['id']))
         nested = 0
         sorted_sets = sorted({sets[m['id']] for m in items}, key=len)
-        # Index larger sets by size buckets for nesting checks
         by_size = defaultdict(list)
         for s in sorted_sets:
             by_size[len(s)].append(s)
         sizes = sorted(by_size)
         for s in sorted_sets:
-            if len(s) == 0:
+            if not s:
                 continue
             contained = False
             for L in sizes:
@@ -175,7 +161,6 @@ def compute_overlap(mods):
                 if contained:
                     break
             if contained:
-                # count modules with this set that are nested (each module once)
                 nested += local[s]
         per_source[key] = dict(
             modules=len(items),
@@ -184,25 +169,26 @@ def compute_overlap(mods):
             nested_in_larger=nested,
         )
 
-    # Global unique across all sources
     all_sets = set(sets.values())
-    # Cross-source: identical reaction sets appearing in ≥2 sources
     cross_shared_sets = 0
     pairwise = {a: {b: 0 for b in SOURCE_ORDER} for a in SOURCE_ORDER}
-    set_sources = defaultdict(set)
+    also_in_examples = []
     for rs, owners in global_set_to_ids.items():
         srcs = {s for s, _ in owners}
-        set_sources[rs] = srcs
         if len(srcs) >= 2:
             cross_shared_sets += 1
             src_list = sorted(srcs)
             for i, a in enumerate(src_list):
                 for b in src_list[i + 1:]:
-                    if a in pairwise and b in pairwise[a]:
-                        pairwise[a][b] += 1
-                        pairwise[b][a] += 1
+                    pairwise[a][b] += 1
+                    pairwise[b][a] += 1
+            if len(rs) >= 4 and len(also_in_examples) < 20:
+                also_in_examples.append(dict(
+                    n_reactions=len(rs),
+                    sources=src_list,
+                    module_ids=[mid for _, mid in owners[:6]],
+                ))
 
-    # Global nesting (any larger module anywhere)
     nested_global = 0
     uniq_sets_list = sorted(all_sets, key=len)
     by_size = defaultdict(list)
@@ -211,19 +197,17 @@ def compute_overlap(mods):
     sizes = sorted(by_size)
     nested_set_flags = {}
     for s in uniq_sets_list:
-        if len(s) == 0:
-            nested_set_flags[s] = False
-            continue
         contained = False
-        for L in sizes:
-            if L <= len(s):
-                continue
-            for t in by_size[L]:
-                if s < t:
-                    contained = True
+        if s:
+            for L in sizes:
+                if L <= len(s):
+                    continue
+                for t in by_size[L]:
+                    if s < t:
+                        contained = True
+                        break
+                if contained:
                     break
-            if contained:
-                break
         nested_set_flags[s] = contained
     for m in mods:
         if nested_set_flags.get(sets[m['id']]):
@@ -236,6 +220,8 @@ def compute_overlap(mods):
         cross_source_identical_sets=cross_shared_sets,
         by_source={k: per_source.get(k, dict(modules=0, unique_reaction_sets=0, exact_duplicate_extra=0, nested_in_larger=0)) for k in SOURCE_ORDER},
         pairwise_identical_sets=pairwise,
+        also_in_examples=also_in_examples,
+        dedup_key='canonical reaction-id set; geometry_fingerprint for WikiPathways geometry-only',
     )
     return summary, by_src, sets
 
@@ -246,207 +232,21 @@ def _bbox(nodes):
     return min(xs), min(ys), max(xs), max(ys)
 
 
-def draw_module_paths(m, x0, y0, cell, stroke='#374151', lw=0.9, node_r=1.4, reaction_fill='#d77d38', met_fill='#197d87'):
-    """Return SVG fragments for a module fitted into a square cell (padding inside)."""
+def module_density(m):
+    nodes = m.get('nodes') or []
+    if len(nodes) < 2:
+        return 0.0
+    xmin, ymin, xmax, ymax = _bbox(nodes)
+    area = max((xmax - xmin) * (ymax - ymin), 1e-9)
+    return len(nodes) / area
+
+
+def draw_module_paths(m, x0, y0, cell, stroke='#111111', lw=1.0, node_r=1.6, reaction_fill='#111111', met_fill='#111111', met_open=True):
+    """SVG fragments; curated style = black edges. Metabolites as open circles, reactions filled."""
     nodes = m.get('nodes') or []
     edges = m.get('edges') or []
     if len(nodes) < 2:
         return []
-    xmin, ymin, xmax, ymax = _bbox(nodes)
-    w = max(xmax - xmin, 1e-6)
-    h = max(ymax - ymin, 1e-6)
-    pad = cell * 0.12
-    scale = (cell - 2 * pad) / max(w, h)
-    cx = x0 + cell / 2
-    cy = y0 + cell / 2
-    mx = (xmin + xmax) / 2
-    my = (ymin + ymax) / 2
-    pos = {}
-    for n in nodes:
-        pos[n['key']] = (cx + (n['xy'][0] - mx) * scale, cy + (n['xy'][1] - my) * scale)
-    parts = []
-    for e in edges:
-        a, b = pos.get(e['a']), pos.get(e['b'])
-        if not a or not b:
-            continue
-        parts.append(f'<line x1="{a[0]:.2f}" y1="{a[1]:.2f}" x2="{b[0]:.2f}" y2="{b[1]:.2f}" stroke="{stroke}" stroke-width="{lw}" stroke-linecap="round"/>')
-    for n in nodes:
-        x, y = pos[n['key']]
-        fill = reaction_fill if n.get('role') == 'reaction' or str(n.get('key', '')).startswith('r:') else met_fill
-        parts.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="{node_r}" fill="{fill}"/>')
-    return parts
-
-
-def pick_examples(by_src):
-    picked = []
-    used = set()
-    for src, size, substr in EXAMPLE_SPEC:
-        items = by_src.get(src) or []
-        cand = [m for m in items if m['id'] not in used and 2 <= (m.get('size') or 0) <= 24]
-        if size:
-            prefer = [m for m in cand if m.get('size') == size]
-            if prefer:
-                cand = prefer + [m for m in cand if m not in prefer]
-        if substr:
-            named = [m for m in cand if substr.lower() in (m.get('name') or '').lower()]
-            if named:
-                cand = named
-        # Prefer denser / mid-size drawings
-        cand = sorted(cand, key=lambda m: (-min(m.get('size') or 0, 12), m.get('name') or '', m['id']))
-        if not cand:
-            continue
-        m = cand[0]
-        used.add(m['id'])
-        picked.append(m)
-    return picked
-
-
-def write_examples(picked, overlap_summary):
-    cols = 4
-    rows = int(math.ceil(len(picked) / cols))
-    cell = 150
-    cap_h = 44
-    gap = 16
-    left = 20
-    top = 20
-    W = left * 2 + cols * cell + (cols - 1) * gap
-    H = top * 2 + rows * (cell + cap_h) + (rows - 1) * gap
-    parts = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif">',
-        f'<title>Example Atlas modules</title>',
-        f'<rect width="{W}" height="{H}" fill="#ffffff"/>',
-    ]
-    for i, m in enumerate(picked):
-        r, c = divmod(i, cols)
-        x = left + c * (cell + gap)
-        y = top + r * (cell + cap_h + gap)
-        sk = source_key(m)
-        parts.append(f'<rect x="{x}" y="{y}" width="{cell}" height="{cell}" rx="8" fill="#fafafa" stroke="{SOURCE_STROKE.get(sk, "#888")}" stroke-width="1.2"/>')
-        parts.extend(draw_module_paths(m, x, y, cell, stroke='#4b5563', lw=1.1, node_r=2.0))
-        name = (m.get('name') or m.get('map_id') or '')[:42]
-        cap1 = SOURCE_LABEL.get(sk, sk)
-        cap2 = html.escape(name)
-        cap3 = f"{m.get('size', len(m.get('reactions') or []))} reactions"
-        tx = x + cell / 2
-        parts.append(f'<text x="{tx:.1f}" y="{y + cell + 14}" text-anchor="middle" font-size="11" font-weight="600" fill="#1f2937">{html.escape(cap1)}</text>')
-        parts.append(f'<text x="{tx:.1f}" y="{y + cell + 28}" text-anchor="middle" font-size="10" fill="#4b5563">{cap2}</text>')
-        parts.append(f'<text x="{tx:.1f}" y="{y + cell + 40}" text-anchor="middle" font-size="10" fill="#6b7280">{cap3}</text>')
-    parts.append('</svg>')
-    svg = '\n'.join(parts)
-    OUT.mkdir(parents=True, exist_ok=True)
-    (OUT / 'atlas_examples.svg').write_text(svg, encoding='utf-8')
-    _svg_to_png(OUT / 'atlas_examples.svg', OUT / 'atlas_examples.png', width=900)
-    return OUT / 'atlas_examples.svg', OUT / 'atlas_examples.png'
-
-
-def _hex_rgb(h):
-    h = h.lstrip('#')
-    return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
-
-
-def write_overview_mosaic(by_src, summary):
-    """Dense PNG mosaic via PIL (fast): contiguous source regions, tint, legend."""
-    from PIL import Image, ImageDraw, ImageFont
-
-    cell = 10
-    gap = 1
-    region_gap = 8
-    pad = 14
-    legend_line = 14
-    legend_h = 36 + legend_line * (1 + sum(1 for sk in SOURCE_ORDER if (by_src.get(sk))))
-
-    blocks = []
-    for sk in SOURCE_ORDER:
-        items = by_src.get(sk) or []
-        if not items:
-            continue
-        cols = max(10, int(math.ceil(math.sqrt(len(items)) * 1.4)))
-        rows = int(math.ceil(len(items) / cols))
-        items = sorted(items, key=lambda m: (m.get('size') or 0, m['id']))
-        blocks.append((sk, items, cols, rows))
-
-    max_content_w = 2200
-    layout = []
-    x = pad
-    y = pad
-    row_h = 0
-    canvas_w = pad
-    for sk, items, cols, rows in blocks:
-        bw = cols * (cell + gap)
-        bh = rows * (cell + gap)
-        if x > pad and x + bw > max_content_w + pad:
-            x = pad
-            y += row_h + region_gap
-            row_h = 0
-        layout.append((sk, items, cols, rows, x, y))
-        row_h = max(row_h, bh)
-        x += bw + region_gap
-        canvas_w = max(canvas_w, x)
-    content_bottom = max((y0 + rows * (cell + gap) for _, _, _, rows, _, y0 in layout), default=pad)
-    canvas_h = content_bottom + pad + legend_h + pad
-    canvas_w = max(canvas_w + pad, pad + 900)
-
-    im = Image.new('RGB', (canvas_w, canvas_h), (255, 255, 255))
-    draw = ImageDraw.Draw(im)
-    try:
-        font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 12)
-        font_sm = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 11)
-        font_bold = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 13)
-    except Exception:
-        font = font_sm = font_bold = ImageFont.load_default()
-
-    ink = (55, 65, 81)
-    met = (25, 125, 135)
-    rxn = (215, 125, 56)
-
-    for sk, items, cols, rows, x0, y0 in layout:
-        bw = cols * (cell + gap)
-        bh = rows * (cell + gap)
-        tint = _hex_rgb(SOURCE_TINT.get(sk, '#eeeeee'))
-        stroke = _hex_rgb(SOURCE_STROKE.get(sk, '#888888'))
-        draw.rectangle([x0 - 2, y0 - 2, x0 + bw + 1, y0 + bh + 1], fill=tint, outline=stroke, width=1)
-        for i, m in enumerate(items):
-            r, c = divmod(i, cols)
-            cx = x0 + c * (cell + gap)
-            cy = y0 + r * (cell + gap)
-            _pil_draw_module(draw, m, cx, cy, cell, ink=ink, met=met, rxn=rxn)
-
-    ly = content_bottom + pad
-    draw.text((pad, ly), 'Default Atlas modules by source (cut windows; several can come from one map)', fill=(31, 41, 55), font=font_bold)
-    ly += 18
-    draw.text(
-        (pad, ly),
-        f"Total cut modules: {summary['total_modules']:,}   ·   Unique after dedup: {summary['unique_reaction_sets_global']:,}",
-        fill=(75, 85, 99),
-        font=font_sm,
-    )
-    ly += 16
-    for sk in SOURCE_ORDER:
-        info = summary['by_source'].get(sk) or {}
-        if not info.get('modules'):
-            continue
-        tint = _hex_rgb(SOURCE_TINT.get(sk, '#eeeeee'))
-        stroke = _hex_rgb(SOURCE_STROKE.get(sk, '#888888'))
-        draw.rectangle([pad, ly, pad + 11, ly + 11], fill=tint, outline=stroke)
-        label = (
-            f"{SOURCE_LABEL.get(sk, sk)}: {info['modules']:,} modules"
-            f" · {info['unique_reaction_sets']:,} unique after dedup"
-        )
-        draw.text((pad + 18, ly - 1), label, fill=(55, 65, 81), font=font_sm)
-        ly += legend_line
-
-    OUT.mkdir(parents=True, exist_ok=True)
-    path = OUT / 'atlas_overview.png'
-    im.save(path, format='PNG', optimize=True)
-    _shrink_png(path, max_bytes=3_000_000)
-    return path
-
-
-def _pil_draw_module(draw, m, x0, y0, cell, ink=(55, 65, 81), met=(25, 125, 135), rxn=(215, 125, 56)):
-    nodes = m.get('nodes') or []
-    edges = m.get('edges') or []
-    if len(nodes) < 2:
-        return
     xmin, ymin, xmax, ymax = _bbox(nodes)
     w = max(xmax - xmin, 1e-6)
     h = max(ymax - ymin, 1e-6)
@@ -456,22 +256,295 @@ def _pil_draw_module(draw, m, x0, y0, cell, ink=(55, 65, 81), met=(25, 125, 135)
     cy = y0 + cell / 2
     mx = (xmin + xmax) / 2
     my = (ymin + ymax) / 2
-    pos = {}
-    for n in nodes:
-        pos[n['key']] = (
-            cx + (n['xy'][0] - mx) * scale,
-            cy + (n['xy'][1] - my) * scale,
-        )
+    pos = {n['key']: (cx + (n['xy'][0] - mx) * scale, cy + (n['xy'][1] - my) * scale) for n in nodes}
+    parts = []
     for e in edges:
         a, b = pos.get(e['a']), pos.get(e['b'])
         if a and b:
-            draw.line([a, b], fill=ink, width=1)
+            parts.append(f'<line x1="{a[0]:.2f}" y1="{a[1]:.2f}" x2="{b[0]:.2f}" y2="{b[1]:.2f}" stroke="{stroke}" stroke-width="{lw}" stroke-linecap="round"/>')
     for n in nodes:
         x, y = pos[n['key']]
         is_r = n.get('role') == 'reaction' or str(n.get('key', '')).startswith('r:')
-        r = 1.2 if is_r else 1.0
-        fill = rxn if is_r else met
-        draw.ellipse([x - r, y - r, x + r, y + r], fill=fill)
+        if is_r:
+            parts.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="{node_r}" fill="{reaction_fill}"/>')
+        elif met_open:
+            parts.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="{node_r}" fill="#ffffff" stroke="{met_fill}" stroke-width="{max(lw, 0.8)}"/>')
+        else:
+            parts.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="{node_r}" fill="{met_fill}"/>')
+    return parts
+
+
+def _hex_rgb(h):
+    h = h.lstrip('#')
+    return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
+
+
+def _tile_px(m):
+    # Ideal size before landscape fit-scale. Larger modules stay readable at README width.
+    s = int(m.get('size') or 1)
+    if s <= 2:
+        return 3
+    if s <= 4:
+        return 5
+    if s <= 8:
+        return 9
+    if s <= 16:
+        return 14
+    return 20
+
+
+def unique_representatives(by_src, sets):
+    """One module per unique reaction set within each source (prefer denser / larger)."""
+    out = {}
+    for sk, items in by_src.items():
+        best = {}
+        for m in items:
+            rs = sets[m['id']]
+            score = (module_density(m), m.get('size') or 0, len(m.get('nodes') or []))
+            cur = best.get(rs)
+            if cur is None or score > cur[0]:
+                best[rs] = (score, m)
+        out[sk] = [t[1] for t in best.values()]
+    return out
+
+
+def _pil_draw_module(draw, m, x0, y0, cell):
+    ink = (17, 17, 17)
+    if cell < 5:
+        # Crumb: solid speck (shape not resolvable at this size).
+        draw.rectangle([x0, y0, x0 + max(cell - 1, 0), y0 + max(cell - 1, 0)], fill=ink)
+        return
+    nodes = m.get('nodes') or []
+    edges = m.get('edges') or []
+    if len(nodes) < 2:
+        draw.rectangle([x0, y0, x0 + cell - 1, y0 + cell - 1], outline=ink)
+        return
+    xmin, ymin, xmax, ymax = _bbox(nodes)
+    w = max(xmax - xmin, 1e-6)
+    h = max(ymax - ymin, 1e-6)
+    pad = cell * 0.12
+    scale = (cell - 2 * pad) / max(w, h)
+    cx = x0 + cell / 2
+    cy = y0 + cell / 2
+    mx = (xmin + xmax) / 2
+    my = (ymin + ymax) / 2
+    pos = {n['key']: (cx + (n['xy'][0] - mx) * scale, cy + (n['xy'][1] - my) * scale) for n in nodes}
+    lw = 1 if cell >= 8 else 1
+    for e in edges:
+        a, b = pos.get(e['a']), pos.get(e['b'])
+        if a and b:
+            draw.line([a, b], fill=ink, width=lw)
+    for n in nodes:
+        x, y = pos[n['key']]
+        is_r = n.get('role') == 'reaction' or str(n.get('key', '')).startswith('r:')
+        r = max(1.0, cell * 0.08) if is_r else max(0.9, cell * 0.07)
+        if is_r:
+            draw.ellipse([x - r, y - r, x + r, y + r], fill=ink)
+        else:
+            draw.ellipse([x - r, y - r, x + r, y + r], outline=ink, fill=(255, 255, 255))
+
+
+def _shelf_pack(items, max_width, scale=1.0, gap=1):
+    """Pack variable-size tiles into shelves; return placements and block size."""
+    placements = []  # (m, x, y, cell)
+    x = y = 0
+    row_h = 0
+    width = 0
+    for m in items:
+        cell = max(2, int(round(_tile_px(m) * scale)))
+        if x > 0 and x + cell > max_width:
+            y += row_h + gap
+            x = 0
+            row_h = 0
+        placements.append((m, x, y, cell))
+        row_h = max(row_h, cell)
+        x += cell + gap
+        width = max(width, x)
+    height = y + row_h if placements else 0
+    return placements, width, height
+
+
+def _pack_to_box(items, max_w, max_h):
+    """Shelf-pack items into max_w×max_h by searching a fit scale (fills the box tightly)."""
+    if not items or max_w < 4 or max_h < 4:
+        return [], 1.0
+    # Sort large tiles first so shapes stay contiguous and crumbs fill gaps.
+    ordered = sorted(items, key=lambda m: (-(m.get('size') or 0), m['id']))
+    lo, hi = 0.15, 3.0
+    best = ([], 0.15)
+    for _ in range(14):
+        mid = (lo + hi) / 2
+        placements, _, h = _shelf_pack(ordered, max_w, scale=mid)
+        if h <= max_h:
+            best = (placements, mid)
+            lo = mid
+        else:
+            hi = mid
+    placements, scale = best
+    if not placements:
+        placements, _, _ = _shelf_pack(ordered, max_w, scale=0.15)
+    return placements, scale
+
+
+def _squarify(areas, x, y, w, h):
+    """Squarified treemap: list of (area) → list of (x, y, w, h) in same order."""
+    if not areas or w <= 0 or h <= 0:
+        return [(x, y, max(w, 1), max(h, 1)) for _ in areas]
+    total = sum(areas) or 1.0
+    # Normalize to pixel area
+    px_areas = [a / total * w * h for a in areas]
+    out = [None] * len(px_areas)
+    items = list(enumerate(px_areas))
+
+    def worst(row, row_area, side):
+        if not row or side <= 0 or row_area <= 0:
+            return float('inf')
+        thickness = row_area / side
+        worst_ar = 0.0
+        for _, a in row:
+            if a <= 0:
+                continue
+            length = a / thickness
+            worst_ar = max(worst_ar, length / thickness, thickness / length)
+        return worst_ar
+
+    def layout_row(row, row_area, x0, y0, w0, h0, horizontal):
+        coords = {}
+        if horizontal:
+            side = w0
+            row_h = row_area / side if side else 0
+            cx = x0
+            for idx, a in row:
+                rw = a / row_h if row_h else 0
+                coords[idx] = (cx, y0, rw, row_h)
+                cx += rw
+        else:
+            side = h0
+            row_w = row_area / side if side else 0
+            cy = y0
+            for idx, a in row:
+                rh = a / row_w if row_w else 0
+                coords[idx] = (x0, cy, row_w, rh)
+                cy += rh
+        return coords
+
+    def squarify_rec(remaining, x0, y0, w0, h0):
+        if not remaining:
+            return
+        if len(remaining) == 1:
+            idx, a = remaining[0]
+            out[idx] = (x0, y0, w0, h0)
+            return
+        horizontal = w0 >= h0
+        side = h0 if horizontal else w0
+        row = [remaining[0]]
+        row_area = remaining[0][1]
+        i = 1
+        while i < len(remaining):
+            cand = row + [remaining[i]]
+            cand_area = row_area + remaining[i][1]
+            if worst(cand, cand_area, side) <= worst(row, row_area, side):
+                row = cand
+                row_area = cand_area
+                i += 1
+            else:
+                break
+        coords = layout_row(row, row_area, x0, y0, w0, h0, horizontal)
+        for idx, box in coords.items():
+            out[idx] = box
+        rest = remaining[i:]
+        if not rest:
+            return
+        if horizontal:
+            squarify_rec(rest, x0, y0 + coords[row[0][0]][3], w0, h0 - coords[row[0][0]][3])
+        else:
+            squarify_rec(rest, x0 + coords[row[0][0]][2], y0, w0 - coords[row[0][0]][2], h0)
+
+    squarify_rec(items, x, y, w, h)
+    return [out[i] if out[i] is not None else (x, y, 1, 1) for i in range(len(areas))]
+
+
+def write_overview_mosaic(by_src, summary, sets):
+    """Landscape (16:9) mosaic: unique-after-dedup tiles in a tight treemap; readable at README width."""
+    from PIL import Image, ImageDraw, ImageFont
+
+    canvas_w = 1800
+    canvas_h = 1012  # 16:9
+    pad = 10
+    label_h = 30
+    legend_h = 40
+    gap = 4
+    # Small sources share a bottom strip so labels stay readable (min height).
+    small_strip_h = 110
+    inner_x = pad
+    inner_y = pad
+    inner_w = canvas_w - 2 * pad
+    main_h = canvas_h - 2 * pad - legend_h - small_strip_h - gap
+
+    try:
+        font_sm = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 18)
+        font_bold = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 22)
+        font_bold_sm = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 18)
+    except Exception:
+        font_sm = font_bold = font_bold_sm = ImageFont.load_default()
+
+    reps = unique_representatives(by_src, sets)
+    # Keep tiny sources out of the treemap so they are not crushed to <1px height.
+    small_keys = {'metabolismregulation', 'panther', 'ich360'}
+    main_blocks, small_blocks = [], []
+    for sk in SOURCE_ORDER:
+        items = reps.get(sk) or []
+        if not items:
+            continue
+        info = summary['by_source'][sk]
+        block = dict(sk=sk, items=items, info=info, area=max(info['unique_reaction_sets'], 1))
+        (small_blocks if sk in small_keys else main_blocks).append(block)
+
+    boxes = _squarify([b['area'] for b in main_blocks], inner_x, inner_y, inner_w, main_h)
+    im = Image.new('RGB', (canvas_w, canvas_h), (255, 255, 255))
+    draw = ImageDraw.Draw(im)
+
+    def paint_block(b, x0, y0, bw2, bh2, font):
+        tint = _hex_rgb(SOURCE_TINT[b['sk']])
+        stroke = _hex_rgb(SOURCE_STROKE[b['sk']])
+        draw.rectangle([x0, y0, x0 + bw2 - 1, y0 + bh2 - 1], fill=tint, outline=stroke, width=2)
+        info = b['info']
+        label = f"{SOURCE_LABEL_SHORT.get(b['sk'], b['sk'])}  ·  {info['modules']:,} / {info['unique_reaction_sets']:,}"
+        draw.text((x0 + 8, y0 + 5), label, fill=(17, 17, 17), font=font)
+        tile_x, tile_y = x0 + 4, y0 + label_h
+        tile_w, tile_h = max(bw2 - 8, 4), max(bh2 - label_h - 4, 4)
+        placements, _ = _pack_to_box(b['items'], tile_w, tile_h)
+        for m, px, py, cell in placements:
+            if py + cell > tile_h:
+                continue
+            _pil_draw_module(draw, m, tile_x + px, tile_y + py, cell)
+
+    for b, (bx, by, bw, bh) in zip(main_blocks, boxes):
+        bx, by, bw, bh = int(round(bx)), int(round(by)), int(round(bw)), int(round(bh))
+        x0, y0 = bx + gap // 2, by + gap // 2
+        bw2, bh2 = max(bw - gap, 24), max(bh - gap, label_h + 16)
+        paint_block(b, x0, y0, bw2, bh2, font_bold)
+
+    if small_blocks:
+        sy = pad + main_h + gap
+        sw = (inner_w - (len(small_blocks) - 1) * gap) // len(small_blocks)
+        for i, b in enumerate(small_blocks):
+            x0 = inner_x + i * (sw + gap)
+            paint_block(b, x0, sy, sw, small_strip_h, font_bold_sm)
+
+    ly = canvas_h - legend_h + 8
+    legend = (
+        f"One tile per unique reaction set (after dedup) · cut {summary['total_modules']:,} · "
+        f"unique {summary['unique_reaction_sets_global']:,} · nested {summary['modules_nested_in_larger_global']:,} · "
+        f"tile size scales with reactions; crumbs are solid specks"
+    )
+    draw.text((pad, ly), legend, fill=(31, 41, 55), font=font_sm)
+
+    OUT.mkdir(parents=True, exist_ok=True)
+    path = OUT / 'atlas_overview.png'
+    im.save(path, format='PNG', optimize=True)
+    _shrink_png(path, max_bytes=3_500_000)
+    return path
 
 
 def _shrink_png(path: Path, max_bytes: int):
@@ -479,136 +552,395 @@ def _shrink_png(path: Path, max_bytes: int):
     if path.stat().st_size <= max_bytes:
         return
     im = Image.open(path).convert('RGB')
-    # progressive downscale / quality
-    for scale in (0.85, 0.75, 0.65, 0.55):
+    for scale in (0.9, 0.8, 0.7, 0.6):
         w, h = im.size
         small = im.resize((max(1, int(w * scale)), max(1, int(h * scale))), Image.Resampling.LANCZOS)
         small.save(path, format='PNG', optimize=True)
         if path.stat().st_size <= max_bytes:
             return
-    # last resort: palette
-    Image.open(path).convert('P', palette=Image.ADAPTIVE, colors=64).save(path, optimize=True)
+
+
+def _ellipsis(text, max_chars):
+    text = text or ''
+    if len(text) <= max_chars:
+        return text
+    return text[: max(1, max_chars - 1)].rstrip() + '…'
+
+
+def _wrap(text, max_chars, max_lines=2):
+    text = text or ''
+    words = text.split()
+    lines = []
+    cur = ''
+    for w in words:
+        trial = (cur + ' ' + w).strip()
+        if len(trial) <= max_chars:
+            cur = trial
+        else:
+            if cur:
+                lines.append(cur)
+            cur = w
+            if len(lines) >= max_lines:
+                break
+    if cur and len(lines) < max_lines:
+        lines.append(cur)
+    if len(lines) == max_lines and (''.join(lines) != text.replace(' ', '')[:]):
+        # if truncated mid-way, ellipsis last line
+        if sum(len(x) for x in lines) < len(text.replace(' ', '')):
+            lines[-1] = _ellipsis(lines[-1], max_chars)
+    return lines[:max_lines]
+
+
+def pick_examples(by_src):
+    """16 distinct maps (4×4), prefer size 6–12, one map per cell."""
+    targets = [
+        ('escher', ['core metabolism', 'glycolysis'], 8),
+        ('escher', ['tca', 'citric', 'central carbon'], 8),
+        ('escher', ['fatty', 'lipid'], 12),
+        ('reactome', ['glycolysis', 'glucose'], 8),
+        ('reactome', ['aspartate', 'nucleotide', 'amino'], 8),
+        ('reactome', None, 8),
+        ('wikipathways', ['glycolysis', 'tca', 'pentose'], 8),
+        ('wikipathways', None, 6),
+        ('wikipathways_geometry', None, 8),
+        ('human_maps', ['glycolysis'], 8),
+        ('human_maps', ['cholesterol', 'lipid', 'sphingolipid'], 8),
+        ('ich360', ['amino', 'biosynthesis'], 8),
+        ('ich360', ['nucleotide', 'cofactor'], 6),
+        ('brenda', None, 8),
+        ('metabolismregulation', ['glycolysis'], 6),
+        ('panther', None, 4),
+    ]
+    picked = []
+    used_maps = set()
+    used_ids = set()
+    for sk, substrs, size in targets:
+        items = by_src.get(sk) or []
+        cand = [
+            m for m in items
+            if m['id'] not in used_ids
+            and (m.get('map_id'), m.get('name')) not in used_maps
+            and 4 <= (m.get('size') or 0) <= 24
+            and len(m.get('nodes') or []) >= 5
+        ]
+        if substrs:
+            named = [m for m in cand if any(s in (m.get('name') or '').lower() for s in substrs)]
+            if named:
+                cand = named
+        prefer = [m for m in cand if m.get('size') == size]
+        pool = prefer or cand
+        pool = sorted(pool, key=lambda m: (-(m.get('size') == size), -min(m.get('size') or 0, 12), m.get('name') or '', m['id']))
+        if not pool:
+            # relax size floor
+            pool = sorted(
+                [m for m in items if m['id'] not in used_ids and (m.get('map_id'), m.get('name')) not in used_maps and (m.get('size') or 0) >= 2],
+                key=lambda m: (-(m.get('size') or 0), m['id']),
+            )
+        if not pool:
+            continue
+        m = pool[0]
+        used_ids.add(m['id'])
+        used_maps.add((m.get('map_id'), m.get('name')))
+        picked.append(m)
+    return picked[:16]
+
+
+def write_examples(picked, summary):
+    cols = 4
+    rows = int(math.ceil(len(picked) / cols))
+    cell = 148
+    cap_h = 52
+    gap = 14
+    left = 18
+    top = 18
+    W = left * 2 + cols * cell + (cols - 1) * gap
+    H = top * 2 + rows * (cell + cap_h) + (rows - 1) * gap
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif">',
+        '<title>Example Atlas modules</title>',
+        f'<rect width="{W}" height="{H}" fill="#ffffff"/>',
+    ]
+    for i, m in enumerate(picked):
+        r, c = divmod(i, cols)
+        x = left + c * (cell + gap)
+        y = top + r * (cell + cap_h + gap)
+        sk = source_key(m)
+        parts.append(f'<rect x="{x}" y="{y}" width="{cell}" height="{cell}" rx="8" fill="#fafafa" stroke="{SOURCE_STROKE.get(sk, "#888")}" stroke-width="1.2"/>')
+        parts.extend(draw_module_paths(m, x, y, cell, stroke='#111', lw=1.05, node_r=2.0))
+        tx = x + cell / 2
+        max_chars = 22
+        parts.append(f'<text x="{tx:.1f}" y="{y + cell + 14}" text-anchor="middle" font-size="11" font-weight="600" fill="#111">{html.escape(SOURCE_LABEL_SHORT.get(sk, sk))}</text>')
+        name_lines = _wrap(m.get('name') or m.get('map_id') or '', max_chars, 2)
+        for li, line in enumerate(name_lines):
+            parts.append(f'<text x="{tx:.1f}" y="{y + cell + 28 + li * 12}" text-anchor="middle" font-size="10" fill="#374151">{html.escape(line)}</text>')
+        parts.append(f'<text x="{tx:.1f}" y="{y + cell + 28 + len(name_lines) * 12}" text-anchor="middle" font-size="10" fill="#6b7280">{m.get("size", len(m.get("reactions") or []))} reactions</text>')
+    parts.append('</svg>')
+    OUT.mkdir(parents=True, exist_ok=True)
+    svg_path = OUT / 'atlas_examples.svg'
+    svg_path.write_text('\n'.join(parts), encoding='utf-8')
+    png_path = OUT / 'atlas_examples.png'
+    _svg_to_png(svg_path, png_path, width=900)
+    return svg_path, png_path
 
 
 def _svg_to_png(svg_path: Path, png_path: Path, width: int = 800):
     try:
         import cairosvg
         cairosvg.svg2png(url=svg_path.resolve().as_uri(), write_to=str(png_path), output_width=width)
-        return
-    except Exception:
-        pass
-    # Fallback: rasterise via wand/PIL is unavailable for arbitrary SVG; leave SVG only.
-    print(f'PNG preview skipped for {svg_path.name} (install cairosvg for PNG)', flush=True)
+    except Exception as exc:
+        print(f'PNG preview skipped for {svg_path.name}: {exc}', flush=True)
 
 
 def write_worked_examples(by_src, mods, sets):
-    """Small SVG panels for the worked-examples section."""
     OUT.mkdir(parents=True, exist_ok=True)
     paths = {}
+    paths['cut'] = _worked_cut_figure(by_src)
+    paths['ids'] = _worked_ids_figure(by_src)
+    paths['dedup'] = _worked_dedup_figure(by_src, mods, sets)
+    paths['prov'] = _worked_provenance_figure(by_src, mods, sets)
+    paths['select'] = _worked_select_figure(by_src, sets)
+    return paths
 
-    # (1) Cut example: pick an Escher map with several modules
-    escher = by_src.get('escher') or []
-    by_map = defaultdict(list)
-    for m in escher:
-        by_map[m.get('map_id')].append(m)
-    # Prefer a map with 8–40 modules of varied sizes
-    map_id, group = max(by_map.items(), key=lambda kv: (min(40, len(kv[1])), -abs(len(kv[1]) - 20)))
-    group = sorted(group, key=lambda m: (m.get('size') or 0, m['id']))
-    # Show whole-map hull + up to 6 module cells
-    paths['cut'] = _worked_cut_figure(group[:1][0] if False else group, map_id)
 
-    # (2) Canonicalisation: Human-maps reaction with bigg/mnx/rhea
+def _worked_cut_figure(by_src):
+    """Source-map region with cut-window outlines + 3–4 non-trivial modules."""
+    from database import escher_diagram
+    from escher_cutter import reaction_windows, raw_escher_paths
+
+    # Prefer e_coli_core — small, readable
+    paths = [p for p in raw_escher_paths() if 'e_coli_core' in str(p)]
+    if not paths:
+        paths = raw_escher_paths()[:1]
+    path = paths[0]
+    diagram = escher_diagram(path)
+    windows = reaction_windows(diagram)
+    # Build bboxes in original coordinates for size 4/8/12 windows
+    rx = {r['key']: r for r in diagram['events']}
+    glyphs = diagram['glyphs']
+
+    def window_bbox(rs):
+        pts = []
+        for k in rs:
+            if k in rx:
+                pts.append(rx[k]['xy'])
+            for mk in (rx[k].get('visible') or {}):
+                g = glyphs.get(mk) or {}
+                if g.get('primary', True) and 'xy' in g:
+                    pts.append(g['xy'])
+        if not pts:
+            return None
+        xs = [p[0] for p in pts]
+        ys = [p[1] for p in pts]
+        return min(xs), min(ys), max(xs), max(ys)
+
+    # Map bounds first (used for spatial separation of cut windows).
+    all_xy = [r['xy'] for r in diagram['events']] + [g['xy'] for g in glyphs.values() if 'xy' in g]
+    xmin, ymin = min(p[0] for p in all_xy), min(p[1] for p in all_xy)
+    xmax, ymax = max(p[0] for p in all_xy), max(p[1] for p in all_xy)
+
+    # Pick 3–4 non-trivial windows with distinct sizes and spatially separated bboxes.
+    sized = defaultdict(list)
+    for rs in windows:
+        if 4 <= len(rs) <= 16:
+            bb = window_bbox(rs)
+            if bb and (bb[2] - bb[0]) > 1 and (bb[3] - bb[1]) > 1:
+                sized[len(rs)].append((rs, bb))
+
+    def bb_center(bb):
+        return ((bb[0] + bb[2]) / 2, (bb[1] + bb[3]) / 2)
+
+    def far_enough(bb, chosen_bbs, min_frac=0.12):
+        if not chosen_bbs:
+            return True
+        cx, cy = bb_center(bb)
+        span = max(xmax - xmin, ymax - ymin, 1e-6)
+        for ob in chosen_bbs:
+            ox, oy = bb_center(ob)
+            if math.hypot(cx - ox, cy - oy) / span < min_frac:
+                return False
+        return True
+
+    chosen = []
+    chosen_bbs = []
+    for n in (4, 8, 12):
+        cands = sorted(sized.get(n) or [], key=lambda t: -((t[1][2] - t[1][0]) * (t[1][3] - t[1][1])))
+        for item in cands:
+            if far_enough(item[1], chosen_bbs, min_frac=0.18):
+                chosen.append(item)
+                chosen_bbs.append(item[1])
+                break
+        if len(chosen) >= 3:
+            break
+    if len(chosen) < 3:
+        for n in sorted(sized, reverse=True):
+            for item in sized[n]:
+                if item in chosen:
+                    continue
+                if far_enough(item[1], chosen_bbs, min_frac=0.08):
+                    chosen.append(item)
+                    chosen_bbs.append(item[1])
+                if len(chosen) >= 3:
+                    break
+            if len(chosen) >= 3:
+                break
+    chosen = chosen[:3]
+
+    def window_as_module(rs):
+        nodes, edges, seen = [], [], set()
+        for k in rs:
+            if k not in rx:
+                continue
+            r = rx[k]
+            rkey = f"r:{r['id']}"
+            nodes.append({'key': rkey, 'xy': r['xy'], 'role': 'reaction'})
+            for mk in (r.get('visible') or {}):
+                g = glyphs.get(mk) or {}
+                if 'xy' not in g:
+                    continue
+                mkey = f'm:{mk}'
+                if mkey not in seen:
+                    nodes.append({'key': mkey, 'xy': g['xy'], 'role': 'metabolite'})
+                    seen.add(mkey)
+                edges.append({'a': rkey, 'b': mkey})
+        return {
+            'nodes': nodes,
+            'edges': edges,
+            'size': len(rs),
+            'reactions': [{'id': rx[k]['id']} for k in rs if k in rx],
+        }
+
+    # Map panel: draw all reactions/edges lightly, highlight chosen windows
+    map_w, map_h = 360, 280
+    mw = max(xmax - xmin, 1e-6)
+    mh = max(ymax - ymin, 1e-6)
+    scale = min((map_w - 24) / mw, (map_h - 24) / mh)
+
+    def tx(xy):
+        return 20 + 12 + (xy[0] - xmin) * scale, 48 + 12 + (xy[1] - ymin) * scale
+
+    cell = 118
+    gap = 14
+    right_x = 20 + map_w + 28
+    W = right_x + len(chosen) * (cell + gap) + 8
+    H = 48 + max(map_h, cell + 40) + 40
+    tint_colors = ['#3f8f6b55', '#b9852f55', '#4a6fa555']
+    stroke_colors = ['#3f8f6b', '#b9852f', '#4a6fa5']
+
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif">',
+        f'<rect width="{W}" height="{H}" fill="#fff"/>',
+        f'<text x="20" y="24" font-size="13" font-weight="700" fill="#111">Cut windows on a source map</text>',
+        f'<text x="20" y="40" font-size="11" fill="#4b5563">{html.escape(path.stem)} · outlined windows to stored modules</text>',
+        f'<rect x="20" y="48" width="{map_w}" height="{map_h}" rx="8" fill="#fafafa" stroke="#d0d7de"/>',
+    ]
+    # faint full map
+    for r in diagram['events']:
+        for mk, coeff in (r.get('visible') or {}).items():
+            g = glyphs.get(mk) or {}
+            if 'xy' not in g:
+                continue
+            a, b = tx(r['xy']), tx(g['xy'])
+            parts.append(f'<line x1="{a[0]:.1f}" y1="{a[1]:.1f}" x2="{b[0]:.1f}" y2="{b[1]:.1f}" stroke="#cbd5e1" stroke-width="0.7"/>')
+    for r in diagram['events']:
+        x, y = tx(r['xy'])
+        parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="2.0" fill="#111"/>')
+    # window outlines (draw largest first so small windows stay visible)
+    for i, (rs, bb) in sorted(enumerate(chosen), key=lambda t: -len(t[1][0])):
+        x0, y0 = tx((bb[0], bb[1]))
+        x1, y1 = tx((bb[2], bb[3]))
+        pad = 5
+        parts.append(
+            f'<rect x="{min(x0,x1)-pad:.1f}" y="{min(y0,y1)-pad:.1f}" width="{abs(x1-x0)+2*pad:.1f}" height="{abs(y1-y0)+2*pad:.1f}" '
+            f'fill="{tint_colors[i % 3]}" stroke="{stroke_colors[i % 3]}" stroke-width="1.6" rx="3"/>'
+        )
+    # size chips in a non-overlapping legend strip inside the map panel
+    chip_x, chip_y = 28, 56
+    for i, (rs, bb) in enumerate(chosen):
+        parts.append(
+            f'<rect x="{chip_x}" y="{chip_y + i * 16}" width="52" height="14" rx="3" '
+            f'fill="#ffffffcc" stroke="{stroke_colors[i % 3]}" stroke-width="1"/>'
+        )
+        parts.append(
+            f'<text x="{chip_x + 26:.1f}" y="{chip_y + i * 16 + 11}" text-anchor="middle" '
+            f'font-size="10" font-weight="600" fill="{stroke_colors[i % 3]}">{len(rs)} rx</text>'
+        )
+
+    # Right: Atlas match when possible, else draw window geometry directly
+    escher_mods = by_src.get('escher') or []
+    stem = path.stem
+    for i, (rs, bb) in enumerate(chosen):
+        ids = frozenset(rx[k]['id'] for k in rs if k in rx)
+        match = next(
+            (
+                m for m in escher_mods
+                if (m.get('size') or 0) == len(rs)
+                and frozenset(r.get('id') for r in (m.get('reactions') or [])) == ids
+            ),
+            None,
+        )
+        if match is None:
+            match = next(
+                (
+                    m for m in escher_mods
+                    if (m.get('size') or 0) == len(rs)
+                    and stem.split('.')[0] in (m.get('name') or '')
+                    and len(m.get('nodes') or []) >= 4
+                ),
+                None,
+            )
+        if match is None or len(match.get('nodes') or []) < 2:
+            match = window_as_module(rs)
+        x = right_x + i * (cell + gap)
+        y = 48 + 12
+        parts.append(f'<rect x="{x}" y="{y}" width="{cell}" height="{cell}" rx="8" fill="#fff" stroke="{stroke_colors[i % 3]}" stroke-width="1.3"/>')
+        parts.extend(draw_module_paths(match, x, y, cell, stroke='#111', lw=1.0, node_r=1.8))
+        parts.append(f'<text x="{x+cell/2:.1f}" y="{y+cell+14}" text-anchor="middle" font-size="10" fill="#111">{len(rs)} reactions</text>')
+
+    parts.append(
+        f'<text x="20" y="{H-12}" font-size="11" fill="#6b7280">'
+        f'Left: source map with cut-window outlines. Right: resulting non-trivial modules '
+        f'(sizes {", ".join(str(len(rs)) for rs, _ in chosen)}).</text>'
+    )
+    parts.append('</svg>')
+    out = OUT / 'worked_cut.svg'
+    out.write_text('\n'.join(parts), encoding='utf-8')
+    _svg_to_png(out, OUT / 'worked_cut.png', width=980)
+    return out
+
+
+def _worked_ids_figure(by_src):
     hm_cands = [
         m for m in (by_src.get('human_maps') or [])
         if sum(1 for r in (m.get('reactions') or []) if (r.get('references') or {}).get('bigg.reaction')) >= 3
     ]
-    hm = max(hm_cands, key=lambda m: m.get('size') or 0) if hm_cands else None
-    paths['ids'] = _worked_ids_figure(hm)
-
-    # (3) Dedup across sources: find identical reaction set in two sources
-    set_owners = defaultdict(list)
-    for m in mods:
-        rs = sets[m['id']]
-        if len(rs) >= 3:
-            set_owners[rs].append(m)
-    pair = None
-    for rs, owners in set_owners.items():
-        srcs = {source_key(m) for m in owners}
-        if len(srcs) >= 2:
-            # pick one from each of two sources
-            a = next(m for m in owners if source_key(m) == sorted(srcs)[0])
-            b = next(m for m in owners if source_key(m) == sorted(srcs)[1])
-            pair = (a, b, rs)
-            break
-    paths['dedup'] = _worked_dedup_figure(pair)
-
-    # (4) Provenance record
-    sample = next((m for m in escher if (m.get('size') or 0) >= 4 and m.get('extraction')), escher[0] if escher else None)
-    paths['prov'] = _worked_provenance_figure(sample)
-
-    # (5) Compact selection schematic (optional)
-    paths['select'] = _worked_select_figure()
-
-    return paths
-
-
-def _worked_cut_figure(group, map_id):
-    # Panel A: scatter all module bboxes on shared coords from first large module's map — simpler: show 6 modules in a row with nesting note
-    show = group[:6] if len(group) >= 6 else group
-    cell = 120
-    gap = 14
-    left = 20
-    top = 36
-    W = left * 2 + len(show) * cell + (len(show) - 1) * gap
-    H = top + cell + 56
-    name = html.escape((show[0].get('name') if show else map_id) or str(map_id))
+    m = max(hm_cands, key=lambda x: x.get('size') or 0) if hm_cands else None
+    W, H = 740, 250
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif">',
         f'<rect width="{W}" height="{H}" fill="#fff"/>',
-        f'<text x="{left}" y="22" font-size="13" font-weight="700" fill="#1f2937">Cut windows from one Escher map</text>',
-        f'<text x="{left}" y="{H - 14}" font-size="11" fill="#6b7280">{name} · {len(group)} modules stored from this map (showing {len(show)})</text>',
-    ]
-    for i, m in enumerate(show):
-        x = left + i * (cell + gap)
-        y = top
-        nested = any(reaction_set(m) < reaction_set(o) for o in group if o['id'] != m['id'])
-        stroke = '#b9852f' if nested else '#3f8f6b'
-        parts.append(f'<rect x="{x}" y="{y}" width="{cell}" height="{cell}" rx="8" fill="#fafafa" stroke="{stroke}" stroke-width="1.2"/>')
-        parts.extend(draw_module_paths(m, x, y, cell, lw=1.0, node_r=1.8))
-        parts.append(f'<text x="{x + cell/2:.1f}" y="{y + cell + 14}" text-anchor="middle" font-size="10" fill="#374151">{m.get("size", "?")} rx{" · nested" if nested else ""}</text>')
-    parts.append('</svg>')
-    path = OUT / 'worked_cut.svg'
-    path.write_text('\n'.join(parts), encoding='utf-8')
-    _svg_to_png(path, OUT / 'worked_cut.png', width=900)
-    return path
-
-
-def _worked_ids_figure(m):
-    W, H = 720, 220
-    parts = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif">',
-        f'<rect width="{W}" height="{H}" fill="#fff"/>',
-        f'<text x="20" y="28" font-size="13" font-weight="700" fill="#1f2937">Canonical reaction identifiers (Human-maps example)</text>',
+        f'<text x="20" y="24" font-size="13" font-weight="700" fill="#111">Canonical reaction identifiers (Human-maps)</text>',
     ]
     if not m:
         parts.append('<text x="20" y="60" font-size="12" fill="#6b7280">No example module found.</text></svg>')
         path = OUT / 'worked_ids.svg'
         path.write_text('\n'.join(parts), encoding='utf-8')
         return path
-    rows = []
-    for r in (m.get('reactions') or [])[:4]:
-        refs = r.get('references') or {}
-        rows.append((r.get('id'), refs))
-    y = 56
-    parts.append(f'<text x="20" y="48" font-size="11" fill="#6b7280">Map: {html.escape(m.get("name") or "")}</text>')
-    # header
+    parts.append(f'<text x="20" y="42" font-size="11" fill="#6b7280">Map: {html.escape(_ellipsis(m.get("name") or "", 70))}</text>')
+    y = 68
     headers = ['Native (human.gem)', 'bigg.reaction', 'metanetx.reaction', 'rhea']
-    xs = [20, 200, 360, 540]
+    xs = [20, 200, 380, 560]
     for x, h in zip(xs, headers):
-        parts.append(f'<text x="{x}" y="{y}" font-size="11" font-weight="600" fill="#1f2937">{h}</text>')
-    y += 8
+        parts.append(f'<text x="{x}" y="{y}" font-size="11" font-weight="600" fill="#111">{h}</text>')
+    y += 6
     parts.append(f'<line x1="20" y1="{y}" x2="{W-20}" y2="{y}" stroke="#d0d7de"/>')
-    y += 18
+    y += 20
+    rows = []
+    for r in (m.get('reactions') or []):
+        refs = r.get('references') or {}
+        if refs.get('bigg.reaction') or refs.get('metanetx.reaction') or refs.get('rhea'):
+            rows.append((r.get('id'), refs))
+        if len(rows) >= 4:
+            break
     for rid, refs in rows:
         vals = [
             (refs.get('human.gem') or [rid])[0],
@@ -622,98 +954,230 @@ def _worked_ids_figure(m):
     parts.append('</svg>')
     path = OUT / 'worked_ids.svg'
     path.write_text('\n'.join(parts), encoding='utf-8')
-    _svg_to_png(path, OUT / 'worked_ids.png', width=720)
+    _svg_to_png(path, OUT / 'worked_ids.png', width=740)
     return path
 
 
-def _worked_dedup_figure(pair):
-    W, H = 640, 260
+def _worked_dedup_figure(by_src, mods, sets):
+    """Exact cross-source duplicate (merged also_in record) + nesting case."""
+    # Cross-source identical set with size >= 6
+    owners_by_set = defaultdict(list)
+    for m in mods:
+        rs = sets[m['id']]
+        if len(rs) >= 6:
+            owners_by_set[rs].append(m)
+    pair = None
+    for rs, owners in owners_by_set.items():
+        srcs = {source_key(m) for m in owners}
+        if len(srcs) >= 2 and 'escher' in srcs and 'human_maps' in srcs:
+            a = next(m for m in owners if source_key(m) == 'escher')
+            b = next(m for m in owners if source_key(m) == 'human_maps')
+            pair = (a, b, rs)
+            break
+    if pair is None:
+        for rs, owners in owners_by_set.items():
+            srcs = {source_key(m) for m in owners}
+            if len(srcs) >= 2:
+                aa = sorted(srcs)
+                a = next(m for m in owners if source_key(m) == aa[0])
+                b = next(m for m in owners if source_key(m) == aa[1])
+                pair = (a, b, rs)
+                break
+
+    # Nesting within Escher same map
+    nest = None
+    escher = by_src.get('escher') or []
+    by_map = defaultdict(list)
+    for m in escher:
+        by_map[m.get('map_id')].append(m)
+    for mid, group in by_map.items():
+        sets_local = {m['id']: sets[m['id']] for m in group}
+        for child in group:
+            cs = sets_local[child['id']]
+            if not (4 <= len(cs) <= 8):
+                continue
+            for parent in group:
+                if parent['id'] == child['id']:
+                    continue
+                ps = sets_local[parent['id']]
+                if len(ps) >= len(cs) + 4 and cs < ps:
+                    nest = (child, parent)
+                    break
+            if nest:
+                break
+        if nest:
+            break
+
+    cell = 120
+    W, H = 920, 320
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif">',
         f'<rect width="{W}" height="{H}" fill="#fff"/>',
-        f'<text x="20" y="28" font-size="13" font-weight="700" fill="#1f2937">Same canonical reaction set in two sources</text>',
+        f'<text x="20" y="24" font-size="13" font-weight="700" fill="#111">Dedup: identical sets merge; nested crumbs remain stored</text>',
     ]
-    if not pair:
-        parts.append('<text x="20" y="60" font-size="12" fill="#6b7280">No cross-source identical set with ≥3 reactions in the default Atlas.</text></svg>')
-        path = OUT / 'worked_dedup.svg'
-        path.write_text('\n'.join(parts), encoding='utf-8')
-        return path
-    a, b, rs = pair
-    cell = 150
-    for i, m in enumerate((a, b)):
-        x = 40 + i * (cell + 80)
-        y = 50
-        sk = source_key(m)
-        parts.append(f'<rect x="{x}" y="{y}" width="{cell}" height="{cell}" rx="8" fill="#fafafa" stroke="{SOURCE_STROKE.get(sk,"#888")}" stroke-width="1.2"/>')
-        parts.extend(draw_module_paths(m, x, y, cell, lw=1.0, node_r=1.8))
-        parts.append(f'<text x="{x+cell/2:.1f}" y="{y+cell+16}" text-anchor="middle" font-size="11" font-weight="600" fill="#1f2937">{html.escape(SOURCE_LABEL.get(sk, sk))}</text>')
-        parts.append(f'<text x="{x+cell/2:.1f}" y="{y+cell+30}" text-anchor="middle" font-size="10" fill="#6b7280">{html.escape((m.get("name") or "")[:36])}</text>')
-    parts.append('<text x="320" y="130" text-anchor="middle" font-size="18" fill="#6b7280">=</text>')
-    parts.append(f'<text x="20" y="{H-16}" font-size="11" fill="#6b7280">{len(rs)} shared canonical reaction ids · both modules kept in the library; selection prefers the denser drawing at compose time</text>')
+    # Left panel: exact duplicate → merged record
+    parts.append('<text x="20" y="48" font-size="12" font-weight="600" fill="#111">A. Same reaction set across sources (drawings may differ)</text>')
+    if pair:
+        a, b, rs = pair
+        for i, m in enumerate((a, b)):
+            x = 20 + i * (cell + 16)
+            y = 60
+            sk = source_key(m)
+            parts.append(f'<rect x="{x}" y="{y}" width="{cell}" height="{cell}" rx="8" fill="#fafafa" stroke="{SOURCE_STROKE.get(sk,"#888")}" stroke-width="1.2"/>')
+            parts.extend(draw_module_paths(m, x, y, cell, stroke='#111', lw=1.0, node_r=1.7))
+            parts.append(f'<text x="{x+cell/2:.1f}" y="{y+cell+14}" text-anchor="middle" font-size="10" font-weight="600" fill="#111">{html.escape(_ellipsis(SOURCE_LABEL_SHORT.get(sk, sk), 16))}</text>')
+            parts.append(f'<text x="{x+cell/2:.1f}" y="{y+cell+28}" text-anchor="middle" font-size="9" fill="#6b7280">{html.escape(_ellipsis(m.get("name") or "", 18))}</text>')
+        parts.append('<path d="M280 120 L310 120 L310 114 L324 124 L310 134 L310 128 L280 128 Z" fill="#6b7280"/>')
+        mx, my, mw, mh = 340, 70, 200, 110
+        parts.append(f'<rect x="{mx}" y="{my}" width="{mw}" height="{mh}" rx="8" fill="#e7f4ee" stroke="#3f8f6b" stroke-width="1.4"/>')
+        parts.append(f'<text x="{mx+10}" y="{my+22}" font-size="11" font-weight="700" fill="#111">Unique after dedup</text>')
+        parts.append(f'<text x="{mx+10}" y="{my+42}" font-size="10" fill="#374151">{len(rs)} canonical reactions</text>')
+        parts.append(f'<text x="{mx+10}" y="{my+60}" font-size="10" fill="#374151">also_in:</text>')
+        parts.append(f'<text x="{mx+10}" y="{my+76}" font-size="10" fill="#374151">{html.escape(SOURCE_LABEL_SHORT.get(source_key(a), source_key(a)))}</text>')
+        parts.append(f'<text x="{mx+10}" y="{my+92}" font-size="10" fill="#374151">{html.escape(SOURCE_LABEL_SHORT.get(source_key(b), source_key(b)))}</text>')
+    # Right panel: nesting
+    parts.append('<text x="560" y="48" font-size="12" font-weight="600" fill="#111">B. Nested crumb</text>')
+    if nest:
+        child, parent = nest
+        for i, m in enumerate((child, parent)):
+            x = 560 + i * (cell + 16)
+            y = 60
+            sk = source_key(m)
+            stroke = '#b9852f' if i == 0 else '#3f8f6b'
+            parts.append(f'<rect x="{x}" y="{y}" width="{cell}" height="{cell}" rx="8" fill="#fafafa" stroke="{stroke}" stroke-width="1.2"/>')
+            parts.extend(draw_module_paths(m, x, y, cell, stroke='#111', lw=1.0, node_r=1.7))
+            label = 'nested subset' if i == 0 else 'larger window'
+            parts.append(f'<text x="{x+cell/2:.1f}" y="{y+cell+14}" text-anchor="middle" font-size="10" font-weight="600" fill="#111">{label}</text>')
+            parts.append(f'<text x="{x+cell/2:.1f}" y="{y+cell+28}" text-anchor="middle" font-size="9" fill="#6b7280">{m.get("size")} reactions</text>')
+        parts.append('<path d="M686 120 L716 120 L716 114 L730 124 L716 134 L716 128 L686 128 Z" fill="#6b7280"/>')
+
+    cap = 'A: identical canonical reaction sets collapse to one unique entry with also_in provenance. B: smaller reaction sets nested in larger windows stay stored as multi-scale crumbs.'
+    # wrap caption inside width
+    for i, line in enumerate(_wrap(cap, 110, 3)):
+        parts.append(f'<text x="20" y="{H - 36 + i * 14}" font-size="11" fill="#4b5563">{html.escape(line)}</text>')
     parts.append('</svg>')
     path = OUT / 'worked_dedup.svg'
     path.write_text('\n'.join(parts), encoding='utf-8')
-    _svg_to_png(path, OUT / 'worked_dedup.png', width=640)
+    _svg_to_png(path, OUT / 'worked_dedup.png', width=920)
     return path
 
 
-def _worked_provenance_figure(m):
-    W, H = 640, 240
+def _worked_provenance_figure(by_src, mods, sets):
+    escher = by_src.get('escher') or []
+    # Prefer a module that also appears in another source
+    sample = None
+    also_in = []
+    owners = defaultdict(list)
+    for m in mods:
+        owners[sets[m['id']]].append(m)
+    for m in escher:
+        if (m.get('size') or 0) < 6 or not m.get('extraction'):
+            continue
+        peers = owners.get(sets[m['id']]) or []
+        srcs = sorted({source_key(p) for p in peers})
+        if len(srcs) >= 2:
+            sample = m
+            also_in = srcs
+            break
+    if sample is None:
+        sample = next((m for m in escher if (m.get('size') or 0) >= 6 and m.get('extraction')), escher[0] if escher else None)
+
+    W, H = 700, 260
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" font-family="ui-monospace,Menlo,monospace">',
         f'<rect width="{W}" height="{H}" fill="#fff"/>',
-        f'<text x="20" y="28" font-size="13" font-weight="700" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" fill="#1f2937">Provenance fields on one module</text>',
+        f'<text x="20" y="24" font-size="13" font-weight="700" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" fill="#111">Provenance fields on one module</text>',
     ]
-    if not m:
+    if not sample:
         parts.append('</svg>')
         path = OUT / 'worked_provenance.svg'
         path.write_text('\n'.join(parts), encoding='utf-8')
         return path
-    ex = m.get('extraction') or {}
+    ex = sample.get('extraction') or {}
     lines = [
-        f'source:   {m.get("source")}',
-        f'map:      {(m.get("name") or m.get("map_id") or "")[:70]}',
-        f'license:  {m.get("license")}',
+        f'source:   {sample.get("source")}',
+        f'map:      {_ellipsis(sample.get("name") or sample.get("map_id") or "", 60)}',
+        f'license:  {sample.get("license")}',
         f'method:   {ex.get("method")}',
         f'version:  {ex.get("version")}',
-        f'size:     {m.get("size")} reactions',
+        f'size:     {sample.get("size")} reactions',
     ]
-    y = 56
+    if also_in:
+        lines.append('also_in:  ' + ', '.join(SOURCE_LABEL.get(s, s) for s in also_in))
+    y = 52
     for line in lines:
         parts.append(f'<text x="28" y="{y}" font-size="12" fill="#374151">{html.escape(line)}</text>')
-        y += 22
-    # tiny drawing
+        y += 20
     parts.append(f'<rect x="{W-170}" y="48" width="140" height="140" rx="8" fill="#fafafa" stroke="#d0d7de"/>')
-    parts.extend(draw_module_paths(m, W - 170, 48, 140, lw=1.0, node_r=1.8))
+    parts.extend(draw_module_paths(sample, W - 170, 48, 140, stroke='#111', lw=1.0, node_r=1.8))
     parts.append('</svg>')
     path = OUT / 'worked_provenance.svg'
     path.write_text('\n'.join(parts), encoding='utf-8')
-    _svg_to_png(path, OUT / 'worked_provenance.png', width=640)
+    _svg_to_png(path, OUT / 'worked_provenance.png', width=700)
     return path
 
 
-def _worked_select_figure():
-    W, H = 640, 200
+def _worked_select_figure(by_src, sets):
+    """Real same-source same-set modules with different density."""
+    best = None
+    for sk in ('escher', 'human_maps', 'ich360'):
+        groups = defaultdict(list)
+        for m in by_src.get(sk) or []:
+            rs = sets[m['id']]
+            if len(rs) >= 6:
+                groups[rs].append(m)
+        for rs, items in groups.items():
+            if len(items) < 2:
+                continue
+            scored = []
+            for m in items:
+                d = module_density(m)
+                if d > 0:
+                    scored.append((d, m))
+            scored.sort(key=lambda t: -t[0])
+            if len(scored) >= 2 and scored[0][0] > scored[-1][0] * 1.25:
+                best = (sk, scored[0], scored[-1], rs)
+                break
+        if best:
+            break
+
+    cell = 160
+    W, H = 720, 310
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif">',
         f'<rect width="{W}" height="{H}" fill="#fff"/>',
-        f'<text x="20" y="28" font-size="13" font-weight="700" fill="#1f2937">Compact selection among overlapping candidates</text>',
-        # two boxes same reaction set
-        f'<rect x="40" y="50" width="200" height="100" rx="8" fill="#f5f5f5" stroke="#9ca3af" stroke-width="1.2"/>',
-        f'<text x="140" y="78" text-anchor="middle" font-size="12" fill="#6b7280">Sprawling whole-map window</text>',
-        f'<text x="140" y="98" text-anchor="middle" font-size="11" fill="#9ca3af">same reaction set</text>',
-        f'<text x="140" y="128" text-anchor="middle" font-size="11" fill="#9ca3af">lower density → dropped</text>',
-        f'<text x="280" y="105" text-anchor="middle" font-size="20" fill="#6b7280">→</text>',
-        f'<rect x="320" y="50" width="200" height="100" rx="8" fill="#e7f4ee" stroke="#3f8f6b" stroke-width="1.6"/>',
-        f'<text x="420" y="78" text-anchor="middle" font-size="12" font-weight="600" fill="#1f2937">Compact pathway window</text>',
-        f'<text x="420" y="98" text-anchor="middle" font-size="11" fill="#3f8f6b">same reaction set</text>',
-        f'<text x="420" y="128" text-anchor="middle" font-size="11" fill="#3f8f6b">higher density → kept</text>',
-        f'<text x="20" y="{H-18}" font-size="11" fill="#6b7280">Coverage still ranks first; compactness breaks ties for same-source biochemical matches with identical reaction sets.</text>',
-        '</svg>',
+        f'<text x="20" y="24" font-size="13" font-weight="700" fill="#111">Compact selection among overlapping candidates</text>',
     ]
+    if not best:
+        parts.append('<text x="20" y="60" font-size="12" fill="#6b7280">No same-set density pair found.</text></svg>')
+        path = OUT / 'worked_select.svg'
+        path.write_text('\n'.join(parts), encoding='utf-8')
+        return path
+    sk, (d_hi, m_hi), (d_lo, m_lo), rs = best
+    # sprawling left, compact right
+    for i, (m, dens, title, stroke) in enumerate((
+        (m_lo, d_lo, 'Lower density (dropped)', '#9ca3af'),
+        (m_hi, d_hi, 'Higher density (kept)', '#3f8f6b'),
+    )):
+        x = 40 + i * (cell + 100)
+        y = 44
+        fill = '#f5f5f5' if i == 0 else '#e7f4ee'
+        parts.append(f'<rect x="{x}" y="{y}" width="{cell}" height="{cell}" rx="8" fill="{fill}" stroke="{stroke}" stroke-width="1.5"/>')
+        parts.extend(draw_module_paths(m, x, y, cell, stroke='#111', lw=1.05, node_r=1.9))
+        parts.append(f'<text x="{x+cell/2:.1f}" y="{y+cell+16}" text-anchor="middle" font-size="11" font-weight="600" fill="#111">{html.escape(title)}</text>')
+        parts.append(f'<text x="{x+cell/2:.1f}" y="{y+cell+32}" text-anchor="middle" font-size="10" fill="#4b5563">{html.escape(_ellipsis(m.get("name") or "", 28))}</text>')
+        parts.append(f'<text x="{x+cell/2:.1f}" y="{y+cell+46}" text-anchor="middle" font-size="10" fill="#6b7280">{len(rs)} reactions · density {dens:.3g}</text>')
+    # arrow path between boxes (ASCII geometry, no unicode glyphs)
+    parts.append('<path d="M250 124 L300 124 L300 116 L318 128 L300 140 L300 132 L250 132 Z" fill="#6b7280"/>')
+    parts.append(
+        f'<text x="20" y="{H - 16}" font-size="11" fill="#4b5563">'
+        'Same source and identical reaction set; coverage still ranks first. '
+        'Density = matched nodes / bounding-box area.</text>'
+    )
+    parts.append('</svg>')
     path = OUT / 'worked_select.svg'
     path.write_text('\n'.join(parts), encoding='utf-8')
-    _svg_to_png(path, OUT / 'worked_select.png', width=640)
+    _svg_to_png(path, OUT / 'worked_select.png', width=720)
     return path
 
 
@@ -724,21 +1188,33 @@ def run_all():
     summary, by_src, sets = compute_overlap(mods)
     OUT.mkdir(parents=True, exist_ok=True)
     stats_path = OUT / 'atlas_overlap.json'
+    # JSON-serialize frozensets already expanded
     stats_path.write_text(json.dumps(summary, indent=2, sort_keys=True) + '\n', encoding='utf-8')
     print('Wrote', stats_path, flush=True)
     for sk in SOURCE_ORDER:
         info = summary['by_source'][sk]
         print(f"  {sk}: modules={info['modules']} unique={info['unique_reaction_sets']} nested={info['nested_in_larger']}", flush=True)
-    print(f"global unique sets={summary['unique_reaction_sets_global']} nested_modules={summary['modules_nested_in_larger_global']} cross_sets={summary['cross_source_identical_sets']}", flush=True)
+    print(
+        f"global unique={summary['unique_reaction_sets_global']} "
+        f"nested={summary['modules_nested_in_larger_global']} cross_sets={summary['cross_source_identical_sets']}",
+        flush=True,
+    )
 
     print('Writing example grid…', flush=True)
     picked = pick_examples(by_src)
+    print('  picked maps:', [(source_key(m), m.get('name'), m.get('size')) for m in picked], flush=True)
     ex = write_examples(picked, summary)
     print('Wrote', ex, flush=True)
 
-    print('Writing overview mosaic (this may take a minute)…', flush=True)
-    ov = write_overview_mosaic(by_src, summary)
-    print('Wrote', ov, 'size', ov.stat().st_size, flush=True)
+    print('Writing overview mosaic…', flush=True)
+    ov = write_overview_mosaic(by_src, summary, sets)
+    print('Wrote', ov, 'size', ov.stat().st_size, 'dims', end=' ', flush=True)
+    try:
+        from PIL import Image
+        im = Image.open(ov)
+        print(im.size, flush=True)
+    except Exception:
+        print(flush=True)
 
     print('Writing worked examples…', flush=True)
     wp = write_worked_examples(by_src, mods, sets)
@@ -761,7 +1237,7 @@ def main():
         (OUT / 'atlas_overlap.json').write_text(json.dumps(summary, indent=2, sort_keys=True) + '\n')
         print(json.dumps(summary, indent=2))
     elif args.command == 'overview':
-        write_overview_mosaic(by_src, summary)
+        write_overview_mosaic(by_src, summary, sets)
     elif args.command == 'examples':
         write_examples(pick_examples(by_src), summary)
     elif args.command == 'worked':

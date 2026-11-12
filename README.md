@@ -48,9 +48,9 @@ Layout evaluation: `pip install -r layout_atlas/requirements-eval.txt`, then `py
 
 The Atlas stores reusable pathway modules (topology, reaction identity, geometry, licence) cut from public community maps. Default load: `data/open_core.sqlite` plus in-tree extensions. Counts from [`data/atlas_registry.json`](data/atlas_registry.json) (generated 2026-11-12; About uses the same file).
 
-<img src="docs/images/atlas/atlas_overview.png" alt="Overview mosaic of all default Atlas modules, coloured by source, with a legend of module counts and unique-after-dedup counts." width="700">
+<img src="docs/images/atlas/atlas_overview.png" alt="Landscape overview mosaic of unique-after-dedup Atlas modules by source, with readable per-block labels and a legend of module and unique counts." width="700">
 
-*All cut modules at thumbnail scale, grouped by source. Regenerate: `PYTHONPATH=layout_atlas python3 tools/atlas_module_figures.py overview`.*
+*One tile per unique reaction set within each source (tile size scales with reaction count). Regenerate: `PYTHONPATH=layout_atlas python3 tools/atlas_module_figures.py overview`.*
 
 ### Sources and licences
 

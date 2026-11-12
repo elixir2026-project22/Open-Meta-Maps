@@ -120,9 +120,9 @@ Figures: `PYTHONPATH=layout_atlas python3 tools/atlas_module_figures.py worked` 
 
 ### 1. Cutting one source map into modules
 
-<img src="images/atlas/worked_cut.svg" alt="Six cut windows from one Escher map, some marked nested" width="700">
+<img src="images/atlas/worked_cut.svg" alt="Source Escher map with cut-window outlines and the resulting non-trivial modules" width="700">
 
-One community Escher map yields many reaction windows (sizes 1–40). Near-nested crumbs may remain stored; Stage B drops only near-nested pairs under `nest_factor=2`. Nested windows are outlined in amber in the figure.
+A community Escher map is cut into reaction windows (sizes 1–40). The left panel shows the source map with window outlines; the right panel shows the resulting non-trivial modules. Near-nested crumbs may remain stored; Stage B drops only near-nested pairs under `nest_factor=2`.
 
 ### 2. Canonical reaction identifiers
 
@@ -130,23 +130,23 @@ One community Escher map yields many reaction windows (sizes 1–40). Near-neste
 
 Human-maps keep the native MAR id under `human.gem` and attach BiGG / MetaNetX / Rhea from the Human-GEM `reactions.tsv` crosswalk when annotated.
 
-### 3. Cross-source duplicate pathway
+### 3. Dedup: identical sets and nesting
 
-<img src="images/atlas/worked_dedup.svg" alt="Two modules from different sources with the same canonical reaction set" width="640">
+<img src="images/atlas/worked_dedup.svg" alt="Exact cross-source duplicate collapsed with also_in provenance, plus a nested crumb inside a larger window" width="700">
 
-When two sources contribute the same canonical reaction set, both modules stay in the library (with their own provenance). At compose time, `retrieval.select` keeps the denser drawing among same-source equal sets; coverage still ranks first across the pool.
+Exact duplicates across sources collapse to one unique reaction set with `also_in` listing every contributing source. Nested crumbs (smaller reaction sets inside larger windows) stay stored as multi-scale seeds. At compose time, `retrieval.select` still prefers the denser drawing among same-source equal sets.
 
 ### 4. Provenance on one module
 
-<img src="images/atlas/worked_provenance.svg" alt="Provenance fields for one Atlas module next to its geometry" width="640">
+<img src="images/atlas/worked_provenance.svg" alt="Provenance fields for one Atlas module next to its geometry, including also_in when shared" width="700">
 
-Every module carries `source`, map name/id, `license`, and an `extraction` block (`method`, `version`, `parameters`, `counts`).
+Every module carries `source`, map name/id, `license`, and an `extraction` block (`method`, `version`, `parameters`, `counts`). When the same canonical set appears in multiple sources, the unique record lists `also_in`.
 
 ### 5. Compact selection
 
-<img src="images/atlas/worked_select.svg" alt="Schematic: sprawling window dropped in favour of compact pathway window with the same reaction set" width="640">
+<img src="images/atlas/worked_select.svg" alt="Two real modules with the same reaction set and different densities; denser one kept" width="700">
 
-Among same-source biochemical proposals with identical reaction sets, only the denser drawing is kept.
+Among same-source biochemical proposals with identical reaction sets, only the denser drawing is kept (density = nodes / bounding-box area). Coverage still ranks first.
 
 ### Reactions / reviews / retained_observations
 

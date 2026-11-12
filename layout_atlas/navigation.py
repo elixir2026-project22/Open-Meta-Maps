@@ -93,7 +93,7 @@ def about():
     s_data = sec(
         '1. Data construction — the curated-structure Atlas',
         stats
-        + '<div class="fig"><img src="' + e(overview_rel) + '" alt="' + b('Overview mosaic of all default Atlas modules by source') + '" width="700"/><p class="meta">' + b('All cut modules at thumbnail scale, grouped by source. Totals count cut windows, not independent drawings.') + '</p></div>'
+        + '<div class="fig"><img src="' + e(overview_rel) + '" alt="' + b('Landscape overview mosaic of unique-after-dedup Atlas modules by source') + '" width="700"/><p class="meta">' + b('One tile per unique reaction set within each source; tile size scales with reaction count. Totals count cut windows, not independent drawings.') + '</p></div>'
         + '<h3>' + b('Sources and licences') + '</h3>' + tbl
         + '<p class="meta">' + b('WikiPathways semantic modules live in open_core.sqlite; geometry-only windows ship as an extension for repository size. Both load by default. Dedup stats: docs/images/atlas/atlas_overlap.json.') + '</p>'
         + '<div class="fig"><img src="' + e(examples_rel) + '" alt="' + b('Example Atlas modules with captions') + '" width="700"/><p class="meta">' + b('Representative modules per source (source, map name, reaction count).') + '</p></div>'
