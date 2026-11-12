@@ -824,15 +824,17 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             squeeze = composition_module.squeeze_escher(data, max_gap=k * spacing)
             squeeze['spacing_px'] = round(spacing, 1)
             squeeze['k'] = k
-            # If the first pass found nothing to collapse, try a tighter gap so
-            # remaining BiGG alignment voids still shrink (empty-rect / long-p90).
-            if not squeeze.get('applied'):
-                squeeze2 = composition_module.squeeze_escher(data, max_gap=max(spacing * 1.5, 40.0))
-                if squeeze2.get('applied'):
-                    squeeze2['spacing_px'] = round(spacing, 1)
-                    squeeze2['k'] = round(1.5, 2)
-                    squeeze2['fallback'] = True
-                    squeeze = squeeze2
+            # Follow-up tighter gap so remaining BiGG alignment voids still shrink
+            # (blank / empty-rect / long-p90), whether or not the first pass moved.
+            squeeze2 = composition_module.squeeze_escher(
+                data, max_gap=max(spacing * 1.25, 40.0))
+            if squeeze2.get('applied'):
+                squeeze2['spacing_px'] = round(spacing, 1)
+                squeeze2['k'] = round(1.25, 2)
+                squeeze2['fallback'] = True
+                squeeze2['first'] = {kk: vv for kk, vv in squeeze.items()
+                                     if kk not in ('first',)}
+                squeeze = squeeze2
             metric['squeeze'] = squeeze
             if composition_report is not None:
                 composition_report['squeeze'] = squeeze

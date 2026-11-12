@@ -483,20 +483,33 @@ def _find_pocket_origin(occ, size_w, size_h, prefer_c, content_lo=None, content_
             cy = y0 + size_h / 2.0
             dist = (cx - prefer_c[0]) ** 2 + (cy - prefer_c[1]) ** 2
             aspect_pen = 0.0
+            expand_pen = 0.0
             if content_lo is not None and content_hi is not None:
                 nlo0 = min(content_lo[0], x0)
                 nhi0 = max(content_hi[0], x0 + size_w)
                 nlo1 = min(content_lo[1], y0)
                 nhi1 = max(content_hi[1], y0 + size_h)
                 nasp = (nhi0 - nlo0) / max(nhi1 - nlo1, 1e-9)
+                # Prefer pockets inside the current content AABB (fill voids, don't
+                # inflate blank/empty by parking tiles in the outer search pad).
+                expand_pen = (
+                    max(0.0, content_lo[0] - x0) + max(0.0, (x0 + size_w) - content_hi[0])
+                    + max(0.0, content_lo[1] - y0) + max(0.0, (y0 + size_h) - content_hi[1]))
                 if want_wide:
                     # Prefer growing width (east/west of content), penalise growing height.
                     aspect_pen = max(0.0, ASPECT_MIN - nasp) * 1e6 + max(0.0, (y0 + size_h) - content_hi[1]) * 10
+                    # Needed width growth is cheap; other expansion stays costly.
+                    expand_pen = (
+                        max(0.0, content_lo[1] - y0) + max(0.0, (y0 + size_h) - content_hi[1])
+                        + 0.05 * (max(0.0, content_lo[0] - x0) + max(0.0, (x0 + size_w) - content_hi[0])))
                 elif want_tall:
                     aspect_pen = max(0.0, nasp - ASPECT_MAX) * 1e6 + max(0.0, (x0 + size_w) - content_hi[0]) * 10
+                    expand_pen = (
+                        max(0.0, content_lo[0] - x0) + max(0.0, (x0 + size_w) - content_hi[0])
+                        + 0.05 * (max(0.0, content_lo[1] - y0) + max(0.0, (y0 + size_h) - content_hi[1])))
                 else:
                     aspect_pen = abs(math.log(max(nasp, 1e-9) / TARGET_ASPECT)) * 1e3
-            score = (aspect_pen, dist, iy, ix)
+            score = (aspect_pen, expand_pen, dist, iy, ix)
             if best is None or score < best[0]:
                 best = (score, x0, y0)
     if best is None:
@@ -513,10 +526,11 @@ def pack_into_main_pockets(boxes, main_pts, spacing, prefer_c=None):
     if not boxes or len(main_pts) < 2:
         return {}, dict(placed=0, missed=len(boxes))
     cell = max(float(spacing) * POCKET_CELL_FRAC, 20.0)
-    # Expand search window by one shelf standoff so flush-adjacent strips count.
+    # Flush-adjacent strip only (not a full tile-width halo — that inflated blank).
     pts = np.asarray(main_pts, float)
     lo, hi = pts.min(0), pts.max(0)
-    pad = SHELF_STANDOFF + max(b[1] for b in boxes)
+    max_box = max(max(b[1], b[2]) for b in boxes)
+    pad = min(SHELF_STANDOFF + 0.35 * max_box, float(spacing) * 3.0 + SHELF_GAP)
     # Seed occupancy with main points only; pocket search covers the padded AABB.
     seed = []
     for x, y in pts:
