@@ -1,10 +1,14 @@
-"""V7 expert-style connections: every algorithm-placed connection becomes a Bezier curve, solved for its real end points.
+"""V7 curated-style connections: Bezier during layout; optional final orthogonal pass.
 
-`edge_routing` (V5) rerouted only the blocked edges and rounded their corners.  Here EVERY connection of a reaction the algorithm placed is a Bezier curve
-(an Escher segment with `b1` / `b2`; never a right-angle polyline, never an orthogonal libavoid path).  The shape is not copied from an expert curve: the
-expert drawings (`reaction_templates`, 22 Escher maps) only supply CONSTRAINTS for a participant of that role -- the tangent angle at the reaction centre
+Default path: every algorithm-placed connection becomes a Bezier curve, solved for its real end points.
+After source-path stamp, ``apply(..., mode='orthogonal')`` writes axis-parallel polylines with real
+multimarker bends so official ``edge_orthogonality`` (which ignores Bezier handles) rises.
+
+`edge_routing` (V5) rerouted only the blocked edges and rounded their corners.  The default Bezier path
+styles every algorithm-placed connection with `b1` / `b2` (no libavoid).  The shape is not copied from a curated curve: the
+curated drawings (`reaction_templates`, 22 Escher maps) only supply CONSTRAINTS for a participant of that role -- the tangent angle at the reaction centre
 and at the glyph relative to the chord, the handle lengths as shares of the chord -- and the control points are SOLVED for the end points this map has.
-Core participants are nearly straight in the expert maps (median tangent angle 0, small handles), cofactors bow to their own side by ~35-45 degrees; that is
+Core participants are nearly straight in the curated maps (median tangent angle 0, small handles), cofactors bow to their own side by ~35-45 degrees; that is
 what comes out here, so a short unobstructed connection is a nearly straight Bezier (control points on the chord) and is not bent just to look curved.
 
 Per connection (curve level: everything is checked on the FINAL Bezier, sampled):
@@ -182,13 +186,35 @@ def _curated_block_rects(data, pad=18.0):
     return np.asarray(rects, float), np.asarray(owners, dtype=object)
 
 
-def apply(data, skip_edges=(), only=None):
-    """Turn every algorithm-placed connection of `data` ([header, body], exported without routing) into Bezier segments, in place.  Returns a report.
+def apply(data, skip_edges=(), only=None, mode=None, gem_path=None):
+    """Style algorithm-placed connections in place.
 
-    When `only` is a set of reaction ids, only those reactions are restyled (incremental path used by relocation/peripheral).
-    Curated block AABBs are appended as obstacles so algorithm corridors route around
-    packed modules instead of cutting diagonally through them.
+    Default / ``mode='bezier'``: Bezier segments from curated-map constraints
+    (pipeline stages, hotspot-stable).  ``mode='orthogonal'``: final pass that
+    writes axis-parallel polylines with real multimarker bends for official
+    ``edge_orthogonality`` (see ``orthogonal_route``).
+
+    When `only` is a set of reaction ids, only those reactions are restyled
+    (incremental path used by relocation/peripheral).  Curated block AABBs are
+    appended as obstacles so algorithm corridors route around packed modules.
+    ``gem_path`` (orthogonal mode) filters the in-venv accept gate to GEM ids.
     """
+    if mode == 'orthogonal':
+        import orthogonal_route as ortho
+
+        def _stub(rx, mid_id, key, seg, t, P, q, u):
+            chord = q - P
+            L = float(np.hypot(*chord))
+            if L < 1e-6:
+                return
+            side = 1.0 if (u[0] * chord[1] - u[1] * chord[0]) >= 0 else -1.0
+            c1, c2 = _controls(P, q, 18.0, 18.0, HANDLE, HANDLE, side)
+            seg['b1'] = dict(x=round(float(c1[0]), 2), y=round(float(c1[1]), 2))
+            seg['b2'] = dict(x=round(float(c2[0]), 2), y=round(float(c2[1]), 2))
+
+        return ortho.apply_orthogonal(
+            data, skip_edges=skip_edges, only=only, bezier_stub_fn=_stub,
+            gem_path=gem_path)
     import line_render
     body = data[1]
     nodes, reactions = body['nodes'], body['reactions']

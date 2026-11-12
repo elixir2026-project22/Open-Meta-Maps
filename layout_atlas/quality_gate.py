@@ -1,7 +1,7 @@
 """Unified quality gate: a candidate change to the final map is accepted only if the final geometry does not get worse, compared tier by tier.
 
 Tiers (a plain lexicographic comparison with small tolerances, no combined score):
-  hard    GEM completeness, every algorithm connection still a Bezier, no connection of a moved reaction without segments        -> never allowed to degrade
+  hard    GEM completeness, every algorithm connection still routed (Bézier or orthogonal polyline), no connection of a moved reaction without segments -> never allowed to degrade
   tier 1  disconnected peripheral modules (a real connection that the map does not show), curves through nodes, curves through labels,
           label overlaps, node overlaps                                                                                         -> must not get worse; improvement is decisive
   tier 2  crossings of algorithm connections (algorithm x algorithm + algorithm x curated)                                       -> may not rise by more than TOL_CROSS

@@ -28,7 +28,7 @@ from core import *
 LIMITS = dict(max_bytes=25 * 1024 * 1024, max_reactions=20000, full_routed_max_reactions=150, whole_map_max_reactions=3000, view_size=50)
 SOURCE_PATHS = False  # reuse the curated map's original curves (Escher Bezier chains) for the edges of matched structures
 ORIENTATION = 'full'  # 'off' | 'sides' (currency copies on the substrate / product side) | 'full' (also reactions outside the curated structures between their substrates and products)
-LAYOUT_STYLE = 'curated'  # 'legacy' | 'curated' (V7: Bezier curves from curated-map constraints; no orthogonal polylines).
+LAYOUT_STYLE = 'curated'  # 'legacy' | 'curated' (orthogonal polylines for algorithm edges; curated paths kept).
 
 def normalize_layout_style(value):
     """Map user/API layout_style to the canonical value."""
@@ -39,9 +39,9 @@ def normalize_layout_style(value):
 COMPLETION_CONTEXT = 'auto'  # 'auto' (V6: uncovered reactions are placed beside the glyphs of their own metabolites) | 'off'
 EDGE_ROUTING = 'libavoid'  # 'libavoid' (orthogonal, all edges) | 'hybrid' (routes only blocked algorithm-placed edges) | 'none' (straight lines)
 # Routing behavior by layout style and model size:
-#   - layout_style='curated': Uses Bezier curve fitting (edge_style.apply) for all algorithm-placed edges.
-#     Curated-style curves follow community-map templates. No libavoid routing is used
-#     because the Bezier curves already avoid obstacles via iterative candidate selection.
+#   - layout_style='curated': early edge_style.apply draws Bezier for layout stages; a final
+#     edge_style.apply(..., mode='orthogonal') writes axis-parallel polylines (≤2 bends) for
+#     algorithm edges. Curated Atlas paths / short cofactor stubs stay as stamped. No libavoid.
 #   - layout_style='legacy' with <= ROUTING_THRESHOLD reactions: Uses libavoid orthogonal routing.
 #   - layout_style='legacy' with > ROUTING_THRESHOLD reactions: Routing is deferred (edge_routing.measure only).
 # For scalable=True (large models), straight connections are used initially; edge_style is applied separately.
@@ -948,7 +948,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         metric['label_placement'] = dict(label_placement.optimize(data), seconds=round(time.time() - t_labels, 1))
         if log:
             log(f"  label placement: {metric['label_placement']}")
-        metric['edge_routing'] = dict(mode='curated (Bezier connections)')
+        metric['edge_routing'] = dict(mode='curated (orthogonal algorithm connections)')
         if os.environ.get('OPM_PERIPHERAL', 'on') != 'off' and not PREVIOUS_SKIP_PACK:   # the switch exists for before / after comparisons
             import peripheral as peripheral_module
             import quality_gate
@@ -1082,8 +1082,8 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
                     f"max_gap={corridor.get('max_gap')} min_len={corridor.get('min_len')}")
             dump(folder / 'map.json', data)
         # Rebuild algorithm Beziers against post-restore geometry on small maps
-        # (early edge_style ran before absolute snap). Skip on mid/large — edge_style
-        # alone is ~75 s on iIT341 and would blow the runtime gate.
+        # (early edge_style ran before absolute snap; final orthogonal pass comes later).
+        # Skip on mid/large — edge_style alone is costly on large GEMs.
         if len(model['reactions']) < 200:
             import edge_style as _es_post
             t_style2 = time.time()
@@ -1145,6 +1145,44 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         metric['edge_routing'] = er
     else:
         metric['edge_routing'] = dict(mode=EDGE_ROUTING, not_applied='large model: routing of the algorithm-placed connections is a later step')
+    # Stamp curated source curves before the final orthogonal pass so official
+    # edge_orthogonality sees real waypoints (and so layout_quality describes the final map).
+    pending = metric.pop('_source_path_chains', None)
+    if pending:
+        import source_paths
+        written = source_paths.write_curves_to_escher(data, pending)
+        sp = metric.get('source_paths') or {}
+        sp['written'] = len(written)
+        sp['not_written_to_map_json'] = len(pending) - len(written)
+        metric['source_paths'] = sp
+        data[0]['metadata']['source_paths'] = [
+            dict(reaction=f['reaction'], metabolite=f['metabolite'], status=f['status'], shift_px=f['shift_px'], source=f['source'])
+            for f in written
+        ]
+        dump(folder / 'map.json', data)
+    # Final orthogonal polylines after curated source-path waypoints are present.
+    if LAYOUT_STYLE == 'curated' and os.environ.get('OPM_ORTHOGONAL', 'on') != 'off':
+        import edge_style as _es_final
+        t_orth = time.time()
+        # draw_map writes into <job>/full; the uploaded GEM lives in <job>/upload.
+        gem_file = None
+        for root in (folder, folder.parent):
+            cand = root / 'upload' / 'model.xml'
+            if cand.is_file():
+                gem_file = cand
+                break
+            found = sorted((root / 'upload').glob('model.*')) if (root / 'upload').is_dir() else []
+            if found:
+                gem_file = found[0]
+                break
+        metric['edge_style_orthogonal'] = dict(
+            _es_final.apply(
+                data, skip_edges, mode='orthogonal',
+                gem_path=str(gem_file) if gem_file else None),
+            seconds=round(time.time() - t_orth, 1))
+        if log:
+            log(f"  orthogonal algorithm routes (final): {metric['edge_style_orthogonal']}")
+        dump(folder / 'map.json', data)
     t_quality = time.time()
     # Persist structure membership on the map so continuity can be scored from map.json alone.
     # Absolute same-map reuse keeps BiGG spacing; score spatial pieces, not whole atlas windows.
@@ -1186,52 +1224,6 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
                                                          unattached=[dict(exchange=d['exchange'], transports=d['transports'], anchors=d['anchors'], x=d.get('x'), y=d.get('y'))
                                                                      for d in peripheral_report['details'] if d['state'] == 'not_attached'][:12])
         quality_issues['peripheral'] = peripheral_report['details']
-    # Stamp reused source curves into map.json after evaluate (keeps gate runtime/overlaps comparable).
-    pending = metric.pop('_source_path_chains', None)
-    if pending:
-        import source_paths
-        written = source_paths.write_curves_to_escher(data, pending)
-        sp = metric.get('source_paths') or {}
-        sp['written'] = len(written)
-        sp['not_written_to_map_json'] = len(pending) - len(written)
-        metric['source_paths'] = sp
-        data[0]['metadata']['source_paths'] = [
-            dict(reaction=f['reaction'], metabolite=f['metabolite'], status=f['status'], shift_px=f['shift_px'], source=f['source'])
-            for f in written
-        ]
-        # Refresh orderliness on the stamped map without a full crossing re-evaluate.
-        try:
-            from evaluation.map_rules import orderliness_metrics
-            edges, _nodes = layout_quality.build_edges(data, skip_edges)
-            spacing = ((quality_summary.get('core') or {}).get('long_lines') or {}).get('reaction_spacing_px') or 60.0
-            ord_m = orderliness_metrics(data[1], edges, float(spacing))
-            details = quality_summary.setdefault('details', {})
-            details['orderliness'] = dict(
-                main_segment_axis_share=ord_m.get('main_segment_axis_share'),
-                main_segment_axis_share_length=ord_m.get('main_segment_axis_share_length'),
-                reaction_axis_share=ord_m.get('reaction_axis_share'),
-                chain_turn_median_deg=ord_m.get('chain_turn_median_deg'),
-                metabolite_grid_share=ord_m.get('metabolite_grid_share'),
-                segments=ord_m.get('orderliness_segments'),
-                reactions=ord_m.get('orderliness_reactions'),
-                chain_turns=ord_m.get('orderliness_chain_turns'),
-                metabolites=ord_m.get('orderliness_metabolites'),
-                grid_tol_px=ord_m.get('orderliness_grid_tol_px'),
-            )
-            for k in ('main_segment_axis_share', 'main_segment_axis_share_length',
-                      'reaction_axis_share', 'chain_turn_median_deg', 'metabolite_grid_share'):
-                details[k] = ord_m.get(k)
-            details['panel'] = layout_quality._detailed_metrics_panel(
-                details,
-                line_shape=details.get('line_shape') or {},
-                cycles=details.get('cycles') or {},
-                unrelated=details.get('unrelated_overlaps') or {},
-                crossing_density=details.get('crossing_density') or {},
-                composition=details.get('composition') or {},
-            )
-        except Exception as ex:  # noqa: BLE001 — curve stamp must not fail the job
-            if log:
-                log(f'  orderliness refresh after source-path stamp skipped: {type(ex).__name__}: {ex}'[:160])
     metric['layout_quality_final'] = quality_summary
     metric['algorithm_curated_crossings'] = (quality_summary.get('details') or {}).get('algorithm_curated_crossings')
     metric['longest_links'] = (quality_summary.get('details') or {}).get('longest_links')
@@ -1480,13 +1472,22 @@ def draw_global_map(job, model, selected, folder, prov_kinds, n_reactions, plan=
         return None
     for name, kind, en in (('map.svg', 'svg', 'Completed map (global layout)'), ('map.json', 'json', 'Completed map, Escher JSON')):
         job.add_file(name, en, kind)
-    job.warn('global_degraded', 'Global map without routing: connections are straight lines (structure edges keep their own lines or curves); long edges and crossings are not optimised yet.')
+    # Describe the final map.json (after any orthogonal pass), not the pre-style export.
+    ortho = metric.get('edge_style_orthogonal') or {}
+    n_ortho = int(ortho.get('orthogonal') or 0)
+    if n_ortho > 0:
+        degraded = [f'routing: orthogonal polylines on {n_ortho} algorithm edge(s); stubs/curated paths unchanged']
+        kind = 'global'
+    else:
+        degraded = ['routing: none (straight connections)']
+        kind = 'global_degraded'
+        job.warn('global_degraded', 'Global map without routing: connections are straight lines (structure edges keep their own lines or curves); long edges and crossings are not optimised yet.')
     network = global_network_metrics(model, folder / 'map.json')
     job.state['views'] = []  # a global map has no separate views; the modules tab lists the structures
     job.save()
-    return dict(kind='global_degraded', requested_layout='global', degraded=['routing: none (straight connections)'], seconds=round(time.time() - t0, 1), network=network,
+    return dict(kind=kind, requested_layout='global', degraded=degraded, seconds=round(time.time() - t0, 1), network=network,
                 metrics={k: metric.get(k) for k in ('node_overlap_pairs', 'label_overlap_pairs', 'straight_crossings')}, source_paths=metric.get('source_paths'),
-                instances=metric.get('instances'), global_layout=metric.get('global'), completion=metric.get('completion'), expert_geometry=metric.get('expert_geometry'), instance_optimization=metric.get('instance_optimization'), context_placement=metric.get('context_placement'), completion_context=metric.get('completion_context'), layout_quality_final=metric.get('layout_quality_final'), edge_style=metric.get('edge_style'), peripheral=metric.get('peripheral'), block_relocation=metric.get('block_relocation'), region_placement=metric.get('region_placement'), regions=metric.get('regions'), expert_submodule=metric.get('expert_submodule'), label_placement=metric.get('label_placement'), hotspot_repair=metric.get('hotspot_repair'), protected=metric.get('protected'), node_overlap_kinds=metric.get('node_overlap_kinds'), edge_routing=metric.get('edge_routing'))
+                instances=metric.get('instances'), global_layout=metric.get('global'), completion=metric.get('completion'), expert_geometry=metric.get('expert_geometry'), instance_optimization=metric.get('instance_optimization'), context_placement=metric.get('context_placement'), completion_context=metric.get('completion_context'), layout_quality_final=metric.get('layout_quality_final'), edge_style=metric.get('edge_style'), edge_style_orthogonal=metric.get('edge_style_orthogonal'), peripheral=metric.get('peripheral'), block_relocation=metric.get('block_relocation'), region_placement=metric.get('region_placement'), regions=metric.get('regions'), expert_submodule=metric.get('expert_submodule'), label_placement=metric.get('label_placement'), hotspot_repair=metric.get('hotspot_repair'), protected=metric.get('protected'), node_overlap_kinds=metric.get('node_overlap_kinds'), edge_routing=metric.get('edge_routing'))
 
 
 def run_job(folder):
