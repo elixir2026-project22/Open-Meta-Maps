@@ -847,6 +847,22 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             # restore here (that would re-expand BiGG-internal voids against a
             # squeezed surrounding canvas).
             dump(folder / 'map.json', data)
+        # Shorten extreme empty axis-aligned corridors before hotspot so repair
+        # can clean crossings introduced by midmarker slides.
+        import composition as _comp_fit
+        spacing_now = composition_module.reaction_spacing_escher(data)
+        corridor = _comp_fit.compact_empty_corridors_escher(data, spacing=spacing_now)
+        if corridor.get('shortened'):
+            arm2 = composition_module.compact_long_arms_escher(data, currency(model))
+            corridor['arms_followup'] = {
+                k: arm2.get(k) for k in ('shortened', 'pulled_midmarkers')}
+        metric['empty_corridor_escher'] = corridor
+        if composition_report is not None:
+            composition_report['empty_corridor_escher'] = corridor
+        if log and corridor.get('shortened'):
+            log(f"  empty-corridor compact (escher): shortened {corridor['shortened']} "
+                f"max_gap={corridor.get('max_gap')} min_len={corridor.get('min_len')}")
+        dump(folder / 'map.json', data)
         # Rebuild algorithm Beziers against post-restore geometry on small maps
         # (early edge_style ran before absolute snap). Skip on mid/large — edge_style
         # alone is ~75 s on iIT341 and would blow the runtime gate.
@@ -858,8 +874,8 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             if log:
                 log(f"  expert-style connections (post-restore): {metric['edge_style_post_restore']}")
             dump(folder / 'map.json', data)
-        # Hotspot repair AFTER rigid restore + overlap clear + squeeze + restyle so
-        # accepted moves are not undone by absolute snap.
+        # Hotspot repair AFTER rigid restore + overlap clear + squeeze + corridor
+        # so accepted moves are not undone by absolute snap / padding slides.
         if os.environ.get('OPM_HOTSPOT_REPAIR', 'on') != 'off':
             import hotspot_repair
             codes_early = module_codes(blocks) if blocks else {}
@@ -881,29 +897,6 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
                 hr = metric['hotspot_repair']
                 log('  hotspot repair: ' + str({k: hr.get(k) for k in ('accepted_count', 'tries', 'rounds', 'seconds', 'improved')}))
             dump(folder / 'map.json', data)
-        # Shorten remaining empty axis-aligned corridors (e.g. near-vertical BiGG
-        # padding with a few px of X drift that bake-time axis_tol used to miss).
-        import composition as _comp_fit
-        spacing_now = composition_module.reaction_spacing_escher(data)
-        corridor_passes = []
-        for _cpass in range(3):
-            corridor = _comp_fit.compact_empty_corridors_escher(
-                data, spacing=spacing_now)
-            corridor_passes.append(corridor)
-            if not corridor.get('shortened'):
-                break
-            # Private transport arms may re-stretch after a midmarker slide; tuck them.
-            arm2 = composition_module.compact_long_arms_escher(data, currency(model))
-            corridor_passes[-1]['arms_followup'] = {
-                k: arm2.get(k) for k in ('shortened', 'pulled_midmarkers')}
-        metric['empty_corridor_escher'] = dict(
-            passes=corridor_passes,
-            shortened=sum(p.get('shortened') or 0 for p in corridor_passes),
-            length_removed=round(sum(p.get('length_removed') or 0 for p in corridor_passes), 2))
-        if composition_report is not None:
-            composition_report['empty_corridor_escher'] = metric['empty_corridor_escher']
-        if log and metric['empty_corridor_escher']['shortened']:
-            log(f"  empty-corridor compact (escher): {metric['empty_corridor_escher']}")
         # Shrink canvas to content so empty frame padding does not inflate blank/empty gates.
         fit = _comp_fit.fit_canvas_to_content(data)
         metric['canvas_fit'] = fit

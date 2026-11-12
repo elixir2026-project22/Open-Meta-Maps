@@ -409,18 +409,15 @@ def compose(model, scene, blocks, cur):
             overlap_w = max(0.0, min(chi[0], mhi[0]) - max(clo[0], mlo[0]))
             overlap_h = max(0.0, min(chi[1], mhi[1]) - max(clo[1], mlo[1]))
             area = max(float((chi[0] - clo[0]) * (chi[1] - clo[1])), 1.0)
-            # Outside, barely overlapping, or centre outside the main core (outer
-            # 15% margin) — pull into the largest free region of the main AABB.
+            # Outside or barely overlapping the main AABB. Small components
+            # (≤6 reactions) whose centre sits in the outer 12% margin also count.
+            n_rx_i = len(comps[i]['reactions'])
             centre = 0.5 * (clo + chi)
-            core_lo = mlo + 0.08 * (mhi - mlo)
-            core_hi = mhi - 0.08 * (mhi - mlo)
+            core_lo = mlo + 0.12 * (mhi - mlo)
+            core_hi = mhi - 0.12 * (mhi - mlo)
             outside_core = (centre[0] < core_lo[0] or centre[0] > core_hi[0]
                             or centre[1] < core_lo[1] or centre[1] > core_hi[1])
-            if overlap_w * overlap_h >= 0.55 * area and not outside_core:
-                continue
-            if (overlap_w * overlap_h >= 0.55 * area
-                    and core_lo[0] <= centre[0] <= core_hi[0]
-                    and core_lo[1] <= centre[1] <= core_hi[1]):
+            if overlap_w * overlap_h >= 0.45 * area and not (n_rx_i <= 6 and outside_core):
                 continue
             bw = float(max(chi[0] - clo[0], 40.0) + 60.0)
             bh = float(max(chi[1] - clo[1], 40.0) + 60.0)
@@ -948,13 +945,21 @@ def compact_empty_corridors_escher(data, max_gap=None, spacing=None):
         return dict(applied=False, shortened=0)
     if max_gap is None:
         med = float(np.median(edge_lens)) if edge_lens else 150.0
-        # Corridor target: a bit above one typical span so shape stays readable.
-        max_gap = max(med * 1.15, float(spacing or med), 80.0)
+        # Only extreme padding runs: keep local chemistry readable.
+        max_gap = max(med * 2.2, float(spacing or med) * 1.5, 180.0)
+    # Drop short candidates so we do not churn near-median spans.
+    min_len = float(max_gap) * 2.5
+    edges = [(a, b) for a, b in edges
+             if math.hypot(cloud[a][0] - cloud[b][0], cloud[a][1] - cloud[b][1]) >= min_len]
+    if not edges:
+        return dict(applied=False, shortened=0, max_gap=round(float(max_gap), 2),
+                    min_len=round(min_len, 1))
     prefer_move = {str(nid) for nid, n in nodes.items()
                    if n.get('node_type') == 'metabolite'}
     before = {k: list(v) for k, v in cloud.items()}
     rep = ca.compress_empty_axis_edges(
         cloud, edges, max_gap=float(max_gap), prefer_move=prefer_move)
+    rep['min_len'] = round(min_len, 1)
     if not rep.get('applied'):
         return rep
     moved = []
