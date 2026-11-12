@@ -391,13 +391,13 @@ def compose(model, scene, blocks, cur):
     # After related/independent moves: pull any still-exterior small components into
     # the largest free regions of the main AABB (do not grow the canvas first).
     iter_reps = []
+    prev_ids = None
     for _it in range(3):
         main_pts = np.array(
             [placed_pts[k] for i in main for k in cur_keys_of[i] if k in placed_pts], float)
         if len(main_pts) < 2:
             break
         mlo, mhi = main_pts.min(0), main_pts.max(0)
-        mw = float(mhi[0] - mlo[0]); mh = float(mhi[1] - mlo[1])
         outliers = []
         for i in movable_idx:
             ks = [k for k in cur_keys_of[i] if k in placed_pts]
@@ -420,20 +420,27 @@ def compose(model, scene, blocks, cur):
                        key=lambda t: (-t[1] * t[2], t[0]))
         placed, prep = pack_into_main_pockets(
             boxes, main_pts, spacing, prefer_c=main_pts.mean(0))
-        if not placed:
-            iter_reps.append(dict(placed=0, missed=len(boxes), **prep))
+        ids = frozenset(placed)
+        if not placed or ids == prev_ids:
+            iter_reps.append(dict(placed=len(placed), missed=len(boxes) - len(placed),
+                                  **{k: v for k, v in prep.items()
+                                     if k not in ('placed', 'missed')}))
             break
+        prev_ids = ids
+        moved_px = 0.0
         for i, bw, bh, clo in outliers:
             if i not in placed:
                 continue
             origin = placed[i]
             delta = np.array([origin[0], origin[1]], float) - clo
+            moved_px += float(np.hypot(*delta))
             move(i, delta)
             report['arranged_independent'] += 1
         iter_reps.append(dict(placed=len(placed), missed=len(boxes) - len(placed),
+                              moved_px=round(moved_px, 1),
                               **{k: v for k, v in prep.items()
                                  if k not in ('placed', 'missed')}))
-        if prep.get('missed', 0) == len(boxes):
+        if moved_px < 1.0:
             break
     if iter_reps:
         report['interior_repack'] = iter_reps
