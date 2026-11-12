@@ -98,6 +98,7 @@ def about():
         + '<h3>' + b('Sources and licences') + '</h3>' + tbl
         + '<p class="meta">' + b('WikiPathways semantic modules live in open_core.sqlite; geometry-only windows ship as an extension for repository size. Both load by default. Dedup stats: docs/images/atlas/atlas_overlap.json.') + '</p>'
         + '<p>' + b('The Atlas Browser tab searches these curated modules by EC, reaction, metabolite or model ID, source map and licence, and downloads selected modules as Escher JSON with a provenance/licence manifest (rebuild the search index with python3 tools/build_atlas_browser_index.py).') + '</p>'
+        + '<p>' + b('python3 project.py data export bundles the whole Atlas into one archive: Escher JSON per module, the same manifest and the third-party notices (--source, --licence and --all-windows select a part).') + '</p>'
         + '<div class="fig"><img src="' + e(examples_rel) + '" alt="' + b('Example Atlas modules with captions') + '" width="700"/><p class="meta">' + b('Representative modules per source (source, map name, reaction count).') + '</p></div>'
         + '<h3>' + b('Extraction, identity and selection') + '</h3>'
         + '<ul>'

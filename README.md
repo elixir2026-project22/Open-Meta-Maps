@@ -87,6 +87,16 @@ Attribution: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Source notes: [do
 
 Worked examples (cut boundaries, ID remap, cross-source dedup, provenance, compact selection): [docs/atlas_data_management.md](docs/atlas_data_management.md#worked-examples). On-disk layout: [data/README.md](data/README.md).
 
+### Download the Atlas
+
+```sh
+python3 project.py data export                                       # whole Atlas, unique after dedup -> dist/openmetamaps-atlas-<date>.tar.gz
+python3 project.py data export --source panther --licence CC-BY-4.0  # one source, one licence (both repeatable)
+python3 project.py data export --all-windows --out atlas_all.tar.gz  # every cut window instead of unique reaction sets
+```
+
+The archive holds one Escher JSON per module (`modules/<source>/<module_id>.json`), `manifest.json` (source map, licence, attribution text, reaction count, canonical reaction ids, extraction provenance and `also_in` for identical reaction sets in other sources), a short README and `THIRD_PARTY_NOTICES.md`. The default export has 36,103 modules; re-running it gives a byte-identical archive. To pick individual modules, search the Atlas Browser and download the selection as the same Escher JSON with the same manifest fields. Details: [docs/data_packages.md](docs/data_packages.md).
+
 ---
 
 ## 2. Layout optimisation algorithm
