@@ -2,7 +2,7 @@
 
 Open Meta Maps turns a genome-scale metabolic model (GEM) into a complete, editable metabolic map. It has two parts: a curated-structure **Atlas** built from public community maps, and a **layout optimisation** pipeline that reuses matching Atlas geometry and completes the rest with Bézier connections.
 
-ELIXIR BioHackathon Europe 2026 **Project 22** (Open Pathway Maps).
+ELIXIR BioHackathon Europe 2026 **[Project 22](https://github.com/elixir2026-project22)** (Open Pathway Maps).
 
 ## Workflow
 
