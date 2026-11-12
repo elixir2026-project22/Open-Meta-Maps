@@ -3,6 +3,8 @@
   python3 project.py tool [--port 8765]        (or: python3 tool_server.py)
 
 * GET /                      the tool page results/tool/index.html
+* GET /docs/*.md, /README.md, /THIRD_PARTY_NOTICES.md, /LICENSE, /data/README.md
+                             allowlisted repo docs rendered as HTML (same chrome/nav); GET /docs/images/* for embedded images
 * GET /<path>                read-only static files from results/ (catalog, experiment pages, ...); tool_runs is NOT served this way
 * POST /api/jobs             multipart/form-data: `model` (.xml SBML or .json COBRA/BiGG) + `options` (JSON string)
 * GET  /api/jobs/<id>        job state (see tool_pipeline.Job)
@@ -92,9 +94,9 @@ def tool_environment():
 def check_environment():
     """Fail early with a readable message when the drawing stack is missing."""
     problems = []
-    probe = subprocess.run([sys.executable, '-c', 'import PIL, jsonschema, scipy, networkx, numpy'], capture_output=True, text=True)
+    probe = subprocess.run([sys.executable, '-c', 'import PIL, jsonschema, scipy, networkx, numpy, markdown'], capture_output=True, text=True)
     if probe.returncode:
-        problems.append('Python packages missing (need pillow, jsonschema, scipy, networkx, numpy): ' + probe.stderr.strip().splitlines()[-1])
+        problems.append('Python packages missing (need pillow, jsonschema, scipy, networkx, numpy, markdown): ' + probe.stderr.strip().splitlines()[-1])
     node = subprocess.run(['node', '--version'], capture_output=True, text=True, env=tool_environment()) if shutil.which('node', path=tool_environment()['PATH']) else None
     if node is None or node.returncode:
         problems.append('node not found (needed for the ELK/fCoSE layout backend); put it on PATH or in ~/.local/node/bin')
@@ -248,6 +250,15 @@ class Handler(http.server.BaseHTTPRequestHandler):
         return data[:i] + self.HEARTBEAT + data[i:] if i >= 0 else data + self.HEARTBEAT
 
     def static(self, path):
+        import doc_pages
+        doc = doc_pages.handle(path)
+        if doc is not None:
+            status, body, ctype = doc
+            if status != 200 or body is None:
+                return self.send_json(404, error('not_found', 'Not found.'))
+            if ctype.startswith('text/html'):
+                body = self.html_bytes(body)
+            return self.send_bytes(200, body, ctype)
         rel = 'tool/index.html' if path in ('/', '') else path.lstrip('/')
         if rel.startswith('layout_atlas/results/'):
             rel = rel[len('layout_atlas/results/'):]  # the project home page links to results by their path from the project root
