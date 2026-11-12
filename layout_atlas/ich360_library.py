@@ -298,8 +298,17 @@ def build(version=None, access_date=None):
 def register_in_source_registry(source_doc):
     reg_path = INPUTS / 'source_registry.json'
     reg = read(reg_path) if reg_path.exists() else dict(schema=1, files=[], license_evidence=[])
+    prior = {f.get('path'): f for f in reg.get('files', []) if f.get('source') == SOURCE}
     files = [f for f in reg.get('files', []) if f.get('source') != SOURCE]
-    files.extend(source_doc.get('files') or [])
+    for row in source_doc.get('files') or []:
+        old = prior.get(row.get('path')) or {}
+        row = dict(row)
+        row.setdefault('extraction_method', old.get('extraction_method') or 'escher_diagram + diagram_modules')
+        row.setdefault('retrieval_date', old.get('retrieval_date') or source_doc.get('access_date'))
+        for k, v in old.items():
+            if k not in row and v is not None:
+                row[k] = v
+        files.append(row)
     reg['files'] = files
     evidence = [e for e in reg.get('license_evidence', []) if e.get('source') != SOURCE]
     for le in source_doc.get('licence_evidence') or []:

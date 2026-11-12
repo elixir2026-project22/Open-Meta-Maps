@@ -15,7 +15,37 @@ Status: 2026-11-11. How extracted layouts are stored and registered. Not legal a
 | `data/acquisition.json` | Acquisition ledger (Reactome diagrams, reference paths, failures). |
 | `data/packages.json` | Optional release packages (`atlas-full` only). |
 
-`database.build()` rebuilds `atlas.sqlite` from the in-repo Escher cutter, WikiPathways GPML, Reactome archive, and non-Escher observations (geometry-only WikiPathways). `layout_atlas/escher_rebuild.py` surgically replaces open-core Escher rows. `atlas_registry.normalize_open_core()` fills provenance (including `extraction`) without recutting windows.
+`database.build()` rebuilds `atlas.sqlite` from the in-repo Escher cutter, WikiPathways GPML, Reactome archive, and non-Escher observations (geometry-only WikiPathways). Surgical rebuilds: `escher_rebuild.py` (Escher), `reactome_recut.py` (Reactome), `wikipathways_rebuild.py` (WikiPathways semantic + geometry extension), `human_maps_library.py` (Human-maps), `ich360_library.py` (iCH360), `panther_library.py`, `metabolismregulation_library.py`. `atlas_registry.normalize_open_core()` fills provenance (including `extraction`) without recutting windows.
+
+## Stage B window policy (`diagram_modules`)
+
+Coverage-preserving defaults for every source that uses `database.diagram_modules` (Reactome, WikiPathways semantic + geometry, Human-maps, Metabolism Regulation, PANTHER, iCH360):
+
+- **Size-scaled roots (`root_policy=all_roots_upto_48_else_max_roots_24`):** all reactions when \(N \le 48\); otherwise cap at 24 roots (large maps stay tractable; small maps keep full root coverage).
+- **Near-nested dedupe (`nest_factor=2`):** a window S nested in T is dropped when |T| ≤ 2·|S| (size-2 ⊂ size-4, size-4 ⊂ size-8, size-8 ⊂ size-12/16, size-12 ⊂ size-24 go; size-2 ⊂ size-12/24 stays as a multi-scale seed).
+- **Size-1/2 windows that are not near-nested stay stored** (useful on small models). Preference is handled in `retrieval.select` (geometry-crumb demotion + complete-equation bonus), not by deleting non-nested crumbs from the library.
+- Provenance records `independent_only`, `nest_factor`, `root_policy`, `raw_windows_before_dedupe`, and `counts.independent_modules`.
+
+Surgical rebuild entrypoints on the build path: `reactome_recut.py` (Reactome open-core only), `human_maps_library.py`, `wikipathways_rebuild.py`, `ich360_library.py`, `panther_library.py`, `metabolismregulation_library.py`. Escher community windows remain on `escher_community_windows` (unchanged cutter). BRENDA remains on `brenda_library.extract` (not `diagram_modules`).
+
+### Stage B library counts (main → Stage B)
+
+| Source | method | modules before | after | nested-share before | after |
+|---|---|---:|---:|---:|---:|
+| Reactome | `diagram_modules` | 3405 | 1811 | 0.8288 | 0.6781 |
+| WikiPathways semantic | `diagram_modules` | 1245 | 669 | 0.8016 | 0.6308 |
+| WikiPathways geometry | `geometry_modules` | 29673 | 15611 | 0.0 | 0.0 |
+| Human-maps | `diagram_modules` | 8540 | 4690 | 0.8001 | 0.6352 |
+| iCH360 | `diagram_modules` | 858 | 436 | 0.8601 | 0.7248 |
+| PANTHER | `diagram_modules` | 238 | 138 | 0.8109 | 0.6739 |
+| Metabolism Regulation | `diagram_modules` | 423 | 229 | 0.6643 | 0.3799 |
+| Escher | `escher_community_windows` | 13047 | 13047 | 0.8666 | 0.8666 |
+| BRENDA | `brenda_library.extract` | 11703 | 11703 | 0.9719 | 0.9719 |
+| Units (companion) | `units_library.decompose` | 2963 | 2963 | 0.0 | 0.0 |
+
+Size-1/2 crumbs remain in every recut library (example: Human-maps after still has 2722 size-1/2 modules). On iIT341, 46 selected complete-equation modules are size-2 — crumbs do win verified matches and must stay stored.
+
+`units_library.decompose` remains a **companion layer** (`data/extensions/units/`; not in the default `database.modules()` load). Use `--library units_sub` for units + on-demand sub-windows.
 
 ## Provenance on every map and module
 
@@ -27,15 +57,28 @@ Every module payload duplicates the indexed columns and includes `license`, `sou
 "extraction": {
   "method": "diagram_modules",
   "version": "atlas-extraction-1",
-  "parameters": {"max_roots": 24, "window_sizes": [1, 2, 4, 8, 12, 24]},
-  "counts": {"source_events": 95, "modules": 144, "reactions_covered": 79, "coverage": 0.8316}
+  "parameters": {
+    "max_roots": 25,
+    "window_sizes": [1, 2, 4, 8, 12, 24],
+    "independent_only": true,
+    "nest_factor": 2.0,
+    "root_policy": "all_roots_upto_48_else_max_roots_24",
+    "raw_windows_before_dedupe": 144
+  },
+  "counts": {
+    "source_events": 95,
+    "modules": 40,
+    "reactions_covered": 79,
+    "coverage": 0.8316,
+    "independent_modules": 40
+  }
 }
 ```
 
 | Method | Used for | Notes |
 |---|---|---|
 | `escher_community_windows` | Open-core Escher (`escher_cutter`) | All roots; sizes 1–40; reproducible |
-| `diagram_modules` | Reactome, WikiPathways semantic, Human-maps, Metabolism Regulation, PANTHER, iCH360 | BFS windows; parameters recorded |
+| `diagram_modules` | Reactome, WikiPathways semantic, Human-maps, Metabolism Regulation, PANTHER, iCH360 | Size-scaled roots; independent windows only |
 | `geometry_modules` | WikiPathways geometry extension | Same cutter over metabolite–metabolite GPML edges |
 | `brenda_library.extract` | BRENDA extension | Singletons, pairs, windows, components |
 | `units_library.decompose` | Units extension (companion layer) | Non-overlapping 3–12 reaction units |
@@ -53,6 +96,7 @@ Registry `extraction.by_source` summarises method, parameters, map/module counts
 | Human-maps | `human.gem` (MAR) | `bigg.reaction` / `metanetx.reaction` / `rhea` via Human-GEM `reactions.tsv` (CC BY 4.0) |
 | Metabolism Regulation | `sbgn.process` | `rhea` when participant ChEBI uniquely matches a Rhea equation |
 | PANTHER | `celldesigner.reaction` | none yet (no unique Rhea match without inventing ids) |
+| iCH360 | `bigg.reaction` (true BiGG) | already canonical |
 | BRENDA | `ec-code` (+ svg token) | EC kept as-is |
 
 Remap tooling: `layout_atlas/canonical_ids.py`. Crosswalk: `data/source_inputs/crosswalks/`.
@@ -65,13 +109,24 @@ Remap tooling: `layout_atlas/canonical_ids.py`. Crosswalk: `data/source_inputs/c
 
 ## Retrieval ranking
 
-`retrieval.select` keeps coverage (`2 × matched reactions`) as the dominant term and does not change `selection_score` for compactness. Among biochemical proposals (`biol ≥ 1`), compactness (`matched_nodes / bbox_area`) breaks ties, and when two same-source proposals match the **same** reaction set only the denser drawing is kept — pathway maps beat sprawling whole-model windows without dropping coverage.
+`retrieval.select` keeps coverage (`2 × matched reactions`) as the dominant term and does not change `selection_score` for compactness. Among same-source proposals with identical reaction sets, only the denser drawing is kept (compactness `matched_nodes / bbox_area` breaks remaining ties). Stage B also:
+
+- subtracts 3.0 for size≤2 geometry-only proposals (`biol < 1`) so crumbs cannot displace denser covers;
+- adds 4.0 for complete-equation / stoichiometry-verified proposals;
+- when ≥8 free-standing size≤2 CE crumbs overlap a size≥4 non-CE proposal, locks **all** size≤2 CE crumbs before geometry fill-in (pool-density rule on reaction sets only — no source- or model-id branches); sparse pools keep pure score order so larger CE packs are not fragmented;
+- refuses geometry-only one-for-up-to-two exchanges that would drop complete-equation covers.
 
 `layout_priority` still demotes `possibly_automatic` layouts (BRENDA).
 
+### iIT341 complete-equation dip after nested `#24` (and fix)
+
+Pre-`#24` (`4b51810`-era) iIT341 had CE share ≈0.300 (166/554). Nested `#24` dropped to 0.285 (158/554). The eight lost reactions (`ASP1DC`, `CDPMEK`, `DPR`, `DXPRIi`, `MECDPS`, `MEPCT`, `MOHMT`, `PANTS`) were size-2 Escher **complete-equation** covers displaced by size-4 WikiPathways/Human-maps **geometry** because `2×|R|` outscored the verified biol term. Stage B’s `COMPLETE_EQUATION_BONUS=4` restores all eight (and more): CE share 0.339 (188/554) with zero losses vs pre-`#24`. General rule: never let unmatched geometry outrank a stoichiometry-verified cover of the same reactions.
+
 ## Source registry
 
-`data/source_inputs/source_registry.json` is the file-level ledger. Every row records **licence**, **URL**, **version**, **retrieval date**, and **extraction method**. Coverage includes WikiPathways, Escher, Metabolism Regulation, PANTHER, Reactome (archive-v97 diagrams), BRENDA, Human-maps, and the Human-GEM reaction crosswalk.
+`data/source_inputs/source_registry.json` is the file-level ledger. Every row records **licence**, **URL**, **version**, **retrieval date**, and **extraction method**. Coverage includes WikiPathways, Escher, Metabolism Regulation, PANTHER, Reactome (archive-v97 diagrams), BRENDA, Human-maps, iCH360, and the Human-GEM reaction crosswalk. Surgical rebuilds must preserve `extraction_method` / `retrieval_date` when rewriting rows (see `wikipathways_rebuild.refresh_source_registry`).
+
+File-row count stays 2524 vs `main` (nothing dropped). Earlier PR drafts that shrank the JSON by ~4.5k lines had wiped nested `extraction_method` fields during a rebuild; `normalize_open_core` / `write_registry` / extension backfill restore them (`none_em=0`). Binary `modules.json.gz` churn on untouched cutters (BRENDA) is provenance stamp-only (`extraction.counts.independent_modules`); Escher window geometry is unchanged aside from JSON float heal after normalize.
 
 ## WikiPathways layout
 
@@ -88,5 +143,4 @@ Pipeline: `layout_atlas/wikipathways_rebuild.py` over GPML in the **20261110** s
 ## Follow-ups
 
 1. Keep `data/atlas_registry.json` and the About page in sync after every Atlas rebuild.
-2. Stage B: coverage-preserving recut (size-scaled roots, independent windows only) and units as a companion layer.
-3. Raise PANTHER chemical retrieval when richer reaction annotations are available (do not invent unmapped identifiers).
+2. Raise PANTHER chemical retrieval when richer reaction annotations are available (do not invent unmapped identifiers).

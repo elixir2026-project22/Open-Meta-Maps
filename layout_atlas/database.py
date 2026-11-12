@@ -10,6 +10,41 @@ from atlas_registry import SCHEMA_VERSION, ensure_schema, pack, unpack, connect_
 EXTRACTION_VERSION = 'atlas-extraction-1'
 WINDOW_SIZES = (1, 2, 4, 8, 12, 24)
 DEFAULT_MAX_ROOTS = 24
+# Stage B: scale roots with map size; use all roots when the map is cheap.
+SCALED_ROOT_FLOOR = 24
+SCALED_ROOT_DIVISOR = 4
+ALL_ROOTS_UPTO = 48
+
+def scaled_max_roots(n_events, *, floor=SCALED_ROOT_FLOOR, divisor=SCALED_ROOT_DIVISOR, all_roots_upto=ALL_ROOTS_UPTO):
+ """Coverage-preserving root budget: all roots when N is small, else ``floor`` (24).
+
+ Large maps keep the historical max_roots=24 budget (scaled ceil(N/4) exploded
+ Human-maps/iCH360 windows and inflated iIT341 crossings). Small maps (N≤48)
+ still take every root.
+ """
+ n=int(n_events or 0)
+ if n<=0: return floor
+ if n<=all_roots_upto: return n
+ return floor
+
+def independent_reaction_sets(subsets, nest_factor=2.0):
+ """Drop windows nested in a near-scale larger window of the same map.
+
+ A window S is removed when some kept window T has S ⊂ T and
+ len(T) ≤ nest_factor × len(S). Default 2.0 drops near-scale nests
+ (size-2 ⊂ size-4, size-4 ⊂ size-8, size-8 ⊂ size-12/16, size-12 ⊂ size-24)
+ while keeping multi-scale seeds (size-2 ⊂ size-12/24, since 12 ≰ 4).
+ Size-1/2 windows that are not near-nested remain stored; retrieval.select
+ demotes geometry-only crumbs at ranking time.
+ """
+ ordered=sorted(subsets, key=lambda s:(-len(s), s))
+ kept=[]; kept_sets=[]
+ for s in ordered:
+  ss=set(s); n=len(ss)
+  if any(ss<k and (nest_factor is None or len(k)<=nest_factor*n) for k in kept_sets):
+   continue
+  kept.append(s); kept_sets.append(ss)
+ return kept
 
 def extraction_block(method, parameters, counts=None, *, version=EXTRACTION_VERSION, inferred=False):
  """Provenance block written onto every map and module produced by a cutter."""
@@ -31,7 +66,8 @@ def extraction_counts(modules, source_events=None):
  n_cov=len(covered)
  n_events=source_events if source_events is not None else (n_cov or None)
  coverage=round(n_cov/n_events, 4) if n_events else None
- return dict(source_events=n_events, modules=len(modules), reactions_covered=n_cov, coverage=coverage)
+ return dict(source_events=n_events, modules=len(modules), reactions_covered=n_cov, coverage=coverage,
+             independent_modules=len(modules))
 
 def attach_extraction(modules, method, parameters, source_events=None, *, version=EXTRACTION_VERSION, inferred=False):
  """Stamp the same per-map extraction block on every module in the cut."""
@@ -120,9 +156,13 @@ def from_legacy(m):
  )
  return dict(id=m['id'],source=m['source'],species=m['species'],lineage=m['lineage'],map_id=m['map_id'],name=m['name'],license=m['license'],quality=m['quality'],size=size,nodes=nodes,edges=edges,reactions=reactions,attachments=m['attachments'],ports=m.get('all_participant_ports',m['ports']),legacy_id=m['id'],source_sha256=m['source_sha256'],review_status='not_required',original_instance='data/source_inputs/module_observations.json.gz',extraction=extraction)
 
-def diagram_modules(d,max_roots=DEFAULT_MAX_ROOTS,window_sizes=WINDOW_SIZES):
+def diagram_modules(d,max_roots=None,window_sizes=WINDOW_SIZES,independent_only=True):
  # d has explicit visible glyphs and semantic or annotated event records.
+ # Stage B default: size-scaled roots + persist only non-nested windows.
+ # Size-1/2 windows stay stored (useful on small models); retrieval.select
+ # demotes geometry-only crumbs so they do not displace denser covers.
  g=nx.Graph();rx={r['key']:r for r in d['events']}
+ if max_roots is None: max_roots=scaled_max_roots(len(rx))
  def core_visible(r):
   return [k for k in r['visible'] if d['glyphs'][k].get('label','').lower() not in {'h2o','water','h+','h(+)','atp','adp','amp','nad+','nadh','nadp+','nadph','coa-sh','coa','phosphate','pi','ppi'} and str(d['glyphs'][k]['entity']).split('@')[0] not in {'chebi:15377','chebi:15378','chebi:30616','chebi:456216','chebi:57287','chebi:57288','chebi:57945','chebi:57925'}]
  for k,r in rx.items():
@@ -134,6 +174,9 @@ def diagram_modules(d,max_roots=DEFAULT_MAX_ROOTS,window_sizes=WINDOW_SIZES):
   order=[k for k in nx.bfs_tree(g,root) if k in rx][:max(window_sizes)]
   for n in window_sizes:
    if len(order)>=n:subsets.add(tuple(sorted(order[:n])))
+ raw_count=len(subsets)
+ if independent_only: subsets=set(independent_reaction_sets(subsets))
+ n_events=len(rx)
  out=[]
  for rs in sorted(subsets):
   selected=[rx[k] for k in rs];keys=set(rs)
@@ -154,7 +197,10 @@ def diagram_modules(d,max_roots=DEFAULT_MAX_ROOTS,window_sizes=WINDOW_SIZES):
    outside=sorted(n for n in g[k] if n not in rs)
    if outside:ports.append(dict(key=k,outside_reactions=outside,scope='available_source_map'))
   out.append(dict(id=uid([d['id'],rs]),source=d['source'],species=d['species'],lineage=d['lineage'],map_id=d['id'],name=d['name'],license=d['license'],quality='semantic_transfer',size=len(rs),nodes=nodes,edges=edges,reactions=selected,attachments=[],ports=ports,source_sha256=d['source_sha256'],review_status='not_required',original_instance=d.get('path'),biochemical_visibility='complete reference reaction; partial observed drawing'))
- attach_extraction(out, 'diagram_modules', dict(max_roots=max_roots, window_sizes=list(window_sizes)), source_events=len(rx))
+ params=dict(max_roots=max_roots, window_sizes=list(window_sizes), independent_only=bool(independent_only),
+             root_policy='all_roots_upto_48_else_max_roots_24', raw_windows_before_dedupe=raw_count,
+             nest_factor=2.0)
+ attach_extraction(out, 'diagram_modules', params, source_events=n_events)
  return out
 
 def wp_diagram(d,rhea):
@@ -192,7 +238,9 @@ def reactome_diagram(path):
   if ok and coeff:
    p=e.get('position',{});events.append(dict(key='r:'+str(e['id']),id=event.get('stId',str(e['reactomeId'])),references={'reactome':[event.get('stId',str(e['reactomeId']))]},coefficients={k:v for k,v in coeff.items() if v},visible=visible,xy=[p.get('x',0),p.get('y',0)],position_origin='observed',reversible=False,paths=e.get('segments',[])))
  rid=path.stem
- return dict(id=uid([rid,sha(path.read_bytes())]),source='reactome',species='Homo sapiens',lineage='reactome:'+rid,map_id=rid,name=a.get('displayName',rid),license='CC0-1.0-data',glyphs=glyphs,events=events,source_sha256=sha(path.read_bytes()),path=str(path.relative_to(BASE)))
+ try: rel=str(path.resolve().relative_to(ROOT.resolve()))
+ except Exception: rel=str(path)
+ return dict(id=uid([rid,sha(path.read_bytes())]),source='reactome',species='Homo sapiens',lineage='reactome:'+rid,map_id=rid,name=a.get('displayName',rid),license='CC0-1.0-data',glyphs=glyphs,events=events,source_sha256=sha(path.read_bytes()),path=rel)
 
 
 def escher_diagram(path, source='escher', license='CC0-1.0', species='unspecified', reaction_namespace='bigg.reaction', **meta):
@@ -257,7 +305,7 @@ def build():
   dd=wp_diagram(d,rhea);maps.append({k:d[k] for k in ['id','source','source_id','species','lineage','name','author','source_sha256','license']});mods.extend(diagram_modules(dd))
  acq=read(DATA/'acquisition.json')
  for rec in acq['reactome_diagrams']:
-  p=BASE/rec['layout_path'] if rec.get('layout_path') else DATA/'reactome'/(rec['id']+'.json')
+  p=(ROOT/rec['layout_path']) if rec.get('layout_path') and (ROOT/rec['layout_path']).exists() else DATA/'reactome'/(rec['id']+'.json')
   try:
    d=reactome_diagram(p);maps.append({k:d[k] for k in ['id','source','species','lineage','name','source_sha256','license']});mods.extend(diagram_modules(d))
   except Exception as e:binding_audit.append(dict(source='reactome',map_id=rec['id'],status='parse_failure',error=str(e)))

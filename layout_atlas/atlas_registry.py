@@ -65,7 +65,14 @@ DEFAULT_EXTENSIONS = (
 )
 
 # Default cutter parameters used when backfilling extraction onto existing records.
-_DIAGRAM_PARAMS = dict(max_roots=24, window_sizes=[1, 2, 4, 8, 12, 24])
+# Stage B: size-scaled roots + persist only independent (non-nested) windows.
+_DIAGRAM_PARAMS = dict(
+    max_roots='scaled',
+    window_sizes=[1, 2, 4, 8, 12, 24],
+    independent_only=True,
+    nest_factor=2.0,
+    root_policy='all_roots_upto_48_else_max_roots_24',
+)
 _EXTRACTION_BY_SOURCE = {
     'escher': (
         'escher_community_windows',
@@ -85,6 +92,7 @@ _EXTRACTION_BY_SOURCE = {
     'human_maps': ('diagram_modules', dict(_DIAGRAM_PARAMS), EXTRACTION_VERSION, False),
     'metabolismregulation': ('diagram_modules', dict(_DIAGRAM_PARAMS), EXTRACTION_VERSION, False),
     'panther': ('diagram_modules', dict(_DIAGRAM_PARAMS), EXTRACTION_VERSION, False),
+    'ich360': ('diagram_modules', dict(_DIAGRAM_PARAMS), EXTRACTION_VERSION, False),
     'brenda': (
         'brenda_library.extract',
         dict(
@@ -243,6 +251,7 @@ def _counts_for_modules(mods, source_events=None):
         modules=len(mods),
         reactions_covered=n_cov,
         coverage=coverage,
+        independent_modules=len(mods),
     )
 
 

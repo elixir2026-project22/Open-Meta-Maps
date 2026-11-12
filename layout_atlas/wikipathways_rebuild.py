@@ -71,8 +71,11 @@ def geometry_diagram(d):
     )
 
 
-def geometry_modules(d, max_roots=24):
-    """BFS windows over geometry diagram; same size bounds as database.build legacy filter."""
+def geometry_modules(d, max_roots=None):
+    """BFS windows over geometry diagram; same size bounds as database.build legacy filter.
+
+    ``max_roots=None`` uses Stage B size-scaled roots (``database.scaled_max_roots``).
+    """
     diagram = geometry_diagram(d)
     if not diagram['events']:
         return []
@@ -86,10 +89,18 @@ def geometry_modules(d, max_roots=24):
             out.append(m)
     # Re-stamp after size filter so counts match stored modules.
     from database import attach_extraction, WINDOW_SIZES
+    sample = (mods[0].get('extraction') or {}).get('parameters') if mods else {}
     attach_extraction(
         out, 'geometry_modules',
-        dict(max_roots=max_roots, window_sizes=list(WINDOW_SIZES),
-             underlying='diagram_modules over metabolite–metabolite GPML edges'),
+        dict(
+            max_roots=(sample or {}).get('max_roots', max_roots),
+            window_sizes=list(WINDOW_SIZES),
+            independent_only=True,
+            nest_factor=(sample or {}).get('nest_factor', 2.0),
+            root_policy=(sample or {}).get('root_policy', 'scaled_max_24_ceil_N_4_or_all_upto_48'),
+            raw_windows_before_dedupe=(sample or {}).get('raw_windows_before_dedupe'),
+            underlying='diagram_modules over metabolite–metabolite GPML edges',
+        ),
         source_events=len(diagram['events']),
     )
     return out
@@ -364,22 +375,36 @@ def export_map_observations(map_obs):
 
 
 def refresh_source_registry(version=RELEASE):
+    """Rewrite WikiPathways GPML rows while preserving prior provenance fields."""
     reg_path = INPUTS / 'source_registry.json'
     reg = read(reg_path)
+    prior = {
+        f.get('path'): f
+        for f in reg.get('files', [])
+        if f.get('source') == 'wikipathways' and f.get('path')
+    }
     files = [f for f in reg.get('files', []) if f.get('source') != 'wikipathways']
+    import re
     for p in sorted((INPUTS / 'raw/wp').rglob('*.gpml')):
         rel = str(p.relative_to(INPUTS))
         digest = sha(p.read_bytes())
-        lineage = None
-        import re
         m = re.search(r'WP\d+', p.name)
-        files.append(dict(
+        old = prior.get(rel) or {}
+        row = dict(
             source='wikipathways', id=p.name, format='gpml',
             family=p.parent.name, species=p.parent.name.replace('_', ' '),
             path=rel, sha256=digest, license='CC0-1.0', use='core',
             url=f'https://data.wikipathways.org/{version}/gpml/',
             version=version, lineage=m[0] if m else None,
-        ))
+            extraction_method=old.get('extraction_method')
+            or 'wp_diagram + diagram_modules (semantic) or geometry_modules',
+            retrieval_date=old.get('retrieval_date') or str(date.today()),
+        )
+        # Keep any additional provenance keys already recorded for this path.
+        for k, v in old.items():
+            if k not in row and v is not None:
+                row[k] = v
+        files.append(row)
     # archive provenances already updated by prior refresh; keep non-wp + rewrite wp gpml entries
     reg['files'] = files
     reg['wikipathways_release'] = version
@@ -399,13 +424,29 @@ def _write_geometry_extension(geometry_mods):
         m.setdefault('layout_origin', dict(LAYOUT_ORIGIN_EXPERT))
         m.setdefault('attribution', ATTRIBUTION['wikipathways'])
         m.setdefault('atlas_schema_version', SCHEMA_VERSION)
+        # Retrieval indexes geometry_fingerprint; assign without a full family pass.
+        if 'geometry_fingerprint' not in m:
+            pts = np.array([n['xy'] for n in m['nodes']], float)
+            m['geometry_fingerprint'] = uid(
+                np.round(np.sort(np.linalg.norm(pts[:, None] - pts[None, :], axis=2).ravel()), 3).tolist()
+            )
+        m.setdefault('core_family', uid(['wp-geometry', m['id']]))
+        m.setdefault('variant', uid([m['core_family'], m['id']]))
     with gzip.open(ext / 'modules.json.gz', 'wt') as f:
         json.dump(geometry_mods, f, ensure_ascii=False, separators=(',', ':'))
     dump(ext / 'SOURCE.json', dict(
         source='wikipathways', release=RELEASE, license='CC0-1.0',
         license_url='https://www.wikipathways.org/terms.html',
         modules=len(geometry_mods), quality='geometry_only',
-        extraction='diagram_modules BFS windows over metabolite–metabolite GPML edges',
+        extraction=dict(
+            method='geometry_modules',
+            parameters=dict(
+                independent_only=True,
+                root_policy='scaled_max_24_ceil_N_4_or_all_upto_48',
+                underlying='diagram_modules over metabolite–metabolite GPML edges',
+            ),
+            atlas_schema_version=SCHEMA_VERSION,
+        ),
         admitted_to_open_core=True, partition='open_core',
         note='Default extension; loaded by database.modules(). Kept out of open_core.sqlite for size.',
         date=str(date.today()),

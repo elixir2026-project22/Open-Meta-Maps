@@ -158,8 +158,11 @@ def build(version=VERSION, access_date=None):
             path=d.get('path'), format='celldesigner', events=len(d['events']), glyphs=len(d['glyphs']),
             modules=len(mods), audit=d.get('audit'),
             extraction=(mods[0].get('extraction') if mods else database.extraction_block(
-                'diagram_modules', dict(max_roots=24, window_sizes=[1, 2, 4, 8, 12, 24]),
-                dict(source_events=len(d['events']), modules=0, reactions_covered=0, coverage=None),
+                'diagram_modules',
+                dict(max_roots='scaled', window_sizes=[1, 2, 4, 8, 12, 24], independent_only=True,
+                     root_policy='scaled_max_24_ceil_N_4_or_all_upto_48'),
+                dict(source_events=len(d['events']), modules=0, reactions_covered=0, coverage=None,
+                     independent_modules=0),
             )),
         ))
         per_map.append(dict(source_id=d.get('source_id'), name=d['name'], sha256=d['source_sha256'],
@@ -235,8 +238,17 @@ def build(version=VERSION, access_date=None):
 def register_in_source_registry(source_doc):
     reg_path = INPUTS / 'source_registry.json'
     reg = read(reg_path) if reg_path.exists() else dict(schema=1, files=[], license_evidence=[])
+    prior = {f.get('path'): f for f in reg.get('files', []) if f.get('source') == SOURCE}
     files = [f for f in reg.get('files', []) if f.get('source') != SOURCE]
-    files.extend(source_doc.get('files') or [])
+    for row in source_doc.get('files') or []:
+        old = prior.get(row.get('path')) or {}
+        row = dict(row)
+        row.setdefault('extraction_method', old.get('extraction_method') or 'celldesigner.decode + diagram_modules')
+        row.setdefault('retrieval_date', old.get('retrieval_date') or source_doc.get('access_date'))
+        for k, v in old.items():
+            if k not in row and v is not None:
+                row[k] = v
+        files.append(row)
     reg['files'] = files
     evidence = [e for e in reg.get('license_evidence', []) if e.get('source') != SOURCE]
     if source_doc.get('licence_evidence'):

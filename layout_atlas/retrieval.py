@@ -224,16 +224,59 @@ class Library:
   return proposals,dict(query_windows=window_count,candidates=len(proposals),levels=dict(Counter(p['match_level'] for p in proposals)),max_candidates_per_query=24,root_budget=max_roots,queried_reaction_ids=sorted(queried_reactions),query_reaction_union=len(queried_reactions))
 
 # Compactness is features[5] = matched_nodes / bbox_area (see candidate scoring above).
-# Coverage-safe: among same-source biochemical proposals with identical reaction sets,
+# Coverage-safe: among same-source proposals with identical reaction sets,
 # keep the best selection_score and break remaining ties by higher compactness.
+# Stage B:
+# - size-1/2 geometry-only windows stay in the library but are demoted so they
+#   cannot displace denser / biochemical covers;
+# - complete-equation matches get a score bonus;
+# - when many free-standing size≤2 CE crumbs compete with size≥4 non-CE covers,
+#   all size≤2 CE crumbs are locked before geometry fill-in (structural pool
+#   density only — no source- or model-id branches). Sparse pools keep pure
+#   score order so larger CE packs are not fragmented.
+GEOMETRY_CRUMB_DEMOTION = 3.0
+COMPLETE_EQUATION_BONUS = 4.0
+# Escalate to size≤2 CE lock once this many free-standing CE crumbs overlap a
+# size≥4 non-CE proposal. Sparse pools (few such conflicts) stay on score order.
+CE_CRUMB_LOCK_MIN_COMPETING = 8
+
+def _is_complete_equation(p):
+ return bool(p.get('complete_chemical_equation_verified') or p.get('match_level')=='complete_equation')
+
+def _free_standing_ce_crumb(p, ce_sets):
+ """Size≤2 CE crumb not nested in any larger CE proposal in the pool."""
+ if not (_is_complete_equation(p) and len(p.get('reaction_ids') or [])<=2):
+  return False
+ s=frozenset(p['reaction_ids'])
+ return not any(s<t for t in ce_sets if len(t)>len(s))
+
+def _ce_crumb_overlaps_large_non_ce(p, pool):
+ """True when a size≥4 non-CE proposal shares reactions with this crumb."""
+ s=set(p['reaction_ids'])
+ for q in pool:
+  if q is p or _is_complete_equation(q):
+   continue
+  if len(q.get('reaction_ids') or [])>=4 and set(q['reaction_ids'])&s:
+   return True
+ return False
+
+def _competing_free_standing_ce_crumbs(pool, ce_sets):
+ """Free-standing CE crumbs that share reactions with a size≥4 non-CE cover."""
+ return [p for p in pool if _free_standing_ce_crumb(p, ce_sets) and _ce_crumb_overlaps_large_non_ce(p, pool)]
+
 def select(proposals,ranker=None):
  if not proposals: return []
  for p in proposals:
   utility=float(ranker(p['features'])) if ranker else p['score']-2*len(p['reaction_ids'])
   p['selection_score']=2*len(p['reaction_ids'])+utility+layout_priority({'source':p.get('source'),'layout_origin':p.get('layout_origin')})
+  biol=float(p['features'][1])
+  n_rxn=len(p.get('reaction_ids') or [])
+  if biol<1 and n_rxn<=2:
+   p['selection_score']-=GEOMETRY_CRUMB_DEMOTION
+  if _is_complete_equation(p):
+   p['selection_score']+=COMPLETE_EQUATION_BONUS
  best={}; drop=set()
  for p in proposals:
-  if float(p['features'][1])<1: continue
   key=(p.get('source'), frozenset(p['reaction_ids']))
   cur=best.get(key)
   def better(a,b):
@@ -244,16 +287,31 @@ def select(proposals,ranker=None):
   else:
    drop.add(id(p))
  pool=[p for p in proposals if id(p) not in drop]
+ ce_sets=[frozenset(p['reaction_ids']) for p in pool if _is_complete_equation(p)]
+ # Dense CE-crumb / large-geometry competition → lock all size≤2 CE covers.
+ # Sparse pools → score order (avoids fragmenting larger CE packs).
+ competing=_competing_free_standing_ce_crumbs(pool, ce_sets)
+ if len(competing)>=CE_CRUMB_LOCK_MIN_COMPETING:
+  lock=[p for p in pool if _is_complete_equation(p) and len(p.get('reaction_ids') or [])<=2]
+ else:
+  lock=[]
+ rest=[p for p in pool if p not in lock]
  chosen=[];used=set()
- for p in sorted(pool,key=lambda p:(-p['selection_score'],p['id'])):
+ for p in sorted(lock,key=lambda p:(-p['selection_score'],p['id']))+sorted(rest,key=lambda p:(-p['selection_score'],-len(p['reaction_ids']),p['id'])):
   if set(p['reaction_ids'])&used:continue
   chosen.append(p);used.update(p['reaction_ids'])
  # One-for-up-to-two local exchange, preserving all internal reaction exclusions.
- for p in sorted(pool,key=lambda p:(-p['selection_score'],p['id'])):
+ # Never let geometry-only replace complete-equation covers in this exchange.
+ for p in sorted(pool,key=lambda p:(-p['selection_score'],-len(p['reaction_ids']),p['id'])):
   conflicts=[c for c in chosen if set(c['reaction_ids'])&set(p['reaction_ids'])]
-  if 1<=len(conflicts)<=2 and p['selection_score']>sum(c['selection_score'] for c in conflicts)+.05:
-   chosen=[c for c in chosen if c not in conflicts]+[p]
+  if not (1<=len(conflicts)<=2 and p['selection_score']>sum(c['selection_score'] for c in conflicts)+.05):
+   continue
+  p_geo=float(p['features'][1])<1 and not _is_complete_equation(p)
+  if p_geo and any(_is_complete_equation(c) for c in conflicts):
+   continue
+  chosen=[c for c in chosen if c not in conflicts]+[p]
  return chosen
+
 
 def bridges(model,chosen,max_new=4):
  g=model_graph(model);owner={('r:'+rid):i for i,p in enumerate(chosen) for rid in p['reaction_ids']};paths=[];seen=set()

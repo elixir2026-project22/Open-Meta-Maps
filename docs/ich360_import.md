@@ -30,24 +30,28 @@ Atlas already keeps overlapping drawings from one source (e.g. Human-maps compar
 
 ## Importer
 
-`layout_atlas/ich360_library.py` → `database.escher_diagram` + `diagram_modules` (BFS windows, sizes 1–24, `max_roots=24`). Each module carries Stage A `extraction` provenance (`method=diagram_modules`, `version=atlas-extraction-1`). `layout_origin.status` = `curated_hand_drawn`.
+`layout_atlas/ich360_library.py` → `database.escher_diagram` + Stage B `diagram_modules` (size-scaled roots, `independent_only`, `nest_factor=1.5`, large-map min size 4) with an extra keep-`size ≥ 4` filter. Each module carries `extraction` provenance (`method=diagram_modules`, `version=atlas-extraction-1`). `layout_origin.status` = `curated_hand_drawn`.
 
-Provenance: `data/extensions/ich360/SOURCE.json`, `data/source_inputs/source_registry.json`, licence snapshots under `data/terms/ich360_*`. Default load includes **858** iCH360 modules (total default Atlas **69,132**).
+Provenance: `data/extensions/ich360/SOURCE.json`, `data/source_inputs/source_registry.json`, licence snapshots under `data/terms/ich360_*`. Default load includes **503** iCH360 modules (sizes 4/8/12/24 only; total default Atlas **68,777**).
 
-## Compose metrics (main → ich360-maps; `--source-paths`, Stage A baseline)
+## Compose metrics (`--source-paths`)
 
-| | e_coli_core main | e_coli_core +iCH360 | iIT341 main | iIT341 +iCH360 |
+Nested iCH360 cutter (main / #24) vs Stage B ich360 recut (size≥4; other Atlas sources unchanged from main):
+
+| metric | e_coli nested | e_coli Stage B | iIT341 nested | iIT341 Stage B |
 |---|---:|---:|---:|---:|
-| curated_coverage_share | 0.7368 | 0.7368 | 0.3069 | 0.2924 |
-| crossings (counted) | 46 | 46 | 299 | 239 |
-| overlapping_pairs | 5 | 5 | 18 | 16 |
-| unrelated_overlaps_total | 5 | 5 | 17 | 8 |
-| blank_space_share | 0.5826 | 0.5826 | 0.9401 | 0.8605 |
-| edge_len_max_rel | 12.187 | 12.187 | 27.975 | 27.871 |
-| aspect_ratio (W/H) | 1.1726 | 1.1726 | 0.5394 | 0.8079 |
-| runtime_s | 77.9 | 74.7 | 457.3 | 454.2 |
-| iCH360 modules used | — | 0 | — | 7 (4×`full_map` + 3×`ions_metals_uptake`, all size-2 geometry) |
+| curated_coverage_share | 0.7368 | 0.7368 | 0.2852 | 0.2852 |
+| crossings (counted) | 46 | 46 | 239 | 230 |
+| overlapping_pairs | 5 | 5 | 16 | 17 |
+| node_overlap_pairs | 1 | 1 | 2 | 1 |
+| blank_space_share | 0.5826 | 0.5826 | 0.8605 | 0.9459 |
+| runtime_s | 67.3 | 69.3 | 426.9 | 432.6 |
+| iCH360 modules used | 0 | 0 | 7 (all size-2 geometry) | 0 |
+
+Pre-iCH360 Stage A docs baseline for iIT341 was `curated_coverage_share=0.3069` (compose dirs without iCH360 measured ≈0.2996). Nested #24 dipped to 0.2924 in the #24 write-up / 0.2852 when re-measured on this branch’s select path.
 
 ### iIT341 iCH360 selection note
 
-`full_map` size-2 windows still win for exchange/transport motifs (e.g. native `GLNtex`+`EX_gln__L_e` geometry-matched onto iIT341 `AAtr`+`EX_aa_e`). Tighter pathway maps (`aminoacids_biosynthesis`, etc.) do not contain that periplasm/exchange pair, so they never enter the proposal pool for those targets. Stage A compactness twinning only applies when `biochemical_level ≥ 1`; these hits are geometry-only (`biol=0`), so compactness does not prefer pathway twins. The full_map window beats the previous Escher geometry cover mainly via lower `initial_fit` (−0.2×Δfit ≈ +0.011 selection_score).
+Under the nested cutter, `full_map` / `ions_metals_uptake` **size-2 geometry-only** windows won for exchange/transport motifs (e.g. native `GLNtex`+`EX_gln__L_e` geometry-matched onto iIT341 `AAtr`+`EX_aa_e`). Pathway maps lack that periplasm/exchange pair, so they never entered the proposal pool for those targets; Stage A compactness twinning did not apply at `biol=0`.
+
+Stage B removes those crumbs from the library (`large_map_min_size=4` + ich360 keep-`size≥4`) and demotes any leftover size≤2 geometry proposals in `retrieval.select` (−3.0). On iIT341 that yields **zero** iCH360 selections and slightly better crossings/overlaps, but **`curated_coverage_share` stays 0.2852** — the size-2 hits were geometry placements, and dropping them does not restore pre-iCH360 complete-equation coverage. Recut/dedupe alone does not undo the 0.307→0.292 dip.
