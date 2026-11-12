@@ -105,7 +105,12 @@ button.lnk{font:inherit;background:none;border:0;color:var(--accent);cursor:poin
 .ab-card{position:relative;cursor:pointer}
 .ab-card.sel{outline:2px solid var(--accent)}
 .ab-card .chk{position:absolute;top:10px;right:10px;z-index:2}
-.ab-card img.th{display:block;width:100%;height:150px;object-fit:contain;background:var(--bg);border-radius:8px;margin-bottom:10px;border:1px solid var(--line)}
+.ab-th{position:relative;display:block;width:100%;height:150px;margin-bottom:10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);overflow:hidden}
+.ab-th::before{content:"Loading…";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--mute);pointer-events:none}
+.ab-th.is-ready::before,.ab-th.is-error::before{content:none}
+.ab-th.is-error::after{content:"Preview unavailable";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--mute);background:var(--bg)}
+.ab-th img.th{display:block;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .15s ease}
+.ab-th.is-ready img.th{opacity:1}
 .ab-empty{color:var(--mute);padding:24px 0}
 .ab-detail{display:none}.ab-detail.on{display:block}
 .ab-list.on{display:none}
@@ -117,7 +122,7 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
 </style>
 <div id="listView" class="ab-list">
 <form class="filters" id="filters" autocomplete="off">
-<label class="grow">Search<input type="search" name="q" id="q" placeholder="name, id, free text"></label>
+<label class="grow">Search<input type="search" name="q" id="q" placeholder="name, EC, reaction or metabolite id"></label>
 <label>EC number<input name="ec" id="ec" placeholder="1.1.1.1"></label>
 <label>Reaction ID<input name="reaction" id="reaction" placeholder="BiGG / Rhea / source"></label>
 <label>Metabolite ID<input name="metabolite" id="metabolite" placeholder="g6p / chebi:…"></label>
@@ -157,12 +162,61 @@ function loadMeta(){
   (m.licences||[]).forEach(function(x){var o=document.createElement('option');o.value=x[0];o.textContent=x[0]+' ('+x[1]+')';l.appendChild(o)});
   search();
  }).catch(function(){$('count').textContent='Could not load Atlas index. Is the tool server running?'})}
+var TH_PLACEHOLDER='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="240" height="160"><rect width="100%" height="100%" fill="#f3f4f6"/></svg>');
+var thumbIO=null;
+function ensureThumbIO(){
+ if(thumbIO)return thumbIO;
+ if(!('IntersectionObserver' in window))return null;
+ thumbIO=new IntersectionObserver(function(entries){
+  entries.forEach(function(en){
+   if(!en.isIntersecting)return;
+   loadThumb(en.target);
+   thumbIO.unobserve(en.target);
+  });
+ },{root:null,rootMargin:'200px 0px',threshold:0.01});
+ return thumbIO;
+}
+function loadThumb(wrap){
+ if(!wrap||wrap.getAttribute('data-loaded'))return;
+ var img=wrap.querySelector('img.th');if(!img)return;
+ var src=wrap.getAttribute('data-src')||img.getAttribute('data-src')||'';
+ if(!src){wrap.classList.add('is-error');wrap.setAttribute('data-loaded','1');return}
+ wrap.setAttribute('data-loaded','1');
+ img.onload=function(){wrap.classList.add('is-ready');wrap.classList.remove('is-error')};
+ img.onerror=function(){img.removeAttribute('src');wrap.classList.remove('is-ready');wrap.classList.add('is-error')};
+ img.src=src;
+}
+function wireThumbs(){
+ var wraps=document.querySelectorAll('.ab-th[data-src]');
+ var io=ensureThumbIO();
+ Array.prototype.forEach.call(wraps,function(wrap,i){
+  // Eagerly load first two rows (~12) so above-the-fold never stays empty.
+  if(i<12||!io){loadThumb(wrap);return}
+  io.observe(wrap);
+ });
+ // Fallback: any wrap already near the viewport (IO can miss mid-render).
+ Array.prototype.forEach.call(wraps,function(wrap){
+  if(wrap.getAttribute('data-loaded'))return;
+  var r=wrap.getBoundingClientRect();
+  if(r.top<window.innerHeight+240&&r.bottom>-40)loadThumb(wrap);
+ });
+}
+if(!window.__abThumbScroll){
+ window.__abThumbScroll=1;
+ window.addEventListener('scroll',function(){
+  Array.prototype.forEach.call(document.querySelectorAll('.ab-th[data-src]:not([data-loaded])'),function(wrap){
+   var r=wrap.getBoundingClientRect();
+   if(r.top<window.innerHeight+240&&r.bottom>-40)loadThumb(wrap);
+  });
+ },{passive:true});
+}
 function card(m){
  var checked=state.selected[m.id]?' checked':'';
  var also=m.also_in?'<p class="ab-also">'+esc(m.also_in.label)+'</p>':'';
+ var thumb=m.thumbnail||'';
  return '<article class="card ab-card'+(state.selected[m.id]?' sel':'')+'" data-id="'+esc(m.id)+'">'
   +'<label class="chk" onclick="event.stopPropagation()"><input type="checkbox" data-id="'+esc(m.id)+'"'+checked+'></label>'
-  +'<img class="th" loading="lazy" alt="" src="'+esc(m.thumbnail)+'">'
+  +'<div class="ab-th" data-src="'+esc(thumb)+'"><img class="th" alt="" decoding="async" data-src="'+esc(thumb)+'" src="'+TH_PLACEHOLDER+'"></div>'
   +'<h2 class="dn">'+esc(m.name||m.id)+'</h2>'
   +'<p class="meta">'+esc(m.source)+' · '+esc(m.name||m.map_id)+'</p>'+also
   +'<div class="tags"><span class="tag src-'+esc(m.source)+'">'+esc(m.source)+'</span>'
@@ -172,6 +226,7 @@ function render(data){
  state.lastIds=(data.results||[]).map(function(m){return m.id});
  state.cards={};(data.results||[]).forEach(function(m){state.cards[m.id]=m});
  $('grid').innerHTML=(data.results||[]).map(card).join('')||'<p class="ab-empty">No modules match these filters.</p>';
+ wireThumbs();
  var kind=data.deduped===false?'layout variants':'modules';
  $('count').textContent=data.total.toLocaleString()+' '+kind+' · page '+data.page+' / '+data.pages;
  var p=$('pager'),html='',i,start=Math.max(1,data.page-3),end=Math.min(data.pages,data.page+3);
@@ -217,11 +272,12 @@ function openDetail(id){
    also='<h2>Also drawn in</h2><p class="meta">'+esc(d.also_in.label)+'</p><div class="tablewrap"><table><thead><tr><th>Source</th><th>Map</th><th>Licence</th><th>Attribution</th></tr></thead><tbody>'
     +d.variants.map(function(v){return '<tr><td>'+esc(v.source)+'</td><td>'+esc(v.name)+'</td><td>'+esc(v.license)+'</td><td>'+esc(v.attribution||'')+'</td></tr>'}).join('')
     +'</tbody></table></div>'}
-  $('detail').innerHTML='<div class="detail-grid"><div><img class="th" style="height:240px;width:100%;object-fit:contain" src="'+esc(d.thumbnail)+'" alt="">'
+  var spRow=d.species?'<dt>Species</dt><dd>'+esc(d.species)+'</dd>':'';
+  $('detail').innerHTML='<div class="detail-grid"><div><img class="th" style="height:240px;width:100%;object-fit:contain;background:var(--bg);border:1px solid var(--line);border-radius:8px" src="'+esc(d.thumbnail)+'" alt="">'
    +'</div><div><dl class="kv">'
    +'<dt>Source</dt><dd>'+esc(d.source)+'</dd>'
    +'<dt>Map</dt><dd>'+esc(d.name)+' <span class="muted">'+esc(d.map_id)+'</span></dd>'
-   +'<dt>Species</dt><dd>'+esc(d.species||'')+'</dd>'
+   +spRow
    +'<dt>Licence</dt><dd>'+esc(d.license)+'</dd>'
    +'<dt>Attribution</dt><dd>'+esc(d.attribution||'')+'</dd>'
    +'<dt>Reactions</dt><dd>'+esc(d.size)+'</dd>'

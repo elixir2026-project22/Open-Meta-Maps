@@ -393,6 +393,46 @@ def _truthy(v):
     return str(v or '').strip().lower() in ('1', 'true', 'yes', 'on', 'all')
 
 
+# EC: 1.1.1.1 / 1.1.1.- / 1.1.1.100
+_EC_RE = re.compile(r'^\d{1,2}\.\d{1,2}\.\d{1,2}(?:\.(?:\d{1,3}|-))?$')
+# BiGG-like metabolite: g6p_c, glc__D_e
+_MET_RE = re.compile(r'(?i)^(?:chebi[:_]\d+|[a-z][a-z0-9]*(?:__[a-z0-9]+)?_[a-z]\d?)$')
+# Namespaced reaction ids (Rhea / Reactome / MetaNetX) and bare BiGG-like tokens.
+_RX_NS_RE = re.compile(r'(?i)^(rhea|reactome|metanetx\.reaction):\S+$')
+_RX_RE = re.compile(r'(?i)^[A-Za-z][A-Za-z0-9_.-]{1,40}$')
+
+
+def classify_query(q):
+    """Detect whether free-text looks like an EC, reaction, or metabolite id."""
+    s = str(q or '').strip()
+    if not s:
+        return 'text'
+    if _EC_RE.match(s):
+        return 'ec'
+    if s.lower().startswith('chebi:') or _MET_RE.match(s):
+        return 'metabolite'
+    if _RX_NS_RE.match(s):
+        return 'reaction'
+    # Prefer reaction for ALLCAPS / id-like tokens; avoid swallowing plain English.
+    if _RX_RE.match(s) and (' ' not in s) and (s.isupper() or re.search(r'\d', s)):
+        return 'reaction'
+    return 'text'
+
+
+_UNKNOWN_SPECIES = re.compile(
+    r'(?i)^(unspecified|unknown|n/?a|none|pathway-level\b.*|.*organism assignment not.*|'
+    r'.*multi-organism.*)$'
+)
+
+
+def species_display(value):
+    """Return a user-facing species string, or None when unknown/placeholder."""
+    sp = str(value or '').strip()
+    if not sp or _UNKNOWN_SPECIES.match(sp):
+        return None
+    return sp
+
+
 def _quality_rank(code):
     order = {'semantic_transfer': 0, 'annotated_topology': 1, 'geometry_only': 2}
     return order.get(code or '', 9)
@@ -425,7 +465,11 @@ def _collapse(hits):
 
 
 def search(filters=None, page=1, per_page=PAGE_DEFAULT, index=None):
-    """Filter modules. Dedup by canonical reaction set unless variants=1."""
+    """Filter modules. Dedup by canonical reaction set unless variants=1.
+
+    Free-text `q` auto-routes EC / reaction / metabolite shaped tokens so the
+    dedicated fields are optional.
+    """
     filters = filters or {}
     idx = index or load_index()
     rows = idx['modules']
@@ -435,8 +479,16 @@ def search(filters=None, page=1, per_page=PAGE_DEFAULT, index=None):
     rx = filters.get('reaction') or filters.get('reaction_id') or ''
     met = filters.get('metabolite') or filters.get('metabolite_id') or ''
     mmap = filters.get('map') or filters.get('map_id') or filters.get('model') or ''
-    q = filters.get('q') or filters.get('query') or ''
+    q = (filters.get('q') or filters.get('query') or '').strip()
     show_variants = _truthy(filters.get('variants') or filters.get('show_variants'))
+    q_kind = classify_query(q) if q else 'text'
+    # Route free-text into the matching field when the dedicated field is empty.
+    if q and q_kind == 'ec' and not ec:
+        ec, q = q, ''
+    elif q and q_kind == 'reaction' and not rx:
+        rx, q = q, ''
+    elif q and q_kind == 'metabolite' and not met:
+        met, q = q, ''
 
     hits = []
     for m in rows:
@@ -473,13 +525,15 @@ def search(filters=None, page=1, per_page=PAGE_DEFAULT, index=None):
         page = pages
     start = (page - 1) * per_page
     slice_ = items[start:start + per_page]
+    results = [public_card(rep, variants=members) for rep, members in slice_]
     return dict(
         total=total,
         page=page,
         per_page=per_page,
         pages=pages,
         deduped=not show_variants,
-        results=[public_card(rep, variants=members) for rep, members in slice_],
+        q_kind=q_kind if (filters.get('q') or filters.get('query')) else None,
+        results=results,
         filters={k: v for k, v in filters.items() if v not in (None, '')},
     )
 
@@ -497,12 +551,13 @@ def public_card(m, variants=None):
             label=f"also in: {len(sources)} sources / {len(maps)} maps",
         )
     q = quality_label(m.get('quality'))
+    sp = species_display(m.get('species'))
     return dict(
         id=m['id'],
         source=m['source'],
         name=m['name'],
         map_id=m['map_id'],
-        species=m.get('species') or '',
+        species=sp,
         license=m['license'],
         attribution=attribution_string(m.get('attribution'), m.get('source') or ''),
         size=m['size'],
@@ -603,7 +658,7 @@ def module_detail(module_id, index=None):
         name=mod.get('name'),
         map_id=mod.get('map_id'),
         lineage=mod.get('lineage'),
-        species=mod.get('species'),
+        species=species_display(mod.get('species')),
         license=mod.get('license') or mod.get('licence'),
         attribution=attribution_string(rec.get('attribution') or mod.get('attribution'), mod.get('source') or ''),
         size=rec.get('size') or mod.get('size'),
@@ -878,7 +933,12 @@ def page_html():
 .ab-card{position:relative;cursor:pointer}
 .ab-card.sel{outline:2px solid var(--accent)}
 .ab-card .chk{position:absolute;top:10px;right:10px;z-index:2}
-.ab-card img.th{display:block;width:100%;height:150px;object-fit:contain;background:var(--bg);border-radius:8px;margin-bottom:10px;border:1px solid var(--line)}
+.ab-th{position:relative;display:block;width:100%;height:150px;margin-bottom:10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);overflow:hidden}
+.ab-th::before{content:"Loading…";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--mute);pointer-events:none}
+.ab-th.is-ready::before,.ab-th.is-error::before{content:none}
+.ab-th.is-error::after{content:"Preview unavailable";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--mute);background:var(--bg)}
+.ab-th img.th{display:block;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .15s ease}
+.ab-th.is-ready img.th{opacity:1}
 .ab-empty{color:var(--mute);padding:24px 0}
 .ab-detail{display:none}.ab-detail.on{display:block}
 .ab-list.on{display:none}
@@ -891,7 +951,7 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
     body = css_extra + '''
 <div id="listView" class="ab-list">
 <form class="filters" id="filters" autocomplete="off">
-<label class="grow">Search<input type="search" name="q" id="q" placeholder="name, id, free text"></label>
+<label class="grow">Search<input type="search" name="q" id="q" placeholder="name, EC, reaction or metabolite id"></label>
 <label>EC number<input name="ec" id="ec" placeholder="1.1.1.1"></label>
 <label>Reaction ID<input name="reaction" id="reaction" placeholder="BiGG / Rhea / source"></label>
 <label>Metabolite ID<input name="metabolite" id="metabolite" placeholder="g6p / chebi:…"></label>
@@ -931,12 +991,61 @@ function loadMeta(){
   (m.licences||[]).forEach(function(x){var o=document.createElement('option');o.value=x[0];o.textContent=x[0]+' ('+x[1]+')';l.appendChild(o)});
   search();
  }).catch(function(){$('count').textContent='Could not load Atlas index. Is the tool server running?'})}
+var TH_PLACEHOLDER='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="240" height="160"><rect width="100%" height="100%" fill="#f3f4f6"/></svg>');
+var thumbIO=null;
+function ensureThumbIO(){
+ if(thumbIO)return thumbIO;
+ if(!('IntersectionObserver' in window))return null;
+ thumbIO=new IntersectionObserver(function(entries){
+  entries.forEach(function(en){
+   if(!en.isIntersecting)return;
+   loadThumb(en.target);
+   thumbIO.unobserve(en.target);
+  });
+ },{root:null,rootMargin:'200px 0px',threshold:0.01});
+ return thumbIO;
+}
+function loadThumb(wrap){
+ if(!wrap||wrap.getAttribute('data-loaded'))return;
+ var img=wrap.querySelector('img.th');if(!img)return;
+ var src=wrap.getAttribute('data-src')||img.getAttribute('data-src')||'';
+ if(!src){wrap.classList.add('is-error');wrap.setAttribute('data-loaded','1');return}
+ wrap.setAttribute('data-loaded','1');
+ img.onload=function(){wrap.classList.add('is-ready');wrap.classList.remove('is-error')};
+ img.onerror=function(){img.removeAttribute('src');wrap.classList.remove('is-ready');wrap.classList.add('is-error')};
+ img.src=src;
+}
+function wireThumbs(){
+ var wraps=document.querySelectorAll('.ab-th[data-src]');
+ var io=ensureThumbIO();
+ Array.prototype.forEach.call(wraps,function(wrap,i){
+  // Eagerly load first two rows (~12) so above-the-fold never stays empty.
+  if(i<12||!io){loadThumb(wrap);return}
+  io.observe(wrap);
+ });
+ // Fallback: any wrap already near the viewport (IO can miss mid-render).
+ Array.prototype.forEach.call(wraps,function(wrap){
+  if(wrap.getAttribute('data-loaded'))return;
+  var r=wrap.getBoundingClientRect();
+  if(r.top<window.innerHeight+240&&r.bottom>-40)loadThumb(wrap);
+ });
+}
+if(!window.__abThumbScroll){
+ window.__abThumbScroll=1;
+ window.addEventListener('scroll',function(){
+  Array.prototype.forEach.call(document.querySelectorAll('.ab-th[data-src]:not([data-loaded])'),function(wrap){
+   var r=wrap.getBoundingClientRect();
+   if(r.top<window.innerHeight+240&&r.bottom>-40)loadThumb(wrap);
+  });
+ },{passive:true});
+}
 function card(m){
  var checked=state.selected[m.id]?' checked':'';
  var also=m.also_in?'<p class="ab-also">'+esc(m.also_in.label)+'</p>':'';
+ var thumb=m.thumbnail||'';
  return '<article class="card ab-card'+(state.selected[m.id]?' sel':'')+'" data-id="'+esc(m.id)+'">'
   +'<label class="chk" onclick="event.stopPropagation()"><input type="checkbox" data-id="'+esc(m.id)+'"'+checked+'></label>'
-  +'<img class="th" loading="lazy" alt="" src="'+esc(m.thumbnail)+'">'
+  +'<div class="ab-th" data-src="'+esc(thumb)+'"><img class="th" alt="" decoding="async" data-src="'+esc(thumb)+'" src="'+TH_PLACEHOLDER+'"></div>'
   +'<h2 class="dn">'+esc(m.name||m.id)+'</h2>'
   +'<p class="meta">'+esc(m.source)+' · '+esc(m.name||m.map_id)+'</p>'+also
   +'<div class="tags"><span class="tag src-'+esc(m.source)+'">'+esc(m.source)+'</span>'
@@ -946,6 +1055,7 @@ function render(data){
  state.lastIds=(data.results||[]).map(function(m){return m.id});
  state.cards={};(data.results||[]).forEach(function(m){state.cards[m.id]=m});
  $('grid').innerHTML=(data.results||[]).map(card).join('')||'<p class="ab-empty">No modules match these filters.</p>';
+ wireThumbs();
  var kind=data.deduped===false?'layout variants':'modules';
  $('count').textContent=data.total.toLocaleString()+' '+kind+' · page '+data.page+' / '+data.pages;
  var p=$('pager'),html='',i,start=Math.max(1,data.page-3),end=Math.min(data.pages,data.page+3);
@@ -991,11 +1101,12 @@ function openDetail(id){
    also='<h2>Also drawn in</h2><p class="meta">'+esc(d.also_in.label)+'</p><div class="tablewrap"><table><thead><tr><th>Source</th><th>Map</th><th>Licence</th><th>Attribution</th></tr></thead><tbody>'
     +d.variants.map(function(v){return '<tr><td>'+esc(v.source)+'</td><td>'+esc(v.name)+'</td><td>'+esc(v.license)+'</td><td>'+esc(v.attribution||'')+'</td></tr>'}).join('')
     +'</tbody></table></div>'}
-  $('detail').innerHTML='<div class="detail-grid"><div><img class="th" style="height:240px;width:100%;object-fit:contain" src="'+esc(d.thumbnail)+'" alt="">'
+  var spRow=d.species?'<dt>Species</dt><dd>'+esc(d.species)+'</dd>':'';
+  $('detail').innerHTML='<div class="detail-grid"><div><img class="th" style="height:240px;width:100%;object-fit:contain;background:var(--bg);border:1px solid var(--line);border-radius:8px" src="'+esc(d.thumbnail)+'" alt="">'
    +'</div><div><dl class="kv">'
    +'<dt>Source</dt><dd>'+esc(d.source)+'</dd>'
    +'<dt>Map</dt><dd>'+esc(d.name)+' <span class="muted">'+esc(d.map_id)+'</span></dd>'
-   +'<dt>Species</dt><dd>'+esc(d.species||'')+'</dd>'
+   +spRow
    +'<dt>Licence</dt><dd>'+esc(d.license)+'</dd>'
    +'<dt>Attribution</dt><dd>'+esc(d.attribution||'')+'</dd>'
    +'<dt>Reactions</dt><dd>'+esc(d.size)+'</dd>'

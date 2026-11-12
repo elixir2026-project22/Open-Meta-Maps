@@ -113,6 +113,59 @@ class TestSearchIndex:
         assert r['pages'] == 2
         assert len(r['results']) == 2
 
+    def test_each_result_card_has_thumbnail(self):
+        r = ab.search({}, page=1, per_page=24, index=self.idx)
+        assert r['results']
+        for card in r['results']:
+            assert card.get('thumbnail'), card['id']
+            assert card['thumbnail'].endswith('/thumbnail.svg')
+            assert f"/api/atlas/modules/{card['id']}/thumbnail.svg" == card['thumbnail']
+
+    def test_free_text_q_auto_detects_ec_reaction_metabolite(self):
+        r_ec = ab.search({'q': '9.9.9.9'}, index=self.idx)
+        assert r_ec['q_kind'] == 'ec'
+        assert r_ec['total'] == 1
+        assert r_ec['results'][0]['also_in']['modules'] == 2
+        r_rx = ab.search({'q': 'HEX1'}, index=self.idx)
+        assert r_rx['q_kind'] == 'reaction'
+        assert r_rx['total'] == 1
+        assert r_rx['results'][0]['id'] == 'mod_human'
+        r_met = ab.search({'q': 'g6p_c'}, index=self.idx)
+        assert r_met['q_kind'] == 'metabolite'
+        assert r_met['total'] >= 1
+        # Plain English still uses the free-text blob path.
+        r_txt = ab.search({'q': 'Glycolysis'}, index=self.idx)
+        assert r_txt['q_kind'] == 'text'
+        assert r_txt['total'] >= 1
+
+
+class TestQueryAndSpeciesHelpers:
+    def test_classify_query(self):
+        assert ab.classify_query('1.1.1.100') == 'ec'
+        assert ab.classify_query('1.1.1.-') == 'ec'
+        assert ab.classify_query('HEX1') == 'reaction'
+        assert ab.classify_query('rhea:12345') == 'reaction'
+        assert ab.classify_query('g6p_c') == 'metabolite'
+        assert ab.classify_query('chebi:17925') == 'metabolite'
+        assert ab.classify_query('central carbon metabolism') == 'text'
+        assert ab.classify_query('') == 'text'
+
+    def test_species_display_hides_placeholders(self):
+        assert ab.species_display('Escherichia coli') == 'Escherichia coli'
+        assert ab.species_display('pathway-level; organism assignment not in source SVG') is None
+        assert ab.species_display('unspecified') is None
+        assert ab.species_display('') is None
+        assert ab.species_display(None) is None
+
+    def test_public_card_omits_unknown_species(self):
+        m = _mod('brenda_x', source='brenda', name='Pathway')
+        m['species'] = 'pathway-level; organism assignment not in source SVG'
+        card = ab.public_card(m)
+        assert card['species'] is None
+        # page_html omits the Species row when the API returns null/empty.
+        html = (ab.ROOT / 'layout_atlas' / 'results' / 'atlas_browser' / 'index.html').read_text(encoding='utf-8')
+        assert "d.species?'" in html or 'var spRow=d.species?' in html
+
 
 class TestDownloadManifest:
     def setup_method(self):
