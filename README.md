@@ -48,8 +48,6 @@ python3 project.py compose --gem examples/e_coli_core_edited.xml --out results/e
 
 Layout evaluation: `pip install -r layout_atlas/requirements-eval.txt`, then `python3 project.py evaluate --gem MODEL.xml --map DIR/map.json`. See [docs/layout_evaluation.md](docs/layout_evaluation.md).
 
----
-
 ## 1. Data construction — the curated-structure Atlas
 
 The Atlas stores reusable pathway modules (topology, reaction identity, geometry, licence) cut from public community maps. Default load: `data/open_core.sqlite` plus in-tree extensions. Counts from [`data/atlas_registry.json`](data/atlas_registry.json) (generated 2026-11-12; About uses the same file).
@@ -130,6 +128,22 @@ Matched geometry is kept as drawn (translated only). Everything else is placed b
 | **Integrity** | Model hash, every reaction drawn, visual stoichiometry; protected shared glyphs must not split | `tool_pipeline.py` |
 
 **Determinism:** fixed layout seed `20261105` (`core.SEEDS`), ELK/fCoSE seeds, `PYTHONHASHSEED=0` on re-exec. Displacement measured by `evaluate --compare-map` only.
+
+### Example output
+
+Maps composed from the bundled example models. Every reaction and metabolite is drawn.
+
+<p align="center">
+<img src="docs/images/examples/e_coli_core.png" alt="Escherichia coli core map (e_coli_core, 95 reactions)" width="700"><br>
+<em>Escherichia coli</em> core (<code>e_coli_core</code>, 95 reactions)
+</p>
+
+<p align="center">
+<img src="docs/images/examples/iIT341.png" alt="Helicobacter pylori iIT341 map (554 reactions)" width="700"><br>
+<em>Helicobacter pylori</em> iIT341 (554 reactions)
+</p>
+
+*Previews are cropped to content, 2800 px wide. Labels are kept only when they stay readable at that width. Regenerate: `PYTHONPATH=layout_atlas python3 tools/render_map_preview.py DIR/map.json docs/images/examples/NAME.png`.*
 
 ---
 

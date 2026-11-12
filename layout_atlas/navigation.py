@@ -124,7 +124,14 @@ def about():
         + '<li>' + b('Not yet optimised: axis-aligned segments and axes; grid metabolites; chain turn angles; cycle placement; compartment packing.') + '</li>'
         + '<li>' + b('Build-on-previous: compose --previous map.json pins matched nodes; evaluate --compare-map measures displacement.') + '</li>'
         + '<li>' + b('Gaps: 2D component packing, harder orientation, compose --seed. Details: docs/layout_evaluation.md · docs/limitations.md.') + '</li>'
-        + '</ul>',
+        + '</ul>'
+        + '<h3>' + b('Example output') + '</h3>'
+        + '<p>' + b('Maps composed from the bundled example models. Every reaction and metabolite is drawn.') + '</p>'
+        + '<div class="fig">'
+        + '<div><img src="' + e(ui.rel(about_path, 'docs/images/examples/e_coli_core.png')) + '" alt="' + b('Escherichia coli core map (e_coli_core, 95 reactions)') + '" width="700"/><p class="meta"><i>Escherichia coli</i> core (<code>e_coli_core</code>, 95 reactions)</p></div>'
+        + '<div><img src="' + e(ui.rel(about_path, 'docs/images/examples/iIT341.png')) + '" alt="' + b('Helicobacter pylori iIT341 map (554 reactions)') + '" width="700"/><p class="meta"><i>Helicobacter pylori</i> iIT341 (554 reactions)</p></div>'
+        + '</div>'
+        + '<p class="meta">' + b('Previews are cropped to content, 2800 px wide. Labels are kept only when they stay readable at that width.') + '</p>',
     )
 
     s_out = sec(
