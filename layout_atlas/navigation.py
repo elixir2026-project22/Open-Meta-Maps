@@ -122,7 +122,7 @@ def about():
         + '<h3>' + b('Layout stages') + '</h3>'
         + '<p>' + b('After matching, the Composer keeps curated blocks rigid, completes uncovered reactions, orients free reactions, composes stray components, draws Bézier connections and places labels. Small models take the full path; mid-size models use a global plan then the same curated Bézier pass; larger models keep a skeleton and draw ~50-reaction views on demand. Full stage table: README §2.') + '</p>'
         + '<h3>' + b('Layout rules and evaluation') + '</h3>'
-        + '<p>' + b('Rules (crossings, overlaps, long edges, participant consistency, compartments, compactness, reproducibility, scale): metric groups, acceptance criteria and status table in README §3. Compose writes layout_quality into layout_issues.json / report.json; python3 project.py evaluate adds layout-rules metrics.') + '</p>'
+        + '<p>' + b('Rules (crossings, overlaps, long edges, participant consistency, compartments, compactness, reproducibility, scale): metric groups and status table in README §3. Compose writes layout_quality into layout_issues.json / report.json; python3 project.py evaluate adds layout-rules metrics.') + '</p>'
         + '<ul>'
         + '<li>' + b('Optimised (partially): crossings and unrelated overlaps; detour and bends; long lines and cofactor clones; participant placement; curated-structure continuity; periphery, aspect, blank space.') + '</li>'
         + '<li>' + b('Not yet optimised: axis-aligned segments and axes; grid metabolites; chain turn angles; cycle placement; compartment packing.') + '</li>'
