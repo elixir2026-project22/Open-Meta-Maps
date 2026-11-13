@@ -21,8 +21,10 @@ Operations on the scene made by `drawing.display_scene` (the hashed drawing file
   structure-local     after packing (compose pipeline), a reaction inside a curated structure prefers that structure's own `copy:` of the
                       metabolite.  When the structure has no suitable copy and the reaction still has a far link to another structure's
                       `copy:`, a new movable `inst:` is placed next to the structure — replacing the island-proximity stretch onto a foreign
-                      curated copy.  Curated `copy:` / `side:` / pinned glyphs are never created, moved or merged.  Reason `structure_local`.
-                      The far cut is the layout's own edge-length fence (Q3 + 1.5 IQR of non-currency participant lengths, falling back to NEAR).
+                      curated copy.  New `inst:` glyphs are accepted only when participant side-consistency does not worsen vs the current
+                      scene (LayoutQualityEvaluator ``rule="instance"``, new-only).  Curated `copy:` / `side:` / pinned glyphs are never
+                      created, moved or merged.  Reason `structure_local`.  The far cut is the layout's own edge-length fence
+                      (Q3 + 1.5 IQR of non-currency participant lengths, falling back to NEAR).
 
 Curated glyphs and reaction points are never moved here; only the participant each reaction attaches to is chosen (and new `inst:` nodes may
 be added).  Currency metabolites keep their per-reaction `side:` glyphs.  Deterministic.  The report gives long-edge counts before / after
@@ -52,6 +54,18 @@ HUB_METAB_PCT = 0.95
 HUB_NEAR = 180.0
 HUB_MAX_NEW = 12
 LOCAL_OFFSET = np.array([0.0, 55.0])  # same offset as long_edge_split placement
+
+
+def _side_consistency_ok(model, scene, pc_before):
+    """New-only participant side-consistency gate (LayoutQualityEvaluator rule=instance)."""
+    from layout_quality_evaluator import (
+        accept_participant_consistency,
+        measure_scene_participant_consistency,
+    )
+
+    pc_after = measure_scene_participant_consistency(model, scene)
+    ok, reason = accept_participant_consistency(pc_before, pc_after)
+    return ok, reason, pc_after
 
 
 def _long(model, scene, cur, thresholds=(250.0, 1000.0)):
@@ -318,9 +332,12 @@ def structure_local(model, scene, blocks, cur, reasons=None):
     added = 0
     reused = 0
     skipped = 0
+    skipped_side = 0
     frozen_copies = set(scene.get('structure_local_frozen_copies') or ())
     foreign_pending = _pending('foreign')
     shared_pending = _pending('shared')
+    from layout_quality_evaluator import measure_scene_participant_consistency
+    pc_base = measure_scene_participant_consistency(model, scene)
     # Shared (m:/inst:) groups only reuse an existing local movable instance — new glyphs are reserved for
     # far foreign-copy links (the cross-structure case).  Reuse is applied when it clearly shortens the edge.
     for kind, pending in (('foreign', foreign_pending), ('shared', shared_pending)):
@@ -362,19 +379,38 @@ def structure_local(model, scene, blocks, cur, reasons=None):
             while key in pos:
                 n += 1
                 key = f'inst:local:{bid}:{mid}:{n}'
+            # Tentative new inst: — keep only when side consistency does not worsen (new-only).
+            prev_parts = {rid: parts.get((rid, mid)) for rid, _ in members}
+            prev_protected = list(scene.get('protected') or [])
             pos[key] = np.asarray(spot, float).tolist()
             labels[key], copies[key] = mid, mid
+            for rid, old in members:
+                _detach_protected(scene, rid, mid)
+                parts[rid, mid] = key
+            ok, _why, pc_after = _side_consistency_ok(model, scene, pc_base)
+            if not ok:
+                for rid, old in prev_parts.items():
+                    if old is None:
+                        parts.pop((rid, mid), None)
+                    else:
+                        parts[rid, mid] = old
+                pos.pop(key, None)
+                labels.pop(key, None)
+                copies.pop(key, None)
+                scene['protected'] = prev_protected
+                skipped += 1
+                skipped_side += 1
+                continue
             reasons[key] = 'structure_local'
             existing = np.vstack([existing, spot]) if len(existing) else np.asarray(spot, float).reshape(1, 2)
             for rid, old in members:
                 if old.startswith('copy:'):
                     frozen_copies.add(old)
-                _detach_protected(scene, rid, mid)
-                parts[rid, mid] = key
             added += 1
+            pc_base = pc_after if pc_after is not None else pc_base
     scene['structure_local_frozen_copies'] = sorted(frozen_copies)
     report = dict(added=added, reused_local=reused, reassigned_to_own_copy=reassigned,
-                  skipped_no_clearance=skipped,
+                  skipped_no_clearance=skipped, skipped_side_consistency=skipped_side,
                   far_threshold=round(far_thr, 2),
                   groups=len(foreign_pending) + len(shared_pending), reason='structure_local',
                   frozen_copies=len(frozen_copies))
@@ -393,7 +429,10 @@ def optimize(model, scene, blocks, cur, summary=True, reuse=True, split=True):
     shared_before = {k for k in pos if k.startswith('m:')}
     summary_cut = _degree_threshold(model, cur, SUMMARY_DEGREE_PCT, SUMMARY_MIN)
     hub_mets = _hub_metabolites(model, cur, HUB_METAB_PCT)
-    report = dict(summary_reactions=[], added=0, reattached=0, summary_degree_cut=summary_cut, hub_metabolites=len(hub_mets))
+    report = dict(summary_reactions=[], added=0, reattached=0, skipped_side_consistency=0,
+                  summary_degree_cut=summary_cut, hub_metabolites=len(hub_mets))
+    from layout_quality_evaluator import measure_scene_participant_consistency
+    pc_base = measure_scene_participant_consistency(model, scene)
 
     # 1. summary reactions: local stubs/columns instead of map-wide spokes (degree-driven, not name-driven)
     if summary:
@@ -408,6 +447,8 @@ def optimize(model, scene, blocks, cur, summary=True, reuse=True, split=True):
             for m in core:
                 for role_c in participation_roles(r['metabolites'][m]):
                     (subs if role_c < 0 else prods).append(m)
+            prev_parts = {mid: parts.get((rid, mid)) for mid in core}
+            new_keys = []
             if SUMMARY_LAYOUT == 'columns':
                 # two columns: substrates in one column on the left of the reaction point, products in one on the right, each ordered by where the
                 # metabolite is drawn elsewhere (top to bottom), so the connections form two fans instead of a ring (a ring sends lines in every direction)
@@ -424,20 +465,38 @@ def optimize(model, scene, blocks, cur, summary=True, reuse=True, split=True):
                         pos[key] = [float(centre[0] + sign * dist), float(centre[1] + (i - (n - 1) / 2.0) * spacing)]
                         labels[key], copies[key] = mid, mid
                         parts[rid, mid] = key
-                        reasons[key] = 'summary_reaction'
-                report['summary_reactions'].append(dict(reaction=rid, participants=len(core), layout='columns'))
-                report['added'] += len(core)
+                        new_keys.append(key)
+            else:
+                for members, start in ((subs, 90.0), (prods, -90.0)):
+                    for i, mid in enumerate(members):
+                        angle = np.radians(start + 180.0 * (i + .5) / max(len(members), 1))
+                        key = f'inst:{rid}:{mid}'
+                        pos[key] = (centre + radius * np.array([np.cos(angle), np.sin(angle)])).tolist()
+                        labels[key], copies[key] = mid, mid
+                        parts[rid, mid] = key
+                        new_keys.append(key)
+            ok, _why, pc_after = _side_consistency_ok(model, scene, pc_base)
+            if not ok:
+                for mid, old in prev_parts.items():
+                    if old is None:
+                        parts.pop((rid, mid), None)
+                    else:
+                        parts[rid, mid] = old
+                for key in new_keys:
+                    pos.pop(key, None)
+                    labels.pop(key, None)
+                    copies.pop(key, None)
+                report['skipped_side_consistency'] += 1
                 continue
-            for members, start in ((subs, 90.0), (prods, -90.0)):
-                for i, mid in enumerate(members):
-                    angle = np.radians(start + 180.0 * (i + .5) / max(len(members), 1))
-                    key = f'inst:{rid}:{mid}'
-                    pos[key] = (centre + radius * np.array([np.cos(angle), np.sin(angle)])).tolist()
-                    labels[key], copies[key] = mid, mid
-                    parts[rid, mid] = key
-                    reasons[key] = 'summary_reaction'
-            report['summary_reactions'].append(dict(reaction=rid, participants=len(core)))
+            for key in new_keys:
+                reasons[key] = 'summary_reaction'
+            layout = 'columns' if SUMMARY_LAYOUT == 'columns' else 'ring'
+            row = dict(reaction=rid, participants=len(core))
+            if layout == 'columns':
+                row['layout'] = 'columns'
+            report['summary_reactions'].append(row)
             report['added'] += len(core)
+            pc_base = pc_after if pc_after is not None else pc_base
 
     # 2. reuse and split, per metabolite
     uses = defaultdict(list)
@@ -495,10 +554,32 @@ def optimize(model, scene, blocks, cur, summary=True, reuse=True, split=True):
                 best = f'inst:{mid}:{added}'
                 pos[best] = (mp.mean(axis=0) + LOCAL_OFFSET).tolist()
                 labels[best], copies[best] = mid, mid
-                reasons[best] = 'long_edge_split'
-                targets.append(best)
-                added += 1
-                report['added'] += 1
+                prev_parts = {r: parts.get((r, mid)) for r in members}
+                for r in members:
+                    parts[r, mid] = best
+                ok, _why, pc_after = _side_consistency_ok(model, scene, pc_base)
+                if not ok:
+                    for r, old in prev_parts.items():
+                        if old is None:
+                            parts.pop((r, mid), None)
+                        else:
+                            parts[r, mid] = old
+                    pos.pop(best, None)
+                    labels.pop(best, None)
+                    copies.pop(best, None)
+                    report['skipped_side_consistency'] += 1
+                    best = 'm:' + mid
+                    moved_groups['kept'] += 1
+                else:
+                    reasons[best] = 'long_edge_split'
+                    targets.append(best)
+                    added += 1
+                    report['added'] += 1
+                    pc_base = pc_after if pc_after is not None else pc_base
+                    for r in members:
+                        parts[r, mid] = best
+                    moved_groups['moved_as_a_whole'] += 1
+                    continue
             else:
                 best = 'm:' + mid
                 moved_groups['kept'] += 1
@@ -530,12 +611,29 @@ def optimize(model, scene, blocks, cur, summary=True, reuse=True, split=True):
                     key = f'inst:{mid}:{added}'
                     pos[key] = (centre + LOCAL_OFFSET).tolist()
                     labels[key], copies[key] = mid, mid
-                    reasons[key] = 'long_edge_split'
-                    targets.append(key)
-                    added += 1
+                    prev_parts = {rid: parts.get((rid, mid)) for rid, _ in members}
                     for rid, _ in members:
                         parts[rid, mid] = key
-                    report['added'] += 1
+                    ok, _why, pc_after = _side_consistency_ok(model, scene, pc_base)
+                    if not ok:
+                        for rid, old in prev_parts.items():
+                            if old is None:
+                                parts.pop((rid, mid), None)
+                            else:
+                                parts[rid, mid] = old
+                        pos.pop(key, None)
+                        labels.pop(key, None)
+                        copies.pop(key, None)
+                        report['skipped_side_consistency'] += 1
+                        for rid, p in members:
+                            d = np.hypot(*(np.array([pos[t] for t in targets], float) - p).T)
+                            parts[rid, mid] = targets[int(np.argmin(d))]
+                    else:
+                        reasons[key] = 'long_edge_split'
+                        targets.append(key)
+                        added += 1
+                        report['added'] += 1
+                        pc_base = pc_after if pc_after is not None else pc_base
                 else:
                     for rid, p in members:
                         d = np.hypot(*(np.array([pos[t] for t in targets], float) - p).T)
