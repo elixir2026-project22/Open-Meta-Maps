@@ -607,16 +607,14 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
                 continue
             for i, rid in enumerate(bridge['reaction_ids']):
                 key = 'r:' + rid
-                if PREVIOUS_ANCHORS and key in PREVIOUS_ANCHORS:
-                    continue
                 anchors[key] = (np.array(a) + (np.array(c) - a) * (i + 1) / (len(bridge['reaction_ids']) + 1)).tolist()
-    # Pin previous-map anchors (overwrite) so complete_spaced treats them as fixed.
-    if PREVIOUS_ANCHORS and not PREVIOUS_SKIP_PACK:
-        anchors.update({k: list(v) for k, v in PREVIOUS_ANCHORS.items()})
-        blocks, _ = prev.apply_block_positions(blocks, PREVIOUS_ANCHORS)
-        if log:
-            log(f'  previous layout: pinned {len(PREVIOUS_ANCHORS)} anchors '
-                f'({prev.reaction_anchor_share(PREVIOUS_ANCHORS, model):.0%} of reactions)')
+    # Defer all --previous placement to the final Escher rigid translate so curated
+    # structure relatives stay identical to the no-previous drawing.  Mid-pipeline
+    # pins / leftovers change neighbour forces and deform structures.
+    if PREVIOUS_ANCHORS and not PREVIOUS_SKIP_PACK and log:
+        log(f'  previous layout: {len(PREVIOUS_ANCHORS)} anchors '
+            f'({prev.reaction_anchor_share(PREVIOUS_ANCHORS, model):.0%} of reactions); '
+            f'deferred to final rigid structure translate')
     timings = {}
     stamp = time.time()
 
@@ -627,12 +625,17 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         if log:
             log(f'  {name}: {timings[name]} s')
 
-    def _pin_previous(scene):
-        if not PREVIOUS_ANCHORS:
-            return scene
-        scene, n = prev.pin_scene(scene, PREVIOUS_ANCHORS, blocks=blocks)
-        if log and n:
-            log(f'  previous layout restore: {n} glyphs')
+    def _pin_previous(scene, label=None):
+        # Mid-pipeline previous pins are deferred; see final translate_structures_escher.
+        return scene
+
+    def _same_map_or_previous_restore(scene, label):
+        """Same-map absolute restore (identical to the no-previous path)."""
+        import curated_axes as _ca_restore
+        scene, _rr = _ca_restore.restore_rigid_group(scene, blocks)
+        if log and _rr.get('restored'):
+            log(f'  same-map rigid restore ({label}): {_rr["restored"]} glyphs'
+                + (f', n_rx={_rr["n_rx"]}' if _rr.get('n_rx') is not None else ''))
         return scene
 
     if scalable:
@@ -673,31 +676,12 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             completion_skip = {rid for region in regions if len(region['reactions']) > 1 for rid in region['reactions']}
         # With a previous map, embed a new reaction only when ≥2 participants are already drawn;
         # otherwise leave it as a new component (do not pull onto a single metabolite).
-        min_anch = 2 if PREVIOUS_ANCHORS else 1
+        # Same min_anchors as no-previous so curated geometry stays comparable;
+        # --previous structure placement happens on the final map.
         scene, completion_report = completion_context_module.place(
-            model, scene, blocks, currency(model), completion_skip, min_anchors=min_anch)
+            model, scene, blocks, currency(model), completion_skip, min_anchors=1)
         if log:
             log(f"  anchor-driven placement: {completion_report['placed']} of {completion_report['candidates']} reactions placed {completion_report['tiers']}, attachment {completion_report['attachment_rate_before']['rate']} -> {completion_report['attachment_rate_after']['rate']}")
-        scene = _pin_previous(scene)
-        # Pin-old / place-new: never drop reactions that lack ≥2 anchors — park leftovers.
-        if PREVIOUS_ANCHORS:
-            scene, leftover_report = prev.place_leftover_reactions(
-                model, scene, anchors=PREVIOUS_ANCHORS, cur=currency(model), min_embed_anchors=2)
-            if completion_report is not None:
-                completion_report['previous_leftovers'] = leftover_report
-            if log and leftover_report.get('placed'):
-                log(f"  previous leftovers: placed {leftover_report['placed']} "
-                    f"(embedded {leftover_report['embedded']}, "
-                    f"new components {leftover_report['new_components']})")
-            scene = _pin_previous(scene)
-    elif PREVIOUS_ANCHORS:
-        scene, leftover_report = prev.place_leftover_reactions(
-            model, scene, anchors=PREVIOUS_ANCHORS, cur=currency(model), min_embed_anchors=2)
-        completion_report = dict(method='previous_leftovers_only', previous_leftovers=leftover_report)
-        if log and leftover_report.get('placed'):
-            log(f"  previous leftovers: placed {leftover_report['placed']} "
-                f"(embedded {leftover_report['embedded']}, "
-                f"new components {leftover_report['new_components']})")
         scene = _pin_previous(scene)
     peripheral_report = None
     instance_report = None
@@ -718,11 +702,8 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         scene, composition_report = composition.compose(model, scene, blocks, currency(model))
         if log:
             log('  composition: ' + str({k: v for k, v in composition_report.items() if k != 'moves'}))
-        # Composition / landscape reflow must not break same-map absolute relatives.
-        import curated_axes as _ca
-        scene, _rr = _ca.restore_rigid_group(scene, blocks)
-        if log and _rr.get('restored'):
-            log(f"  same-map rigid restore (after compose): {_rr['restored']} glyphs, n_rx={_rr.get('n_rx')}")
+        # Composition / landscape reflow must not break curated relatives.
+        scene = _same_map_or_previous_restore(scene, 'after compose')
         scene = _pin_previous(scene)
     elif PREVIOUS_SKIP_PACK:
         scene = _pin_previous(scene)
@@ -763,7 +744,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             model, scene, currency(model), curated_rx, top=10)
         scene, completion_after = completion_context_module.place(
             model, scene, blocks, currency(model), completion_skip, boundary_aware=True,
-            min_anchors=(2 if PREVIOUS_ANCHORS else 1))
+            min_anchors=1)
         scene = _pin_previous(scene)
         if completion_report is not None:
             completion_report['after_compose'] = {
@@ -788,10 +769,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         if log and arm_report.get('shortened'):
             log(f"  compact long arms: shortened {arm_report['shortened']}, "
                 f"pulled mids {arm_report['pulled_midmarkers']}")
-        import curated_axes as _ca2
-        scene, _rr2 = _ca2.restore_rigid_group(scene, blocks)
-        if log and _rr2.get('restored'):
-            log(f"  same-map rigid restore (after arms): {_rr2['restored']} glyphs")
+        scene = _same_map_or_previous_restore(scene, 'after arms')
         # Private glyphs already move with each reaction in place(); a second full
         # instances.optimize here doubled runtime on iIT341 without cutting ac crossings.
     import orientation as orientation_module
@@ -800,30 +778,6 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     if scalable:
         scene, audit = gl.scalable_scene_relax(model, scene, blocks, extra_groups=plan['groups'])
         lap('scene relaxation (sparse)')
-    elif PREVIOUS_ANCHORS:
-        # Local relayout of free nodes only when it lowers crossings substantially;
-        # otherwise keep the pinned previous geometry and leftover parking.
-        import copy as _copy_prev
-        before_scene = _copy_prev.deepcopy(scene)
-        cross_before = prev.scene_segment_crossings(model, scene)
-        scene, audit = geometry.complete_scene(model, scene, blocks)
-        scene = _pin_previous(scene)
-        scene, _ = prev.place_leftover_reactions(
-            model, scene, anchors=PREVIOUS_ANCHORS, cur=currency(model), min_embed_anchors=2)
-        scene = _pin_previous(scene)
-        cross_after = prev.scene_segment_crossings(model, scene)
-        keep = prev.keep_local_relayout(cross_before, cross_after)
-        previous_relayout = dict(
-            crossings_before=cross_before, crossings_after=cross_after, kept=keep)
-        if not keep:
-            scene = before_scene
-            scene = _pin_previous(scene)
-            audit = dict(audit or {}, previous_relayout_reverted=True)
-        # complete_scene stamps scene['anchors']; a reverted snapshot may lack it.
-        scene['anchors'] = {k: list(v) for k, v in (scene.get('anchors') or anchors).items()}
-        if log:
-            log(f"  previous local relayout: crossings {cross_before} -> {cross_after} "
-                f"({'kept' if keep else 'reverted'})")
     else:
         scene, audit = geometry.complete_scene(model, scene, blocks)
     scene = orientation_module.apply(model, scene, blocks, ORIENTATION, 'after_relax')
@@ -841,9 +795,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             instance_report['added'] = int(instance_report.get('added', 0)) + int(local_report.get('added', 0))
             instance_report['instances_separated'] = scene.get('instances_separated')
     import curated_axes as _ca3
-    scene, _rr3 = _ca3.restore_rigid_group(scene, blocks)
-    if log and _rr3.get('restored'):
-        log(f"  same-map rigid restore (after relax): {_rr3['restored']} glyphs")
+    scene = _same_map_or_previous_restore(scene, 'after relax')
     scene = _pin_previous(scene)
     scene, _ov = _ca3.clear_rigid_node_overlaps(scene, blocks)
     if log and _ov.get('moved'):
@@ -1043,7 +995,6 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
                 log(f"  compact long arms (escher): shortened {arm_escher['shortened']}")
         import curated_axes as _ca_es
         if not PREVIOUS_SKIP_PACK:
-            # Absolute same-map restore would overwrite --previous pins with source-map coords.
             data, _rr_es = _ca_es.restore_rigid_group_escher(data, blocks)
             if log and _rr_es.get('restored'):
                 log(f"  same-map rigid restore (escher after arms): {_rr_es['restored']} nodes")
@@ -1223,7 +1174,8 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     if not PREVIOUS_SKIP_PACK:
         import composition as _comp_tip
         tip = _comp_tip.nudge_frontier_escher(
-            data, model, previous_anchors=PREVIOUS_ANCHORS,
+            # Keep tip identical to no-previous; structure previous is applied after.
+            data, model, previous_anchors=None,
             skip_edges=skip_edges,
             gem_path=str(gem_file) if gem_file else None)
         metric['frontier_tip_nudge'] = tip
@@ -1238,6 +1190,23 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             if log and fit.get('applied'):
                 log(f"  canvas fit after tip: {fit.get('content')} pad=40")
             dump(output_names.map_json(folder), data)
+    # Final --previous step: rigidly translate each curated structure toward previous
+    # anchors.  Internal relatives stay identical to the no-previous drawing.
+    if PREVIOUS_ANCHORS:
+        data, n_final = prev.translate_structures_escher(
+            data, PREVIOUS_ANCHORS, blocks=blocks, scene=scene)
+        if log and n_final:
+            log(f'  previous structure rigid translate (final map): {n_final} glyphs')
+        import curated_axes as _ca_prev_final
+        data, _ov_prev = _ca_prev_final.clear_rigid_node_overlaps_escher(data, blocks)
+        if log and _ov_prev.get('moved'):
+            log(f'  clear rigid node overlaps (after previous translate): '
+                f"moved {_ov_prev['moved']} nodes")
+        import composition as _comp_prev_fit
+        fit_prev = _comp_prev_fit.fit_canvas_to_content(data)
+        if log and fit_prev.get('applied'):
+            log(f"  canvas fit after previous translate: {fit_prev.get('content')} pad=40")
+        dump(output_names.map_json(folder), data)
     t_quality = time.time()
     # Persist structure membership on the map so continuity can be scored from map.json alone.
     # Absolute same-map reuse keeps BiGG spacing; score spatial pieces, not whole atlas windows.

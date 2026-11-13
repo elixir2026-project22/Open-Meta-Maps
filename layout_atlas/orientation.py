@@ -513,7 +513,11 @@ def angle_of(subs, prods):
 
 def angles_from_map(map_json, skip=None):
     """{reaction id: angle in degrees between the mean substrate and product directions}, from an Escher map (all drawn glyphs, as in the
-    comparison with the expert map)."""
+    comparison with the expert map).
+
+    Segments that reference a missing node id (e.g. a dangling multimarker after a
+    partial ``--previous`` graft) are skipped so layout quality still evaluates.
+    """
     body = map_json[1]
     nodes = body['nodes']
     out = {}
@@ -521,16 +525,19 @@ def angles_from_map(map_json, skip=None):
         mid = None
         for seg in rx['segments'].values():
             for k in (seg['from_node_id'], seg['to_node_id']):
-                if nodes[k]['node_type'] == 'midmarker':
-                    mid = nodes[k]
+                n = nodes.get(k)
+                if n is not None and n.get('node_type') == 'midmarker':
+                    mid = n
         if mid is None:
             continue
         coefficient = {m['bigg_id']: m['coefficient'] for m in rx['metabolites']}
         subs, prods = [], []
         for seg in rx['segments'].values():
             for k in (seg['from_node_id'], seg['to_node_id']):
-                n = nodes[k]
-                if n['node_type'] == 'metabolite' and not (skip and skip(n['bigg_id'])):
+                n = nodes.get(k)
+                if n is None:
+                    continue
+                if n.get('node_type') == 'metabolite' and not (skip and skip(n.get('bigg_id'))):
                     v = np.array([n['x'] - mid['x'], n['y'] - mid['y']])
                     (subs if coefficient.get(n['bigg_id'], 0) < 0 else prods).append(v)
         angle = angle_of(subs, prods)
