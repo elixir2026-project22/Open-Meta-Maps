@@ -4,6 +4,9 @@ A hub is a currency metabolite drawn as one glyph linked to ≥2 reactions.
 Each de-novo reaction gets its own clone; the clone keeps the midmarker distance
 and is rotated onto the bisector of a free angular gap around the midmarker when
 every directed gate metric stays at least as good as the pre-split baseline.
+When gap bisectors are rejected by the crossing prefilter, fallback rotations are
+tried so more hubs become per-reaction clones (Pathway Scorer ``cofactors as
+clones``).  Cofactors stay separate glyphs — never hidden inside reaction boxes.
 Curated reaction geometry is left untouched.
 
 The gate is ``layout_gate`` (compose-path code only).
@@ -18,6 +21,27 @@ from cofactor_hubs import cofactor_hubs
 from hub_drawing import drawing_graph, stub_endpoints
 from layout_gate import CrossingIndex, score_map, score_trial
 from layout_quality_evaluator import HUB_DIRS, METRIC_EPS, metrics_not_worse
+
+# Fallback rotations (degrees) when gap bisectors increase stub crossings or regress
+# soft metrics.  Small angles first so clones stay near the original spoke.
+_FALLBACK_ROTATIONS = (
+    0.0,
+    12.0,
+    -12.0,
+    20.0,
+    -20.0,
+    30.0,
+    -30.0,
+    45.0,
+    -45.0,
+    60.0,
+    -60.0,
+    90.0,
+    -90.0,
+    135.0,
+    -135.0,
+    180.0,
+)
 
 
 def _midmarker(nodes, rx):
@@ -144,7 +168,7 @@ def _gap_rotation_degrees(nodes, rx, glyph) -> list[float]:
 
 
 def _angle_candidates(map_json, movers, glyph, rid_to_key) -> list[float]:
-    """Union of gap-bisector rotations from each mover, largest gap first."""
+    """Gap-bisector rotations first, then small fallback rotations for stubborn hubs."""
     nodes = map_json[1]["nodes"]
     reactions = map_json[1]["reactions"]
     seen = []
@@ -158,6 +182,11 @@ def _angle_candidates(map_json, movers, glyph, rid_to_key) -> list[float]:
                 continue
             found.add(ang)
             seen.append(ang)
+    for ang in _FALLBACK_ROTATIONS:
+        if ang in found:
+            continue
+        found.add(ang)
+        seen.append(ang)
     return seen
 
 
@@ -225,7 +254,8 @@ def apply_gated(map_json, model, pathway, curated=(), cur=None, log=None):
     """Split hubs one metabolite at a time when gate metrics do not worsen vs baseline.
 
     Each trial must stay non-worse than both the original pre-split score and the
-    score of the current (already-accepted) map.
+    score of the current (already-accepted) map.  Remaining hubs are rescanned for
+    several rounds so later clones can succeed after earlier hubs move.
     """
     cur = currency(model) if cur is None else set(cur)
     curated = set(curated)
@@ -246,49 +276,65 @@ def apply_gated(map_json, model, pathway, curated=(), cur=None, log=None):
     before_index = CrossingIndex(g0.to_undirected(), pos0, routes0)
     accepted_splits = []
     rejected = 0
+    # Enough rounds to clear typical exchange hubs; stop early when a pass accepts nothing.
+    max_rounds = max(3, baseline["hub_count"] + 1)
 
-    for hub in baseline["hubs"]:
-        met = hub["metabolite"]
-        glyph = hub["glyph"]
-        movers = _hub_movers(hub, curated)
-        if not movers:
-            rejected += 1
-            continue
-        reactions = current[1]["reactions"]
-        rid_to_key = {rx.get("bigg_id"): key for key, rx in reactions.items() if rx.get("bigg_id")}
-        angles = _angle_candidates(current, movers, glyph, rid_to_key)
-        old_stubs = _old_stub_pairs(current, movers, glyph)
-        old_graph_stubs = stub_endpoints(pathway, current, old_stubs)
-        old_stub_x = before_index.stub_crossing_count(old_graph_stubs)
-        placed = False
-        for angle in angles:
-            trial, splits, new_stubs = _split_movers(current, met, movers, glyph, angle)
-            if not splits:
-                break
-            after = score_trial(
-                pathway,
-                current,
-                trial,
-                old_stubs,
-                new_stubs,
-                before_index=before_index,
-                old_stub_crossings=old_stub_x,
-            )
-            if (
-                after is None
-                or not metrics_not_worse(original_score, after, HUB_DIRS, METRIC_EPS)
-                or not metrics_not_worse(current_score, after, HUB_DIRS, METRIC_EPS)
-            ):
-                continue
-            current = trial
-            current_score = after
-            g0, pos0, routes0 = drawing_graph(pathway, current)
-            before_index = CrossingIndex(g0.to_undirected(), pos0, routes0)
-            accepted_splits.extend(splits)
-            placed = True
+    for _round in range(max_rounds):
+        hubs = cofactor_hubs(current, model, cur=cur)["hubs"]
+        if not hubs:
             break
-        if not placed:
-            rejected += 1
+        progressed = False
+        round_rejected = 0
+        for hub in hubs:
+            met = hub["metabolite"]
+            glyph = hub["glyph"]
+            movers = _hub_movers(hub, curated)
+            if not movers:
+                round_rejected += 1
+                continue
+            reactions = current[1]["reactions"]
+            rid_to_key = {
+                rx.get("bigg_id"): key for key, rx in reactions.items() if rx.get("bigg_id")
+            }
+            angles = _angle_candidates(current, movers, glyph, rid_to_key)
+            old_stubs = _old_stub_pairs(current, movers, glyph)
+            old_graph_stubs = stub_endpoints(pathway, current, old_stubs)
+            old_stub_x = before_index.stub_crossing_count(old_graph_stubs)
+            placed = False
+            for angle in angles:
+                trial, splits, new_stubs = _split_movers(
+                    current, met, movers, glyph, angle
+                )
+                if not splits:
+                    break
+                after = score_trial(
+                    pathway,
+                    current,
+                    trial,
+                    old_stubs,
+                    new_stubs,
+                    before_index=before_index,
+                    old_stub_crossings=old_stub_x,
+                )
+                if (
+                    after is None
+                    or not metrics_not_worse(original_score, after, HUB_DIRS, METRIC_EPS)
+                    or not metrics_not_worse(current_score, after, HUB_DIRS, METRIC_EPS)
+                ):
+                    continue
+                current = trial
+                current_score = after
+                g0, pos0, routes0 = drawing_graph(pathway, current)
+                before_index = CrossingIndex(g0.to_undirected(), pos0, routes0)
+                accepted_splits.extend(splits)
+                placed = True
+                progressed = True
+                break
+            if not placed:
+                round_rejected += 1
+        rejected = round_rejected
+        if not progressed:
+            break
 
     final = cofactor_hubs(current, model, cur=cur)
     ok = bool(accepted_splits) and final["hub_count"] < baseline["hub_count"]
