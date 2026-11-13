@@ -1819,7 +1819,9 @@ def run_job(folder):
         job.save()
         map_note = None
         if len(allids) <= LIMITS['full_routed_max_reactions']:
-            metric = draw_map(model, selected, folder / 'full', full_model=model)
+            # Pass job.log so clear_through / hotspot progress reaches the UI
+            # (otherwise "Complete the map" looks frozen while CrossingIndex runs).
+            metric = draw_map(model, selected, folder / 'full', full_model=model, log=job.log)
             if (folder / 'full' / 'layout_issues.json').is_file():
                 (folder / 'layout_issues.json').write_bytes((folder / 'full' / 'layout_issues.json').read_bytes())
                 job.add_file('layout_issues.json', 'Layout issues (where the problems are)', 'json')
