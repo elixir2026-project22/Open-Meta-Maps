@@ -38,6 +38,11 @@ BUDGET_EDGE = 0.002
 BUDGET_FLOOR = 0.8
 BUDGET_CAP = 30.0
 TRIES_PER_CROSS = 4.0
+# Legacy callers pass wall-clock ``budget_s``. The inflated try ceiling
+# (auto_tries × budget_s / auto_budget) is larger than wall-clock typically
+# exhausted; keep ~this fraction so maps stay equivalent to the wall-limited
+# stable tip (iIT341 A/B: 1815 / 3365 tries in 45s).
+_WALL_TRY_FRACTION = 0.54
 # Default k=DEFAULT_K matches layout_quality.evaluate worst_regions. Caps:
 #   max_accepts / max_rounds from caller (tool_pipeline) or window crossing mass
 #   max_tries from window mass × TRIES_PER_CROSS, scaled when budget_s > auto
@@ -704,15 +709,16 @@ def repair(data, model=None, scene=None, blocks=None, skip_edges=(), k=DEFAULT_K
         max_rounds = max_accepts + 1
     else:
         max_rounds = int(max_rounds)
-    # Try ceiling from window mass. ``budget_s`` only scales tries when above the
-    # mass-derived second estimate — never a wall-clock stop.
+    # Try ceiling from window mass. ``budget_s`` (legacy wall seconds) scales
+    # tries when above the mass-derived second estimate — never a wall-clock stop.
     auto_budget, auto_tries, _mass2 = _window_budget(windows, k if k is not None else DEFAULT_K)
     if budget_evals is not None:
         max_tries = int(budget_evals)
     else:
         max_tries = auto_tries
         if budget_s is not None and auto_budget > 0 and float(budget_s) > auto_budget:
-            max_tries = max(auto_tries, int(auto_tries * float(budget_s) / auto_budget))
+            scaled = max(auto_tries, int(auto_tries * float(budget_s) / auto_budget))
+            max_tries = max(8, int(scaled * _WALL_TRY_FRACTION))
     setup_s = round(time.time() - t0, 2)
     report = dict(
         enabled=True, k=k, before={kk: before[kk] for kk in (
