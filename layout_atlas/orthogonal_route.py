@@ -303,7 +303,9 @@ def _edge_lengths(ends, pos, routes):
 
 
 def _gate_metrics(data, pathway=None):
-    """In-venv accept gates: crossings, AR, PC, edge length deviation."""
+    """In-venv accept gates: crossings, AR, PC, edge length deviation, through-node."""
+    import layout_quality as lq
+
     ends, pos, routes = _drawing_parts(data, pathway=pathway)
     segs, spos = _segment_graph(ends, pos, routes)
     stubs, stub_pos = _stub_graph(ends, pos, routes)
@@ -315,6 +317,7 @@ def _gate_metrics(data, pathway=None):
             float(np.mean([abs(mean - x) / mean for x in lengths])) if mean else None),
         'angular_resolution': float(_angular_resolution(stubs, stub_pos)),
         'participant_consistency': _participant_consistency(ends, pos, routes),
+        'curves_through_nodes': float(lq.curves_through_nodes_count(data)),
     }
 
 

@@ -595,6 +595,8 @@ class CrossingIndex:
 
 def score_map(pathway, map_json) -> dict[str, Any]:
     """Directed gate metrics on a clone-aware Escher drawing."""
+    import layout_quality as lq
+
     g, pos, routes = drawing_graph(pathway, map_json)
     u = g.to_undirected()
     pieces = _straight_pieces(u, pos, routes)
@@ -609,6 +611,8 @@ def score_map(pathway, map_json) -> dict[str, Any]:
     out["homogeneity"] = _homogeneity(pos)
     out.update(_node_overlaps(u, pos))
     out["participant_consistency"] = _through_reaction_share(g, pos)
+    # Same geometry as the panel / LayoutQualityEvaluator no-new hard gate.
+    out["curves_through_nodes"] = float(lq.curves_through_nodes_count(map_json))
     return out
 
 
@@ -668,6 +672,8 @@ def score_trial(
     if ar0 is not None and ar1 is not None and ar1 > ar0 + 1e-4:
         return None
 
+    import layout_quality as lq
+
     after = {
         "crossings": float(max(n_cross, 0)),
         "crossing_density": float(_crossing_density(max(n_cross, 0), trial_pieces_all)),
@@ -678,6 +684,7 @@ def score_trial(
         "aspect_ratio": _aspect_ratio(pos1),
         "homogeneity": _homogeneity(pos1),
         "participant_consistency": _through_reaction_share(g1, pos1),
+        "curves_through_nodes": float(lq.curves_through_nodes_count(trial_map)),
     }
     after.update(_node_overlaps(u1, pos1))
     return after

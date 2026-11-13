@@ -37,9 +37,10 @@ def test_gate_columns_cover_directed_metrics():
     assert "crossing_angular_resolution" in HUB_DIRS
     assert "aspect_ratio" in HUB_DIRS
     assert "homogeneity" in HUB_DIRS
+    assert "curves_through_nodes" in HUB_DIRS
     assert "species_drawn" not in HUB_DIRS
     assert "reactions_drawn" not in HUB_DIRS
-    assert len(HUB_DIRS) == 11
+    assert len(HUB_DIRS) == 12
 
 
 def test_angle_candidates_include_fallback_rotations():

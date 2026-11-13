@@ -370,7 +370,15 @@ def apply(data, skip_edges=(), only=None, mode=None, gem_path=None, pathway=None
             h1, h2 = float(np.clip(base['h1'], 0.2, 0.5)), float(np.clip(base['h2'], 0.2, 0.5))
             cands = [('template', s0, e0, h1, h2, 1.0), ('straightish', 0.0, 0.0, HANDLE, HANDLE, 1.0), ('template_mirror', s0, e0, h1, h2, -1.0),
                      ('template_strong', s0 * 1.5, e0 * 1.5, min(h1 * 1.3, 0.55), min(h2 * 1.3, 0.55), 1.0),
-                     ('bow_a', 14.0, 14.0, HANDLE, HANDLE, 1.0), ('bow_b', 14.0, 14.0, HANDLE, HANDLE, -1.0)]
+                     ('bow_a', 14.0, 14.0, HANDLE, HANDLE, 1.0), ('bow_b', 14.0, 14.0, HANDLE, HANDLE, -1.0),
+                     # Stronger bows: clear algorithm edges that would otherwise score as
+                     # official "line through a node" (pass 0 / fail 5 on the hard rule).
+                     ('bow_clear_a', 28.0, 28.0, HANDLE, HANDLE, 1.0),
+                     ('bow_clear_b', 28.0, 28.0, HANDLE, HANDLE, -1.0),
+                     ('bow_clear_c', 42.0, 42.0, 0.35, 0.35, 1.0),
+                     ('bow_clear_d', 42.0, 42.0, 0.35, 0.35, -1.0),
+                     ('bow_clear_e', 60.0, 60.0, 0.38, 0.38, 1.0),
+                     ('bow_clear_f', 60.0, 60.0, 0.38, 0.38, -1.0)]
             if abs(s0) < 3 and abs(e0) < 3:
                 cands = [cands[1]] + [c for c in cands if c[0] != 'straightish']  # a core participant that is straight in the expert maps stays nearly straight
             if len(edges) > FAN_MIN_EDGES:
@@ -397,8 +405,9 @@ def apply(data, skip_edges=(), only=None, mode=None, gem_path=None, pathway=None
                                                        own=list(cur_edge['own']), rid_i=cur_edge['rid'], tname=t['bigg_id']))
             chain = None
             degraded = False
-            # Corridor search is expensive; skip it on incremental restyles when a light hit is acceptable, or when the best candidate is already clean
-            do_corridor = best[5] > 0 and (only_set is None or best[5] >= 2)
+            # Corridor when any glyph hit remains. Incremental restyles used to skip
+            # single-hit cases; those still fail the official through-node hard rule.
+            do_corridor = best[5] > 0
             if do_corridor:   # every candidate touches an obstacle: find a corridor and fit a smooth multi-segment Bezier through it
                 for path in _corridor(P, q, rects, mine):
                     t_start = _rot(chord / L, s0 * side)
@@ -414,13 +423,18 @@ def apply(data, skip_edges=(), only=None, mode=None, gem_path=None, pathway=None
                     if chain:
                         break
                 if chain is None:
-                    # a glyph only this reaction uses (a cofactor drawn beside it) may move a little: it belongs to the algorithm's layout, not to an expert structure
+                    # A glyph only this reaction uses may move a little (algorithm
+                    # layout, not curated). Prefer currency stubs, but allow any
+                    # single-holder endpoint when a through-node hit remains —
+                    # needed to move the official lines-through-nodes hard rule.
                     nid = seg['to_node_id']
-                    if len(holders[nid]) == 1 and cur:
+                    if len(holders[nid]) == 1:
                         base = math.atan2(q[1] - P[1], q[0] - P[0])
                         options = []
-                        for radius in (55.0, 75.0, 95.0):
-                            for k in range(12):
+                        radii = (55.0, 75.0, 95.0, 120.0) if cur else (55.0, 75.0, 95.0)
+                        n_angles = 16 if cur else 12
+                        for radius in radii:
+                            for k in range(n_angles):
                                 ang = base + ((k + 1) // 2) * (math.pi / 6) * (1 if k % 2 else -1)
                                 q2 = P + radius * np.array([math.cos(ang), math.sin(ang)])
                                 box = np.array([q2[0] - 7, q2[1] - 7, q2[0] + 7, q2[1] + 7])
@@ -652,3 +666,164 @@ def joint_route(data, store, ev, cur_edge, rects, owner_arr, label_rects, label_
             name, c1, c2 = row[c][0], row[c][1], row[c][2]
             it['seg']['b1'], it['seg']['b2'] = dict(x=round(float(c1[0]), 2), y=round(float(c1[1]), 2)), dict(x=round(float(c2[0]), 2), y=round(float(c2[1]), 2))
     return rep
+
+
+def _prepare_algorithm_spokes_for_restyle(data, reaction_ids, skip_edges):
+    """Collapse algorithm mid→…→met chains to straight mid→met (b1=b2=None).
+
+    ``apply`` only styles undecorated mid→metabolite spokes; corridor / Bezier
+    leftovers must be reset first so a clear-through pass can rewrite them.
+    Curated / preserved (rid, met) pairs are left untouched.
+    """
+    skip = {tuple(e) for e in (skip_edges or [])}
+    body = data[1]
+    nodes = body['nodes']
+    n_reset = 0
+    for rx in body['reactions'].values():
+        rid = rx.get('bigg_id')
+        if rid not in reaction_ids:
+            continue
+        mid = next(
+            (s['from_node_id'] for s in rx['segments'].values()
+             if nodes.get(s['from_node_id'], {}).get('node_type') == 'midmarker'),
+            None,
+        )
+        if mid is None:
+            continue
+        out = {}
+        for key, s in rx['segments'].items():
+            out.setdefault(s['from_node_id'], []).append((key, s))
+        keep, drop_nodes = {}, set()
+        # Keep non-algorithm geometry (and move multimarkers that belong to it).
+        for key, s in rx['segments'].items():
+            algo = (
+                str(key).startswith('es_s') or str(key).startswith('route')
+                or str(key).startswith('qg') or str(key).startswith('hr')
+            )
+            if algo:
+                continue
+            keep[key] = s
+        # Follow algorithm heads from the midmarker to their metabolite.
+        counter = 0
+        for key, s in list(rx['segments'].items()):
+            if s['from_node_id'] != mid:
+                continue
+            algo = (
+                str(key).startswith('es_s') or str(key).startswith('route')
+                or str(key).startswith('qg') or str(key).startswith('hr')
+            )
+            to = s['to_node_id']
+            # Direct mid→metabolite Bezier: clear controls unless preserved.
+            if nodes.get(to, {}).get('node_type') == 'metabolite':
+                met = nodes[to].get('bigg_id')
+                if (rid, met) in skip:
+                    keep[key] = s
+                    continue
+                if key in keep:
+                    s['b1'] = None
+                    s['b2'] = None
+                    n_reset += 1
+                else:
+                    counter += 1
+                    keep[f'clr{counter}'] = dict(
+                        from_node_id=mid, to_node_id=to, b1=None, b2=None,
+                    )
+                    n_reset += 1
+                continue
+            if not algo and nodes.get(to, {}).get('node_type') != 'multimarker':
+                continue
+            # Corridor / orthogonal chain.
+            cur = to
+            while nodes.get(cur, {}).get('node_type') == 'multimarker':
+                drop_nodes.add(cur)
+                nxt = out.get(cur)
+                if not nxt:
+                    break
+                cur = nxt[0][1]['to_node_id']
+            if nodes.get(cur, {}).get('node_type') != 'metabolite':
+                continue
+            met = nodes[cur].get('bigg_id')
+            if (rid, met) in skip:
+                continue
+            counter += 1
+            keep[f'clr{counter}'] = dict(
+                from_node_id=mid, to_node_id=cur, b1=None, b2=None,
+            )
+            n_reset += 1
+        # Drop algorithm segment keys not retained; drop orphan multimarkers.
+        rx['segments'] = keep
+        for nn in drop_nodes:
+            # Only drop if no remaining segment references the node.
+            used = any(
+                nn in (s['from_node_id'], s['to_node_id'])
+                for s in rx['segments'].values()
+            )
+            if not used:
+                nodes.pop(nn, None)
+    return n_reset
+
+
+def clear_through_nodes(data, skip_edges=None, log=None, mode=None, gem_path=None):
+    """Re-style algorithm reactions whose curves still hit foreign glyphs.
+
+    Keeps the restyle only when ``curves_through_nodes`` strictly falls and the
+    headline crossing count does not rise (no-new / no-worse vs the live map).
+    Does not scale the canvas or split the map.  ``mode`` / ``gem_path`` match
+    ``apply`` (use ``mode='orthogonal'`` after the final orthogonal pass).
+    """
+    import copy
+    import time
+
+    import layout_quality as lq
+
+    t0 = time.time()
+    skip = list(skip_edges) if skip_edges is not None else list(
+        (data[0].get('metadata') or {}).get('preserved_edges') or []
+    )
+    before = lq.curves_through_nodes_report(data, skip)
+    before_cross = int(lq.CrossingIndex(data, skip).headline())
+    report = dict(
+        enabled=True,
+        before=before['count'],
+        before_crossings=before_cross,
+        reactions=list(before['reactions']),
+        accepted=False,
+        mode=mode or 'bezier',
+        seconds=0.0,
+    )
+    if before['count'] <= 0 or not before['reactions']:
+        report['reason'] = 'clean'
+        report['after'] = before['count']
+        report['after_crossings'] = before_cross
+        report['seconds'] = round(time.time() - t0, 2)
+        return report
+
+    trial = copy.deepcopy(data)
+    report['reset_spokes'] = _prepare_algorithm_spokes_for_restyle(
+        trial, set(before['reactions']), skip,
+    )
+    style = apply(
+        trial, skip, only=set(before['reactions']), mode=mode, gem_path=gem_path,
+    )
+    after = lq.curves_through_nodes_report(trial, skip)
+    after_cross = int(lq.CrossingIndex(trial, skip).headline())
+    report['style'] = {k: style.get(k) for k in (
+        'bezier', 'corridor', 'relocated', 'degraded', 'hits_after', 'crossings_after',
+        'orthogonal',
+    ) if isinstance(style, dict) and k in style}
+    report['after'] = after['count']
+    report['after_crossings'] = after_cross
+    ok = after['count'] < before['count'] and after_cross <= before_cross
+    report['accepted'] = bool(ok)
+    report['reason'] = 'accepted' if ok else 'no_improvement'
+    if ok:
+        data[0], data[1] = trial[0], trial[1]
+    report['seconds'] = round(time.time() - t0, 2)
+    if log:
+        log(
+            f"  clear through-nodes ({report['mode']}): {before['count']}->{after['count']} "
+            f"crossings {before_cross}->{after_cross} "
+            f"({'kept' if ok else 'reverted'}) "
+            f"rids={len(before['reactions'])} {report['seconds']}s"
+        )
+    return report
