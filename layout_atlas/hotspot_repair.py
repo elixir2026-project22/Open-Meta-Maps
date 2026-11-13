@@ -4,8 +4,9 @@ After Bézier routing and label placement, reuses ``layout_quality``'s shared
 crossing detector (``build_edges`` / ``_seg_hits`` / ``CrossingIndex``) to find
 the top-k densest 400 px windows and try cheap generic moves.  A move is kept
 only when the headline crossing count (algorithm×algorithm + algorithm×curated)
-strictly falls and node/label overlaps do not rise. Curated geometry moves only
-as a whole-block translation. Previous-map pins are never moved.
+strictly falls and node/label overlaps and curves-through-nodes do not rise.
+Curated geometry moves only as a whole-block translation. Previous-map pins
+are never moved.
 
 Evaluation is incremental: a spatial segment index is built once; each candidate
 only recounts segments of the touched reactions (delta counting). Candidate
@@ -687,6 +688,7 @@ def repair(data, model=None, scene=None, blocks=None, skip_edges=(), k=DEFAULT_K
     # Use the same skip set as evaluate (preserved + source_paths), not the raw caller list.
     index = lq.CrossingIndex(data, skip)
     node_ov0, lab_ov0 = lq.overlap_counts(data)
+    through0 = lq.curves_through_nodes_count(data, skip)
     windows = _windows_from_index(index, k)
     spacing = _spacing_from_nodes(index.nodes)
     lengths = [float(np.sum(np.hypot(*np.diff(e['pts'], axis=0).T))) for e in index.edges if len(e['pts']) > 1]
@@ -722,6 +724,7 @@ def repair(data, model=None, scene=None, blocks=None, skip_edges=(), k=DEFAULT_K
         budget_evals=max_tries, budget_mass=mass, setup_s=setup_s, diagnosis=[],
         max_rounds=max_rounds, max_accepts=max_accepts,
     )
+    report['before']['curves_through_nodes'] = through0
     for win in windows:
         report['diagnosis'].append(index.window_breakdown(win) | dict(
             window=[win['x'], win['y']], listed_crossings=win.get('crossings'),
@@ -775,12 +778,13 @@ def repair(data, model=None, scene=None, blocks=None, skip_edges=(), k=DEFAULT_K
                     report['reject_reasons']['node_overlap'] = report['reject_reasons'].get('node_overlap', 0) + 1
                     continue
                 new_total, delta, payload = index.delta_after_replace(data, changed)
-                if delta >= 0:
+                # Allow flat crossings when through-nodes may fall; reject only rises.
+                if delta > 0:
                     undo()
                     report['rejected'] += 1
                     report['reject_reasons']['no_crossing_drop'] = report['reject_reasons'].get('no_crossing_drop', 0) + 1
                     continue
-                # Overlap check only for promising (crossing-reducing) moves.
+                # Overlap / through-node check for promising moves.
                 n_ov, l_ov = lq.overlap_counts(data)
                 if n_ov > node_ov0 or l_ov > lab_ov0:
                     undo()
@@ -788,24 +792,37 @@ def repair(data, model=None, scene=None, blocks=None, skip_edges=(), k=DEFAULT_K
                     why = 'node_overlap' if n_ov > node_ov0 else 'label_overlap'
                     report['reject_reasons'][why] = report['reject_reasons'].get(why, 0) + 1
                     continue
+                through1 = lq.curves_through_nodes_count(data, skip)
+                if through1 > through0:
+                    undo()
+                    report['rejected'] += 1
+                    report['reject_reasons']['curves_through_nodes'] = (
+                        report['reject_reasons'].get('curves_through_nodes', 0) + 1
+                    )
+                    continue
                 # Rebuild after every accept so incremental delta drift cannot
                 # claim phantom gains (delta_after_replace under-counts some Bezier edits).
                 index.rebuild(data)
                 real_total = index.headline()
                 real_delta = real_total - current_cross
-                if real_delta >= 0:
+                through_drop = through1 < through0
+                crossing_drop = real_delta < 0
+                if real_delta > 0 or not (crossing_drop or through_drop):
                     undo()
                     index.rebuild(data)
                     report['rejected'] += 1
-                    report['reject_reasons']['no_real_drop'] = report['reject_reasons'].get('no_real_drop', 0) + 1
+                    why = 'no_real_drop' if real_delta > 0 else 'no_through_or_crossing_drop'
+                    report['reject_reasons'][why] = report['reject_reasons'].get(why, 0) + 1
                     continue
                 current_cross = real_total
                 node_ov0, lab_ov0 = n_ov, l_ov
+                through0 = through1
                 row = dict(
                     kind=move['kind'], order=list(move.get('order') or ()),
                     window=[win['x'], win['y']],
                     before_crossings=current_cross - real_delta, after_crossings=current_cross,
                     delta=real_delta,
+                    curves_through_nodes=through0,
                 )
                 if move.get('rid'):
                     row['reaction'] = move['rid']
@@ -813,7 +830,8 @@ def repair(data, model=None, scene=None, blocks=None, skip_edges=(), k=DEFAULT_K
                 accepts += 1
                 progressed = True
                 if log:
-                    log(f"  hotspot repair: accepted {move['kind']} Δ={real_delta} crossings→{current_cross}")
+                    log(f"  hotspot repair: accepted {move['kind']} Δ={real_delta} "
+                        f"crossings→{current_cross} through→{through0}")
                 cross_rids, cross_nids = index.participants_in_window(win)
                 if not cross_rids:
                     cross_rids = set(win.get('reactions') or [])
@@ -835,6 +853,7 @@ def repair(data, model=None, scene=None, blocks=None, skip_edges=(), k=DEFAULT_K
     report['after'] = {kk: after[kk] for kk in (
         'crossings', 'top_window_crossings', 'worst_window', 'node_overlaps', 'label_overlaps',
         'continuity_share', 'split_structures', 'length_p90', 'currency_involved', 'main_metabolite')}
+    report['after']['curves_through_nodes'] = lq.curves_through_nodes_count(data, skip)
     report['accepted_count'] = len(report['accepted'])
     report['search_s'] = search_s
     report['seconds'] = round(time.time() - t0, 2)
@@ -843,6 +862,8 @@ def repair(data, model=None, scene=None, blocks=None, skip_edges=(), k=DEFAULT_K
     if log:
         log(f"  hotspot repair: done accepted={report['accepted_count']} "
             f"crossings {report['before']['crossings']}->{report['after']['crossings']} "
+            f"through_nodes {report['before']['curves_through_nodes']}->"
+            f"{report['after']['curves_through_nodes']} "
             f"(search {search_s}s / total {report['seconds']}s)")
     return report
 

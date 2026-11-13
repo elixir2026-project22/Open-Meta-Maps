@@ -203,11 +203,48 @@ def test_tip_evaluate_is_no_worse_including_aspect():
     )
     baseline = ev.snapshot(copy_data=False)
     assert "aspect_ratio" in baseline
+    assert "curves_through_nodes" in baseline
     assert metrics_not_worse(baseline, baseline, TIP_DIRS)
     worse = dict(baseline, aspect_ratio=float(baseline["aspect_ratio"]) - 0.05)
     decision = ev.evaluate(copy.deepcopy(data), metrics=worse)
     assert not decision.accepted
     assert "aspect_ratio" in decision.reason
+    worse_through = dict(baseline, curves_through_nodes=float(baseline["curves_through_nodes"]) + 1)
+    decision2 = ev.evaluate(copy.deepcopy(data), metrics=worse_through)
+    assert not decision2.accepted
+    assert "curves_through_nodes" in decision2.reason
+
+
+@pytest.mark.parametrize("name", ["e_coli_core", "iIT341"])
+def test_hard_reject_new_curves_through_nodes(name):
+    """No-new hard gate: raising through-node hits vs snapshot is rejected."""
+    import layout_quality as lq
+
+    data, model, pathway = _load(name)
+    skip = (data[0].get("metadata") or {}).get("preserved_edges") or []
+    ev = LayoutQualityEvaluator(
+        data, skip_edges=skip, model=model, pathway=pathway, rule="metrics",
+        require_local_improvement=False,
+    )
+    ev.snapshot()
+    # Identical candidate keeps residual through-nodes (not absolute zero).
+    same = ev.evaluate(copy.deepcopy(data))
+    assert same.accepted
+    assert "new_curves_through_nodes" not in same.hard_failures
+
+    real = lq.curves_through_nodes_count
+
+    def bumped(d, skip_edges=None):
+        return int(real(d, skip_edges)) + 1
+
+    lq.curves_through_nodes_count = bumped
+    try:
+        decision = ev.evaluate(copy.deepcopy(data))
+    finally:
+        lq.curves_through_nodes_count = real
+    assert not decision.accepted
+    assert "new_curves_through_nodes" in decision.hard_failures
+    assert "new_curves_through_nodes" in decision.reason
 
 
 def test_instance_rule_new_only_side_consistency():
