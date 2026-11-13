@@ -84,6 +84,39 @@ def _load_pathway(gem_path):
         return None
 
 
+def load_pathway(gem_path):
+    """Public: load a GEM Pathway once for reuse across tip / orthogonal gates."""
+    return _load_pathway(gem_path)
+
+
+def gate_metrics(data, pathway=None):
+    """Public: crossings, ELD, angular resolution, participant consistency."""
+    return _gate_metrics(data, pathway=pathway)
+
+
+def piece_axis_alignment(data, pathway=None):
+    """Mean axis-alignment of drawn marker pieces (Bezier handles ignored).
+
+    Official ``edge_orthogonality`` scores the same pieces. For each piece the
+    acute angle to the nearer axis is mapped linearly onto [0, 1] (aligned → 1,
+    45° → 0).
+    """
+    ends, pos, routes = _drawing_parts(data, pathway=pathway)
+    segs, spos = _segment_graph(ends, pos, routes)
+    vals = []
+    quarter = 0.25 * math.pi
+    half = 0.5 * math.pi
+    for a, b in segs.edges():
+        dx = float(spos[b][0] - spos[a][0])
+        dy = float(spos[b][1] - spos[a][1])
+        if abs(dx) < 1e-12 and abs(dy) < 1e-12:
+            continue
+        # Acute angle to the nearer H/V axis, in [0, π/4].
+        to_near = min(abs(math.atan2(dy, dx)) % half, half - (abs(math.atan2(dy, dx)) % half))
+        vals.append(1.0 - to_near / quarter)
+    return float(np.mean(vals)) if vals else 1.0
+
+
 def _id_lookup(pathway):
     if pathway is None:
         return None
@@ -535,12 +568,14 @@ def _chord_near_axis(p, q, max_ratio=AXIS_ALIGN_RATIO):
     return (min(dx, dy) / m) <= max_ratio + 1e-12
 
 
-def apply_orthogonal(data, skip_edges=(), only=None, bezier_stub_fn=None, gem_path=None):
+def apply_orthogonal(data, skip_edges=(), only=None, bezier_stub_fn=None, gem_path=None,
+                     pathway=None):
     """Route eligible algorithm edges as orthogonal polylines in place.
 
     ``bezier_stub_fn(rx, mid_id, seg_key, seg, t, side, u, …)`` may style short
     cofactor stubs; when None, stubs stay unchanged.  ``gem_path`` optionally
-    filters the local accept gate to GEM species/reactions.
+    filters the local accept gate to GEM species/reactions.  Pass a preloaded
+    ``pathway`` to avoid re-parsing the SBML.
     """
     import layout_quality as lq
     import edge_style
@@ -563,7 +598,8 @@ def apply_orthogonal(data, skip_edges=(), only=None, bezier_stub_fn=None, gem_pa
     skip = {tuple(e) for e in skip_edges}
     only_set = set(only) if only is not None else None
     curated = _curated_reactions(data)
-    pathway = _load_pathway(gem_path)
+    if pathway is None:
+        pathway = _load_pathway(gem_path)
     import copy
     pre_snap = copy.deepcopy(data)
     # Compose always passes gem_path.  If it was set but the GEM cannot be read,

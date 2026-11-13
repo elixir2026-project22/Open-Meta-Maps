@@ -135,6 +135,7 @@ Matched geometry is kept as drawn (translated only). Everything else is placed b
 | **Bézier connections** | Cubic Béziers from reaction templates; optional `--source-paths` for original Escher curves | Connection crossings; unrelated overlaps; detours, hooks, bends; quality gate | `edge_style.py`, `source_paths.py`, `routing.py` |
 | **Labels** | Move labels among candidates to cut collisions | — | `label_placement.py` |
 | **Cofactor hub split** | Late length-preserving per-reaction clones of remaining currency hubs; accept only when gate metrics do not worsen | Pathway Scorer cofactor hubs | `split_cofactor_hubs.py`, `layout_gate.py` |
+| **Frontier tip nudge & canvas fit** | Canvas fit stays before the final label pass (as on main). After the final orthogonal pass and cofactor hub split, tip nudges pull free content-bbox tips inward only when gated metrics vs the pre-nudge baseline do not worsen on a re-routed trial; canvas is refit only when a tip is accepted | Aspect; blank space; connection crossings (gate) | `composition.py` |
 | **Integrity** | Model hash, every reaction drawn, visual stoichiometry; protected shared glyphs must not split | — | `tool_pipeline.py` |
 
 **Determinism:** fixed layout seed `20261105` (`core.SEEDS`), ELK/fCoSE seeds, `PYTHONHASHSEED=0` on re-exec. Displacement measured by `evaluate --compare-map` only.

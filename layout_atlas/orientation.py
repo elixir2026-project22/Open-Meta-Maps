@@ -157,6 +157,16 @@ def stub_ceiling(median):
     return float(max(SIDE_MAX, min(hi, _STUB_MEDIAN_SHARE * med)))
 
 
+def layout_glyph_radius(role='primary'):
+    """Layout disk radius for ``primary``, ``secondary``, or ``marker`` glyphs."""
+    r = (role or 'primary').lower()
+    if r == 'marker':
+        return float(_MARKER_RADIUS)
+    if r == 'secondary':
+        return float(_STUB_RADIUS)
+    return float(_PRIMARY_RADIUS)
+
+
 def _glyph_radius(key, copies, cur):
     if key.startswith('r:'):
         return _MARKER_RADIUS
