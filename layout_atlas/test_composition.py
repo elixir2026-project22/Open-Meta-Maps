@@ -458,6 +458,52 @@ def test_fit_canvas_to_content_shrinks_frame():
     assert abs(can['height'] - 380.0) < 1e-6
 
 
+def test_empty_corridor_does_not_drag_curated_companions():
+    """ICL→succ empty column must not yank curated ACONTb via shared icit."""
+    # Vertical empty corridor: ICL mid at y=0 to shared succ at y=2000.
+    # ACONTb also holds icit (≤3 mets) and would be companion-dragged without the freeze.
+    data = [{
+        'metadata': {'expert_structures': [
+            {'id': 'tca', 'reactions': ['ICL', 'ACONTb']},
+        ]},
+    }, {
+        'nodes': {
+            'icl_mid': {'node_type': 'midmarker', 'x': 100.0, 'y': 0.0},
+            'icit': {'node_type': 'metabolite', 'bigg_id': 'icit_c', 'x': 100.0, 'y': 40.0},
+            'glx': {'node_type': 'metabolite', 'bigg_id': 'glx_c', 'x': 60.0, 'y': 40.0},
+            'succ': {'node_type': 'metabolite', 'bigg_id': 'succ_c', 'x': 100.0, 'y': 2000.0},
+            'acb_mid': {'node_type': 'midmarker', 'x': 140.0, 'y': 20.0},
+            'acon': {'node_type': 'metabolite', 'bigg_id': 'acon_C_c', 'x': 180.0, 'y': 20.0},
+            'h2o': {'node_type': 'metabolite', 'bigg_id': 'h2o_c', 'x': 140.0, 'y': 50.0},
+            # Filler so corridor emptiness check is not blocked by dense cloud.
+            'other_mid': {'node_type': 'midmarker', 'x': 800.0, 'y': 1000.0},
+            'other_met': {'node_type': 'metabolite', 'bigg_id': 'z_c', 'x': 820.0, 'y': 1000.0},
+        },
+        'reactions': {
+            'icl': {'bigg_id': 'ICL', 'segments': {
+                '0': {'from_node_id': 'icl_mid', 'to_node_id': 'icit'},
+                '1': {'from_node_id': 'icl_mid', 'to_node_id': 'glx'},
+                '2': {'from_node_id': 'icl_mid', 'to_node_id': 'succ'},
+            }},
+            'acb': {'bigg_id': 'ACONTb', 'segments': {
+                '0': {'from_node_id': 'acb_mid', 'to_node_id': 'icit'},
+                '1': {'from_node_id': 'acb_mid', 'to_node_id': 'acon'},
+                '2': {'from_node_id': 'acb_mid', 'to_node_id': 'h2o'},
+            }},
+            'oth': {'bigg_id': 'OTH', 'segments': {
+                '0': {'from_node_id': 'other_mid', 'to_node_id': 'other_met'},
+            }},
+        },
+    }]
+    before_acb = (data[1]['nodes']['acb_mid']['x'], data[1]['nodes']['acb_mid']['y'])
+    before_icl = (data[1]['nodes']['icl_mid']['x'], data[1]['nodes']['icl_mid']['y'])
+    rep = C.compact_empty_corridors_escher(data, max_gap=200.0, spacing=150.0)
+    after_acb = (data[1]['nodes']['acb_mid']['x'], data[1]['nodes']['acb_mid']['y'])
+    after_icl = (data[1]['nodes']['icl_mid']['x'], data[1]['nodes']['icl_mid']['y'])
+    assert after_acb == before_acb, (before_acb, after_acb, rep)
+    assert after_icl == before_icl, (before_icl, after_icl, rep)
+
+
 def test_glyph_circle_overlapping_pairs_counts_disks():
     data = [{}, {'nodes': {
         '1': {'node_type': 'metabolite', 'x': 0.0, 'y': 0.0, 'node_is_primary': True},

@@ -1597,11 +1597,19 @@ def compact_empty_corridors_escher(data, max_gap=None, spacing=None):
     reaction unit (midmarker + private spoke metabolites) toward that shared
     pool — never yank the shared glyph, and never leave private heads behind.
     Private (degree-1) metabolites may move alone.
+
+    Curated expert-structure reactions stay frozen: collapsing ICL→succ (and
+    dragging ACONTb via shared icit) was squashing the e_coli TCA ring
+    (circularity 0.95 → ~0.64).
     """
     import curated_axes as ca
     body = data[1]
     nodes = body.get('nodes') or {}
     reactions = body.get('reactions') or {}
+    curated_rx = set()
+    for s in ((data[0] or {}).get('metadata') or {}).get('expert_structures') or []:
+        curated_rx.update(s.get('reactions') or s.get('reaction_ids') or [])
+    frozen_nids = {str(n) for n in _curated_structure_node_ids(data)}
     # Metabolite node -> reaction bigg_ids that touch it.
     holders = defaultdict(set)
     rx_parts = {}  # rid -> (mid_id, [met_ids])
@@ -1663,6 +1671,10 @@ def compact_empty_corridors_escher(data, max_gap=None, spacing=None):
     for length, rid, mid_id, met_id, vertical in candidates:
         if shortened >= max_shorten:
             break
+        # Never collapse corridors that belong to curated expert structures —
+        # ICL→succ dragging ACONTb via icit broke the e_coli TCA octagon.
+        if rid in curated_rx or str(mid_id) in frozen_nids:
+            continue
         mid = nodes.get(mid_id); met = nodes.get(met_id)
         if mid is None or met is None or 'x' not in mid or 'x' not in met:
             continue
@@ -1722,6 +1734,9 @@ def compact_empty_corridors_escher(data, max_gap=None, spacing=None):
                 for other_rid in holders.get(sid, ()):
                     if other_rid == rid or other_rid not in rx_parts:
                         continue
+                    # Do not drag curated-structure companions (ACONTb via icit).
+                    if other_rid in curated_rx:
+                        continue
                     omid, omets = rx_parts[other_rid]
                     # Simple EX/uptake companions only (≤3 metabolite heads).
                     if len(omets) > 3:
@@ -1730,6 +1745,9 @@ def compact_empty_corridors_escher(data, max_gap=None, spacing=None):
                     for o in omets:
                         if o != met_id:
                             move_ids.add(o)
+            # Abort if any curated glyph would move.
+            if any(str(sid) in frozen_nids for sid in move_ids):
+                continue
             for sid in move_ids:
                 n = nodes.get(sid)
                 if n is None or 'x' not in n:
@@ -2409,13 +2427,37 @@ def tuck_islands_escher(data, cur=None, spacing=None):
                 ids.append(nid)
         return (np.array(pts, float) if pts else np.zeros((0, 2))), ids
 
+    # Freeze only the TCA / citrate-cycle expert component (and co-listed ICL),
+    # not every tiny matched structure — those include the floaters we must tuck
+    # (GLCpts, BIOMASS, …).
+    tca_rx = set()
+    for s in ((data[0] or {}).get('metadata') or {}).get('expert_structures') or []:
+        rxset = set(s.get('reactions') or s.get('reaction_ids') or [])
+        if {'CS', 'ACONTa', 'ACONTb'} <= rxset or (
+                'CS' in rxset and 'ACONTb' in rxset):
+            tca_rx |= rxset
+    frozen_tca = set()
+    if tca_rx:
+        for rx in reactions.values():
+            if (rx.get('bigg_id') or '') not in tca_rx:
+                continue
+            for seg in (rx.get('segments') or {}).values():
+                for end in ('from_node_id', 'to_node_id'):
+                    nid = seg.get(end)
+                    if nid is not None:
+                        frozen_tca.add(str(nid))
+
     def _apply(members, ids, delta):
         for nid in ids:
+            if str(nid) in frozen_tca:
+                continue
             n = nodes.get(nid) or nodes.get(str(nid))
             if n and 'x' in n:
                 n['x'] = float(n['x'] + delta[0])
                 n['y'] = float(n['y'] + delta[1])
         for rid in members:
+            if rid in tca_rx:
+                continue
             for rx in reactions.values():
                 if (rx.get('bigg_id') or '') != rid:
                     continue
@@ -2532,7 +2574,21 @@ def tuck_islands_escher(data, cur=None, spacing=None):
     main_hi = hull_pts.max(0)
 
     for members in island_groups:
+        # Never translate the citrate-cycle expert component as an "island".
+        if tca_rx and set(members) & tca_rx:
+            continue
         pts, ids = _island_pts(members)
+        if len(pts) < 1:
+            continue
+        # Drop TCA glyphs from the move set if a floater somehow shares one.
+        if frozen_tca:
+            ids = [i for i in ids if str(i) not in frozen_tca]
+            pts = np.array(
+                [(float((nodes.get(i) or nodes.get(str(i)) or {}).get('x', 0)),
+                  float((nodes.get(i) or nodes.get(str(i)) or {}).get('y', 0)))
+                 for i in ids
+                 if (nodes.get(i) or nodes.get(str(i))) and 'x' in (nodes.get(i) or nodes.get(str(i)))],
+                float) if ids else np.zeros((0, 2))
         if len(pts) < 1:
             continue
         dists, idxs = hull_tree.query(pts, k=1)
