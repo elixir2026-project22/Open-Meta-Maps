@@ -270,3 +270,127 @@ def test_fit_canvas_to_content_shrinks_frame():
     assert abs(can['y'] - 160.0) < 1e-6
     assert abs(can['width'] - 380.0) < 1e-6
     assert abs(can['height'] - 380.0) < 1e-6
+
+
+def test_glyph_circle_overlapping_pairs_counts_disks():
+    data = [{}, {'nodes': {
+        '1': {'node_type': 'metabolite', 'x': 0.0, 'y': 0.0, 'node_is_primary': True},
+        '2': {'node_type': 'metabolite', 'x': 30.0, 'y': 0.0, 'node_is_primary': True},
+        '3': {'node_type': 'midmarker', 'x': 200.0, 'y': 0.0},
+    }, 'reactions': {}}]
+    assert C.glyph_circle_overlapping_pairs(data) == 1
+
+
+def test_relocation_gate_not_worse_directions():
+    before = dict(crossings=2, overlapping_pairs=1, participant_consistency=0.8,
+                  angular_resolution=0.2, edge_length_deviation=0.5,
+                  edge_orthogonality=0.6, aspect_ratio=0.7)
+    assert C.relocation_gate_not_worse(before, before)
+    assert not C.relocation_gate_not_worse(before, dict(before, crossings=3))
+    assert not C.relocation_gate_not_worse(before, dict(before, aspect_ratio=0.5))
+    assert not C.relocation_gate_not_worse(before, dict(before, overlapping_pairs=2))
+    assert C.relocation_gate_not_worse(
+        before, dict(before, crossings=1, aspect_ratio=0.8, edge_orthogonality=0.7))
+
+
+def test_nudge_skips_curated_and_previous_pins():
+    data = [{
+        'metadata': {'expert_structures': [{'id': 's1', 'reactions': ['R']}]},
+    }, {
+        'canvas': {'x': 0, 'y': 0, 'width': 400, 'height': 200},
+        'nodes': {
+            'm1': {'node_type': 'metabolite', 'x': 0.0, 'y': 50.0, 'bigg_id': 'a',
+                   'node_is_primary': True},
+            'mid': {'node_type': 'midmarker', 'x': 100.0, 'y': 50.0},
+            'm2': {'node_type': 'metabolite', 'x': 300.0, 'y': 50.0, 'bigg_id': 'b',
+                   'node_is_primary': True},
+        },
+        'reactions': {
+            'r1': {'bigg_id': 'R', 'segments': {
+                's1': {'from_node_id': 'm1', 'to_node_id': 'mid'},
+                's2': {'from_node_id': 'mid', 'to_node_id': 'm2'},
+            }},
+        },
+    }]
+    model = {'reactions': [{'id': 'R', 'metabolites': {'a': -1.0, 'b': 1.0}}]}
+    before = {nid: (n['x'], n['y']) for nid, n in data[1]['nodes'].items()}
+    C.nudge_frontier_escher(data, model, previous_anchors={'m:b': [300.0, 50.0]})
+    after = {nid: (n['x'], n['y']) for nid, n in data[1]['nodes'].items()}
+    assert after == before
+
+
+def test_nudge_frontier_escher_shrinks_when_safe():
+    # Long right stub: shortening it shrinks the bbox and improves ELD.
+    data = [{}, {
+        'canvas': {'x': 0, 'y': 0, 'width': 500, 'height': 200},
+        'nodes': {
+            'm1': {'node_type': 'metabolite', 'x': 0.0, 'y': 50.0, 'bigg_id': 'a',
+                   'node_is_primary': True},
+            'mid': {'node_type': 'midmarker', 'x': 100.0, 'y': 50.0},
+            'multi': {'node_type': 'multimarker', 'x': 140.0, 'y': 50.0},
+            'm2': {'node_type': 'metabolite', 'x': 400.0, 'y': 50.0, 'bigg_id': 'b',
+                   'node_is_primary': True},
+            'm3': {'node_type': 'metabolite', 'x': 100.0, 'y': 150.0, 'bigg_id': 'c',
+                   'node_is_primary': True},
+        },
+        'reactions': {
+            'r1': {'bigg_id': 'R', 'label_x': 100.0, 'label_y': 40.0, 'segments': {
+                's1': {'from_node_id': 'm1', 'to_node_id': 'mid'},
+                's2': {'from_node_id': 'mid', 'to_node_id': 'multi',
+                       'b1': {'x': 110.0, 'y': 50.0}, 'b2': {'x': 130.0, 'y': 50.0}},
+                's3': {'from_node_id': 'multi', 'to_node_id': 'm2',
+                       'b1': {'x': 220.0, 'y': 50.0}, 'b2': {'x': 320.0, 'y': 50.0}},
+            }},
+            'r2': {'bigg_id': 'R2', 'label_x': 100.0, 'label_y': 120.0, 'segments': {
+                's1': {'from_node_id': 'm3', 'to_node_id': 'mid'},
+            }},
+        },
+    }]
+    model = {'reactions': [
+        {'id': 'R', 'metabolites': {'a': -1.0, 'b': 1.0}},
+        {'id': 'R2', 'metabolites': {'c': -1.0, 'a': 1.0}},
+    ]}
+    before = C._escher_content_bbox(data[1])
+    label_r2 = (data[1]['reactions']['r2']['label_x'],
+                data[1]['reactions']['r2']['label_y'])
+    m2_x = data[1]['nodes']['m2']['x']
+    rep = C.nudge_frontier_escher(data, model)
+    after = C._escher_content_bbox(data[1])
+    assert rep['accepted'] >= 1
+    assert (after[2] - after[0]) * (after[3] - after[1]) < (
+        before[2] - before[0]) * (before[3] - before[1])
+    assert data[1]['nodes']['m2']['x'] < m2_x
+    # Unrelated reaction label stays put (its mid did not move).
+    assert (data[1]['reactions']['r2']['label_x'],
+            data[1]['reactions']['r2']['label_y']) == label_r2
+
+
+def test_tip_move_shifts_only_near_end_handle():
+    data = [{}, {
+        'nodes': {
+            'mid': {'node_type': 'midmarker', 'x': 0.0, 'y': 0.0},
+            'm': {'node_type': 'metabolite', 'x': 100.0, 'y': 0.0, 'bigg_id': 'x',
+                  'node_is_primary': True},
+        },
+        'reactions': {'r1': {'bigg_id': 'R', 'segments': {
+            's1': {'from_node_id': 'mid', 'to_node_id': 'm',
+                   'b1': {'x': 30.0, 'y': 0.0}, 'b2': {'x': 70.0, 'y': 0.0}},
+        }}},
+    }]
+    C._apply_tip_move(data[1], {'m'}, -40.0, 0.0)
+    seg = data[1]['reactions']['r1']['segments']['s1']
+    assert seg['b1'] == {'x': 30.0, 'y': 0.0}
+    assert seg['b2'] == {'x': 30.0, 'y': 0.0}
+    assert data[1]['nodes']['m']['x'] == 60.0
+
+
+def test_relocation_gate_uses_baseline_not_last_accept():
+    # A second accept fine vs the last state but past the baseline eps fails.
+    baseline = dict(crossings=2, overlapping_pairs=1, participant_consistency=0.8,
+                    angular_resolution=0.2, edge_length_deviation=0.5,
+                    edge_orthogonality=0.9, aspect_ratio=0.7)
+    after_first = dict(baseline, edge_orthogonality=0.9 - 5e-5)
+    after_second = dict(baseline, edge_orthogonality=0.9 - 1.2e-4)
+    assert C.relocation_gate_not_worse(baseline, after_first)
+    assert C.relocation_gate_not_worse(after_first, after_second)
+    assert not C.relocation_gate_not_worse(baseline, after_second)

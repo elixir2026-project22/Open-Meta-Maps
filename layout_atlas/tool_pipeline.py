@@ -1127,7 +1127,8 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
                 hr = metric['hotspot_repair']
                 log('  hotspot repair: ' + str({k: hr.get(k) for k in ('accepted_count', 'tries', 'rounds', 'seconds', 'improved')}))
             dump(output_names.map_json(folder), data)
-        # Shrink canvas to content so empty frame padding does not inflate blank/empty gates.
+        # Shrink canvas to content (same stage as main) before the final label pass.
+        # Tip nudge may refit later only when it accepts a move.
         if not PREVIOUS_SKIP_PACK:
             import composition as _comp_fit
             fit = _comp_fit.fit_canvas_to_content(data)
@@ -1171,20 +1172,20 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         ]
         dump(folder / 'map.json', data)
     # Final orthogonal polylines after curated source-path waypoints are present.
+    gem_file = None
+    for root in (folder, folder.parent):
+        cand = root / 'upload' / 'model.xml'
+        if cand.is_file():
+            gem_file = cand
+            break
+        found = sorted((root / 'upload').glob('model.*')) if (root / 'upload').is_dir() else []
+        if found:
+            gem_file = found[0]
+            break
     if LAYOUT_STYLE == 'curated':
         import edge_style as _es_final
         t_orth = time.time()
         # draw_map writes into <job>/full; the uploaded GEM lives in <job>/upload.
-        gem_file = None
-        for root in (folder, folder.parent):
-            cand = root / 'upload' / 'model.xml'
-            if cand.is_file():
-                gem_file = cand
-                break
-            found = sorted((root / 'upload').glob('model.*')) if (root / 'upload').is_dir() else []
-            if found:
-                gem_file = found[0]
-                break
         metric['edge_style_orthogonal'] = dict(
             _es_final.apply(
                 data, skip_edges, mode='orthogonal',
@@ -1206,6 +1207,26 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     metric['cofactor_hub_split'] = hub_report
     dump(output_names.map_json(folder), data)
     dump(folder / 'cofactor_hub_split.json', hub_report)
+    # Tip nudge after orthogonal routing and hub split; refit canvas only when a
+    # tip is accepted so 0-accept maps stay byte-identical to main.
+    if not PREVIOUS_SKIP_PACK:
+        import composition as _comp_tip
+        tip = _comp_tip.nudge_frontier_escher(
+            data, model, previous_anchors=PREVIOUS_ANCHORS,
+            skip_edges=skip_edges,
+            gem_path=str(gem_file) if gem_file else None)
+        metric['frontier_tip_nudge'] = tip
+        if composition_report is not None:
+            composition_report['frontier_tip_nudge'] = tip
+        if log and tip.get('accepted'):
+            log('  frontier tip nudge: ' + str(tip))
+        if tip.get('accepted'):
+            dump(output_names.map_json(folder), data)
+            fit = _comp_tip.fit_canvas_to_content(data)
+            metric['canvas_fit_after_tip'] = fit
+            if log and fit.get('applied'):
+                log(f"  canvas fit after tip: {fit.get('content')} pad=40")
+            dump(output_names.map_json(folder), data)
     t_quality = time.time()
     # Persist structure membership on the map so continuity can be scored from map.json alone.
     # Absolute same-map reuse keeps BiGG spacing; score spatial pieces, not whole atlas windows.

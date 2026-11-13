@@ -186,7 +186,7 @@ def _curated_block_rects(data, pad=18.0):
     return np.asarray(rects, float), np.asarray(owners, dtype=object)
 
 
-def apply(data, skip_edges=(), only=None, mode=None, gem_path=None):
+def apply(data, skip_edges=(), only=None, mode=None, gem_path=None, pathway=None):
     """Style algorithm-placed connections in place.
 
     Default / ``mode='bezier'``: Bezier segments from curated-map constraints
@@ -198,6 +198,7 @@ def apply(data, skip_edges=(), only=None, mode=None, gem_path=None):
     (incremental path used by relocation/peripheral).  Curated block AABBs are
     appended as obstacles so algorithm corridors route around packed modules.
     ``gem_path`` (orthogonal mode) filters the in-venv accept gate to GEM ids.
+    Pass a preloaded ``pathway`` to skip re-parsing the SBML.
     """
     if mode == 'orthogonal':
         import orthogonal_route as ortho
@@ -214,7 +215,7 @@ def apply(data, skip_edges=(), only=None, mode=None, gem_path=None):
 
         return ortho.apply_orthogonal(
             data, skip_edges=skip_edges, only=only, bezier_stub_fn=_stub,
-            gem_path=gem_path)
+            gem_path=gem_path, pathway=pathway)
     import line_render
     body = data[1]
     nodes, reactions = body['nodes'], body['reactions']

@@ -3,7 +3,10 @@
 Large curated modules (area ≥ data-derived percentile, spatially clustered) mark visual
 components that stay put — never re-tiled, split or deformed.  Related outside components
 are pulled to anchors; independents are shelved in uniform rows with an aspect-aware side.
-Empty-band squeeze (pipeline OPM_SQUEEZE) collapses finished-map corridors.
+Empty-band squeeze (pipeline OPM_SQUEEZE) collapses finished-map corridors.  After the
+final orthogonal pass, ``nudge_frontier_escher`` may pull free content-bbox tip glyphs
+inward when in-repo gate metrics (re-checked after re-routing) do not worsen;
+curated-structure and ``--previous`` pins stay fixed.
 
 Shelf / squeeze ideas follow MetaCarto (CC BY 4.0; doi:10.64898/2026.09.19.752882);
 independent reimplementation.  A/B: OPM_COMPOSE=off.
@@ -15,6 +18,13 @@ import numpy as np
 from scipy.spatial import cKDTree
 
 from core import chem, comp
+import orientation as _orientation
+
+# Tip step = one primary diameter; face band = marker radius (nodes whose disk
+# touches the content bbox face are tips).
+_TIP_PRIMARY_R = float(_orientation.layout_glyph_radius('primary'))
+_TIP_SECONDARY_R = float(_orientation.layout_glyph_radius('secondary'))
+_TIP_MARKER_R = float(_orientation.layout_glyph_radius('marker'))
 
 MAIN_MIN = 20
 FAR_FACTOR = 0.5
@@ -933,6 +943,346 @@ def fit_canvas_to_content(data, pad=40.0):
         height=(y1 - y0) + 2 * pad)
     return dict(applied=True, before=before, after=dict(data[1]['canvas']),
                 content=[round(x1 - x0, 1), round(y1 - y0, 1)])
+
+
+def _escher_content_nodes(body):
+    return [(nid, n) for nid, n in (body.get('nodes') or {}).items()
+            if 'x' in n and n.get('node_type') in ('metabolite', 'midmarker', 'multimarker')]
+
+
+def _escher_content_bbox(body):
+    nodes = _escher_content_nodes(body)
+    if not nodes:
+        return 0.0, 0.0, 0.0, 0.0
+    xs = [n['x'] for _, n in nodes]
+    ys = [n['y'] for _, n in nodes]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+def _content_aspect_ratio(body):
+    """min(side)/max(side) of the content bbox (higher = closer to square)."""
+    x0, y0, x1, y1 = _escher_content_bbox(body)
+    w, h = abs(x1 - x0), abs(y1 - y0)
+    if w <= 1e-12 or h <= 1e-12:
+        return 1.0
+    return float(min(w, h) / max(w, h))
+
+
+def glyph_circle_overlapping_pairs(data):
+    """Count metabolite/midmarker disk pairs that intersect (touching allowed).
+
+    Radii match ``orientation`` primary / stub / marker sizes. Neighbour query only.
+    """
+    body = data[1] if isinstance(data, list) else data
+    pts, rs = [], []
+    for n in (body.get('nodes') or {}).values():
+        t = n.get('node_type')
+        if t == 'metabolite':
+            r = _TIP_PRIMARY_R if n.get('node_is_primary') else _TIP_SECONDARY_R
+        elif t == 'midmarker':
+            r = _TIP_MARKER_R
+        else:
+            continue
+        pts.append((float(n['x']), float(n['y'])))
+        rs.append(float(r))
+    if len(pts) < 2:
+        return 0
+    pts_a = np.asarray(pts, float)
+    rs_a = np.asarray(rs, float)
+    tree = cKDTree(pts_a)
+    pairs = 0
+    max_r = float(max(rs_a))
+    for i, (p, ri) in enumerate(zip(pts_a, rs_a)):
+        for j in tree.query_ball_point(p, float(ri + max_r) + 1e-9):
+            if j <= i:
+                continue
+            if float(np.hypot(*(pts_a[i] - pts_a[j]))) < float(ri + rs_a[j]):
+                pairs += 1
+    return int(pairs)
+
+
+def _curated_structure_node_ids(data):
+    """Escher node ids that belong to curated-structure reactions (must stay put)."""
+    curated_rx = set()
+    for s in (data[0].get('metadata') or {}).get('expert_structures') or []:
+        curated_rx.update(s.get('reactions') or s.get('reaction_ids') or [])
+    if not curated_rx:
+        return set()
+    body = data[1]
+    nodes = body.get('nodes') or {}
+    out = set()
+    for rxn in (body.get('reactions') or {}).values():
+        if rxn.get('bigg_id') not in curated_rx:
+            continue
+        for seg in (rxn.get('segments') or {}).values():
+            for end in ('from_node_id', 'to_node_id'):
+                nid = seg.get(end)
+                if nid is not None and nid in nodes:
+                    out.add(nid)
+    return out
+
+
+def _previous_pinned_node_ids(data, previous_anchors):
+    """Escher node ids locked by ``--previous`` ``r:`` / ``m:`` pins."""
+    if not previous_anchors:
+        return set()
+    body = data[1]
+    nodes = body.get('nodes') or {}
+    out = set()
+    mid_of_rx = {}
+    mets_of = defaultdict(list)
+    for nid, n in nodes.items():
+        nt = n.get('node_type')
+        if nt == 'metabolite' and n.get('bigg_id'):
+            mets_of[n['bigg_id']].append(nid)
+    for rxn in (body.get('reactions') or {}).values():
+        rid = rxn.get('bigg_id')
+        if not rid:
+            continue
+        for seg in (rxn.get('segments') or {}).values():
+            for end in ('from_node_id', 'to_node_id'):
+                nid = seg.get(end)
+                n = nodes.get(nid) or {}
+                if n.get('node_type') == 'midmarker':
+                    mid_of_rx[rid] = nid
+                    break
+    for key in previous_anchors:
+        sk = str(key)
+        if sk.startswith('r:'):
+            nid = mid_of_rx.get(sk[2:])
+            if nid is not None:
+                out.add(nid)
+        elif sk.startswith('m:'):
+            out.update(mets_of.get(sk[2:]) or [])
+    return out
+
+
+def _expand_move_with_multimarkers(body, move):
+    """Keep midmarkers and their multimarkers moving together."""
+    nodes = body.get('nodes') or {}
+    out = set(move)
+    changed = True
+    while changed:
+        changed = False
+        for rxn in (body.get('reactions') or {}).values():
+            for seg in (rxn.get('segments') or {}).values():
+                a, b = seg.get('from_node_id'), seg.get('to_node_id')
+                na, nb = nodes.get(a) or {}, nodes.get(b) or {}
+                types = {na.get('node_type'), nb.get('node_type')}
+                if types != {'midmarker', 'multimarker'}:
+                    continue
+                if a in out and b not in out:
+                    out.add(b)
+                    changed = True
+                elif b in out and a not in out:
+                    out.add(a)
+                    changed = True
+    return out
+
+
+# Tip-nudge no-worse tolerance (same scale as official layout-benchmark gates).
+_GATE_EPS = 1e-4
+
+
+def relocation_gate_not_worse(before, after, eps=_GATE_EPS):
+    """True when tip-nudge gate metrics do not worsen beyond ``eps``.
+
+    Crossings / angular / ELD / overlaps ↓; PC / ortho / aspect_ratio ↑.
+    Missing (None) fields are skipped.
+    """
+    lower = ('crossings', 'overlapping_pairs', 'angular_resolution',
+             'edge_length_deviation')
+    higher = ('participant_consistency', 'edge_orthogonality', 'aspect_ratio')
+    for k in lower:
+        a, b = before.get(k), after.get(k)
+        if a is None or b is None:
+            continue
+        if float(b) > float(a) + eps:
+            return False
+    for k in higher:
+        a, b = before.get(k), after.get(k)
+        if a is None or b is None:
+            continue
+        if float(b) + eps < float(a):
+            return False
+    return True
+
+
+def _escher_gate_metrics(data, model, pathway=None):
+    """Tip-nudge gates from compose-safe counters (no evaluation / gdMetriX).
+
+    PC / ELD / angular from ``orthogonal_route.gate_metrics``; crossings from
+    ``layout_quality.algorithm_crossings``; orthogonality from
+    ``orthogonal_route.piece_axis_alignment`` on the same drawn pieces.
+    """
+    import layout_quality as lq
+    import orthogonal_route as ortho
+    gm = ortho.gate_metrics(data, pathway=pathway)
+    return dict(
+        crossings=int(lq.algorithm_crossings(data)[0]),
+        participant_consistency=gm.get('participant_consistency'),
+        angular_resolution=gm.get('angular_resolution'),
+        edge_length_deviation=gm.get('edge_length_deviation'),
+        edge_orthogonality=ortho.piece_axis_alignment(data, pathway=pathway),
+        aspect_ratio=_content_aspect_ratio(data[1]),
+        overlapping_pairs=glyph_circle_overlapping_pairs(data),
+    )
+
+
+def _apply_tip_move(tbody, move, dx, dy):
+    """Translate ``move`` nodes; shift only the near-end handle of attached segments."""
+    nodes = tbody.get('nodes') or {}
+    moved_mids = {
+        nid for nid in move
+        if (nodes.get(nid) or {}).get('node_type') == 'midmarker'}
+    for rxn in (tbody.get('reactions') or {}).values():
+        segs = rxn.get('segments') or {}
+        mid_of_rx = None
+        for seg in segs.values():
+            for end in ('from_node_id', 'to_node_id'):
+                nid = seg.get(end)
+                if (nodes.get(nid) or {}).get('node_type') == 'midmarker':
+                    mid_of_rx = nid
+        for seg in segs.values():
+            a, b = seg.get('from_node_id'), seg.get('to_node_id')
+            # Escher: b1 is the control near from_node; b2 near to_node.
+            if a in move:
+                pt = seg.get('b1')
+                if pt:
+                    pt['x'] = float(pt['x']) + dx
+                    pt['y'] = float(pt['y']) + dy
+            if b in move:
+                pt = seg.get('b2')
+                if pt:
+                    pt['x'] = float(pt['x']) + dx
+                    pt['y'] = float(pt['y']) + dy
+        if mid_of_rx in moved_mids and 'label_x' in rxn:
+            rxn['label_x'] = float(rxn['label_x']) + dx
+            rxn['label_y'] = float(rxn['label_y']) + dy
+    for nid in move:
+        n = nodes[nid]
+        n['x'] = float(n['x']) + dx
+        n['y'] = float(n['y']) + dy
+        if 'label_x' in n:
+            n['label_x'] = float(n['label_x']) + dx
+            n['label_y'] = float(n['label_y']) + dy
+
+
+def _reactions_touching(tbody, move):
+    """Reaction bigg_ids with a segment end in ``move``."""
+    out = set()
+    for rxn in (tbody.get('reactions') or {}).values():
+        rid = rxn.get('bigg_id')
+        if not rid:
+            continue
+        for seg in (rxn.get('segments') or {}).values():
+            if seg.get('from_node_id') in move or seg.get('to_node_id') in move:
+                out.add(rid)
+                break
+    return out
+
+
+def nudge_frontier_escher(data, model, previous_anchors=None, skip_edges=(),
+                          gem_path=None):
+    """Pull free content-bbox tip glyphs inward when post-routing gates allow.
+
+    Runs after the final orthogonal pass. Each candidate is scored against the
+    original pre-nudge baseline (limits do not accumulate). Cheap area / overlap /
+    aspect / crossing checks reject before re-routing; surviving trials re-route
+    only reactions that touch moved nodes. Curated-structure and ``--previous``
+    pins stay fixed. Tip step is one primary-glyph diameter; the face band is
+    one marker radius (glyph disk touching the bbox face).
+    """
+    import copy as _copy
+    import edge_style
+    import layout_quality as lq
+    import orthogonal_route as ortho
+    if not isinstance(data[0], dict):
+        data[0] = {}
+    data[0].setdefault('metadata', {})
+    body = data[1]
+    x0, y0, x1, y1 = _escher_content_bbox(body)
+    if x1 <= x0 or y1 <= y0:
+        return dict(accepted=0, rejected=0, applied=False)
+    step = 2.0 * _TIP_PRIMARY_R
+    frozen = _curated_structure_node_ids(data) | _previous_pinned_node_ids(
+        data, previous_anchors)
+    asp0 = (x1 - x0) / max(y1 - y0, 1e-9)
+    pathway = ortho.load_pathway(gem_path) if gem_path else None
+    baseline = _escher_gate_metrics(data, model, pathway=pathway)
+    accepted = rejected = 0
+    face_delta = {
+        'right': (-float(step), 0.0),
+        'left': (float(step), 0.0),
+        'top': (0.0, -float(step)),
+        'bottom': (0.0, float(step)),
+    }
+    face_order = ('top', 'bottom', 'right', 'left') if asp0 <= TARGET_ASPECT \
+        else ('right', 'left', 'top', 'bottom')
+    # Nodes whose marker-sized disk touches a content-bbox face.
+    edge_tol = _TIP_MARKER_R
+    skip = list(skip_edges or ())
+    while True:
+        progressed = False
+        x0, y0, x1, y1 = _escher_content_bbox(body)
+        area0 = (x1 - x0) * (y1 - y0)
+        for face in face_order:
+            if face == 'right':
+                tips = [nid for nid, n in _escher_content_nodes(body)
+                        if n['x'] >= x1 - edge_tol]
+            elif face == 'left':
+                tips = [nid for nid, n in _escher_content_nodes(body)
+                        if n['x'] <= x0 + edge_tol]
+            elif face == 'top':
+                tips = [nid for nid, n in _escher_content_nodes(body)
+                        if n['y'] >= y1 - edge_tol]
+            else:
+                tips = [nid for nid, n in _escher_content_nodes(body)
+                        if n['y'] <= y0 + edge_tol]
+            tips = [nid for nid in tips if nid not in frozen]
+            if not tips:
+                continue
+            trial = _copy.deepcopy(data)
+            tbody = trial[1]
+            move = _expand_move_with_multimarkers(tbody, set(tips))
+            move = {nid for nid in move if nid not in frozen}
+            if not move:
+                continue
+            dx, dy = face_delta[face]
+            _apply_tip_move(tbody, move, dx, dy)
+            tx0, ty0, tx1, ty1 = _escher_content_bbox(tbody)
+            area1 = (tx1 - tx0) * (ty1 - ty0)
+            if area1 >= area0:
+                rejected += 1
+                continue
+            # Cheap rejects before re-routing (same directions as the full gate).
+            if glyph_circle_overlapping_pairs(trial) > int(baseline['overlapping_pairs']):
+                rejected += 1
+                continue
+            if float(_content_aspect_ratio(tbody)) + _GATE_EPS < float(baseline['aspect_ratio']):
+                rejected += 1
+                continue
+            if int(lq.algorithm_crossings(trial)[0]) > int(baseline['crossings']):
+                rejected += 1
+                continue
+            only = _reactions_touching(tbody, move)
+            edge_style.apply(
+                trial, skip, mode='orthogonal', only=only or None,
+                gem_path=gem_path, pathway=pathway)
+            gate1 = _escher_gate_metrics(trial, model, pathway=pathway)
+            if not relocation_gate_not_worse(baseline, gate1):
+                rejected += 1
+                continue
+            # Keep the trial's re-route metadata; do not route again.
+            data[0], data[1] = trial[0], trial[1]
+            body = data[1]
+            accepted += 1
+            progressed = True
+            break
+        if not progressed:
+            break
+    return dict(accepted=accepted, rejected=rejected, applied=accepted > 0,
+                step=float(step), mode='tip_nudge')
 
 
 def compact_empty_corridors_escher(data, max_gap=None, spacing=None):
