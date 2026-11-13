@@ -1107,7 +1107,8 @@ def _nudge_through_obstacles(data, skip_edges=None, max_nudge=48.0, log=None, cr
     return report
 
 
-def clear_through_nodes(data, skip_edges=None, log=None, mode=None, gem_path=None):
+def clear_through_nodes(data, skip_edges=None, log=None, mode=None, gem_path=None,
+                        max_rounds=4):
     """Re-style algorithm edges that still hit foreign glyphs (official pairs first).
 
     Greedy per-(reaction, metabolite): reset only that spoke, restyle with
@@ -1118,6 +1119,7 @@ def clear_through_nodes(data, skip_edges=None, log=None, mode=None, gem_path=Non
     Speed: one live ``CrossingIndex`` reused across the surgical loop (rebuild
     only after accept); trial crossings skipped when official count did not
     fall; nudge uses mutate/restore + official-first gate.
+    ``max_rounds`` raises the surgical loop budget (post-island tuck may need more).
     """
     import copy
     import time
@@ -1187,7 +1189,8 @@ def clear_through_nodes(data, skip_edges=None, log=None, mode=None, gem_path=Non
         # Multiple rounds: first pass clears easy chords; later rounds + nudge
         # finish clone-through residuals (need ≤4 official pairs for hard points).
         skip_set = {tuple(e) for e in skip}
-        for rnd in range(4):
+        n_rounds = max(1, int(max_rounds or 4))
+        for rnd in range(n_rounds):
             live_pairs = lq.official_lines_through_nodes_report(data, skip)
             if live_pairs['count'] <= 0:
                 break
@@ -1201,7 +1204,7 @@ def clear_through_nodes(data, skip_edges=None, log=None, mode=None, gem_path=Non
             round_kept = 0
             if log:
                 log(
-                    f"  clear through-nodes: round {rnd + 1}/4 "
+                    f"  clear through-nodes: round {rnd + 1}/{n_rounds} "
                     f"residual_official={live_pairs['count']} "
                     f"({round(time.time() - t0, 1)}s)"
                 )

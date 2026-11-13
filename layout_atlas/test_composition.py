@@ -319,6 +319,123 @@ def test_flush_tuck_against_main_stacks_flush():
     assert placed[0][1] < placed[1][1]
 
 
+def test_tuck_islands_escher_closes_min_point_gap():
+    """Escher-map island with a large empty corridor slides flush to main."""
+    # Main cluster of midmarkers + metabolites forming MAIN_MIN reactions.
+    nodes = {}
+    reactions = {}
+    n_main = max(C.MAIN_MIN, 24)
+    for i in range(n_main):
+        mid = f'mid{i}'
+        met = f'met{i}'
+        nodes[mid] = {'node_type': 'midmarker', 'x': (i % 6) * 100.0, 'y': (i // 6) * 100.0}
+        nodes[met] = {'node_type': 'metabolite', 'bigg_id': f'm{i}_c',
+                      'x': (i % 6) * 100.0 + 40.0, 'y': (i // 6) * 100.0 + 20.0}
+        rid = f'M{i}'
+        reactions[str(i)] = {
+            'bigg_id': rid,
+            'segments': {
+                '0': {'from_node_id': mid, 'to_node_id': met},
+            },
+        }
+    # Shared backbone metabolite so mains form one visual component.
+    nodes['bb'] = {'node_type': 'metabolite', 'bigg_id': 'backbone_c', 'x': 250.0, 'y': 150.0}
+    for i in range(n_main):
+        reactions[str(i)]['segments']['1'] = {
+            'from_node_id': f'mid{i}', 'to_node_id': 'bb'}
+    # Far island above main.
+    nodes['imid'] = {'node_type': 'midmarker', 'x': 200.0, 'y': -900.0}
+    nodes['imet'] = {'node_type': 'metabolite', 'bigg_id': 'z_c', 'x': 220.0, 'y': -880.0}
+    reactions['isl'] = {
+        'bigg_id': 'ISL',
+        'segments': {'0': {'from_node_id': 'imid', 'to_node_id': 'imet'}},
+    }
+    data = [{}, {'nodes': nodes, 'reactions': reactions}]
+    before_y = nodes['imid']['y']
+    rep = C.tuck_islands_escher(data, cur=set(), spacing=100.0)
+    assert rep.get('moved', 0) >= 1, rep
+    assert nodes['imid']['y'] > before_y + 300.0, (before_y, nodes['imid']['y'], rep)
+
+
+def test_tuck_islands_escher_far_not_swallowed_by_near_cluster():
+    """A far floater next to a near island must still tuck (not min-gap skip)."""
+    nodes = {}
+    reactions = {}
+    n_main = max(C.MAIN_MIN, 24)
+    for i in range(n_main):
+        mid = f'mid{i}'
+        met = f'met{i}'
+        nodes[mid] = {'node_type': 'midmarker', 'x': (i % 6) * 100.0, 'y': (i // 6) * 100.0}
+        nodes[met] = {'node_type': 'metabolite', 'bigg_id': f'm{i}_c',
+                      'x': (i % 6) * 100.0 + 40.0, 'y': (i // 6) * 100.0 + 20.0}
+        reactions[str(i)] = {
+            'bigg_id': f'M{i}',
+            'segments': {'0': {'from_node_id': mid, 'to_node_id': met}},
+        }
+    nodes['bb'] = {'node_type': 'metabolite', 'bigg_id': 'backbone_c', 'x': 250.0, 'y': 150.0}
+    for i in range(n_main):
+        reactions[str(i)]['segments']['1'] = {
+            'from_node_id': f'mid{i}', 'to_node_id': 'bb'}
+    # Near island just above main (within join radius of the far one).
+    nodes['nmid'] = {'node_type': 'midmarker', 'x': 200.0, 'y': -80.0}
+    nodes['nmet'] = {'node_type': 'metabolite', 'bigg_id': 'near_c', 'x': 220.0, 'y': -60.0}
+    reactions['near'] = {
+        'bigg_id': 'NEAR',
+        'segments': {'0': {'from_node_id': 'nmid', 'to_node_id': 'nmet'}},
+    }
+    # Far island ~900 px above; spatial join would swallow it into NEAR's min-gap.
+    nodes['imid'] = {'node_type': 'midmarker', 'x': 200.0, 'y': -900.0}
+    nodes['imet'] = {'node_type': 'metabolite', 'bigg_id': 'z_c', 'x': 220.0, 'y': -880.0}
+    reactions['isl'] = {
+        'bigg_id': 'ISL',
+        'segments': {'0': {'from_node_id': 'imid', 'to_node_id': 'imet'}},
+    }
+    data = [{}, {'nodes': nodes, 'reactions': reactions}]
+    before_y = nodes['imid']['y']
+    rep = C.tuck_islands_escher(data, cur=set(), spacing=100.0)
+    assert rep.get('moved', 0) >= 1, rep
+    assert any(d.get('reactions') and 'ISL' in d['reactions'] for d in rep.get('details') or []), rep
+    assert nodes['imid']['y'] > before_y + 300.0, (before_y, nodes['imid']['y'], rep)
+
+
+def test_tuck_islands_to_silhouette_closes_aabb_void():
+    """Island parked in an AABB void (leftover=0 look) slides flush to main hull."""
+    reactions = []
+    parts = {}
+    pos = {}
+    n_main = max(C.MAIN_MIN, 24)
+    cols = 6
+    for i in range(n_main):
+        rid = f'M{i}'
+        mid = f'm{i}'
+        mets = {'backbone': -1.0, mid: 1.0} if i else {mid: -1.0, 'backbone': 1.0}
+        reactions.append({'id': rid, 'metabolites': mets})
+        for m in mets:
+            parts[rid, m] = f'm:{m}'
+        x = (i % cols) * 120.0
+        y = (i // cols) * 120.0
+        pos[f'r:{rid}'] = [x, y]
+        pos[f'm:{mid}'] = [x + 30.0, y + 20.0]
+    pos['m:backbone'] = [300.0, 200.0]
+    # Far island above the main hull across ~800 px empty corridor (still may sit
+    # inside a padded AABB after pocket-pack — the visual floater case).
+    reactions.append({'id': 'ISL', 'metabolites': {'z': -1.0, 'w': 1.0}})
+    parts['ISL', 'z'] = 'm:z'
+    parts['ISL', 'w'] = 'm:w'
+    pos['r:ISL'] = [200.0, -800.0]
+    pos['m:z'] = [180.0, -820.0]
+    pos['m:w'] = [220.0, -780.0]
+    before = list(pos['r:ISL'])
+    model = {'reactions': reactions}
+    scene = {'positions': pos, 'participants': parts, 'labels': {}}
+    out, rep = C.tuck_islands_to_silhouette(model, scene, blocks=[], cur=set(), spacing=120.0)
+    assert rep.get('moved', 0) >= 1, rep
+    after = out['positions']['r:ISL']
+    # Pulled downward toward main (y increases from -800 toward ~0..400).
+    assert after[1] > before[1] + 200.0, (before, after, rep)
+    assert after[1] < 500.0, (after, rep)
+
+
 def test_fit_canvas_to_content_shrinks_frame():
     data = [
         {},
