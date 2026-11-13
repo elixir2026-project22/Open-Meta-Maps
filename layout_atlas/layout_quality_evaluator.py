@@ -21,6 +21,8 @@ acceptance uses ``evaluate()``.
 Accept rule (three tiers, no weighted sum):
   1. Hard constraints reject immediately (skipped for tip / peripheral;
      ``rule="instance"`` promotes side-consistency regressions to hard).
+     Includes no-new ``curves_through_nodes`` (edge-through-node) vs snapshot —
+     curated residuals are allowed; new algorithm geometry must not add hits.
   2. None of the directed metrics may worsen by more than ``METRIC_EPS``.
   3. The candidate must improve its local objective (Pareto on the gated
      metrics when no scalar objective is set), unless the rule opts out.
@@ -51,6 +53,7 @@ SCORE_DIRS: dict[str, str] = {
     "crossing_angular_resolution": "higher",
     "species_drawn": "higher",
     "reactions_drawn": "higher",
+    "curves_through_nodes": "lower",
     # drawn_per_node is undirected in the benchmark; still reported, not gated.
 }
 
@@ -65,6 +68,7 @@ TIP_DIRS: dict[str, str] = {
     "participant_consistency": "higher",
     "edge_orthogonality": "higher",
     "aspect_ratio": "higher",
+    "curves_through_nodes": "lower",
 }
 
 # Hub-split gate columns (single copy; ``layout_gate`` imports this).
@@ -80,6 +84,7 @@ HUB_DIRS: dict[str, str] = {
     "overlapping_pairs": "lower",
     "overlap_area_share": "lower",
     "participant_consistency": "higher",
+    "curves_through_nodes": "lower",
 }
 
 ORTHO_DIRS: dict[str, str] = {
@@ -87,6 +92,7 @@ ORTHO_DIRS: dict[str, str] = {
     "edge_length_deviation": "lower",
     "angular_resolution": "lower",
     "participant_consistency": "higher",
+    "curves_through_nodes": "lower",
 }
 
 # New ``inst:`` creation and structure moves: relative (new-only) side-consistency
@@ -372,6 +378,8 @@ def measure_scores(
     skip = _skip_from_data(data, skip_edges)
     out: dict[str, Any] = {
         "crossings": float(pipeline_crossings(data, skip)),
+        # Panel / quality-gate geometry (not drawing-graph score_map).
+        "curves_through_nodes": float(lq.curves_through_nodes_count(data, skip)),
     }
     if pathway is not None:
         scored = lg.score_map(pathway, data)
@@ -413,6 +421,7 @@ def measure_tip(data, *, pathway=None) -> dict[str, Any]:
         edge_orthogonality=ortho.piece_axis_alignment(data, pathway=pathway),
         aspect_ratio=_content_aspect(data[1]),
         overlapping_pairs=int(_glyph_overlaps(data)),
+        curves_through_nodes=float(lq.curves_through_nodes_count(data)),
     )
 
 
@@ -563,16 +572,25 @@ class LayoutQualityEvaluator:
         return row
 
     def _hard_state(self, data) -> dict[str, Any]:
+        import layout_quality as lq
+
         return dict(
             canvas=canvas_area(data),
             cropped=cropped_label_count(data),
             coverage=coverage_metrics(data, self.model),
+            # No-new edge-through-node: absolute zero is not required of curated
+            # residuals; algorithm accepts must not raise the count.
+            curves_through_nodes=int(
+                lq.curves_through_nodes_count(data, self.skip_edges)
+            ),
         )
 
     def hard_failures(self, candidate) -> list[str]:
         """Hard-constraint failures of ``candidate`` vs the snapshot."""
         if self._snap is None:
             raise RuntimeError("snapshot() before evaluate()")
+        import layout_quality as lq
+
         base = self._snap.data
         fails = []
         # Instance / structure-move gate may evaluate metrics-only (no map body).
@@ -604,6 +622,12 @@ class LayoutQualityEvaluator:
                 fails.append("canvas_grew")
             if cropped_label_count(candidate) > int(self._snap.hard.get("cropped") or 0):
                 fails.append("new_cropped_labels")
+            through_b = int(self._snap.hard.get("curves_through_nodes") or 0)
+            through_a = int(
+                lq.curves_through_nodes_count(candidate, self.skip_edges)
+            )
+            if through_a > through_b:
+                fails.append("new_curves_through_nodes")
         return fails
 
     # --- snapshot / evaluate / commit ------------------------------------

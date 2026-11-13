@@ -141,34 +141,22 @@ def _seg_hits(a, b, S):
     return idx, p + np.outer(t[idx], r)
 
 
-def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, structures=None):
-    """-> (summary, issues).  `summary` holds the six core indicators, the details and the worst local regions; `issues` lists where the problems are.
+def _count_curves_through(algo_edges, rects, owner, kind, label_of=None):
+    """Count algorithm edges whose sampled curve hits a foreign node/label obstacle.
 
-    ``structures``: optional reused curated structures ``[{id, reactions|reaction_ids}]`` (or id→ids).
-    When omitted, ``metadata.expert_structures`` is used, else a fallback from curated-derived connectivity.
+    Returns ``(node_hits, label_hits, hit_points)``.  Same geometry as ``evaluate``.
     """
     import edge_routing as er
-    import orientation as orientation_module
-    from evaluation.continuity import structure_continuity as _structure_continuity
-    from evaluation.map_rules import collect_map_rule_details
-    meta = data[0].get('metadata', {})
-    skip = {tuple(e) for e in (skip_edges if skip_edges is not None else meta.get('preserved_edges') or [])}
-    skip |= {(p['reaction'], p['metabolite']) for p in (meta.get('source_paths') or [])}
-    routed = {(p['reaction'], p['metabolite']): p for p in (meta.get('routed_edges') or [])}
-    body = data[1]
-    nodes, reactions = body['nodes'], body['reactions']
-    rects, owner, kind, label_of = _final_obstacles(data)
+
+    if label_of is None:
+        label_of = [None] * len(kind)
     owner_arr = np.array(owner, dtype=object)
     grid_r = _dd(list)
     for i, r in enumerate(rects):
         _grid_add(grid_r, i, r[:2], r[2:])
-    edges, nodes = build_edges(data, skip_edges)
-    algo = [e for e in edges if not e['curated']]
-    # ---- crossings on the sampled final curves (shared detector; also used by hotspot repair)
-    cross, all_cross_events, cross_points, per_edge_cross = detect_crossings(edges, nodes, max_issues=max_issues)
-    # ---- obstacles on the final curves (algorithm connections only)
-    node_hits, label_hits, hit_points = 0, 0, []
-    for e in algo:
+    node_hits = label_hits = 0
+    hit_points = []
+    for e in algo_edges:
         mask_own = np.isin(owner_arr, e['ends'])
         found_node = found_label = False
         n = len(e['pts']) - 1
@@ -185,11 +173,61 @@ def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, str
                 if kind[c] == 'label' and not found_label:
                     found_label = True
                     hit_points.append(dict(kind='label', reaction=e['rid'], metabolite=e['met'], label=label_of[c], x=round(float(a[0]), 1), y=round(float(a[1]), 1)))
-        node_hits += int(found_node); label_hits += int(found_label)
+        node_hits += int(found_node)
+        label_hits += int(found_label)
+    return node_hits, label_hits, hit_points
+
+
+def curves_through_nodes_count(data, skip_edges=None) -> int:
+    """Number of algorithm edges whose curve passes through a foreign node glyph.
+
+    Same count as ``evaluate`` → ``core.overlaps.curves_through_nodes``.  Used as the
+    no-new edge-through-node gate metric (relative to a snapshot; not an absolute zero).
+    """
+    return int(curves_through_nodes_report(data, skip_edges)["count"])
+
+
+def curves_through_nodes_report(data, skip_edges=None) -> dict:
+    """Through-node count plus the algorithm reactions that contribute hits."""
+    rects, owner, kind, label_of = _final_obstacles(data)
+    edges, _nodes = build_edges(data, skip_edges)
+    algo = [e for e in edges if not e['curated']]
+    node_hits, _label_hits, hit_points = _count_curves_through(
+        algo, rects, owner, kind, label_of
+    )
+    rids = sorted({h["reaction"] for h in hit_points if h.get("kind") == "node"})
+    return dict(count=int(node_hits), reactions=rids, hits=hit_points)
+
+
+def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, structures=None):
+    """-> (summary, issues).  `summary` holds the six core indicators, the details and the worst local regions; `issues` lists where the problems are.
+
+    ``structures``: optional reused curated structures ``[{id, reactions|reaction_ids}]`` (or id→ids).
+    When omitted, ``metadata.expert_structures`` is used, else a fallback from curated-derived connectivity.
+    """
+    import orientation as orientation_module
+    from evaluation.continuity import structure_continuity as _structure_continuity
+    from evaluation.map_rules import collect_map_rule_details
+    meta = data[0].get('metadata', {})
+    skip = {tuple(e) for e in (skip_edges if skip_edges is not None else meta.get('preserved_edges') or [])}
+    skip |= {(p['reaction'], p['metabolite']) for p in (meta.get('source_paths') or [])}
+    routed = {(p['reaction'], p['metabolite']): p for p in (meta.get('routed_edges') or [])}
+    body = data[1]
+    nodes, reactions = body['nodes'], body['reactions']
+    rects, owner, kind, label_of = _final_obstacles(data)
+    edges, nodes = build_edges(data, skip_edges)
+    algo = [e for e in edges if not e['curated']]
+    # ---- crossings on the sampled final curves (shared detector; also used by hotspot repair)
+    cross, all_cross_events, cross_points, per_edge_cross = detect_crossings(edges, nodes, max_issues=max_issues)
+    # ---- obstacles on the final curves (algorithm connections only)
+    node_hits, label_hits, hit_points = _count_curves_through(algo, rects, owner, kind, label_of)
     # ---- glyph overlaps and label collisions
     from scipy.spatial import cKDTree
     centres = np.array([[n['x'], n['y']] for n in nodes.values() if n.get('node_type') in ('metabolite', 'midmarker')], float)
     node_overlap = list(cKDTree(centres).query_pairs(10)) if len(centres) > 1 else []
+    grid_r = _dd(list)
+    for i, r in enumerate(rects):
+        _grid_add(grid_r, i, r[:2], r[2:])
     lab_idx = [i for i, k in enumerate(kind) if k == 'label']
     label_overlap = 0
     for ii, i in enumerate(lab_idx):
