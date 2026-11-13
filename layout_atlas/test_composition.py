@@ -293,12 +293,30 @@ def test_reflow_landscape_in_band_keeps_near_tiles():
     out, rep = C.reflow_landscape(model, scene, blocks=[], cur=cur)
     assert C.ASPECT_MIN - 1e-3 <= rep.get('aspect_before', 0) <= C.ASPECT_MAX + 1e-3, rep
     assert rep.get('reason') == 'main_pocket_pack', rep
-    assert rep.get('pack', {}).get('side') == 'pocket', rep
     assert rep.get('pocket', {}).get('near_kept', 0) >= 1, rep
     # Near tile must not be skyline-shelved far from its original pose.
     near_after = out['positions']['r:NEAR']
     assert abs(near_after[0] - near_before[0]) < 1e-6, (near_before, near_after, rep)
     assert abs(near_after[1] - near_before[1]) < 1e-6, (near_before, near_after, rep)
+    # Far leftover must not stay parked at the wide skyline shelf; flush-tuck
+    # (or pocket) pulls it beside main (leftover count → 0).
+    assert rep.get('pocket', {}).get('leftover', 1) == 0, rep
+    far_after = out['positions']['r:FAR']
+    assert far_after[0] < 1100.0, (far_after, rep)
+
+
+def test_flush_tuck_against_main_stacks_flush():
+    """Leftover boxes stack flush with main (east preferred when in-band)."""
+    sizes = {0: (80.0, 60.0), 1: (70.0, 50.0)}
+    centres = {0: np.array([2000.0, 100.0]), 1: np.array([2100.0, 200.0])}
+    placed, rep = C.flush_tuck_against_main(
+        [0, 1], sizes, centres, main_lo=(0.0, 0.0), main_hi=(1000.0, 700.0))
+    assert set(placed) == {0, 1}, rep
+    assert rep.get('side') == 'right', rep
+    # Flush: top-left x sits at main_hi + gap, not a multi-thousand skyline shelf.
+    gap = C.FLUSH_TUCK_GAP
+    assert abs(placed[0][0] - (1000.0 + gap)) < 1e-6
+    assert placed[0][1] < placed[1][1]
 
 
 def test_fit_canvas_to_content_shrinks_frame():

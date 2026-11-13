@@ -81,3 +81,15 @@ def test_clear_through_nodes_drives_e_coli_official_to_credit_band():
     assert report["accepted"]
     assert after_off <= 4
     assert after_off == report["after_official"]
+
+
+def test_clear_through_nodes_skips_when_official_already_clean():
+    """Post-hotspot / post-orthogonal clears must early-out once official is 0."""
+    data = load_escher(EXAMPLE)
+    skip = (data[0].get("metadata") or {}).get("preserved_edges") or []
+    edge_style.clear_through_nodes(data, skip)
+    assert lq.official_lines_through_nodes_count(data, skip) == 0
+    report = edge_style.clear_through_nodes(data, skip)
+    assert report["reason"] == "official_clean"
+    assert report["after_official"] == 0
+    assert report["seconds"] < 1.0

@@ -62,6 +62,75 @@ POCKET_PAD_CELLS = 1
 FAR_OUTLIER_FRAC = 0.28
 # Second-chance pad for far outliers that miss the tight flush search (fraction of span).
 FAR_OUTLIER_PAD_FRAC = 0.18
+# Third-chance: when pockets are full, stack leftovers in a compact strip flush with
+# the main AABB (SHELF_STANDOFF only — never a wide skyline shelf that parks TR floaters).
+FLUSH_TUCK_GAP = SHELF_STANDOFF
+
+
+def flush_tuck_against_main(ids, sizes, centres, main_lo, main_hi, gap=None):
+    """Place leftover boxes in a single compact strip flush with the main AABB.
+
+    Prefers the east edge when that keeps / improves landscape aspect; otherwise
+    south. Returns ``{id: (top_left_x, top_left_y)}`` absolute placements.
+    """
+    if not ids:
+        return {}, dict(placed=0, side=None)
+    gap = FLUSH_TUCK_GAP if gap is None else float(gap)
+    mlo = np.asarray(main_lo, float)
+    mhi = np.asarray(main_hi, float)
+    main_w = float(mhi[0] - mlo[0])
+    main_h = float(mhi[1] - mlo[1])
+    order = sorted(ids, key=lambda i: (-sizes[i][0] * sizes[i][1], i))
+    # Mean leftover centre picks the nearer of east vs south when both keep aspect.
+    mean_c = np.mean([centres[i] for i in order], axis=0)
+
+    def _stack_east():
+        x0 = float(mhi[0] + gap)
+        y = float(mlo[1])
+        placed = {}
+        for i in order:
+            w, h = sizes[i]
+            placed[i] = (x0, y)
+            y += h + SHELF_GAP
+        bh = y - float(mlo[1]) - SHELF_GAP
+        bw = max(sizes[i][0] for i in order)
+        asp = (main_w + gap + bw) / max(main_h, bh, 1.0)
+        return placed, asp, 'right'
+
+    def _stack_south():
+        y0 = float(mhi[1] + gap)
+        x = float(mlo[0])
+        placed = {}
+        for i in order:
+            w, h = sizes[i]
+            placed[i] = (x, y0)
+            x += w + SHELF_GAP
+        bw = x - float(mlo[0]) - SHELF_GAP
+        bh = max(sizes[i][1] for i in order)
+        asp = max(main_w, bw) / max(main_h + gap + bh, 1.0)
+        return placed, asp, 'below'
+
+    east, east_asp, east_side = _stack_east()
+    south, south_asp, south_side = _stack_south()
+
+    def _band_score(asp, side):
+        in_band = ASPECT_MIN - 1e-3 <= asp <= ASPECT_MAX + 1e-3
+        # Prefer the side facing the leftovers' current cluster.
+        side_pen = 0.0
+        if side == 'right' and mean_c[0] < mlo[0]:
+            side_pen = 1.0
+        if side == 'below' and mean_c[1] < mlo[1]:
+            side_pen = 1.0
+        return (0 if in_band else 1,
+                abs(math.log(max(asp, 1e-9) / TARGET_ASPECT)),
+                side_pen)
+
+    if _band_score(east_asp, east_side) <= _band_score(south_asp, south_side):
+        placed, asp, side = east, east_asp, east_side
+    else:
+        placed, asp, side = south, south_asp, south_side
+    return placed, dict(placed=len(placed), side=side, aspect=round(asp, 3),
+                        gap=round(gap, 1))
 
 
 def components(model, scene, cur):
@@ -838,15 +907,15 @@ def reflow_landscape(model, scene, blocks, cur):
                     placed=len(pocket_tl),
                     missed=len(pocket_boxes) - len(pocket_tl),
                     retry=dict(more_rep, accepted=len(kept)))
-    if in_band0 and not pocket_tl:
+    if in_band0 and not pocket_tl and not pack_ids:
         report.update(aspect_after=round(aspect0, 3), reason='already_in_band',
                       pocket=pocket_rep)
         return scene, report
-    if pocket_tl:
+    if pocket_tl or (in_band0 and pack_ids):
         pocket_keys = {i: list(keys_of[i]) for i in pocket_tl}
         pocket_placed = {i: (x, y) for i, (x, y) in pocket_tl.items()}
         # Absolute top-lefts with origin (0,0): _apply_placed targets top-left + size/2.
-        aspect_p = _apply_placed(pocket_placed, (0.0, 0.0))
+        aspect_p = _apply_placed(pocket_placed, (0.0, 0.0)) if pocket_placed else aspect0
         # Shelf leftovers are only tiles that were pack candidates but still missed.
         # Near non-candidates (in-band) and successfully pocketed tiles stay put.
         leftover = [i for i in pack_ids if i not in pocket_tl]
@@ -854,18 +923,51 @@ def reflow_landscape(model, scene, blocks, cur):
                                 near_kept=max(0, len(sizes) - len(pack_ids)))
         aspect_p_in = ASPECT_MIN - 1e-3 <= aspect_p <= ASPECT_MAX + 1e-3
 
-        def _pocket_done(reason, left):
-            report.update(applied=bool(pocket_tl), aspect_after=round(aspect_p, 3),
-                          reason=reason,
-                          pack=dict(side='pocket', movable=len(pocket_tl),
-                                    leftover=len(left), aspect=round(aspect_p, 3),
-                                    in_band=ASPECT_MIN - 1e-3 <= aspect_p <= ASPECT_MAX + 1e-3))
+        def _pocket_done(reason, left, flush_rep=None):
+            pack = dict(side='pocket', movable=len(pocket_tl),
+                        leftover=len(left), aspect=round(aspect_p, 3),
+                        in_band=ASPECT_MIN - 1e-3 <= aspect_p <= ASPECT_MAX + 1e-3)
+            if flush_rep:
+                pack['flush_tuck'] = flush_rep
+                pack['side'] = flush_rep.get('side') or 'pocket'
+            report.update(applied=bool(pocket_tl) or bool(flush_rep),
+                          aspect_after=round(aspect_p, 3),
+                          reason=reason, pack=pack)
             return scene, report
 
-        # Started in-band: pocket-pack (plus flush retry) only — never peel onto an
-        # external shelf or skyline-reflow near leftovers (reopens TR floaters / spokes).
+        # Started in-band: pocket-pack, then flush-tuck any missed far outliers against
+        # the main AABB. Never peel onto a wide skyline shelf (reopens TR floaters).
         if in_band0:
-            return _pocket_done('main_pocket_pack', leftover)
+            flush_rep = None
+            if leftover:
+                # Bounds after pocket apply so flush strip sits beside the filled main.
+                pts_now = np.array(
+                    [pos[k] for i in main for k in comps[i]['keys']
+                     if k in pos and not k.startswith('side:')]
+                    + [pos[k] for i, ks in pocket_keys.items() for k in ks if k in pos],
+                    float)
+                if len(pts_now) >= 2:
+                    flo, fhi = pts_now.min(0), pts_now.max(0)
+                else:
+                    flo, fhi = mlo, mhi
+                # Snapshot so flush _apply_placed moves leftovers from current (post-pocket) pose.
+                origin_centres = {i: np.asarray(centres[i], float).copy() for i in leftover}
+                for i in leftover:
+                    ks = keys_of[i]
+                    arr = np.array([pos[k] for k in ks if k in pos], float)
+                    if len(arr):
+                        origin_centres[i] = arr.mean(0)
+                origin_pos = {k: list(v) for k, v in pos.items()}
+                tucked, flush_rep = flush_tuck_against_main(
+                    leftover, sizes, origin_centres, flo, fhi)
+                if tucked:
+                    aspect_p = _apply_placed(tucked, (0.0, 0.0))
+                    pocket_tl.update(tucked)
+                    leftover = []
+                    report['pocket'] = dict(
+                        report.get('pocket') or {},
+                        leftover=0, flush_tuck=flush_rep)
+            return _pocket_done('main_pocket_pack', leftover, flush_rep=flush_rep)
 
         # If every movable fitted in a pocket but the frame is still tall/narrow,
         # peel the largest pocketed tiles onto an east shelf so width can catch up

@@ -1129,8 +1129,35 @@ def clear_through_nodes(data, skip_edges=None, log=None, mode=None, gem_path=Non
     skip = list(skip_edges) if skip_edges is not None else list(
         (data[0].get('metadata') or {}).get('preserved_edges') or []
     )
-    before = lq.curves_through_nodes_report(data, skip)
+    # Official count first (cheap): post-hotspot / post-orthogonal / post-tip clears
+    # often arrive already at 0 — skip CrossingIndex + OMM restyle (was ~1.5s+ each
+    # and stacked into multi-minute compose after #38's per-trial reuse).
     before_off = lq.official_lines_through_nodes_report(data, skip)
+    report = dict(
+        enabled=True,
+        before=None,
+        before_official=before_off['count'],
+        before_crossings=None,
+        reactions=list(before_off.get('reactions') or []),
+        accepted=False,
+        mode=mode or 'bezier',
+        seconds=0.0,
+        edges_tried=0,
+        edges_kept=0,
+        reset_spokes=0,
+        nudge=None,
+    )
+    if before_off['count'] <= 0:
+        before = lq.curves_through_nodes_report(data, skip)
+        report['before'] = before['count']
+        report['after'] = before['count']
+        report['after_official'] = 0
+        report['after_crossings'] = None
+        report['reason'] = 'official_clean'
+        report['seconds'] = round(time.time() - t0, 2)
+        return report
+
+    before = lq.curves_through_nodes_report(data, skip)
     index = lq.CrossingIndex(data, skip)
     before_cross = int(index.headline())
     edge_hits = Counter(
@@ -1140,21 +1167,10 @@ def clear_through_nodes(data, skip_edges=None, log=None, mode=None, gem_path=Non
     )
     # Fall back to OMM hit reactions (all spokes) when official is already clean.
     target_rids = list(before_off['reactions']) or list(before['reactions'])
-    report = dict(
-        enabled=True,
-        before=before['count'],
-        before_official=before_off['count'],
-        before_crossings=before_cross,
-        reactions=list(target_rids),
-        accepted=False,
-        mode=mode or 'bezier',
-        seconds=0.0,
-        edges_tried=0,
-        edges_kept=0,
-        reset_spokes=0,
-        nudge=None,
-    )
-    if (before_off['count'] <= 0 and before['count'] <= 0) or not target_rids:
+    report['before'] = before['count']
+    report['before_crossings'] = before_cross
+    report['reactions'] = list(target_rids)
+    if not target_rids:
         report['reason'] = 'clean'
         report['after'] = before['count']
         report['after_official'] = before_off['count']
