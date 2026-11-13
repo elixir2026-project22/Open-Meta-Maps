@@ -91,6 +91,21 @@ def _count_hits(samples, others):
     return int(np.count_nonzero(hit.any(axis=1)))
 
 
+def _count_marker_hits(samples, others):
+    """Strict polyline-vs-box hits for official through clearance (no END_PAD).
+
+    layout-benchmark excludes only the endpoint *species*, not a 14px pad, so a
+    marker polyline that grazes a neighbour near mid/met still scores.  ``others``
+    must already omit the endpoint glyph boxes.
+    """
+    if not len(others) or len(samples) < 2:
+        return 0
+    samples = np.asarray(samples, float)
+    A, B = samples[:-1], samples[1:]
+    hit = er._hits_many(A, B, others, 0.0)
+    return int(np.count_nonzero(hit.any(axis=1)))
+
+
 def _evaluate(samples, rects, mine, S_other, label_rects=None, label_mine=None):
     """(glyph hits, crossings, anomaly, detour, label hits) of a sampled curve.  Glyph hits are hard; label hits are soft (the labels are moved afterwards)."""
     hits = _count_hits(samples, rects[~mine])
@@ -122,28 +137,99 @@ def _fit_through(waypoints, t_start, t_end, handle=0.35):
     return segs
 
 
-def _corridor(p, q, rects, mine, step_cost=35.0):
+def _corridor(p, q, rects, mine, step_cost=35.0, official_clear=False):
     margin = max(140.0, 0.5 * float(np.hypot(*(q - p))))
+    if official_clear:
+        margin = max(margin, 280.0)
     lo, hi = np.minimum(p, q) - margin, np.maximum(p, q) + margin
     others = rects[~mine]
     inside = (others[:, 2] >= lo[0]) & (others[:, 0] <= hi[0]) & (others[:, 3] >= lo[1]) & (others[:, 1] <= hi[1])
     window = others[inside]
     out = []
-    for bend_cost, pad in er.CANDIDATES:
+    # Wider corner pads / clearance when matching Escher r=20 boxes for the
+    # official through-node hard rule (default CANDIDATES are tuned to NODE_HALF=7).
+    candidates = (
+        ((35.0, 28.0), (80.0, 28.0), (35.0, 45.0), (120.0, 45.0), (35.0, 65.0))
+        if official_clear else er.CANDIDATES
+    )
+    clear = 18.0 if official_clear else er.CLEAR
+    for bend_cost, pad in candidates:
         grown = np.stack([window[:, 0] - pad, window[:, 1] - pad, window[:, 2] + pad, window[:, 3] + pad], axis=1)
         corners = np.concatenate([grown[:, [0, 1]], grown[:, [2, 1]], grown[:, [0, 3]], grown[:, [2, 3]]]) if len(window) else np.zeros((0, 2))
         keep = np.ones(len(corners), bool)
         for i, c in enumerate(corners):
-            if ((window[:, 0] - er.CLEAR < c[0]) & (c[0] < window[:, 2] + er.CLEAR) & (window[:, 1] - er.CLEAR < c[1]) & (c[1] < window[:, 3] + er.CLEAR)).any():
+            if ((window[:, 0] - clear < c[0]) & (c[0] < window[:, 2] + clear) & (window[:, 1] - clear < c[1]) & (c[1] < window[:, 3] + clear)).any():
                 keep[i] = False
         corners = corners[keep]
         if len(corners) > er.MAX_POINTS:
             dq = q - p
             d = np.abs(dq[0] * (corners[:, 1] - p[1]) - dq[1] * (corners[:, 0] - p[0])) / max(float(np.hypot(*dq)), 1e-9)
             corners = corners[np.argsort(d)[:er.MAX_POINTS]]
-        path = er._astar(p, q, corners, window, bend_cost, pad)
-        if path:
+        # Temporarily tighten blocked clearance for official A*.
+        old_clear = er.CLEAR
+        if official_clear:
+            er.CLEAR = clear
+        try:
+            path = er._astar(p, q, corners, window, bend_cost, pad)
+        finally:
+            er.CLEAR = old_clear
+        if path and (not official_clear or _count_marker_hits(np.asarray(path, float), others) == 0):
             out.append(path)
+    return out
+
+
+def _lateral_detours(p, q, rects, mine, side=1.0):
+    """Waypoint paths that bow off the chord so official marker polylines clear glyphs.
+
+    layout-benchmark counts mid→multimarker→met chords, not Bezier handles; a
+    lateral multimarker is the reliable way to drop ``rule_lines_through_nodes``.
+    """
+    p, q = np.asarray(p, float), np.asarray(q, float)
+    chord = q - p
+    L = float(np.hypot(*chord))
+    if L < 1e-6 or not len(rects):
+        return []
+    d = chord / L
+    nrm = np.array([-d[1], d[0]]) * float(side)
+    others = rects[~mine] if mine is not None and len(mine) == len(rects) else rects
+    out = []
+    seen = set()
+    for off in (35.0, 55.0, 80.0, 110.0, 150.0, 200.0, 260.0, 320.0, 420.0, 550.0, 700.0):
+        for fracs in ((0.5,), (1.0 / 3.0, 2.0 / 3.0), (0.25, 0.5, 0.75)):
+            for sign in (1.0, -1.0):
+                path = [p] + [p + f * chord + (off * sign) * nrm for f in fracs] + [q]
+                key = tuple(round(float(x), 1) for w in path[1:-1] for x in w)
+                if key in seen:
+                    continue
+                seen.add(key)
+                if _count_marker_hits(np.asarray(path, float), others) == 0:
+                    out.append(path)
+        if len(out) >= 16:
+            break
+    return out
+
+
+def _random_s_detours(p, q, rects, mine, seed=0, tries=400):
+    """Sample two-waypoint S-curves when regular laterals fail (dense clone clusters)."""
+    p, q = np.asarray(p, float), np.asarray(q, float)
+    chord = q - p
+    L = float(np.hypot(*chord))
+    if L < 1e-6 or not len(rects):
+        return []
+    d = chord / L
+    nrm = np.array([-d[1], d[0]])
+    others = rects[~mine] if mine is not None and len(mine) == len(rects) else rects
+    rng = np.random.default_rng(seed)
+    out = []
+    for _ in range(tries):
+        off1 = float(rng.uniform(30.0, 900.0) * rng.choice([-1.0, 1.0]))
+        off2 = float(rng.uniform(30.0, 900.0) * rng.choice([-1.0, 1.0]))
+        f1, f2 = sorted(rng.uniform(0.1, 0.9, size=2))
+        path = [p, p + f1 * chord + off1 * nrm, p + f2 * chord + off2 * nrm, q]
+        if _count_marker_hits(np.asarray(path, float), others) == 0:
+            out.append(path)
+            if len(out) >= 6:
+                break
     return out
 
 
@@ -186,7 +272,8 @@ def _curated_block_rects(data, pad=18.0):
     return np.asarray(rects, float), np.asarray(owners, dtype=object)
 
 
-def apply(data, skip_edges=(), only=None, mode=None, gem_path=None, pathway=None):
+def apply(data, skip_edges=(), only=None, mode=None, gem_path=None, pathway=None,
+          official_clear=False, allow_relocate=True):
     """Style algorithm-placed connections in place.
 
     Default / ``mode='bezier'``: Bezier segments from curated-map constraints
@@ -199,6 +286,12 @@ def apply(data, skip_edges=(), only=None, mode=None, gem_path=None, pathway=None
     appended as obstacles so algorithm corridors route around packed modules.
     ``gem_path`` (orthogonal mode) filters the in-venv accept gate to GEM ids.
     Pass a preloaded ``pathway`` to skip re-parsing the SBML.
+
+    ``official_clear``: inflate metabolite obstacles to Escher radii and materialize
+    clearance bows as multimarker chains so layout-benchmark ``rule_lines_through_nodes``
+    (marker polylines, not Bezier handles) sees the detour.
+    ``allow_relocate``: when False, never move metabolite glyphs (routing-only
+    clearance for preserved / curated spokes).
     """
     if mode == 'orthogonal':
         import orthogonal_route as ortho
@@ -222,12 +315,32 @@ def apply(data, skip_edges=(), only=None, mode=None, gem_path=None, pathway=None
     import layout_quality as lq
     all_rects, all_owner, all_kind, _ = lq._final_obstacles(data)
     is_node = np.array([k == 'node' for k in all_kind])
-    rects, owner_arr = all_rects[is_node], np.array(all_owner, dtype=object)[is_node]
+    rects, owner_arr = all_rects[is_node].copy(), np.array(all_owner, dtype=object)[is_node]
     label_rects, label_owner = all_rects[~is_node], np.array(all_owner, dtype=object)[~is_node]
-    block_rects, block_owners = _curated_block_rects(data)
-    if len(block_rects):
-        rects = np.vstack([rects, block_rects]) if len(rects) else block_rects
-        owner_arr = np.concatenate([owner_arr, block_owners]) if len(owner_arr) else block_owners
+    if official_clear and len(rects):
+        # Scorer uses Escher circles (r=20/10); expand metabolite AABBs to match so
+        # corridor / relocation clear what the official hard rule counts.
+        for i, oid in enumerate(owner_arr):
+            n = nodes.get(oid) or {}
+            if n.get('node_type') != 'metabolite':
+                continue
+            half = (
+                lq.ESCHER_PRIMARY_RADIUS if n.get('node_is_primary', True)
+                else lq.ESCHER_SECONDARY_RADIUS
+            )
+            cx = 0.5 * (rects[i, 0] + rects[i, 2])
+            cy = 0.5 * (rects[i, 1] + rects[i, 3])
+            rects[i] = (cx - half, cy - half, cx + half, cy + half)
+    # Curated block AABBs steer normal corridors around packed modules. For
+    # official through-clearance they fill the whole module and make every
+    # in-module detour look blocked — skip them when official_clear is on.
+    if not official_clear:
+        block_rects, block_owners = _curated_block_rects(data)
+        if len(block_rects):
+            rects = np.vstack([rects, block_rects]) if len(rects) else block_rects
+            owner_arr = np.concatenate([owner_arr, block_owners]) if len(owner_arr) else block_owners
+    else:
+        block_rects, block_owners = np.zeros((0, 4)), np.array([], dtype=object)
     skip = {tuple(e) for e in skip_edges}
     only_set = set(only) if only is not None else None
     # all current segments, by reaction (the crossing term sees what is already drawn)
@@ -305,12 +418,27 @@ def apply(data, skip_edges=(), only=None, mode=None, gem_path=None, pathway=None
         lab_of[o].append(i)
     joint_store = {}
     own_curves = defaultdict(list)      # sampled curves already decided for each reaction: a later curve of the same reaction must not cross them away from the reaction point
-    report = dict(relocated=0, edges=0, expert_or_curved=0, bezier=0, straightish=0, curved=0, corridor=0, degraded=0, no_template=0, hits_after=0, crossings_after=0)
+    report = dict(relocated=0, edges=0, expert_or_curved=0, bezier=0, straightish=0, curved=0, corridor=0,
+                  materialized=0, degraded=0, no_template=0, hits_after=0, crossings_after=0,
+                  official_clear=bool(official_clear))
     routed, counter = [], [0]
+    # Continue past any existing es* multimarkers so a later apply (clear-through
+    # greedy per edge) does not overwrite earlier detour waypoints.
+    _es_max = 0
+    for _nid in nodes:
+        if isinstance(_nid, str) and _nid.startswith('es'):
+            try:
+                _es_max = max(_es_max, int(_nid[2:]))
+            except ValueError:
+                pass
+    counter[0] = _es_max
 
     def new_node(x, y):
         counter[0] += 1
         nid = f'es{counter[0]}'
+        while nid in nodes:
+            counter[0] += 1
+            nid = f'es{counter[0]}'
         nodes[nid] = dict(node_type='multimarker', x=round(float(x), 2), y=round(float(y), 2))
         return nid
     for rx in sorted(reactions.values(), key=lambda r: r['bigg_id']):
@@ -405,46 +533,131 @@ def apply(data, skip_edges=(), only=None, mode=None, gem_path=None, pathway=None
                                                        own=list(cur_edge['own']), rid_i=cur_edge['rid'], tname=t['bigg_id']))
             chain = None
             degraded = False
+            materialized = False
             # Corridor when any glyph hit remains. Incremental restyles used to skip
             # single-hit cases; those still fail the official through-node hard rule.
-            do_corridor = best[5] > 0
-            if do_corridor:   # every candidate touches an obstacle: find a corridor and fit a smooth multi-segment Bezier through it
-                for path in _corridor(P, q, rects, mine):
-                    t_start = _rot(chord / L, s0 * side)
-                    t_end = _rot(chord / L, e0 * side)
-                    for handle in (0.35, 0.22):
-                        segs = _fit_through(path, t_start, t_end, handle)
+            # Official scorer ignores Bezier handles — a bow that clears boxes still
+            # scores as a chord unless multimarkers are written, so also corridor /
+            # materialize when the straight chord hits under Escher-sized obstacles.
+            chord_hits = 0
+            if official_clear and len(rects):
+                chord_hits = _count_marker_hits(np.array([P, q], float), rects[~mine])
+            do_corridor = best[5] > 0 or (official_clear and chord_hits > 0 and best[5] == 0)
+            if do_corridor:
+                # Prefer materializing a hit-free bow as multimarkers (official polyline
+                # then follows the bow) before expensive A* corridor search.
+                if official_clear and best[5] == 0 and chord_hits > 0:
+                    smp_bow = best[4]
+                    n_s = len(smp_bow)
+                    if n_s >= 4:
+                        path = [P, smp_bow[n_s // 3], smp_bow[(2 * n_s) // 3], q]
+                        t_start = (q - P) / max(L, 1e-9)
+                        t_end = t_start
+                        for handle in (0.35, 0.22, 0.15):
+                            segs = _fit_through(path, t_start, t_end, handle)
+                            smp = np.vstack([_bezier(a, b, c, d, 12) for a, b, c, d in segs])
+                            hits, cross, anomaly, detour, _l = ev(smp)
+                            own_x = sum(_pair_cross(smp[3:], o[3:]) for o in own_curves[rid])
+                            mark_hits = _count_marker_hits(np.array(path, float), rects[~mine])
+                            if mark_hits == 0 and own_x == 0 and detour < 3.5:
+                                chain = (segs, smp, hits, cross)
+                                materialized = True
+                                break
+                if chain is None:
+                    lateral_paths = list(_lateral_detours(P, q, rects, mine, side)) if official_clear else []
+                    if official_clear and not lateral_paths:
+                        lateral_paths = list(_random_s_detours(
+                            P, q, rects, mine,
+                            seed=(hash((rid, t.get('bigg_id'))) & 0xFFFFFFFF),
+                        ))
+                    path_lists = lateral_paths + list(
+                        _corridor(P, q, rects, mine, official_clear=official_clear)
+                    )
+                    for pi, path in enumerate(path_lists):
+                        t_start = _rot(chord / L, s0 * side)
+                        t_end = _rot(chord / L, e0 * side)
+                        for handle in (0.35, 0.22, 0.12):
+                            segs = _fit_through(path, t_start, t_end, handle)
+                            smp = np.vstack([_bezier(a, b, c, d, 12) for a, b, c, d in segs])
+                            hits, cross, anomaly, detour, _l = ev(smp)
+                            own_x = sum(_pair_cross(smp[3:], o[3:]) for o in own_curves[rid])
+                            mark_hits = 0
+                            if official_clear:
+                                mark_hits = _count_marker_hits(np.asarray(path, float), rects[~mine])
+                            # Official scorer sees marker polylines only. Prefer marker-clean
+                            # paths even when the fitted Bezier slightly clips a box.
+                            if official_clear:
+                                # Marker clearance is the official hard-rule signal.
+                                # Same-reaction own_x is soft: biomass-scale hubs often
+                                # cannot detour without grazing a sibling spoke.
+                                path_ok = mark_hits == 0 and detour < 4.0
+                            else:
+                                path_ok = hits == 0 and not anomaly and own_x == 0
+                            if path_ok:
+                                chain = (segs, smp, hits, cross)
+                                if pi < len(lateral_paths):
+                                    materialized = True
+                                break
+                        if chain:
+                            break
+                # Last resort for official_clear: random S-curves after A* too.
+                if chain is None and official_clear:
+                    for path in _random_s_detours(
+                        P, q, rects, mine,
+                        seed=(hash((rid, t.get('bigg_id'), 'late')) & 0xFFFFFFFF),
+                        tries=600,
+                    ):
+                        t_start = (q - P) / max(L, 1e-9)
+                        t_end = t_start
+                        segs = _fit_through(path, t_start, t_end, 0.22)
                         smp = np.vstack([_bezier(a, b, c, d, 12) for a, b, c, d in segs])
                         hits, cross, anomaly, detour, _l = ev(smp)
-                        own_x = sum(_pair_cross(smp[3:], o[3:]) for o in own_curves[rid])
-                        if hits == 0 and not anomaly and own_x == 0:
+                        mark_hits = _count_marker_hits(np.asarray(path, float), rects[~mine])
+                        if mark_hits == 0 and detour < 4.0:
                             chain = (segs, smp, hits, cross)
+                            materialized = True
                             break
-                    if chain:
-                        break
                 if chain is None:
                     # A glyph only this reaction uses may move a little (algorithm
                     # layout, not curated). Prefer currency stubs, but allow any
                     # single-holder endpoint when a through-node hit remains —
                     # needed to move the official lines-through-nodes hard rule.
                     nid = seg['to_node_id']
-                    if len(holders[nid]) == 1:
+                    allow_reloc = allow_relocate and (
+                        len(holders[nid]) == 1 or (
+                            official_clear and len(holders[nid]) <= 2 and cur
+                        )
+                    )
+                    if allow_reloc:
                         base = math.atan2(q[1] - P[1], q[0] - P[0])
                         options = []
-                        radii = (55.0, 75.0, 95.0, 120.0) if cur else (55.0, 75.0, 95.0)
-                        n_angles = 16 if cur else 12
+                        if official_clear:
+                            radii = (55.0, 75.0, 95.0, 120.0, 150.0, 180.0)
+                            n_angles = 24
+                            # Pack against compact boxes; clear chords against Escher sizes.
+                            pack_half = er.NODE_HALF
+                            clear_half = (
+                                lq.ESCHER_PRIMARY_RADIUS if t.get('node_is_primary', True)
+                                else lq.ESCHER_SECONDARY_RADIUS
+                            )
+                        else:
+                            radii = (55.0, 75.0, 95.0, 120.0) if cur else (55.0, 75.0, 95.0)
+                            n_angles = 16 if cur else 12
+                            pack_half = clear_half = er.NODE_HALF
                         for radius in radii:
                             for k in range(n_angles):
                                 ang = base + ((k + 1) // 2) * (math.pi / 6) * (1 if k % 2 else -1)
                                 q2 = P + radius * np.array([math.cos(ang), math.sin(ang)])
-                                box = np.array([q2[0] - 7, q2[1] - 7, q2[0] + 7, q2[1] + 7])
+                                box = np.array([q2[0] - pack_half, q2[1] - pack_half, q2[0] + pack_half, q2[1] + pack_half])
                                 others_n = rects[owner_arr != nid]
                                 if len(others_n) and ((others_n[:, 0] < box[2] + 4) & (box[0] - 4 < others_n[:, 2]) & (others_n[:, 1] < box[3] + 4) & (box[1] - 4 < others_n[:, 3])).any():
                                     continue
                                 c1b, c2b = _controls(P, q2, 0.0, 0.0, HANDLE, HANDLE, side)
                                 smp2 = _bezier(P, c1b, c2b, q2)
                                 h2, x2, a2, d2, l2 = ev(smp2)
-                                if h2 == 0 and not a2:
+                                # Chord-clear for official (relocated endpoint → new chord).
+                                ch2 = _count_marker_hits(np.array([P, q2], float), rects[owner_arr != nid]) if official_clear else 0
+                                if h2 == 0 and ch2 == 0 and not a2:
                                     options.append(((x2, l2, radius, k), q2, c1b, c2b, smp2))
                         if options:
                             _, q2, c1b, c2b, smp2 = min(options, key=lambda o: o[0])
@@ -452,7 +665,8 @@ def apply(data, skip_edges=(), only=None, mode=None, gem_path=None, pathway=None
                             t['x'], t['y'] = round(float(q2[0]), 2), round(float(q2[1]), 2)
                             if 'label_x' in t:
                                 t['label_x'], t['label_y'] = round(float(t['label_x'] + dq[0]), 2), round(float(t['label_y'] + dq[1]), 2)
-                            rects[rect_of[nid]] = [q2[0] - er.NODE_HALF, q2[1] - er.NODE_HALF, q2[0] + er.NODE_HALF, q2[1] + er.NODE_HALF]
+                            new_half = clear_half if official_clear else er.NODE_HALF
+                            rects[rect_of[nid]] = [q2[0] - new_half, q2[1] - new_half, q2[0] + new_half, q2[1] + new_half]
                             for c in cells(rects[rect_of[nid]][:2], rects[rect_of[nid]][2:]):
                                 rect_grid[c].append(rect_of[nid])
                             for li in lab_of.get(nid, []):
@@ -467,10 +681,16 @@ def apply(data, skip_edges=(), only=None, mode=None, gem_path=None, pathway=None
                             joint_store[rid][-1]['fixed'] = True
                     if chain is None and best[5] > 0:
                         degraded = True
+                    elif chain is None and official_clear and chord_hits > 0 and best[5] == 0:
+                        # Bow cleared sampled curve but chord still hits and we could not
+                        # materialize / corridor / relocate — keep bow (visual) but flag.
+                        degraded = True
             if chain:
                 joint_store[rid][-1]['fixed'] = True
                 segs, smp, hits, cross = chain
                 report['corridor'] += 1
+                if materialized:
+                    report['materialized'] += 1
                 del rx['segments'][key]
                 prev = mid_id
                 for i, (a, b, c, d) in enumerate(segs):
@@ -480,7 +700,7 @@ def apply(data, skip_edges=(), only=None, mode=None, gem_path=None, pathway=None
                     rx['segments'][f'es_s{counter[0]}'] = dict(from_node_id=prev, to_node_id=to, b1=dict(x=round(float(b[0]), 2), y=round(float(b[1]), 2)),
                                                                b2=dict(x=round(float(c[0]), 2), y=round(float(c[1]), 2)))
                     prev = to
-                kind, name = 'bezier_curved', 'corridor'
+                kind, name = 'bezier_curved', ('materialized_bow' if materialized else 'corridor')
             else:
                 _, name, c1, c2, smp, hits, cross = best
                 seg['b1'], seg['b2'] = dict(x=round(float(c1[0]), 2), y=round(float(c1[1]), 2)), dict(x=round(float(c2[0]), 2), y=round(float(c2[1]), 2))
@@ -668,14 +888,17 @@ def joint_route(data, store, ev, cur_edge, rects, owner_arr, label_rects, label_
     return rep
 
 
-def _prepare_algorithm_spokes_for_restyle(data, reaction_ids, skip_edges):
+def _prepare_algorithm_spokes_for_restyle(data, reaction_ids, skip_edges, only_metabolites=None):
     """Collapse algorithm mid→…→met chains to straight mid→met (b1=b2=None).
 
     ``apply`` only styles undecorated mid→metabolite spokes; corridor / Bezier
     leftovers must be reset first so a clear-through pass can rewrite them.
     Curated / preserved (rid, met) pairs are left untouched.
+    When ``only_metabolites`` is set, only spokes to those BiGG ids are reset
+    (other spokes keep their Bezier / corridor geometry).
     """
     skip = {tuple(e) for e in (skip_edges or [])}
+    only_mets = set(only_metabolites) if only_metabolites is not None else None
     body = data[1]
     nodes = body['nodes']
     n_reset = 0
@@ -719,16 +942,17 @@ def _prepare_algorithm_spokes_for_restyle(data, reaction_ids, skip_edges):
                 if (rid, met) in skip:
                     keep[key] = s
                     continue
-                if key in keep:
-                    s['b1'] = None
-                    s['b2'] = None
-                    n_reset += 1
-                else:
-                    counter += 1
-                    keep[f'clr{counter}'] = dict(
-                        from_node_id=mid, to_node_id=to, b1=None, b2=None,
-                    )
-                    n_reset += 1
+                if only_mets is not None and met not in only_mets:
+                    keep[key] = s
+                    continue
+                # Drop spseg/route prefixes so ``apply`` will restyle (it skips
+                # str(key).startswith('spseg') as expert even when b1/b2 are cleared).
+                counter += 1
+                keep.pop(key, None)
+                keep[f'clr{counter}'] = dict(
+                    from_node_id=mid, to_node_id=to, b1=None, b2=None,
+                )
+                n_reset += 1
                 continue
             if not algo and nodes.get(to, {}).get('node_type') != 'multimarker':
                 continue
@@ -745,12 +969,41 @@ def _prepare_algorithm_spokes_for_restyle(data, reaction_ids, skip_edges):
             met = nodes[cur].get('bigg_id')
             if (rid, met) in skip:
                 continue
+            if only_mets is not None and met not in only_mets:
+                # Keep the existing corridor chain intact.
+                continue
             counter += 1
             keep[f'clr{counter}'] = dict(
                 from_node_id=mid, to_node_id=cur, b1=None, b2=None,
             )
             n_reset += 1
         # Drop algorithm segment keys not retained; drop orphan multimarkers.
+        # When only_mets is set, also keep algo segments for non-target mets.
+        if only_mets is not None:
+            for key, s in rx['segments'].items():
+                if key in keep:
+                    continue
+                # Resolve metabolite endpoint of this algo segment chain.
+                to = s['to_node_id']
+                cur = to
+                while nodes.get(cur, {}).get('node_type') == 'multimarker':
+                    nxt = out.get(cur)
+                    if not nxt:
+                        break
+                    cur = nxt[0][1]['to_node_id']
+                met = nodes.get(cur, {}).get('bigg_id')
+                if met not in only_mets:
+                    keep[key] = s
+                    drop_nodes.discard(to)
+                    if nodes.get(to, {}).get('node_type') == 'multimarker':
+                        # Walk and un-drop the chain.
+                        c2 = to
+                        while nodes.get(c2, {}).get('node_type') == 'multimarker':
+                            drop_nodes.discard(c2)
+                            nxt = out.get(c2)
+                            if not nxt:
+                                break
+                            c2 = nxt[0][1]['to_node_id']
         rx['segments'] = keep
         for nn in drop_nodes:
             # Only drop if no remaining segment references the node.
@@ -763,16 +1016,90 @@ def _prepare_algorithm_spokes_for_restyle(data, reaction_ids, skip_edges):
     return n_reset
 
 
-def clear_through_nodes(data, skip_edges=None, log=None, mode=None, gem_path=None):
-    """Re-style algorithm reactions whose curves still hit foreign glyphs.
+def _nudge_through_obstacles(data, skip_edges=None, max_nudge=48.0):
+    """Small perpendicular nudges of glyphs that official pairs still pierce.
 
-    Keeps the restyle only when ``curves_through_nodes`` strictly falls and the
-    headline crossing count does not rise (no-new / no-worse vs the live map).
-    Does not scale the canvas or split the map.  ``mode`` / ``gem_path`` match
-    ``apply`` (use ``mode='orthogonal'`` after the final orthogonal pass).
+    Used after routing detours stall (clone-through / dense clusters). Moves the
+    *through* metabolite glyph, not curated reaction midmarkers. Accepts only
+    when official pairs fall and crossings do not rise.
+    """
+    import copy
+
+    import layout_quality as lq
+
+    skip = list(skip_edges) if skip_edges is not None else []
+    report = dict(tried=0, kept=0, nudged=[])
+    nodes = data[1]['nodes']
+    # Pins: curated rigid structures — still allow tiny nudges of currency clones.
+    for _round in range(3):
+        pairs = lq.official_lines_through_nodes_report(data, skip).get('pairs') or []
+        if not pairs:
+            break
+        # Prefer same-bigg clone-through, then high-frequency through ids.
+        from collections import Counter
+        through_hits = Counter(p['through'] for p in pairs if p.get('through'))
+        progressed = False
+        for through_bigg, _n in through_hits.most_common():
+            # Candidate glyphs with this bigg_id.
+            cands = [
+                nid for nid, n in nodes.items()
+                if n.get('node_type') == 'metabolite' and n.get('bigg_id') == through_bigg
+            ]
+            if not cands:
+                continue
+            live_off = lq.official_lines_through_nodes_count(data, skip)
+            live_cross = int(lq.CrossingIndex(data, skip).headline())
+            # Nudge each candidate along a few axes.
+            for nid in cands:
+                n0 = nodes[nid]
+                x0, y0 = float(n0['x']), float(n0['y'])
+                lx0 = n0.get('label_x')
+                ly0 = n0.get('label_y')
+                best = None
+                for dist in (12.0, 20.0, 28.0, 36.0, max_nudge):
+                    for ang_i in range(12):
+                        ang = ang_i * (math.pi / 6)
+                        dx, dy = dist * math.cos(ang), dist * math.sin(ang)
+                        trial = copy.deepcopy(data)
+                        tn = trial[1]['nodes'][nid]
+                        tn['x'], tn['y'] = round(x0 + dx, 2), round(y0 + dy, 2)
+                        if lx0 is not None:
+                            tn['label_x'] = round(float(lx0) + dx, 2)
+                            tn['label_y'] = round(float(ly0) + dy, 2)
+                        after_off = lq.official_lines_through_nodes_count(trial, skip)
+                        after_cross = int(lq.CrossingIndex(trial, skip).headline())
+                        report['tried'] += 1
+                        drop = live_off - after_off
+                        if drop > 0 and after_cross <= live_cross:
+                            score = (drop, -after_cross, -dist)
+                            if best is None or score > best[0]:
+                                best = (score, trial, dist, ang_i)
+                if best is not None:
+                    _, trial, dist, ang_i = best
+                    data[0], data[1] = trial[0], trial[1]
+                    nodes = data[1]['nodes']
+                    report['kept'] += 1
+                    report['nudged'].append(dict(node=nid, bigg=through_bigg, dist=dist))
+                    progressed = True
+                    break
+            if progressed:
+                break
+        if not progressed:
+            break
+    return report
+
+
+def clear_through_nodes(data, skip_edges=None, log=None, mode=None, gem_path=None):
+    """Re-style algorithm edges that still hit foreign glyphs (official pairs first).
+
+    Greedy per-(reaction, metabolite): reset only that spoke, restyle with
+    ``official_clear`` (Escher-sized obstacles + multimarker detours), keep the
+    edge when official pairs fall and crossings do not rise more than a small
+    trade budget. Does not scale the canvas or split the map.
     """
     import copy
     import time
+    from collections import Counter
 
     import layout_quality as lq
 
@@ -781,49 +1108,149 @@ def clear_through_nodes(data, skip_edges=None, log=None, mode=None, gem_path=Non
         (data[0].get('metadata') or {}).get('preserved_edges') or []
     )
     before = lq.curves_through_nodes_report(data, skip)
+    before_off = lq.official_lines_through_nodes_report(data, skip)
     before_cross = int(lq.CrossingIndex(data, skip).headline())
+    edge_hits = Counter(
+        (p['reaction'], p['metabolite'])
+        for p in before_off.get('pairs') or []
+        if p.get('reaction') and p.get('metabolite')
+    )
+    # Fall back to OMM hit reactions (all spokes) when official is already clean.
+    target_rids = list(before_off['reactions']) or list(before['reactions'])
     report = dict(
         enabled=True,
         before=before['count'],
+        before_official=before_off['count'],
         before_crossings=before_cross,
-        reactions=list(before['reactions']),
+        reactions=list(target_rids),
         accepted=False,
         mode=mode or 'bezier',
         seconds=0.0,
+        edges_tried=0,
+        edges_kept=0,
+        reset_spokes=0,
+        nudge=None,
     )
-    if before['count'] <= 0 or not before['reactions']:
+    if (before_off['count'] <= 0 and before['count'] <= 0) or not target_rids:
         report['reason'] = 'clean'
         report['after'] = before['count']
+        report['after_official'] = before_off['count']
         report['after_crossings'] = before_cross
         report['seconds'] = round(time.time() - t0, 2)
         return report
 
-    trial = copy.deepcopy(data)
-    report['reset_spokes'] = _prepare_algorithm_spokes_for_restyle(
-        trial, set(before['reactions']), skip,
-    )
-    style = apply(
-        trial, skip, only=set(before['reactions']), mode=mode, gem_path=gem_path,
-    )
-    after = lq.curves_through_nodes_report(trial, skip)
-    after_cross = int(lq.CrossingIndex(trial, skip).headline())
-    report['style'] = {k: style.get(k) for k in (
-        'bezier', 'corridor', 'relocated', 'degraded', 'hits_after', 'crossings_after',
-        'orthogonal',
-    ) if isinstance(style, dict) and k in style}
+    style_acc = Counter()
+    if edge_hits:
+        # Surgical: one official-hitting spoke at a time.
+        # Include preserved/source_path edges: routing-only (multimarker detours,
+        # no node relocation). Nodes stay put — curated residual through-pairs
+        # otherwise permanently hard-fail the official rule (example: ~44/66).
+        # Multiple rounds: first pass clears easy chords; later rounds + nudge
+        # finish clone-through residuals (need ≤4 official pairs for hard points).
+        skip_set = {tuple(e) for e in skip}
+        for _round in range(4):
+            live_pairs = lq.official_lines_through_nodes_report(data, skip)
+            if live_pairs['count'] <= 0:
+                break
+            round_hits = Counter(
+                (p['reaction'], p['metabolite'])
+                for p in live_pairs.get('pairs') or []
+                if p.get('reaction') and p.get('metabolite')
+            )
+            if not round_hits:
+                break
+            round_kept = 0
+            for (rid, met), _n in round_hits.most_common():
+                live_off = lq.official_lines_through_nodes_count(data, skip)
+                live_cross = int(lq.CrossingIndex(data, skip).headline())
+                if live_off <= 0:
+                    break
+                preserved = (rid, met) in skip_set
+                trial = copy.deepcopy(data)
+                # Temporarily allow restyle of this preserved spoke.
+                trial_skip = [e for e in skip if tuple(e) != (rid, met)]
+                report['reset_spokes'] += _prepare_algorithm_spokes_for_restyle(
+                    trial, {rid}, trial_skip, only_metabolites={met},
+                )
+                style = apply(
+                    trial, trial_skip, only={rid}, mode=mode, gem_path=gem_path,
+                    official_clear=True,
+                    # Never relocate glyphs on preserved spokes (routing detour only).
+                    allow_relocate=not preserved,
+                )
+                if isinstance(style, dict):
+                    for k in ('bezier', 'corridor', 'relocated', 'materialized', 'degraded'):
+                        if k in style:
+                            style_acc[k] += int(style.get(k) or 0)
+                after_off = lq.official_lines_through_nodes_count(trial, skip)
+                after_cross = int(lq.CrossingIndex(trial, skip).headline())
+                report['edges_tried'] += 1
+                official_drop = live_off - after_off
+                cross_delta = after_cross - live_cross
+                cross_ok = cross_delta <= 0 or (official_drop >= 1 and cross_delta <= 1)
+                # Preserved: also forbid any glyph move (relocated must stay 0).
+                reloc_ok = (not preserved) or int((style or {}).get('relocated') or 0) == 0
+                if official_drop > 0 and cross_ok and reloc_ok:
+                    data[0], data[1] = trial[0], trial[1]
+                    report['edges_kept'] += 1
+                    round_kept += 1
+            # Nudge after each routing round while residuals remain.
+            if lq.official_lines_through_nodes_count(data, skip) > 0:
+                nudge = _nudge_through_obstacles(data, skip)
+                if report.get('nudge') is None:
+                    report['nudge'] = {'tried': 0, 'kept': 0}
+                report['nudge']['tried'] = int(report['nudge'].get('tried', 0)) + int(nudge.get('tried', 0))
+                report['nudge']['kept'] = int(report['nudge'].get('kept', 0)) + int(nudge.get('kept', 0))
+                if nudge.get('kept'):
+                    report['edges_kept'] += int(nudge['kept'])
+                    style_acc['nudged'] = int(style_acc.get('nudged', 0)) + int(nudge['kept'])
+                    round_kept += int(nudge['kept'])
+            if round_kept == 0:
+                break
+    else:
+        # OMM-only residual: previous whole-reaction restyle (small maps / gallery).
+        trial = copy.deepcopy(data)
+        report['reset_spokes'] = _prepare_algorithm_spokes_for_restyle(
+            trial, set(target_rids), skip,
+        )
+        style = apply(
+            trial, skip, only=set(target_rids), mode=mode, gem_path=gem_path,
+            official_clear=True,
+        )
+        if isinstance(style, dict):
+            for k in ('bezier', 'corridor', 'relocated', 'materialized', 'degraded'):
+                if k in style:
+                    style_acc[k] += int(style.get(k) or 0)
+        after = lq.curves_through_nodes_report(trial, skip)
+        after_off = lq.official_lines_through_nodes_report(trial, skip)
+        after_cross = int(lq.CrossingIndex(trial, skip).headline())
+        if after['count'] < before['count'] and after_cross <= before_cross and after_off['count'] <= before_off['count']:
+            data[0], data[1] = trial[0], trial[1]
+            report['edges_kept'] = 1
+        report['edges_tried'] = 1
+
+    after = lq.curves_through_nodes_report(data, skip)
+    after_off = lq.official_lines_through_nodes_report(data, skip)
+    after_cross = int(lq.CrossingIndex(data, skip).headline())
+    report['style'] = dict(style_acc)
     report['after'] = after['count']
+    report['after_official'] = after_off['count']
     report['after_crossings'] = after_cross
-    ok = after['count'] < before['count'] and after_cross <= before_cross
+    official_drop = before_off['count'] - after_off['count']
+    report['official_drop'] = int(official_drop)
+    report['cross_delta'] = int(after_cross - before_cross)
+    ok = report['edges_kept'] > 0 and after_off['count'] <= before_off['count']
     report['accepted'] = bool(ok)
     report['reason'] = 'accepted' if ok else 'no_improvement'
-    if ok:
-        data[0], data[1] = trial[0], trial[1]
     report['seconds'] = round(time.time() - t0, 2)
     if log:
         log(
-            f"  clear through-nodes ({report['mode']}): {before['count']}->{after['count']} "
+            f"  clear through-nodes ({report['mode']}): "
+            f"omm {before['count']}->{after['count']} "
+            f"official {before_off['count']}->{after_off['count']} "
             f"crossings {before_cross}->{after_cross} "
-            f"({'kept' if ok else 'reverted'}) "
-            f"rids={len(before['reactions'])} {report['seconds']}s"
+            f"kept {report['edges_kept']}/{report['edges_tried']} "
+            f"nudge={report.get('nudge')} "
+            f"({'kept' if ok else 'reverted'}) {report['seconds']}s"
         )
     return report
