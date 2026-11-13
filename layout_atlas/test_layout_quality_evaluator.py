@@ -12,16 +12,19 @@ from evaluation.escher_bridge import load_escher
 from hub_drawing import pathway_from_model
 from layout_quality_evaluator import (
     FAR_EDGE_CLASSES,
+    INSTANCE_DIRS,
     METRIC_EPS,
     SCORE_DIRS,
     SCORE_METRICS,
     TIP_DIRS,
     LayoutQualityEvaluator,
+    accept_participant_consistency,
     coverage_metrics,
     curated_translation_only,
     dominates,
     far_edge_report,
     measure_scores,
+    measure_scene_participant_consistency,
     metrics_not_worse,
     pipeline_crossings,
     previous_pinned_node_ids,
@@ -205,6 +208,36 @@ def test_tip_evaluate_is_no_worse_including_aspect():
     decision = ev.evaluate(copy.deepcopy(data), metrics=worse)
     assert not decision.accepted
     assert "aspect_ratio" in decision.reason
+
+
+def test_instance_rule_new_only_side_consistency():
+    """rule=instance rejects PC regressions; imperfect baselines may stay."""
+    ev = LayoutQualityEvaluator([], rule="instance", require_local_improvement=False)
+    ev.begin_report({"participant_consistency": 0.81})
+    assert ev.evaluate(None, metrics={"participant_consistency": 0.81}).accepted
+    assert ev.evaluate(None, metrics={"participant_consistency": 0.90}).accepted
+    bad = ev.evaluate(None, metrics={"participant_consistency": 0.80})
+    assert not bad.accepted
+    assert "new_participant_inconsistency" in bad.reason
+    assert INSTANCE_DIRS["participant_consistency"] == "higher"
+    ok, why = accept_participant_consistency(0.5, 0.5)
+    assert ok and why == "accepted"
+    ok, why = accept_participant_consistency(0.5, 0.49)
+    assert not ok
+
+
+def test_measure_scene_participant_consistency_opposite_and_same():
+    model = {"reactions": [{"id": "R1", "metabolites": {"a": -1, "b": 1}}]}
+    opp = {
+        "positions": {"r:R1": [0.0, 0.0], "m:a": [-10.0, 0.0], "m:b": [10.0, 0.0]},
+        "participants": {("R1", "a"): "m:a", ("R1", "b"): "m:b"},
+    }
+    same = {
+        "positions": {"r:R1": [0.0, 0.0], "m:a": [10.0, 0.0], "m:b": [10.0, 5.0]},
+        "participants": {("R1", "a"): "m:a", ("R1", "b"): "m:b"},
+    }
+    assert measure_scene_participant_consistency(model, opp) == pytest.approx(1.0)
+    assert measure_scene_participant_consistency(model, same) == pytest.approx(0.0)
 
 
 @pytest.mark.parametrize("name", ["e_coli_core", "iIT341"])

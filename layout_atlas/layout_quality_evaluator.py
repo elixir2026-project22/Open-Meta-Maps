@@ -8,6 +8,9 @@ Wired into compose today:
     ``block_relocation._accept`` when not balanced): ``rule="peripheral"``
   - orthogonal routing (``orthogonal_route._gate_ok`` and length-deviation
     caps): ``ORTHO_DIRS`` + ``metrics_not_worse``
+  - new ``inst:`` / structure moves (``instances.structure_local``,
+    ``instances.optimize``, relocation / peripheral): ``rule="instance"``
+    with ``INSTANCE_DIRS`` (participant side-consistency, new-only)
 
 Shared tolerance: ``METRIC_EPS``.
 
@@ -16,7 +19,8 @@ API: ``snapshot()`` → ``evaluate()`` → ``commit()`` / ``rollback()`` /
 acceptance uses ``evaluate()``.
 
 Accept rule (three tiers, no weighted sum):
-  1. Hard constraints reject immediately (skipped for tip / peripheral).
+  1. Hard constraints reject immediately (skipped for tip / peripheral;
+     ``rule="instance"`` promotes side-consistency regressions to hard).
   2. None of the directed metrics may worsen by more than ``METRIC_EPS``.
   3. The candidate must improve its local objective (Pareto on the gated
      metrics when no scalar objective is set), unless the rule opts out.
@@ -82,6 +86,12 @@ ORTHO_DIRS: dict[str, str] = {
     "crossings": "lower",
     "edge_length_deviation": "lower",
     "angular_resolution": "lower",
+    "participant_consistency": "higher",
+}
+
+# New ``inst:`` creation and structure moves: relative (new-only) side-consistency
+# gate. Existing curated residuals below 1.0 are allowed; regressions are not.
+INSTANCE_DIRS: dict[str, str] = {
     "participant_consistency": "higher",
 }
 
@@ -406,6 +416,69 @@ def measure_tip(data, *, pathway=None) -> dict[str, Any]:
     )
 
 
+def measure_scene_participant_consistency(model, scene) -> float | None:
+    """Scene-level opposite-side share (reactant×product leave vectors, >90°).
+
+    Same geometry as ``layout_gate._through_reaction_share`` / official
+    ``participant_consistency``, but on compose ``scene`` keys (``r:`` /
+    ``copy:`` / ``inst:`` / …) so ``inst:`` creation can be gated before export.
+    """
+    from core import participation_roles
+
+    pos = scene.get("positions") or {}
+    parts = scene.get("participants") or {}
+    good = total = 0
+    for r in model.get("reactions") or []:
+        rid = r.get("id")
+        if rid is None:
+            continue
+        rk = "r:" + rid
+        if rk not in pos:
+            continue
+        origin = np.asarray(pos[rk], float)
+        inward: list[np.ndarray] = []
+        outward: list[np.ndarray] = []
+        for mid, coeff in (r.get("metabolites") or {}).items():
+            key = parts.get((rid, mid))
+            if key is None or key not in pos:
+                continue
+            vec = np.asarray(pos[key], float) - origin
+            for role in participation_roles(coeff):
+                (inward if role < 0 else outward).append(vec)
+        for vin in inward:
+            for vout in outward:
+                total += 1
+                if float(np.dot(vin, vout)) < 0.0:
+                    good += 1
+    if total == 0:
+        return None
+    return good / total
+
+
+def accept_participant_consistency(
+    before: float | None,
+    after: float | None,
+    *,
+    eps: float = METRIC_EPS,
+) -> tuple[bool, str]:
+    """New-only side-consistency gate via ``rule="instance"``.
+
+    Returns ``(ok, reason)``. Absolute values below 1.0 are fine; only a
+    regression beyond ``eps`` is rejected.
+    """
+    gate = LayoutQualityEvaluator(
+        [],
+        rule="instance",
+        require_local_improvement=False,
+        eps=eps,
+    )
+    gate.begin_report({"participant_consistency": before})
+    decision = gate.evaluate(
+        None, metrics={"participant_consistency": after},
+    )
+    return bool(decision.accepted), decision.reason
+
+
 @dataclass
 class Evaluation:
     """Result of evaluating one candidate against the snapshot baseline."""
@@ -460,6 +533,8 @@ class LayoutQualityEvaluator:
             self.metric_dirs = dict(metric_dirs)
         elif rule == "tip":
             self.metric_dirs = dict(TIP_DIRS)
+        elif rule == "instance":
+            self.metric_dirs = dict(INSTANCE_DIRS)
         else:
             self.metric_dirs = dict(SCORE_DIRS)
         self._snap: _Snapshot | None = None
@@ -500,28 +575,35 @@ class LayoutQualityEvaluator:
             raise RuntimeError("snapshot() before evaluate()")
         base = self._snap.data
         fails = []
+        # Instance / structure-move gate may evaluate metrics-only (no map body).
+        if self.rule == "instance" and (
+            not isinstance(base, list) or not isinstance(candidate, list)
+        ):
+            return fails
         pinned = previous_pinned_node_ids(base, self.previous_anchors)
         if pinned and not pins_unchanged(base, candidate, pinned, self.eps):
             fails.append("pins_moved")
         if not curated_translation_only(base, candidate, self.eps):
             fails.append("curated_not_translation_only")
-        cov_b = self._snap.hard["coverage"]
-        cov_a = coverage_metrics(candidate, self.model)
-        for key in ("species_drawn", "reactions_drawn"):
-            bv, av = cov_b.get(key), cov_a.get(key)
-            if bv is None or av is None:
-                continue
-            if float(av) + self.eps < float(bv) or float(av) + self.eps < 1.0:
-                if float(bv) >= 1.0 - self.eps and float(av) < 1.0 - self.eps:
-                    fails.append("not_everything_drawn")
-                    break
-                if float(av) + self.eps < float(bv):
-                    fails.append("not_everything_drawn")
-                    break
-        if canvas_area(candidate) > self._snap.hard["canvas"] + self.eps:
-            fails.append("canvas_grew")
-        if cropped_label_count(candidate) > int(self._snap.hard["cropped"]):
-            fails.append("new_cropped_labels")
+        cov_b = self._snap.hard.get("coverage") or {}
+        if cov_b and isinstance(candidate, list):
+            cov_a = coverage_metrics(candidate, self.model)
+            for key in ("species_drawn", "reactions_drawn"):
+                bv, av = cov_b.get(key), cov_a.get(key)
+                if bv is None or av is None:
+                    continue
+                if float(av) + self.eps < float(bv) or float(av) + self.eps < 1.0:
+                    if float(bv) >= 1.0 - self.eps and float(av) < 1.0 - self.eps:
+                        fails.append("not_everything_drawn")
+                        break
+                    if float(av) + self.eps < float(bv):
+                        fails.append("not_everything_drawn")
+                        break
+        if self._snap.hard and isinstance(candidate, list):
+            if canvas_area(candidate) > float(self._snap.hard.get("canvas") or 0.0) + self.eps:
+                fails.append("canvas_grew")
+            if cropped_label_count(candidate) > int(self._snap.hard.get("cropped") or 0):
+                fails.append("new_cropped_labels")
         return fails
 
     # --- snapshot / evaluate / commit ------------------------------------
@@ -611,6 +693,34 @@ class LayoutQualityEvaluator:
             ok = not metric_fails
             reason = "accepted" if ok else "metrics:" + ",".join(metric_fails)
             ev = Evaluation(ok, reason, True, ok, True, after, before, [], metric_fails)
+            self._record(ev)
+            return ev
+        if self.rule == "instance":
+            # New-only side consistency: regressions are hard; absolute <1.0 is fine.
+            after = dict(metrics) if metrics is not None else self.measure(candidate)
+            before = self._snap.metrics
+            metric_fails = metric_regressions(before, after, self.metric_dirs, self.eps)
+            hard_fails = []
+            if "participant_consistency" in metric_fails:
+                hard_fails.append("new_participant_inconsistency")
+            # Keep pin / curated rigidity when a full map candidate is supplied.
+            if isinstance(candidate, list) and isinstance(self._snap.data, list):
+                hard_fails.extend(
+                    f for f in self.hard_failures(candidate)
+                    if f not in hard_fails
+                )
+            hard_ok = not hard_fails
+            metrics_ok = not metric_fails
+            ok = hard_ok and metrics_ok
+            if not hard_ok:
+                reason = "hard:" + ",".join(hard_fails)
+            elif not metrics_ok:
+                reason = "metrics:" + ",".join(metric_fails)
+            else:
+                reason = "accepted"
+            ev = Evaluation(
+                ok, reason, hard_ok, metrics_ok, True, after, before, hard_fails, metric_fails,
+            )
             self._record(ev)
             return ev
 
@@ -1016,6 +1126,7 @@ __all__ = [
     "TIP_DIRS",
     "HUB_DIRS",
     "ORTHO_DIRS",
+    "INSTANCE_DIRS",
     "FAR_EDGE_CLASSES",
     "LayoutQualityEvaluator",
     "Evaluation",
@@ -1025,6 +1136,8 @@ __all__ = [
     "pipeline_crossings",
     "measure_scores",
     "measure_tip",
+    "measure_scene_participant_consistency",
+    "accept_participant_consistency",
     "coverage_metrics",
     "pins_unchanged",
     "curated_translation_only",

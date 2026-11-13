@@ -2,6 +2,7 @@
 import copy
 
 import numpy as np
+import pytest
 
 import instances as I
 
@@ -258,3 +259,56 @@ def test_two_local_inst_keep_metabolite_gap():
     gap = float(inspect.signature(I.separate).parameters['metabolite_gap'].default)
     d = float(np.hypot(*(np.array(out['positions'][ka], float) - np.array(out['positions'][kb], float))))
     assert d + 1e-9 >= gap
+
+
+def test_structure_local_skips_inst_that_worsens_side_consistency(monkeypatch):
+    # Own substrate on −x, far foreign product on +x (PC=1). Forced same-side product inst rejected.
+    model = {
+        'reactions': [{'id': 'RA', 'metabolites': {'a_c': -1, 'b_c': 1}}],
+        'metabolites': [],
+    }
+    blocks = [{'id': 'A', 'reaction_ids': ['RA'], 'positions': {}}]
+    scene = _scene(
+        {
+            'r:RA': [0.0, 0.0],
+            'copy:A:a_c': [-40.0, 0.0],
+            'copy:B:b_c': [1000.0, 0.0],
+        },
+        {('RA', 'a_c'): 'copy:A:a_c', ('RA', 'b_c'): 'copy:B:b_c'},
+    )
+    from layout_quality_evaluator import measure_scene_participant_consistency
+    assert measure_scene_participant_consistency(model, scene) == pytest.approx(1.0)
+
+    def _bad_place(centre, foreign_xy, existing, place_dist, clearance, far_thr, disk_clearance):
+        # Plant product on the substrate half-plane → opposite-side share drops.
+        return np.array([-80.0, 0.0], float)
+
+    monkeypatch.setattr(I, '_place_along_corridor', _bad_place)
+    out, rep = I.structure_local(model, copy.deepcopy(scene), blocks, cur=set())
+    assert rep['added'] == 0
+    assert rep.get('skipped_side_consistency', 0) >= 1
+    assert out['participants'][('RA', 'a_c')] == 'copy:A:a_c'
+    assert out['participants'][('RA', 'b_c')] == 'copy:B:b_c'
+    assert measure_scene_participant_consistency(model, out) == pytest.approx(1.0)
+
+
+def test_structure_local_allows_imperfect_baseline_pc():
+    # Existing same-side curated geometry (PC=0) must not block a side-preserving local inst.
+    model = {
+        'reactions': [{'id': 'RA', 'metabolites': {'a_c': -1, 'b_c': 1}}],
+        'metabolites': [],
+    }
+    blocks = [{'id': 'A', 'reaction_ids': ['RA'], 'positions': {}}]
+    scene = _scene(
+        {
+            'r:RA': [0.0, 0.0],
+            'copy:B:a_c': [1000.0, 0.0],
+            'copy:B:b_c': [1100.0, 40.0],
+        },
+        {('RA', 'a_c'): 'copy:B:a_c', ('RA', 'b_c'): 'copy:B:b_c'},
+    )
+    from layout_quality_evaluator import measure_scene_participant_consistency
+    assert measure_scene_participant_consistency(model, scene) == pytest.approx(0.0)
+    out, rep = I.structure_local(model, copy.deepcopy(scene), blocks, cur=set())
+    assert rep['added'] == 2
+    assert measure_scene_participant_consistency(model, out) >= 0.0 - 1e-9

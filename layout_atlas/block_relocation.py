@@ -48,24 +48,58 @@ MIN_GAIN = 0.5
 MAX_COLL_RISE, MAX_CROSS_RISE = 5, 10
 
 
-def _accept(old, new):
+def _accept(old, new, *, pc_before=None, pc_after=None):
     if ACCEPT != 'balanced':
         from layout_quality_evaluator import LayoutQualityEvaluator
         gate = LayoutQualityEvaluator([], rule='peripheral', require_local_improvement=True)
         gate.begin_report(old)
         decision = gate.evaluate(None, metrics=new)
-        return decision.accepted, decision.reason
-    if new['hard'] > old['hard']:
-        return False, 'hard constraint broken'
-    dc, do, dl = new['crossings'] - old['crossings'], new['collisions'] - old['collisions'], new['long_edges'] - old['long_edges']
-    if do > MAX_COLL_RISE:
-        return False, 'collisions +%d (limit %d)' % (do, MAX_COLL_RISE)
-    if dc > MAX_CROSS_RISE:
-        return False, 'crossings +%d (limit %d)' % (dc, MAX_CROSS_RISE)
-    dj = W_CROSS * dc + W_COLL * do + W_LONG * dl + 0.0
-    if dj < -MIN_GAIN:
-        return True, 'weighted gain %.1f (crossings %+d, collisions %+d, long connections %+d)' % (-dj, dc, do, dl)
-    return False, 'no weighted gain (%.1f; crossings %+d, collisions %+d, long connections %+d)' % (-dj, dc, do, dl)
+        if not decision.accepted:
+            return decision.accepted, decision.reason
+        why = decision.reason
+    else:
+        if new['hard'] > old['hard']:
+            return False, 'hard constraint broken'
+        dc, do, dl = new['crossings'] - old['crossings'], new['collisions'] - old['collisions'], new['long_edges'] - old['long_edges']
+        if do > MAX_COLL_RISE:
+            return False, 'collisions +%d (limit %d)' % (do, MAX_COLL_RISE)
+        if dc > MAX_CROSS_RISE:
+            return False, 'crossings +%d (limit %d)' % (dc, MAX_CROSS_RISE)
+        dj = W_CROSS * dc + W_COLL * do + W_LONG * dl + 0.0
+        if dj >= -MIN_GAIN:
+            return False, 'no weighted gain (%.1f; crossings %+d, collisions %+d, long connections %+d)' % (-dj, dc, do, dl)
+        why = 'weighted gain %.1f (crossings %+d, collisions %+d, long connections %+d)' % (-dj, dc, do, dl)
+    if pc_before is not None or pc_after is not None:
+        from layout_quality_evaluator import accept_participant_consistency
+        ok_pc, why_pc = accept_participant_consistency(pc_before, pc_after)
+        if not ok_pc:
+            return False, why_pc
+    return True, why
+
+
+def _scene_pc(model, scene):
+    from layout_quality_evaluator import measure_scene_participant_consistency
+    return measure_scene_participant_consistency(model, scene)
+
+
+def _scene_pc_after_moves(model, scene, moves):
+    """``moves`` = iterable of (keys, delta); measure PC as if those rigid translations applied."""
+    from layout_quality_evaluator import measure_scene_participant_consistency
+    shifted = {}
+    for keys, delta in moves:
+        dx, dy = float(delta[0]), float(delta[1])
+        for k in keys:
+            shifted[k] = (shifted.get(k, (0.0, 0.0))[0] + dx, shifted.get(k, (0.0, 0.0))[1] + dy)
+    if not shifted:
+        return measure_scene_participant_consistency(model, scene)
+    trial_pos = {}
+    for k, v in scene['positions'].items():
+        if k in shifted:
+            trial_pos[k] = [float(v[0]) + shifted[k][0], float(v[1]) + shifted[k][1]]
+        else:
+            trial_pos[k] = list(v)
+    trial = dict(scene, positions=trial_pos)
+    return measure_scene_participant_consistency(model, trial)
 
 
 def _spacing(pos):
@@ -213,6 +247,7 @@ def relocate(data, model, scene, blocks, cur, skip_edges, max_units=20, log=None
     far = len(units)
     rejected_units = []
     base, summary, issues = qg.evaluate_map(data, skip_edges, disconnected=far)
+    pc_base = _scene_pc(model, scene)
     for unit in units[:max_units]:
         row = dict(block=unit['block'], reactions=unit['reactions'][:6], longest_px=unit['long'][0][2], longest_in_spacings=round(unit['long'][0][2] / unit['spacing'], 1),
                    connections=[(r, m, px) for r, m, px, _ in unit['long'][:4]], tries=[])
@@ -228,7 +263,8 @@ def relocate(data, model, scene, blocks, cur, skip_edges, max_units=20, log=None
             d2, redo, _ = qg.translate_module(data, scene, unit['keys'], delta, set(unit['reactions']), skip_edges)
             edge_style.apply(d2, skip_edges, only=redo)
             new, s2, i2 = qg.evaluate_map(d2, skip_edges, disconnected=far - 1)
-            ok, why = _accept(base, new)
+            pc_after = _scene_pc_after_moves(model, scene, [(unit['keys'], delta)])
+            ok, why = _accept(base, new, pc_before=pc_base, pc_after=pc_after)
             row['tries'].append(dict(moved_px=round(float(np.hypot(*delta)), 1), decision='accepted' if ok else 'rejected', reason=why, proxy=proxy,
                                      after={k: new[k] for k in ('collisions', 'crossings', 'long_edges')}, diagnosis=_diagnose(data, scene, unit, delta, issues, i2)))
             if ok:
@@ -237,6 +273,7 @@ def relocate(data, model, scene, blocks, cur, skip_edges, max_units=20, log=None
                 base['disconnected'] = far
                 for k in unit['keys']:
                     scene['positions'][k] = [scene['positions'][k][0] + float(delta[0]), scene['positions'][k][1] + float(delta[1])]
+                pc_base = pc_after if pc_after is not None else pc_base
                 won = True
                 break
         if not won and CLEARING:
@@ -251,7 +288,9 @@ def relocate(data, model, scene, blocks, cur, skip_edges, max_units=20, log=None
                     redo = redo | r2
                 edge_style.apply(d1, skip_edges, only=redo)
                 new, s2, i2 = qg.evaluate_map(d1, skip_edges, disconnected=far - 1)
-                ok, why = _accept(base, new)
+                moves = [(unit['keys'], delta)] + [(ks, dp) for ks, dp, _rs in pushes]
+                pc_after = _scene_pc_after_moves(model, scene, moves)
+                ok, why = _accept(base, new, pc_before=pc_base, pc_after=pc_after)
                 row['tries'].append(dict(moved_px=round(float(np.hypot(*delta)), 1), cleared_units=len(pushes), decision='accepted' if ok else 'rejected', reason=why,
                                          after={k: new[k] for k in ('collisions', 'crossings', 'long_edges')}, diagnosis=_diagnose(data, scene, unit, delta, issues, i2)))
                 if ok:
@@ -263,6 +302,7 @@ def relocate(data, model, scene, blocks, cur, skip_edges, max_units=20, log=None
                     for ks, dp, rs in pushes:
                         for k in ks:
                             scene['positions'][k] = [scene['positions'][k][0] + float(dp[0]), scene['positions'][k][1] + float(dp[1])]
+                    pc_base = pc_after if pc_after is not None else pc_base
                     won = True
                     break
         row['decision'] = 'accepted' if won else 'rejected'
@@ -275,7 +315,9 @@ def relocate(data, model, scene, blocks, cur, skip_edges, max_units=20, log=None
             log(f"  block relocation {unit['block'][:8]} ({unit['reactions'][:3]}): {row['decision']} (longest {row['longest_in_spacings']} spacings)")
     # coupled units: two rejected units that share a non-currency metabolite pull on each other (moving one changes the other's connections), so a move that is
     # not good alone can be good together.  Try joint candidates (a few positions for each, moved together) for the most displaced pairs.
-    data, base, issues, far = _joint_pairs(data, model, scene, blocks, cur, skip_edges, rejected_units, base, issues, far, report, log)
+    data, base, issues, far = _joint_pairs(
+        data, model, scene, blocks, cur, skip_edges, rejected_units, base, issues, far, report, log,
+        pc_base=pc_base)
     report['seconds'] = round(time.time() - t0, 1)
     return data, report
 
@@ -338,9 +380,12 @@ def _box(scene, keys, delta):
     return arr.min(0) - 60.0, arr.max(0) + 60.0
 
 
-def _joint_pairs(data, model, scene, blocks, cur, skip_edges, rejected, base, issues, far, report, log):
+def _joint_pairs(data, model, scene, blocks, cur, skip_edges, rejected, base, issues, far, report, log,
+                 pc_base=None):
     import edge_style
     import quality_gate as qg
+    if pc_base is None:
+        pc_base = _scene_pc(model, scene)
     rx = {r['id']: r for r in model['reactions']}
     mets = {id(u): {m for r in u['reactions'] for m in rx[r]['metabolites'] if m not in cur} for u in rejected}
     pairs = []
@@ -366,7 +411,8 @@ def _joint_pairs(data, model, scene, blocks, cur, skip_edges, rejected, base, is
                 d2, redo2, _ = qg.translate_module(d1, scene, b['keys'], db, set(b['reactions']), skip_edges)
                 edge_style.apply(d2, skip_edges, only=redo1 | redo2)
                 new, s2, i2 = qg.evaluate_map(d2, skip_edges, disconnected=far - 2)
-                ok, why = _accept(base, new)
+                pc_after = _scene_pc_after_moves(model, scene, [(a['keys'], da), (b['keys'], db)])
+                ok, why = _accept(base, new, pc_before=pc_base, pc_after=pc_after)
                 row['tries'].append(dict(moved_px=[round(float(np.hypot(*da)), 1), round(float(np.hypot(*db)), 1)], decision='accepted' if ok else 'rejected', reason=why,
                                          after={k: new[k] for k in ('collisions', 'crossings', 'long_edges')}))
                 if ok:
@@ -376,6 +422,7 @@ def _joint_pairs(data, model, scene, blocks, cur, skip_edges, rejected, base, is
                     for u, d in ((a, da), (b, db)):
                         for k in u['keys']:
                             scene['positions'][k] = [scene['positions'][k][0] + float(d[0]), scene['positions'][k][1] + float(d[1])]
+                    pc_base = pc_after if pc_after is not None else pc_base
                     won = True
                     break
             if won:
@@ -397,7 +444,9 @@ def _joint_pairs(data, model, scene, blocks, cur, skip_edges, rejected, base, is
                     redo = redo | r3
                 edge_style.apply(d1, skip_edges, only=redo)
                 new, s2, i2 = qg.evaluate_map(d1, skip_edges, disconnected=far - 2)
-                ok, why = _accept(base, new)
+                moves = [(a['keys'], da), (b['keys'], db)] + [(ks, dp) for ks, dp, _rs in pushes]
+                pc_after = _scene_pc_after_moves(model, scene, moves)
+                ok, why = _accept(base, new, pc_before=pc_base, pc_after=pc_after)
                 row['tries'].append(dict(moved_px=[round(float(np.hypot(*da)), 1), round(float(np.hypot(*db)), 1)], cleared_units=len(pushes), decision='accepted' if ok else 'rejected',
                                          reason=why, after={k: new[k] for k in ('collisions', 'crossings', 'long_edges')}))
                 if ok:
@@ -410,6 +459,7 @@ def _joint_pairs(data, model, scene, blocks, cur, skip_edges, rejected, base, is
                     for ks, dp, rs in pushes:
                         for k in ks:
                             scene['positions'][k] = [scene['positions'][k][0] + float(dp[0]), scene['positions'][k][1] + float(dp[1])]
+                    pc_base = pc_after if pc_after is not None else pc_base
                     won = True
                     break
         row['decision'] = 'accepted' if won else 'rejected'
@@ -605,6 +655,7 @@ def relocate_sub(data, model, scene, blocks, cur, skip_edges, max_units=12, log=
         return data, report
     far = len(units)
     base, summary, issues = qg.evaluate_map(data, skip_edges, disconnected=far)
+    pc_base = _scene_pc(model, scene)
     # Cap expensive whole-block trials: translating a large curated block rarely passes the gate.
     max_tries = 2
     max_move_px = 900.0
@@ -630,7 +681,8 @@ def relocate_sub(data, model, scene, blocks, cur, skip_edges, max_units=12, log=
             d2, redo, _ = qg.translate_module(data, scene, unit['keys'], delta, set(unit['reactions']), skip_edges)
             edge_style.apply(d2, skip_edges, only=redo)
             new, s2, i2 = qg.evaluate_map(d2, skip_edges, disconnected=far - 1)
-            ok, why = _accept(base, new)
+            pc_after = _scene_pc_after_moves(model, scene, [(unit['keys'], delta)])
+            ok, why = _accept(base, new, pc_before=pc_base, pc_after=pc_after)
             row['tries'].append(dict(moved_px=round(move, 1),
                                      decision='accepted' if ok else 'rejected', reason=why,
                                      after={k: new[k] for k in ('collisions', 'crossings', 'long_edges')}))
@@ -641,6 +693,7 @@ def relocate_sub(data, model, scene, blocks, cur, skip_edges, max_units=12, log=
                 for k in unit['keys']:
                     scene['positions'][k] = [scene['positions'][k][0] + float(delta[0]),
                                             scene['positions'][k][1] + float(delta[1])]
+                pc_base = pc_after if pc_after is not None else pc_base
                 won = True
                 break
         row['decision'] = 'accepted' if won else 'rejected'

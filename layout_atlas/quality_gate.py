@@ -165,10 +165,12 @@ def peripheral_pass(data, scene, proposals, skip_edges, max_candidates=24, log=N
     wall-clock. Excess proposals are reported as budget_exhausted without a gate call.
     """
     import edge_style
-    from layout_quality_evaluator import LayoutQualityEvaluator
+    import orthogonal_route as ortho
+    from layout_quality_evaluator import LayoutQualityEvaluator, accept_participant_consistency
     t0 = time.time()
     far = len(proposals)
     base, summary, issues = evaluate_map(data, skip_edges, disconnected=far)
+    pc_base = ortho.gate_metrics(data).get('participant_consistency')
     rows, accepted = [], 0
     gate = LayoutQualityEvaluator(
         data, skip_edges=skip_edges, rule='peripheral', require_local_improvement=True,
@@ -183,6 +185,11 @@ def peripheral_pass(data, scene, proposals, skip_edges, max_candidates=24, log=N
         gate.begin_report(base)
         decision = gate.evaluate(d2, metrics=new, disconnected=far - 1)
         ok, why = decision.accepted, decision.reason
+        if ok:
+            pc_after = ortho.gate_metrics(d2).get('participant_consistency')
+            ok, why = accept_participant_consistency(pc_base, pc_after)
+            if ok:
+                pc_base = pc_after if pc_after is not None else pc_base
         rows.append(dict(exchange=prop['exchange'], transports=prop['transports'], decision='accepted' if ok else 'rejected', reason=why, moved_px=prop.get('moved_px'),
                          before={k: base[k] for k in ('collisions', 'crossings', 'long_edges')}, after={k: new[k] for k in ('collisions', 'crossings', 'long_edges')}))
         if ok:
