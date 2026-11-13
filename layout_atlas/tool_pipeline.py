@@ -466,6 +466,14 @@ def draw_map_from_previous(model, selected, folder, full_model=None, log=None):
         log(f"  previous layout: reused map ({report['kept_reactions']} reactions, "
             f"{report['removed_reactions']} removed, {report['nodes']} nodes{extra}); "
             f"skipped packing/redraw")
+    # Hub split on the reused drawing (same gate as the full compose path).
+    import split_cofactor_hubs as _sch
+    from hub_drawing import pathway_from_model as _pathway_from_model
+    curated_rids = {rid for b in (selected or []) for rid in b.get('reaction_ids') or []}
+    pathway = _pathway_from_model(model)
+    data, hub_report = _sch.apply_gated(
+        data, model, pathway=pathway, curated=curated_rids, log=log)
+    dump(folder / 'cofactor_hub_split.json', hub_report)
     dump(output_names.map_json(folder), data)
     try:
         Draft4Validator(read(ESCHER_SCHEMA)).validate(data)
@@ -491,6 +499,7 @@ def draw_map_from_previous(model, selected, folder, full_model=None, log=None):
         layout_quality_final=quality_summary,
         completion=dict(method='previous_filter_graft', **report),
         previous_relayout=previous_relayout,
+        cofactor_hub_split=hub_report,
         routing=dict(status='preserved_from_previous'),
         routing_attempts=[], orientation_mode=ORIENTATION,
         instance_optimization=dict(mode='off'), context_placement=dict(mode='off'),
@@ -1184,6 +1193,19 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
         if log:
             log(f"  orthogonal algorithm routes (final): {metric['edge_style_orthogonal']}")
         dump(folder / 'map.json', data)
+    # Late per-reaction currency clones for Pathway-Scorer-style hubs (layout gate).
+    # Runs after orthogonal multimarkers exist so the gate scores the same polylines
+    # the official edge_orthogonality measure uses. Also runs on --previous pin paths
+    # (including mid-size skip-packing), not only full redraws.
+    import split_cofactor_hubs as _sch
+    from hub_drawing import pathway_from_model as _pathway_from_model
+    curated_rids = {rid for b in blocks for rid in b.get('reaction_ids') or []}
+    pathway = _pathway_from_model(model)
+    data, hub_report = _sch.apply_gated(
+        data, model, pathway=pathway, curated=curated_rids, log=log)
+    metric['cofactor_hub_split'] = hub_report
+    dump(output_names.map_json(folder), data)
+    dump(folder / 'cofactor_hub_split.json', hub_report)
     t_quality = time.time()
     # Persist structure membership on the map so continuity can be scored from map.json alone.
     # Absolute same-map reuse keeps BiGG spacing; score spatial pieces, not whole atlas windows.

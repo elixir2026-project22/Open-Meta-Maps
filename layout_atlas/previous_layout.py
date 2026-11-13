@@ -33,7 +33,9 @@ def load_previous_anchors(path, model=None):
     body = payload[1] if isinstance(payload, list) and len(payload) >= 2 else payload
     if not isinstance(body, dict):
         raise ValueError(f'Not an Escher map: {path}')
-    abs_map = _absolute_from_escher(body, str(path))
+    header = payload[0] if isinstance(payload, list) and payload else {}
+    skip = (header.get('metadata') or {}).get('hub_split_clones') if isinstance(header, dict) else None
+    abs_map = _absolute_from_escher(body, str(path), skip_nids=skip)
     anchors = {}
     for rid, xy in (abs_map.get('reactions') or {}).items():
         anchors['r:' + rid] = [float(xy[0]), float(xy[1])]
@@ -159,10 +161,13 @@ def filter_previous_map(path, model):
                     used_nodes.add(str(nid))
     kept_nodes = {nid: dict(nodes[nid]) for nid in used_nodes if nid in nodes}
     # Keep the previous compare-map representative glyph for each remaining metabolite
-    # (same rule as evaluation.escher_bridge.escher_positions: last primary wins).  Do not
-    # move other clones — that would stretch edges that still use them.
+    # (primary first, then smallest x — same as _absolute_from_escher). Skip hub-split
+    # clones so --previous pins stay on the original hub glyph.
+    skip_clones = {str(x) for x in ((header.get('metadata') or {}).get('hub_split_clones') or [])}
     ref_nid = {}
     for nid, n in nodes.items():
+        if str(nid) in skip_clones:
+            continue
         if n.get('node_type') != 'metabolite' or not n.get('bigg_id'):
             continue
         mid = n['bigg_id']
