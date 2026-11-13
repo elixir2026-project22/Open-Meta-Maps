@@ -6,6 +6,7 @@ skipped and only free nodes are completed around the pinned anchors.
 from __future__ import annotations
 
 import json
+from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
@@ -64,27 +65,128 @@ def should_skip_packing(anchors, model, threshold=PACK_SKIP_SHARE):
     return reaction_anchor_share(anchors, model) >= float(threshold)
 
 
+def _mean_translation(deltas):
+    """Least-squares mean offset of 2-D deltas (deterministic; no tuned weights)."""
+    arr = np.asarray(list(deltas), float)
+    if arr.size == 0:
+        return None
+    return arr.mean(axis=0)
+
+
 def apply_block_positions(blocks, anchors):
-    """Rewrite curated block glyph positions from previous anchors where present."""
+    """Translate each curated block as a rigid body from previous anchors.
+
+    When a block has one or more glyphs that match previous anchors, compute one
+    structure-level translation (mean offset of the matches) and add it to every
+    glyph in the block.  Blocks with no matches are left unchanged.
+    """
     if not anchors:
         return blocks, 0
     n = 0
     for b in blocks or []:
         pos = dict(b.get('positions') or {})
-        for k in list(pos):
+        deltas = []
+        for k, xy in pos.items():
             if k in anchors:
-                pos[k] = list(anchors[k])
-                n += 1
+                deltas.append(np.asarray(anchors[k], float) - np.asarray(xy, float))
+        delta = _mean_translation(deltas)
+        if delta is None:
+            b['positions'] = pos
+            continue
+        for k in list(pos):
+            pos[k] = (np.asarray(pos[k], float) + delta).tolist()
+            n += 1
         b['positions'] = pos
     return blocks, n
 
 
-def pin_scene(scene, anchors):
+def _structure_membership(scene, pos, blocks=None):
+    """Map curated structure id → scene keys (``copy:`` glyphs and their ``r:`` midmarkers).
+
+    Block ``reaction_ids`` assign midmarkers even when ``participants`` is incomplete.
+    Each scene key belongs to at most one structure (deterministic: prefer the
+    ``copy:`` prefix owner, otherwise the lexicographically smallest block id).
+    """
+    structure_keys = defaultdict(set)
+    owner = {}
+
+    def claim(bid, k):
+        if k not in pos:
+            return
+        prev = owner.get(k)
+        if prev is None:
+            owner[k] = bid
+            structure_keys[bid].add(k)
+            return
+        if prev == bid:
+            return
+        # copy:<bid>:… keys are unique per structure; never reassign them.
+        if k.startswith('copy:'):
+            return
+        # Shared midmarkers / side stubs: keep the lexicographically smaller bid.
+        keep = sorted((prev, bid))[0]
+        drop = bid if keep == prev else prev
+        if drop in structure_keys:
+            structure_keys[drop].discard(k)
+        owner[k] = keep
+        structure_keys[keep].add(k)
+
+    for k in pos:
+        if not (isinstance(k, str) and k.startswith('copy:') and k.count(':') >= 2):
+            continue
+        claim(k.split(':', 2)[1], k)
+    # Prefer reaction→structure from curated copy participants.
+    rid_owner = {}
+    parts = scene.get('participants') or {}
+    for pk, key in parts.items():
+        if not (isinstance(key, str) and key.startswith('copy:') and key.count(':') >= 2):
+            continue
+        bid = key.split(':', 2)[1]
+        if isinstance(pk, (tuple, list)) and len(pk) >= 1:
+            rid = pk[0]
+        elif isinstance(pk, str) and '||' in pk:
+            rid = pk.split('||', 1)[0]
+        else:
+            continue
+        rid_owner.setdefault(rid, bid)
+        claim(bid, 'r:' + rid)
+    for b in sorted(blocks or [], key=lambda x: x.get('id') or ''):
+        bid = b.get('id')
+        if not bid:
+            continue
+        for rid in b.get('reaction_ids') or []:
+            use = rid_owner.get(rid, bid)
+            claim(use, 'r:' + rid)
+            prefix = 'side:' + rid + ':'
+            for k in pos:
+                if k.startswith(prefix):
+                    claim(use, k)
+    return structure_keys
+
+
+def _structure_translation(keys, pos, anchors):
+    """One structure-level translation from matched previous anchors, or None."""
+    deltas = []
+    for k in keys:
+        if k.startswith('copy:'):
+            met = k.rsplit(':', 1)[-1]
+            mk = 'm:' + met
+            if mk in anchors:
+                deltas.append(np.asarray(anchors[mk], float) - np.asarray(pos[k], float))
+        elif k.startswith('r:') and k in anchors:
+            deltas.append(np.asarray(anchors[k], float) - np.asarray(pos[k], float))
+    return _mean_translation(deltas)
+
+
+def pin_scene(scene, anchors, blocks=None):
     """Hard-pin previous anchors into a display scene before export.
 
-    Pins ``r:`` / ``m:`` keys and curated ``copy:…:met`` glyphs to the previous
-    primary metabolite position.  Currency ``side:`` stubs follow their reaction
-    midmarker by the same delta so spokes stay attached.  Must run before
+    Curated structures (``copy:<structure>:…`` glyphs, their reaction midmarkers,
+    and reaction-local ``side:`` stubs) move as rigid bodies: one least-squares
+    mean translation from all matched previous anchors for that structure,
+    applied to every member.  Nodes outside structures (``m:``, ``inst:``, free
+    ``r:``) restore their previous positions independently.  Other ``side:``
+    stubs follow their reaction midmarker by the same delta.  Must run before
     ``drawing.export`` (which applies one uniform canvas translation); do not
     re-apply absolute previous coordinates onto the exported Escher JSON.
     """
@@ -92,31 +194,39 @@ def pin_scene(scene, anchors):
         return scene, 0
     pos = scene.get('positions') or {}
     n = 0
-    old_mids = {k: list(pos[k]) for k in pos if k.startswith('r:') and k in anchors}
+    old_mids = {k: list(pos[k]) for k in pos if k.startswith('r:')}
+    structure_keys = _structure_membership(scene, pos, blocks=blocks)
+    in_structure = set()
+    for keys in structure_keys.values():
+        in_structure.update(keys)
+
+    for _bid, keys in structure_keys.items():
+        delta = _structure_translation(keys, pos, anchors)
+        if delta is None:
+            continue
+        for k in keys:
+            pos[k] = (np.asarray(pos[k], float) + delta).tolist()
+            n += 1
+
     for k, xy in anchors.items():
-        if k in pos:
+        if k in pos and k not in in_structure:
             pos[k] = [float(xy[0]), float(xy[1])]
             n += 1
+
+    # Keep remaining side stubs attached to midmarkers that moved.
     for k in list(pos):
-        if not k.startswith('copy:'):
-            continue
-        met = k.rsplit(':', 1)[-1]
-        mk = 'm:' + met
-        if mk in anchors:
-            pos[k] = [float(anchors[mk][0]), float(anchors[mk][1])]
-            n += 1
-    # Keep side stubs attached to pinned midmarkers.
-    for k in list(pos):
-        if not k.startswith('side:'):
+        if not k.startswith('side:') or k in in_structure:
             continue
         # side:<rid>:<met>
         parts = k.split(':', 2)
         if len(parts) < 3:
             continue
         rk = 'r:' + parts[1]
-        if rk not in anchors or rk not in old_mids:
+        if rk not in old_mids or rk not in pos:
             continue
-        delta = np.asarray(anchors[rk], float) - np.asarray(old_mids[rk], float)
+        delta = np.asarray(pos[rk], float) - np.asarray(old_mids[rk], float)
+        if float(np.hypot(delta[0], delta[1])) < 1e-15:
+            continue
         pos[k] = (np.asarray(pos[k], float) + delta).tolist()
         n += 1
     scene['positions'] = pos

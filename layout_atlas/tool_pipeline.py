@@ -630,7 +630,7 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
     def _pin_previous(scene):
         if not PREVIOUS_ANCHORS:
             return scene
-        scene, n = prev.pin_scene(scene, PREVIOUS_ANCHORS)
+        scene, n = prev.pin_scene(scene, PREVIOUS_ANCHORS, blocks=blocks)
         if log and n:
             log(f'  previous layout restore: {n} glyphs')
         return scene
