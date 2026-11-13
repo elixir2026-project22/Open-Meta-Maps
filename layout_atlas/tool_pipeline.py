@@ -1192,16 +1192,13 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             dump(output_names.map_json(folder), data)
     # Final --previous step: rigidly translate each curated structure toward previous
     # anchors.  Internal relatives stay identical to the no-previous drawing.
+    # Do not clear overlaps afterwards — that pass can nudge duplicate rigid glyphs
+    # and break within-structure relatives.
     if PREVIOUS_ANCHORS:
         data, n_final = prev.translate_structures_escher(
             data, PREVIOUS_ANCHORS, blocks=blocks, scene=scene)
         if log and n_final:
             log(f'  previous structure rigid translate (final map): {n_final} glyphs')
-        import curated_axes as _ca_prev_final
-        data, _ov_prev = _ca_prev_final.clear_rigid_node_overlaps_escher(data, blocks)
-        if log and _ov_prev.get('moved'):
-            log(f'  clear rigid node overlaps (after previous translate): '
-                f"moved {_ov_prev['moved']} nodes")
         import composition as _comp_prev_fit
         fit_prev = _comp_prev_fit.fit_canvas_to_content(data)
         if log and fit_prev.get('applied'):
