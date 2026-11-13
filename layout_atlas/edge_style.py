@@ -1016,31 +1016,36 @@ def _prepare_algorithm_spokes_for_restyle(data, reaction_ids, skip_edges, only_m
     return n_reset
 
 
-def _nudge_through_obstacles(data, skip_edges=None, max_nudge=48.0):
+def _nudge_through_obstacles(data, skip_edges=None, max_nudge=48.0, log=None, crossing_index=None):
     """Small perpendicular nudges of glyphs that official pairs still pierce.
 
     Used after routing detours stall (clone-through / dense clusters). Moves the
     *through* metabolite glyph, not curated reaction midmarkers. Accepts only
     when official pairs fall and crossings do not rise.
+
+    Speed: mutate/restore (no deepcopy), official-count gate before any
+    ``CrossingIndex`` rebuild, first improving accept (distances ascending),
+    8 compass angles. Rebuilds crossings only on official-improving trials.
     """
-    import copy
+    from collections import Counter
 
     import layout_quality as lq
 
     skip = list(skip_edges) if skip_edges is not None else []
-    report = dict(tried=0, kept=0, nudged=[])
+    report = dict(tried=0, kept=0, nudged=[], cross_checks=0)
     nodes = data[1]['nodes']
+    index = crossing_index if crossing_index is not None else lq.CrossingIndex(data, skip)
     # Pins: curated rigid structures — still allow tiny nudges of currency clones.
-    for _round in range(3):
+    for rnd in range(3):
         pairs = lq.official_lines_through_nodes_report(data, skip).get('pairs') or []
         if not pairs:
             break
         # Prefer same-bigg clone-through, then high-frequency through ids.
-        from collections import Counter
         through_hits = Counter(p['through'] for p in pairs if p.get('through'))
+        if log:
+            log(f"  clear through-nodes nudge round {rnd + 1}: residual_official={len(pairs)}")
         progressed = False
         for through_bigg, _n in through_hits.most_common():
-            # Candidate glyphs with this bigg_id.
             cands = [
                 nid for nid, n in nodes.items()
                 if n.get('node_type') == 'metabolite' and n.get('bigg_id') == through_bigg
@@ -1048,39 +1053,52 @@ def _nudge_through_obstacles(data, skip_edges=None, max_nudge=48.0):
             if not cands:
                 continue
             live_off = lq.official_lines_through_nodes_count(data, skip)
-            live_cross = int(lq.CrossingIndex(data, skip).headline())
-            # Nudge each candidate along a few axes.
+            live_cross = int(index.headline())
+            if live_off <= 0:
+                break
             for nid in cands:
                 n0 = nodes[nid]
                 x0, y0 = float(n0['x']), float(n0['y'])
                 lx0 = n0.get('label_x')
                 ly0 = n0.get('label_y')
-                best = None
+
+                def _restore():
+                    n0['x'], n0['y'] = x0, y0
+                    if lx0 is not None:
+                        n0['label_x'], n0['label_y'] = lx0, ly0
+
+                accepted = False
+                # Distances ascending → first accept is already a short move.
                 for dist in (12.0, 20.0, 28.0, 36.0, max_nudge):
-                    for ang_i in range(12):
-                        ang = ang_i * (math.pi / 6)
+                    for ang_i in range(8):
+                        ang = ang_i * (math.pi / 4)
                         dx, dy = dist * math.cos(ang), dist * math.sin(ang)
-                        trial = copy.deepcopy(data)
-                        tn = trial[1]['nodes'][nid]
-                        tn['x'], tn['y'] = round(x0 + dx, 2), round(y0 + dy, 2)
+                        n0['x'], n0['y'] = round(x0 + dx, 2), round(y0 + dy, 2)
                         if lx0 is not None:
-                            tn['label_x'] = round(float(lx0) + dx, 2)
-                            tn['label_y'] = round(float(ly0) + dy, 2)
-                        after_off = lq.official_lines_through_nodes_count(trial, skip)
-                        after_cross = int(lq.CrossingIndex(trial, skip).headline())
+                            n0['label_x'] = round(float(lx0) + dx, 2)
+                            n0['label_y'] = round(float(ly0) + dy, 2)
+                        after_off = lq.official_lines_through_nodes_count(data, skip)
                         report['tried'] += 1
-                        drop = live_off - after_off
-                        if drop > 0 and after_cross <= live_cross:
-                            score = (drop, -after_cross, -dist)
-                            if best is None or score > best[0]:
-                                best = (score, trial, dist, ang_i)
-                if best is not None:
-                    _, trial, dist, ang_i = best
-                    data[0], data[1] = trial[0], trial[1]
-                    nodes = data[1]['nodes']
-                    report['kept'] += 1
-                    report['nudged'].append(dict(node=nid, bigg=through_bigg, dist=dist))
-                    progressed = True
+                        if after_off >= live_off:
+                            _restore()
+                            continue
+                        # Official improved — only then pay for CrossingIndex.
+                        index.rebuild(data)
+                        after_cross = int(index.headline())
+                        report['cross_checks'] += 1
+                        if after_cross <= live_cross:
+                            report['kept'] += 1
+                            report['nudged'].append(dict(node=nid, bigg=through_bigg, dist=dist))
+                            accepted = True
+                            progressed = True
+                            break
+                        _restore()
+                        index.rebuild(data)
+                    if accepted:
+                        break
+                if not accepted:
+                    _restore()
+                if accepted:
                     break
             if progressed:
                 break
@@ -1096,6 +1114,10 @@ def clear_through_nodes(data, skip_edges=None, log=None, mode=None, gem_path=Non
     ``official_clear`` (Escher-sized obstacles + multimarker detours), keep the
     edge when official pairs fall and crossings do not rise more than a small
     trade budget. Does not scale the canvas or split the map.
+
+    Speed: one live ``CrossingIndex`` reused across the surgical loop (rebuild
+    only after accept); trial crossings skipped when official count did not
+    fall; nudge uses mutate/restore + official-first gate.
     """
     import copy
     import time
@@ -1109,7 +1131,8 @@ def clear_through_nodes(data, skip_edges=None, log=None, mode=None, gem_path=Non
     )
     before = lq.curves_through_nodes_report(data, skip)
     before_off = lq.official_lines_through_nodes_report(data, skip)
-    before_cross = int(lq.CrossingIndex(data, skip).headline())
+    index = lq.CrossingIndex(data, skip)
+    before_cross = int(index.headline())
     edge_hits = Counter(
         (p['reaction'], p['metabolite'])
         for p in before_off.get('pairs') or []
@@ -1148,7 +1171,7 @@ def clear_through_nodes(data, skip_edges=None, log=None, mode=None, gem_path=Non
         # Multiple rounds: first pass clears easy chords; later rounds + nudge
         # finish clone-through residuals (need ≤4 official pairs for hard points).
         skip_set = {tuple(e) for e in skip}
-        for _round in range(4):
+        for rnd in range(4):
             live_pairs = lq.official_lines_through_nodes_report(data, skip)
             if live_pairs['count'] <= 0:
                 break
@@ -1160,9 +1183,15 @@ def clear_through_nodes(data, skip_edges=None, log=None, mode=None, gem_path=Non
             if not round_hits:
                 break
             round_kept = 0
+            if log:
+                log(
+                    f"  clear through-nodes: round {rnd + 1}/4 "
+                    f"residual_official={live_pairs['count']} "
+                    f"({round(time.time() - t0, 1)}s)"
+                )
             for (rid, met), _n in round_hits.most_common():
                 live_off = lq.official_lines_through_nodes_count(data, skip)
-                live_cross = int(lq.CrossingIndex(data, skip).headline())
+                live_cross = int(index.headline())
                 if live_off <= 0:
                     break
                 preserved = (rid, met) in skip_set
@@ -1183,28 +1212,36 @@ def clear_through_nodes(data, skip_edges=None, log=None, mode=None, gem_path=Non
                         if k in style:
                             style_acc[k] += int(style.get(k) or 0)
                 after_off = lq.official_lines_through_nodes_count(trial, skip)
-                after_cross = int(lq.CrossingIndex(trial, skip).headline())
                 report['edges_tried'] += 1
                 official_drop = live_off - after_off
+                # Skip CrossingIndex rebuild when official did not improve.
+                if official_drop <= 0:
+                    continue
+                after_cross = int(lq.CrossingIndex(trial, skip).headline())
                 cross_delta = after_cross - live_cross
                 cross_ok = cross_delta <= 0 or (official_drop >= 1 and cross_delta <= 1)
                 # Preserved: also forbid any glyph move (relocated must stay 0).
                 reloc_ok = (not preserved) or int((style or {}).get('relocated') or 0) == 0
                 if official_drop > 0 and cross_ok and reloc_ok:
                     data[0], data[1] = trial[0], trial[1]
+                    index.rebuild(data)
                     report['edges_kept'] += 1
                     round_kept += 1
             # Nudge after each routing round while residuals remain.
             if lq.official_lines_through_nodes_count(data, skip) > 0:
-                nudge = _nudge_through_obstacles(data, skip)
+                nudge = _nudge_through_obstacles(
+                    data, skip, log=log, crossing_index=index,
+                )
                 if report.get('nudge') is None:
-                    report['nudge'] = {'tried': 0, 'kept': 0}
-                report['nudge']['tried'] = int(report['nudge'].get('tried', 0)) + int(nudge.get('tried', 0))
-                report['nudge']['kept'] = int(report['nudge'].get('kept', 0)) + int(nudge.get('kept', 0))
+                    report['nudge'] = {'tried': 0, 'kept': 0, 'cross_checks': 0}
+                for k in ('tried', 'kept', 'cross_checks'):
+                    report['nudge'][k] = int(report['nudge'].get(k, 0)) + int(nudge.get(k, 0))
                 if nudge.get('kept'):
                     report['edges_kept'] += int(nudge['kept'])
                     style_acc['nudged'] = int(style_acc.get('nudged', 0)) + int(nudge['kept'])
                     round_kept += int(nudge['kept'])
+                    # Index already rebuilt on each accepted nudge; refresh if needed.
+                    index.rebuild(data)
             if round_kept == 0:
                 break
     else:
