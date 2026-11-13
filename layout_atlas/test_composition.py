@@ -461,10 +461,10 @@ def test_fit_canvas_to_content_shrinks_frame():
 def test_empty_corridor_does_not_drag_curated_companions():
     """ICL→succ empty column must not yank curated ACONTb via shared icit."""
     # Vertical empty corridor: ICL mid at y=0 to shared succ at y=2000.
-    # ACONTb also holds icit (≤3 mets) and would be companion-dragged without the freeze.
+    # Real e_coli TCA expert cluster lists CS+ACONTa+ACONTb+ICL together.
     data = [{
         'metadata': {'expert_structures': [
-            {'id': 'tca', 'reactions': ['ICL', 'ACONTb']},
+            {'id': 'tca', 'reactions': ['CS', 'ACONTa', 'ACONTb', 'ICL']},
         ]},
     }, {
         'nodes': {
@@ -475,6 +475,8 @@ def test_empty_corridor_does_not_drag_curated_companions():
             'acb_mid': {'node_type': 'midmarker', 'x': 140.0, 'y': 20.0},
             'acon': {'node_type': 'metabolite', 'bigg_id': 'acon_C_c', 'x': 180.0, 'y': 20.0},
             'h2o': {'node_type': 'metabolite', 'bigg_id': 'h2o_c', 'x': 140.0, 'y': 50.0},
+            'cs_mid': {'node_type': 'midmarker', 'x': 40.0, 'y': 80.0},
+            'cit': {'node_type': 'metabolite', 'bigg_id': 'cit_c', 'x': 40.0, 'y': 120.0},
             # Filler so corridor emptiness check is not blocked by dense cloud.
             'other_mid': {'node_type': 'midmarker', 'x': 800.0, 'y': 1000.0},
             'other_met': {'node_type': 'metabolite', 'bigg_id': 'z_c', 'x': 820.0, 'y': 1000.0},
@@ -490,6 +492,12 @@ def test_empty_corridor_does_not_drag_curated_companions():
                 '1': {'from_node_id': 'acb_mid', 'to_node_id': 'acon'},
                 '2': {'from_node_id': 'acb_mid', 'to_node_id': 'h2o'},
             }},
+            'cs': {'bigg_id': 'CS', 'segments': {
+                '0': {'from_node_id': 'cs_mid', 'to_node_id': 'cit'},
+            }},
+            'aca': {'bigg_id': 'ACONTa', 'segments': {
+                '0': {'from_node_id': 'acb_mid', 'to_node_id': 'cit'},
+            }},
             'oth': {'bigg_id': 'OTH', 'segments': {
                 '0': {'from_node_id': 'other_mid', 'to_node_id': 'other_met'},
             }},
@@ -502,6 +510,63 @@ def test_empty_corridor_does_not_drag_curated_companions():
     after_icl = (data[1]['nodes']['icl_mid']['x'], data[1]['nodes']['icl_mid']['y'])
     assert after_acb == before_acb, (before_acb, after_acb, rep)
     assert after_icl == before_icl, (before_icl, after_icl, rep)
+
+
+def test_empty_corridor_shortens_non_tca_transport_arm():
+    """FUMt2→fum_c may collapse even when listed in a non-TCA expert structure."""
+    data = [{
+        'metadata': {'expert_structures': [
+            {'id': 'tca', 'reactions': ['CS', 'ACONTa', 'ACONTb', 'ICL']},
+            {'id': 'fum_t', 'reactions': ['FUMt2_2', 'EX_fum_e']},
+        ]},
+    }, {
+        'nodes': {
+            'f_mid': {'node_type': 'midmarker', 'x': 100.0, 'y': 0.0},
+            'fum_e': {'node_type': 'metabolite', 'bigg_id': 'fum_e', 'x': 100.0, 'y': 40.0},
+            'h_c': {'node_type': 'metabolite', 'bigg_id': 'h_c', 'x': 80.0, 'y': 40.0},
+            'fum_c': {'node_type': 'metabolite', 'bigg_id': 'fum_c', 'x': 100.0, 'y': 2000.0},
+            'ex_mid': {'node_type': 'midmarker', 'x': 100.0, 'y': -80.0},
+            'cs_mid': {'node_type': 'midmarker', 'x': 400.0, 'y': 1800.0},
+            'cit': {'node_type': 'metabolite', 'bigg_id': 'cit_c', 'x': 400.0, 'y': 1840.0},
+            # Currency in the column must not block transport collapse.
+            'h2o': {'node_type': 'metabolite', 'bigg_id': 'h2o_c', 'x': 105.0, 'y': 1000.0},
+            'other_mid': {'node_type': 'midmarker', 'x': 800.0, 'y': 1000.0},
+            'other_met': {'node_type': 'metabolite', 'bigg_id': 'z_c', 'x': 820.0, 'y': 1000.0},
+        },
+        'reactions': {
+            'fumt': {'bigg_id': 'FUMt2_2', 'segments': {
+                '0': {'from_node_id': 'f_mid', 'to_node_id': 'fum_e'},
+                '1': {'from_node_id': 'f_mid', 'to_node_id': 'h_c'},
+                '2': {'from_node_id': 'f_mid', 'to_node_id': 'fum_c'},
+            }},
+            'ex': {'bigg_id': 'EX_fum_e', 'segments': {
+                '0': {'from_node_id': 'ex_mid', 'to_node_id': 'fum_e'},
+            }},
+            'cs': {'bigg_id': 'CS', 'segments': {
+                '0': {'from_node_id': 'cs_mid', 'to_node_id': 'cit'},
+            }},
+            'aca': {'bigg_id': 'ACONTa', 'segments': {
+                '0': {'from_node_id': 'cs_mid', 'to_node_id': 'cit'},
+            }},
+            'acb': {'bigg_id': 'ACONTb', 'segments': {
+                '0': {'from_node_id': 'cs_mid', 'to_node_id': 'cit'},
+            }},
+            'oth': {'bigg_id': 'OTH', 'segments': {
+                '0': {'from_node_id': 'other_mid', 'to_node_id': 'other_met'},
+            }},
+        },
+    }]
+    before = data[1]['nodes']['f_mid']['y']
+    # fum_c is shared with a dummy holder so the shared-corridor path runs.
+    data[1]['reactions']['hold'] = {
+        'bigg_id': 'FUM', 'segments': {
+            '0': {'from_node_id': 'cs_mid', 'to_node_id': 'fum_c'},
+        },
+    }
+    rep = C.compact_empty_corridors_escher(data, max_gap=200.0, spacing=150.0)
+    after = data[1]['nodes']['f_mid']['y']
+    assert after > before + 500.0, (before, after, rep)
+    assert data[1]['nodes']['ex_mid']['y'] > -80.0 + 500.0, (data[1]['nodes']['ex_mid']['y'], rep)
 
 
 def test_glyph_circle_overlapping_pairs_counts_disks():

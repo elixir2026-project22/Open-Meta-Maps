@@ -1233,6 +1233,18 @@ def draw_map(model, selected, folder, full_model=None, scalable=False, log=None,
             metric['canvas_fit_after_island_tuck'] = fit_isl
             dump(output_names.map_json(folder), data)
             dump(folder / 'map.json', data)
+            # Transport arms (FUMt2/MALt2) may still be long after rigid restore;
+            # re-run empty-corridor with TCA-core freeze before through-clear.
+            spacing_cor = _comp_isl.reaction_spacing_escher(data)
+            cor2 = _comp_isl.compact_empty_corridors_escher(data, spacing=spacing_cor)
+            metric['empty_corridor_escher_post_island'] = cor2
+            if composition_report is not None:
+                composition_report['empty_corridor_escher_post_island'] = cor2
+            if log and cor2.get('shortened'):
+                log(f"  empty-corridor compact (post-island): shortened {cor2['shortened']} "
+                    f"max_gap={cor2.get('max_gap')} min_len={cor2.get('min_len')}")
+                dump(output_names.map_json(folder), data)
+                dump(folder / 'map.json', data)
             # Node translations can reintroduce official through-pairs; clear with
             # extra rounds — soft-corridor tuck can leave a thicker residual set.
             if os.environ.get('OPM_CLEAR_THROUGH', 'on') != 'off':

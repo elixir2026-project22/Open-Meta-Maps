@@ -1372,6 +1372,44 @@ def _curated_structure_node_ids(data):
     return out
 
 
+# Core citrate-cycle (+ glyoxylate ICL) reactions whose relative geometry defines
+# the closed TCA silhouette. Whole atlas windows often list these together with
+# FUMt2/EX_fum transport — freezing the *entire* window blocks corridor collapse
+# of those tall source arms (README shortens them to ~400–900px).
+_TCA_CORE_RX = frozenset({
+    'CS', 'ACONTa', 'ACONTb', 'ICDHyr', 'AKGDH', 'SUCOAS', 'SUCDi', 'FUM', 'MDH',
+    'ICL',
+})
+
+
+def _tca_expert_rx_and_nodes(data):
+    """Citrate-cycle core reactions + node ids for freeze / no-drag.
+
+    Matches expert structures that contain CS+ACONTb (or CS+ACONTa+ACONTb), but
+    only freezes ``_TCA_CORE_RX`` members — not co-listed transport/EX arms.
+    """
+    tca_rx = set()
+    for s in ((data[0] or {}).get('metadata') or {}).get('expert_structures') or []:
+        rxset = set(s.get('reactions') or s.get('reaction_ids') or [])
+        if {'CS', 'ACONTa', 'ACONTb'} <= rxset or (
+                'CS' in rxset and 'ACONTb' in rxset):
+            tca_rx |= (rxset & _TCA_CORE_RX)
+    if not tca_rx:
+        return set(), set()
+    body = data[1]
+    nodes = body.get('nodes') or {}
+    frozen = set()
+    for rxn in (body.get('reactions') or {}).values():
+        if (rxn.get('bigg_id') or '') not in tca_rx:
+            continue
+        for seg in (rxn.get('segments') or {}).values():
+            for end in ('from_node_id', 'to_node_id'):
+                nid = seg.get(end)
+                if nid is not None and nid in nodes:
+                    frozen.add(str(nid))
+    return tca_rx, frozen
+
+
 def _previous_pinned_node_ids(data, previous_anchors):
     """Escher node ids locked by ``--previous`` ``r:`` / ``m:`` pins."""
     if not previous_anchors:
@@ -1598,18 +1636,18 @@ def compact_empty_corridors_escher(data, max_gap=None, spacing=None):
     pool — never yank the shared glyph, and never leave private heads behind.
     Private (degree-1) metabolites may move alone.
 
-    Curated expert-structure reactions stay frozen: collapsing ICL→succ (and
-    dragging ACONTb via shared icit) was squashing the e_coli TCA ring
-    (circularity 0.95 → ~0.64).
+    Freeze only the citrate-cycle expert cluster (CS/ACONTa/ACONTb + co-listed
+    ICL): collapsing ICL→succ dragged ACONTb via icit and squashed TCA
+    circularity (0.95 → ~0.64). Transport arms (FUMt2/EX_fum, …) stay free so
+    they can tuck to README-like distances instead of leaving tall empty canvas.
     """
     import curated_axes as ca
+    from core import CURRENCY
+
     body = data[1]
     nodes = body.get('nodes') or {}
     reactions = body.get('reactions') or {}
-    curated_rx = set()
-    for s in ((data[0] or {}).get('metadata') or {}).get('expert_structures') or []:
-        curated_rx.update(s.get('reactions') or s.get('reaction_ids') or [])
-    frozen_nids = {str(n) for n in _curated_structure_node_ids(data)}
+    tca_rx, frozen_nids = _tca_expert_rx_and_nodes(data)
     # Metabolite node -> reaction bigg_ids that touch it.
     holders = defaultdict(set)
     rx_parts = {}  # rid -> (mid_id, [met_ids])
@@ -1666,14 +1704,14 @@ def compact_empty_corridors_escher(data, max_gap=None, spacing=None):
     shortened = 0
     removed = 0.0
     moved = set()
-    max_shorten = 2
+    # FUMt2 + MALt2 (+ a couple of other long arms) in one pass.
+    max_shorten = 4
     candidates.sort(reverse=True)
     for length, rid, mid_id, met_id, vertical in candidates:
         if shortened >= max_shorten:
             break
-        # Never collapse corridors that belong to curated expert structures —
-        # ICL→succ dragging ACONTb via icit broke the e_coli TCA octagon.
-        if rid in curated_rx or str(mid_id) in frozen_nids:
+        # Freeze citrate-cycle cluster only (not every expert match / transport).
+        if rid in tca_rx or str(mid_id) in frozen_nids:
             continue
         mid = nodes.get(mid_id); met = nodes.get(met_id)
         if mid is None or met is None or 'x' not in mid or 'x' not in met:
@@ -1689,7 +1727,7 @@ def compact_empty_corridors_escher(data, max_gap=None, spacing=None):
         pad = max(span * 0.12, float(max_gap) * 0.5, 40.0)
         cx, cy = 0.5 * (a[0] + b[0]), 0.5 * (a[1] + b[1])
         band = 18.0 + 0.5 * (abs(a[0] - b[0]) if vertical else abs(a[1] - b[1]))
-        blocked = False
+        blockers = []
         for k, xy in cloud.items():
             if k in (mid_id, met_id):
                 continue
@@ -1698,28 +1736,61 @@ def compact_empty_corridors_escher(data, max_gap=None, spacing=None):
                 if abs(p[0] - cx) > band:
                     continue
                 if lo[1] + pad < p[1] < hi[1] - pad:
-                    blocked = True; break
+                    blockers.append((k, p))
             else:
                 if abs(p[1] - cy) > band:
                     continue
                 if lo[0] + pad < p[0] < hi[0] - pad:
-                    blocked = True; break
-        if blocked:
-            continue
+                    blockers.append((k, p))
+        # Currency cofactors in the column are not real packing obstacles for
+        # transport-arm collapse (h2o sitting on the MALt2→mal__L_c line).
+        hard = []
+        for k, p in blockers:
+            bn = nodes.get(k) or {}
+            bigg = bn.get('bigg_id')
+            if bn.get('node_type') == 'metabolite' and bigg and chem(bigg) in CURRENCY:
+                continue
+            hard.append((k, p))
+        # Ideal shared-corridor target; may stop short of a hard blocker.
         shared = len(holders.get(met_id, ())) > 1
         if shared and not vertical:
             # Horizontal shared corridors are often inter-block metabolic links;
             # collapsing them splits structures and costs continuity.
             continue
+        target_len = max(float(max_gap) * 1.35, 320.0)
+        target_len = min(target_len, length - 1.0)
+        if hard:
+            # Transport / exchange arms (FUMt2, EX_*) often have a single stray
+            # PPP glyph in the column (e.g. 6pgc). Allow collapse through ≤2 hard
+            # blockers for those; otherwise stop with standoff before the nearest.
+            is_transport = (
+                rid.startswith('EX_')
+                or rid.endswith('t2')
+                or rid.endswith('t2r')
+                or rid.endswith('t2_2')
+                or 't2_' in rid
+            )
+            if not (is_transport and len(hard) <= 2):
+                standoff = max(float(max_gap) * 0.9, 140.0)
+                ab = b - a
+                ab_len = float(np.hypot(*ab)) or 1.0
+                u = ab / ab_len
+                nearest = None
+                for _k, p in hard:
+                    t = float(np.dot(p - a, u))
+                    if 0.0 < t < ab_len:
+                        nearest = t if nearest is None else min(nearest, t)
+                if nearest is None:
+                    continue
+                capped = max(target_len, nearest - standoff)
+                if capped >= length - 80.0:
+                    continue
+                target_len = capped
         if shared:
             # Translate the whole reaction unit toward the shared pool: mid + every
             # other metabolite on this reaction (including shared _e/_p partners).
             # Companion EX/uptake reactions that only hold those moved partners are
             # dragged by the same delta so their spokes stay short.
-            # Leave a little more than max_gap so the mid does not dive into the
-            # dense chemistry around the shared pool (extra spoke crossings).
-            target_len = max(float(max_gap) * 1.35, 320.0)
-            target_len = min(target_len, length - 1.0)
             target = b + (a - b) * (target_len / length)
             delta = target - a
             move_ids = {mid_id}
@@ -1734,8 +1805,8 @@ def compact_empty_corridors_escher(data, max_gap=None, spacing=None):
                 for other_rid in holders.get(sid, ()):
                     if other_rid == rid or other_rid not in rx_parts:
                         continue
-                    # Do not drag curated-structure companions (ACONTb via icit).
-                    if other_rid in curated_rx:
+                    # Do not drag citrate-cycle companions (ACONTb via icit).
+                    if other_rid in tca_rx:
                         continue
                     omid, omets = rx_parts[other_rid]
                     # Simple EX/uptake companions only (≤3 metabolite heads).
@@ -1745,7 +1816,7 @@ def compact_empty_corridors_escher(data, max_gap=None, spacing=None):
                     for o in omets:
                         if o != met_id:
                             move_ids.add(o)
-            # Abort if any curated glyph would move.
+            # Abort if any citrate-cycle glyph would move.
             if any(str(sid) in frozen_nids for sid in move_ids):
                 continue
             for sid in move_ids:
@@ -2430,22 +2501,7 @@ def tuck_islands_escher(data, cur=None, spacing=None):
     # Freeze only the TCA / citrate-cycle expert component (and co-listed ICL),
     # not every tiny matched structure — those include the floaters we must tuck
     # (GLCpts, BIOMASS, …).
-    tca_rx = set()
-    for s in ((data[0] or {}).get('metadata') or {}).get('expert_structures') or []:
-        rxset = set(s.get('reactions') or s.get('reaction_ids') or [])
-        if {'CS', 'ACONTa', 'ACONTb'} <= rxset or (
-                'CS' in rxset and 'ACONTb' in rxset):
-            tca_rx |= rxset
-    frozen_tca = set()
-    if tca_rx:
-        for rx in reactions.values():
-            if (rx.get('bigg_id') or '') not in tca_rx:
-                continue
-            for seg in (rx.get('segments') or {}).values():
-                for end in ('from_node_id', 'to_node_id'):
-                    nid = seg.get(end)
-                    if nid is not None:
-                        frozen_tca.add(str(nid))
+    tca_rx, frozen_tca = _tca_expert_rx_and_nodes(data)
 
     def _apply(members, ids, delta):
         for nid in ids:
