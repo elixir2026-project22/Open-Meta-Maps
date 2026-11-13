@@ -281,16 +281,18 @@ def test_glyph_circle_overlapping_pairs_counts_disks():
     assert C.glyph_circle_overlapping_pairs(data) == 1
 
 
-def test_relocation_gate_not_worse_directions():
+def test_tip_gate_directions():
+    from layout_quality_evaluator import METRIC_EPS, TIP_DIRS, metrics_not_worse
     before = dict(crossings=2, overlapping_pairs=1, participant_consistency=0.8,
                   angular_resolution=0.2, edge_length_deviation=0.5,
                   edge_orthogonality=0.6, aspect_ratio=0.7)
-    assert C.relocation_gate_not_worse(before, before)
-    assert not C.relocation_gate_not_worse(before, dict(before, crossings=3))
-    assert not C.relocation_gate_not_worse(before, dict(before, aspect_ratio=0.5))
-    assert not C.relocation_gate_not_worse(before, dict(before, overlapping_pairs=2))
-    assert C.relocation_gate_not_worse(
-        before, dict(before, crossings=1, aspect_ratio=0.8, edge_orthogonality=0.7))
+    assert metrics_not_worse(before, before, TIP_DIRS, METRIC_EPS)
+    assert not metrics_not_worse(before, dict(before, crossings=3), TIP_DIRS, METRIC_EPS)
+    assert not metrics_not_worse(before, dict(before, aspect_ratio=0.5), TIP_DIRS, METRIC_EPS)
+    assert not metrics_not_worse(before, dict(before, overlapping_pairs=2), TIP_DIRS, METRIC_EPS)
+    assert metrics_not_worse(
+        before, dict(before, crossings=1, aspect_ratio=0.8, edge_orthogonality=0.7),
+        TIP_DIRS, METRIC_EPS)
 
 
 def test_nudge_skips_curated_and_previous_pins():
@@ -384,13 +386,14 @@ def test_tip_move_shifts_only_near_end_handle():
     assert data[1]['nodes']['m']['x'] == 60.0
 
 
-def test_relocation_gate_uses_baseline_not_last_accept():
+def test_tip_gate_uses_baseline_not_last_accept():
     # A second accept fine vs the last state but past the baseline eps fails.
+    from layout_quality_evaluator import METRIC_EPS, TIP_DIRS, metrics_not_worse
     baseline = dict(crossings=2, overlapping_pairs=1, participant_consistency=0.8,
                     angular_resolution=0.2, edge_length_deviation=0.5,
                     edge_orthogonality=0.9, aspect_ratio=0.7)
     after_first = dict(baseline, edge_orthogonality=0.9 - 5e-5)
     after_second = dict(baseline, edge_orthogonality=0.9 - 1.2e-4)
-    assert C.relocation_gate_not_worse(baseline, after_first)
-    assert C.relocation_gate_not_worse(after_first, after_second)
-    assert not C.relocation_gate_not_worse(baseline, after_second)
+    assert metrics_not_worse(baseline, after_first, TIP_DIRS, METRIC_EPS)
+    assert metrics_not_worse(after_first, after_second, TIP_DIRS, METRIC_EPS)
+    assert not metrics_not_worse(baseline, after_second, TIP_DIRS, METRIC_EPS)

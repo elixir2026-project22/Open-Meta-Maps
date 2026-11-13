@@ -1,27 +1,25 @@
 """Shared layout-quality evaluator for compose-stage accept / reject.
 
 Wired into compose today:
-  - tip nudge + aspect check (``composition.nudge_frontier_escher``) via
-    ``rule="tip"`` / ``TIP_DIRS`` / ``measure_tip`` / ``METRIC_EPS``
-  - hub split (``layout_gate.no_regression`` / ``split_cofactor_hubs``) via
-    ``HUB_DIRS`` / ``metrics_not_worse`` / ``METRIC_EPS``
+  - tip nudge (``composition.nudge_frontier_escher``): ``rule="tip"`` with
+    ``snapshot`` / ``prefilter`` / ``evaluate`` (aspect is part of ``TIP_DIRS``)
+  - hub split (``split_cofactor_hubs``): ``HUB_DIRS`` + ``metrics_not_worse``
   - peripheral / block relocation (``quality_gate.peripheral_pass``,
-    ``block_relocation._accept`` when not balanced) via ``rule="peripheral"``
+    ``block_relocation._accept`` when not balanced): ``rule="peripheral"``
   - orthogonal routing (``orthogonal_route._gate_ok`` and length-deviation
-    caps) via ``ORTHO_DIRS`` / ``metrics_not_worse`` / ``METRIC_EPS``
+    caps): ``ORTHO_DIRS`` + ``metrics_not_worse``
 
-One shared tolerance: ``METRIC_EPS`` (replaces the former per-module
-``_GATE_EPS`` copies).
+Shared tolerance: ``METRIC_EPS``.
 
-API: ``snapshot()`` a baseline, ``evaluate()`` a candidate, then ``commit()``
-or ``rollback()``.  Callers may cheap-reject with ``prefilter()`` first;
-final acceptance uses the full evaluation.
+API: ``snapshot()`` → ``evaluate()`` → ``commit()`` / ``rollback()`` /
+``prefer()``.  Callers may cheap-reject with ``prefilter()`` first; final
+acceptance uses ``evaluate()``.
 
 Accept rule (three tiers, no weighted sum):
-  1. Hard constraints reject immediately.
-  2. None of the directed score metrics may worsen by more than ``METRIC_EPS``.
+  1. Hard constraints reject immediately (skipped for tip / peripheral).
+  2. None of the directed metrics may worsen by more than ``METRIC_EPS``.
   3. The candidate must improve its local objective (Pareto on the gated
-     metrics when no scalar objective is set).
+     metrics when no scalar objective is set), unless the rule opts out.
 """
 from __future__ import annotations
 
@@ -65,7 +63,7 @@ TIP_DIRS: dict[str, str] = {
     "aspect_ratio": "higher",
 }
 
-# Hub-split gate columns (same set as ``layout_gate._GATE_DIRS``).
+# Hub-split gate columns (single copy; ``layout_gate`` imports this).
 HUB_DIRS: dict[str, str] = {
     "crossings": "lower",
     "crossing_density": "higher",
@@ -444,9 +442,8 @@ class LayoutQualityEvaluator:
         model=None,
         pathway=None,
         local_objective: Callable[[Any], float] | None = None,
-        rule: str = "scores",
+        rule: str = "metrics",
         metric_dirs: Mapping[str, str] | None = None,
-        cross_tol: float = 0.0,
         require_local_improvement: bool = True,
         eps: float = METRIC_EPS,
     ):
@@ -458,16 +455,11 @@ class LayoutQualityEvaluator:
         self.local_objective = local_objective
         self.rule = rule
         self.eps = float(eps)
-        self.cross_tol = float(cross_tol)
         self.require_local_improvement = bool(require_local_improvement)
         if metric_dirs is not None:
             self.metric_dirs = dict(metric_dirs)
         elif rule == "tip":
             self.metric_dirs = dict(TIP_DIRS)
-        elif rule == "hub":
-            self.metric_dirs = dict(HUB_DIRS)
-        elif rule == "ortho":
-            self.metric_dirs = dict(ORTHO_DIRS)
         else:
             self.metric_dirs = dict(SCORE_DIRS)
         self._snap: _Snapshot | None = None
@@ -482,14 +474,6 @@ class LayoutQualityEvaluator:
             return self._measure_peripheral(data)
         if self.rule == "tip":
             return measure_tip(data, pathway=self.pathway)
-        if self.rule in ("hub", "hotspot"):
-            if self.pathway is not None and self.rule == "hub":
-                import layout_gate as lg
-
-                m = lg.score_map(self.pathway, data)
-                m["crossings"] = float(pipeline_crossings(data, self.skip_edges))
-                return m
-            return dict(crossings=float(pipeline_crossings(data, self.skip_edges)))
         return measure_scores(
             data,
             skip_edges=self.skip_edges,
@@ -575,23 +559,20 @@ class LayoutQualityEvaluator:
         *,
         max_crossings: int | None = None,
         max_overlaps: int | None = None,
-        max_content_area: float | None = None,
-        max_aspect_drop: float | None = None,
     ) -> Evaluation | None:
         """Cheap local reject. Returns an Evaluation when rejected, else None.
 
-        Final acceptance must still go through ``evaluate()``.
+        Final acceptance must still go through ``evaluate()``.  For ``rule="tip"``
+        also rejects when aspect_ratio worsens (same direction as ``TIP_DIRS``).
         """
         if self._snap is None:
             raise RuntimeError("snapshot() before prefilter()")
-        if max_content_area is not None and content_area(candidate) >= max_content_area:
-            return self._reject("prefilter_content_area")
         if max_overlaps is not None and _glyph_overlaps(candidate) > max_overlaps:
             return self._reject("prefilter_overlaps")
-        if max_aspect_drop is not None:
+        if self.rule == "tip":
             asp0 = float(self._snap.metrics.get("aspect_ratio") or 0.0)
             asp1 = _content_aspect(candidate[1])
-            if asp1 + self.eps < asp0 - float(max_aspect_drop):
+            if asp1 + self.eps < asp0:
                 return self._reject("prefilter_aspect")
         if max_crossings is not None:
             import layout_quality as lq
@@ -622,31 +603,25 @@ class LayoutQualityEvaluator:
 
         if self.rule == "peripheral":
             return self._evaluate_peripheral(candidate, metrics=metrics, disconnected=disconnected)
-        if self.rule == "hub":
-            return self._evaluate_hub(candidate, metrics=metrics)
-        if self.rule == "hotspot":
-            return self._evaluate_hotspot(
-                candidate, metrics=metrics, local_before=local_before, local_after=local_after
-            )
-        if self.rule == "ortho":
-            return self._evaluate_dirs(candidate, metrics=metrics, require_improve=False)
+        if self.rule == "tip":
+            # Tip: no-worse on TIP_DIRS (includes aspect); content shrink is the caller's gate.
+            after = dict(metrics) if metrics is not None else self.measure(candidate)
+            before = self._snap.metrics
+            metric_fails = metric_regressions(before, after, self.metric_dirs, self.eps)
+            ok = not metric_fails
+            reason = "accepted" if ok else "metrics:" + ",".join(metric_fails)
+            ev = Evaluation(ok, reason, True, ok, True, after, before, [], metric_fails)
+            self._record(ev)
+            return ev
 
         hard_fails = self.hard_failures(candidate)
         after = dict(metrics) if metrics is not None else self.measure(candidate)
         before = self._snap.metrics
         metric_fails = metric_regressions(before, after, self.metric_dirs, self.eps)
-        if self.cross_tol and "crossings" in metric_fails:
-            bv, av = before.get("crossings"), after.get("crossings")
-            if bv is not None and av is not None and float(av) <= float(bv) + self.cross_tol:
-                metric_fails = [k for k in metric_fails if k != "crossings"]
 
         local_ok, local_delta, local_reason = self._local_ok(
             candidate, local=local, local_before=local_before, local_after=local_after, after=after
         )
-        if self.rule == "tip":
-            # Tip gate is no-worse on metrics; content shrink is checked by the caller.
-            local_ok = True
-            local_reason = ""
 
         hard_ok = not hard_fails
         metrics_ok = not metric_fails
@@ -677,22 +652,6 @@ class LayoutQualityEvaluator:
         self._record(ev)
         return ev
 
-    def _evaluate_dirs(self, candidate, *, metrics=None, require_improve=False) -> Evaluation:
-        after = dict(metrics) if metrics is not None else self.measure(candidate)
-        before = self._snap.metrics
-        metric_fails = metric_regressions(before, after, self.metric_dirs, self.eps)
-        ok = not metric_fails
-        if require_improve and ok:
-            ok = dominates(after, before, self.metric_dirs, self.eps)
-        reason = (
-            "accepted"
-            if ok
-            else ("metrics:" + ",".join(metric_fails) if metric_fails else "no_improvement")
-        )
-        ev = Evaluation(ok, reason, True, not metric_fails, True, after, before, [], metric_fails)
-        self._record(ev)
-        return ev
-
     def _evaluate_peripheral(self, candidate, *, metrics=None, disconnected=None) -> Evaluation:
         import quality_gate as qg
 
@@ -714,60 +673,6 @@ class LayoutQualityEvaluator:
             local_ok=bool(ok),
             metrics=new,
             baseline_metrics=old,
-        )
-        self._record(ev)
-        return ev
-
-    def _evaluate_hub(self, candidate, *, metrics=None) -> Evaluation:
-        after = dict(metrics) if metrics is not None else self.measure(candidate)
-        before = self._snap.metrics
-        ok = metrics_not_worse(before, after, self.metric_dirs, self.eps)
-        fails = metric_regressions(before, after, self.metric_dirs, self.eps)
-        reason = "accepted" if ok else "metrics:" + ",".join(fails)
-        ev = Evaluation(ok, reason, True, ok, True, after, before, [], fails)
-        self._record(ev)
-        return ev
-
-    def _evaluate_hotspot(self, candidate, *, metrics=None, local_before=None, local_after=None) -> Evaluation:
-        import layout_quality as lq
-
-        before_cross = (
-            float(local_before)
-            if local_before is not None
-            else float(self._snap.metrics.get("crossings") or pipeline_crossings(self._snap.data, self.skip_edges))
-        )
-        if local_after is not None:
-            after_cross = float(local_after)
-        elif metrics and "crossings" in metrics:
-            after_cross = float(metrics["crossings"])
-        else:
-            after_cross = float(pipeline_crossings(candidate, self.skip_edges))
-        n_ov, l_ov = lq.overlap_counts(candidate)
-        n0, l0 = lq.overlap_counts(self._snap.data)
-        hard_fails = []
-        if n_ov > n0:
-            hard_fails.append("node_overlap")
-        if l_ov > l0:
-            hard_fails.append("label_overlap")
-        local_ok = after_cross < before_cross
-        if hard_fails:
-            reason = hard_fails[0]
-            ev = Evaluation(
-                False, reason, False, True, local_ok, {"crossings": after_cross},
-                self._snap.metrics, hard_fails, [], after_cross - before_cross,
-            )
-            self._record(ev)
-            return ev
-        if not local_ok:
-            ev = Evaluation(
-                False, "no_crossing_drop", True, True, False, {"crossings": after_cross},
-                self._snap.metrics, [], [], after_cross - before_cross,
-            )
-            self._record(ev)
-            return ev
-        ev = Evaluation(
-            True, "accepted", True, True, True, {"crossings": after_cross},
-            self._snap.metrics, [], [], after_cross - before_cross,
         )
         self._record(ev)
         return ev
@@ -865,13 +770,13 @@ def _glyph_overlaps(data) -> int:
 # --- far-edge classification (mutually exclusive + exhaustive) -----------
 
 # Priority order: first match wins. Every far edge gets exactly one label.
-# Count order used in reports: within, copy_noncur, copy_cur, inst, m, side_other.
 FAR_EDGE_CLASSES: tuple[str, ...] = (
     "within_structure_curated",
     "copy_reused_by_noncurated",
     "copy_reused_by_curated",
     "inst",
     "m",
+    "copy_home_unknown",
     "side_other",
 )
 
@@ -886,10 +791,10 @@ def _norm_structure_id(sid: str | None) -> str | None:
 def _metabolite_node_keys(data) -> dict[str, str]:
     """Escher metabolite node id → scene instance key (copy:/inst:/m:/side:).
 
-    Prefers ``metadata.metabolite_instances``. When that table is missing
-    (e.g. e_coli_core), rebuilds keys from ``glyph_identity`` plus the export
-    id order (sorted scene keys ↔ non-multimarker node ids), then falls back
-    to reaction-topology inference from ``glyph_identity``.
+    Prefers ``metadata.metabolite_instances``. When that table is missing,
+    rebuilds the same mapping ``drawing.export`` assigned: node id ``i`` is the
+    ``i``-th key of ``sorted(glyph_identity keys ∪ {r:rid})``, verified against
+    each metabolite's ``bigg_id``. No topology guessing.
     """
     out = {}
     table = (data[0].get("metadata") or {}).get("metabolite_instances") or {}
@@ -905,87 +810,28 @@ def _metabolite_node_keys(data) -> dict[str, str]:
 
 
 def _metabolite_node_keys_from_glyph_identity(data) -> dict[str, str]:
+    """Exact export-id reconstruction from ``glyph_identity`` (no fallbacks)."""
     meta = (data[0].get("metadata") or {}) if isinstance(data[0], dict) else {}
     gi = meta.get("glyph_identity") or {}
     if not gi:
         return {}
     body = data[1]
     nodes = body.get("nodes") or {}
-    # Export assigned ids = enumerate(sorted(positions)); multimarkers are appended later.
-    rids = sorted({rx.get("bigg_id") for rx in (body.get("reactions") or {}).values() if rx.get("bigg_id")})
-    all_keys = sorted(list(gi.keys()) + [f"r:{rid}" for rid in rids])
-    non_multi = sorted(
-        (nid for nid, n in nodes.items() if n.get("node_type") != "multimarker"),
-        key=lambda x: int(x),
+    rids = sorted(
+        {rx.get("bigg_id") for rx in (body.get("reactions") or {}).values() if rx.get("bigg_id")}
     )
-    if len(all_keys) == len(non_multi):
-        out = {}
-        for k, nid in zip(all_keys, non_multi):
-            if k in gi:
-                out[str(nid)] = str(k)
-        if out:
-            return out
-    # Topology inference when node counts drifted after routing.
-    touch: dict[str, set] = defaultdict(set)
-    for rx in (body.get("reactions") or {}).values():
-        rid = rx.get("bigg_id")
-        if not rid:
-            continue
-        for seg in (rx.get("segments") or {}).values():
-            for end in ("from_node_id", "to_node_id"):
-                nid = seg.get(end)
-                if (nodes.get(nid) or {}).get("node_type") == "metabolite":
-                    touch[str(nid)].add(rid)
-    structs = _reaction_structure_ids(data)
-    by_mid: dict[str, list[str]] = defaultdict(list)
-    for k, mid in gi.items():
-        by_mid[str(mid)].append(str(k))
+    all_keys = sorted(list(gi.keys()) + [f"r:{rid}" for rid in rids])
     out = {}
-    for nid, n in nodes.items():
-        if n.get("node_type") != "metabolite":
+    for i, key in enumerate(all_keys):
+        if key not in gi:
             continue
-        mid = n.get("bigg_id")
-        if not mid:
+        nid = str(i)
+        n = nodes.get(nid)
+        if not n or n.get("node_type") != "metabolite":
             continue
-        rids_here = touch.get(str(nid), set())
-        cands = by_mid.get(str(mid)) or []
-        chosen = ""
-        for rid in rids_here:
-            sk = f"side:{rid}:{mid}"
-            if sk in gi:
-                chosen = sk
-                break
-        if not chosen:
-            for rid in rids_here:
-                sid = structs.get(rid)
-                sn = _norm_structure_id(sid)
-                if not sn:
-                    continue
-                for k in cands:
-                    if not k.startswith("copy:"):
-                        continue
-                    cs = _norm_structure_id(k.split(":")[1] if k.count(":") >= 2 else None)
-                    if cs == sn:
-                        chosen = k
-                        break
-                if chosen:
-                    break
-        if not chosen:
-            mk = f"m:{mid}"
-            if mk in gi:
-                chosen = mk
-        if not chosen:
-            insts = [k for k in cands if k.startswith("inst:")]
-            if len(insts) == 1:
-                chosen = insts[0]
-            elif len(cands) == 1:
-                chosen = cands[0]
-            else:
-                copies = [k for k in cands if k.startswith("copy:")]
-                if len(copies) == 1:
-                    chosen = copies[0]
-        if chosen:
-            out[str(nid)] = chosen
+        if n.get("bigg_id") != gi[key]:
+            continue
+        out[nid] = str(key)
     return out
 
 
@@ -1061,12 +907,13 @@ def classify_far_edge(
         return "within_structure_curated"
 
     if key.startswith("copy:"):
+        if not copy_sid:
+            return "copy_home_unknown"
         if not rx_struct:
             return "copy_reused_by_noncurated"
-        if copy_sid and copy_sid != rx_struct:
+        if copy_sid != rx_struct:
             return "copy_reused_by_curated"
-        # Curated reaction with unknown / missing copy home: treat as curated reuse.
-        return "copy_reused_by_curated"
+        return "copy_home_unknown"
 
     if key.startswith("inst:"):
         return "inst"

@@ -27,19 +27,7 @@ from hub_drawing import REACTION, SPECIES, drawing_graph, stub_endpoints
 # Default Escher glyph radii (primary metabolite, secondary, reaction midmarker).
 _RADIUS = {SPECIES: (20.0, 10.0), REACTION: 5.0}
 
-_GATE_DIRS: dict[str, str] = {
-    "crossings": "lower",
-    "crossing_density": "higher",
-    "crossing_angular_resolution": "higher",
-    "edge_length_deviation": "lower",
-    "angular_resolution": "lower",
-    "edge_orthogonality": "higher",
-    "aspect_ratio": "higher",
-    "homogeneity": "lower",
-    "overlapping_pairs": "lower",
-    "overlap_area_share": "lower",
-    "participant_consistency": "higher",
-}
+# Gate directions live in layout_quality_evaluator.HUB_DIRS (single copy).
 
 
 def _orient(a, b, c):
@@ -695,12 +683,3 @@ def score_trial(
     return after
 
 
-def no_regression(before: dict, after: dict, tol: float | None = None) -> bool:
-    """True when no gated metric is worse than ``before`` beyond ``tol``.
-
-    Routed through ``layout_quality_evaluator.metrics_not_worse`` with the shared
-    ``METRIC_EPS`` (and the same columns as ``HUB_DIRS``).
-    """
-    from layout_quality_evaluator import METRIC_EPS, metrics_not_worse
-
-    return metrics_not_worse(before, after, _GATE_DIRS, METRIC_EPS if tol is None else tol)

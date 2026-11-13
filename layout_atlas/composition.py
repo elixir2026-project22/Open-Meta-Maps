@@ -1080,22 +1080,6 @@ def _expand_move_with_multimarkers(body, move):
     return out
 
 
-def relocation_gate_not_worse(before, after, eps=None):
-    """True when tip-nudge gate metrics do not worsen beyond ``eps``.
-
-    Crossings / angular / ELD / overlaps ↓; PC / ortho / aspect_ratio ↑.
-    Missing (None) fields are skipped.  Routed through ``layout_quality_evaluator``.
-    """
-    from layout_quality_evaluator import METRIC_EPS, TIP_DIRS, metrics_not_worse
-    return metrics_not_worse(before, after, TIP_DIRS, METRIC_EPS if eps is None else eps)
-
-
-def _escher_gate_metrics(data, model, pathway=None):
-    """Tip-nudge gates via ``layout_quality_evaluator.measure_tip``."""
-    from layout_quality_evaluator import measure_tip
-    return measure_tip(data, pathway=pathway)
-
-
 def _apply_tip_move(tbody, move, dx, dy):
     """Translate ``move`` nodes; shift only the near-end handle of attached segments."""
     nodes = tbody.get('nodes') or {}
@@ -1163,9 +1147,7 @@ def nudge_frontier_escher(data, model, previous_anchors=None, skip_edges=(),
     import copy as _copy
     import edge_style
     import orthogonal_route as ortho
-    from layout_quality_evaluator import (
-        METRIC_EPS, LayoutQualityEvaluator, measure_tip, metrics_not_worse, TIP_DIRS,
-    )
+    from layout_quality_evaluator import METRIC_EPS, LayoutQualityEvaluator, measure_tip
     if not isinstance(data[0], dict):
         data[0] = {}
     data[0].setdefault('metadata', {})
@@ -1229,7 +1211,7 @@ def nudge_frontier_escher(data, model, previous_anchors=None, skip_edges=(),
             if area1 >= area0:
                 rejected += 1
                 continue
-            # Cheap rejects before re-routing (same directions as the full gate).
+            # Cheap rejects before re-routing (overlaps / tip aspect / crossings).
             if tip_ev.prefilter(
                 trial,
                 max_overlaps=int(baseline['overlapping_pairs']),
@@ -1237,15 +1219,12 @@ def nudge_frontier_escher(data, model, previous_anchors=None, skip_edges=(),
             ) is not None:
                 rejected += 1
                 continue
-            if float(_content_aspect_ratio(tbody)) + METRIC_EPS < float(baseline['aspect_ratio']):
-                rejected += 1
-                continue
             only = _reactions_touching(tbody, move)
             edge_style.apply(
                 trial, skip, mode='orthogonal', only=only or None,
                 gem_path=gem_path, pathway=pathway)
             gate1 = measure_tip(trial, pathway=pathway)
-            if not metrics_not_worse(baseline, gate1, TIP_DIRS, METRIC_EPS):
+            if not tip_ev.evaluate(trial, metrics=gate1).accepted:
                 rejected += 1
                 continue
             # Keep the trial's re-route metadata; do not route again.

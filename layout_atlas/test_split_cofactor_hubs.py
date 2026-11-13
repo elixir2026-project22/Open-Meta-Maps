@@ -6,7 +6,8 @@ from cofactor_hubs import cofactor_hubs
 from core import load_model
 from evaluation.escher_bridge import load_escher
 from hub_drawing import pathway_from_model
-from layout_gate import _GATE_DIRS, no_regression, score_map
+from layout_gate import score_map
+from layout_quality_evaluator import HUB_DIRS, METRIC_EPS, metrics_not_worse
 from split_cofactor_hubs import apply_gated
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -32,13 +33,13 @@ def _curated_reactions(name: str) -> set[str]:
 
 
 def test_gate_columns_cover_directed_metrics():
-    assert "angular_resolution" in _GATE_DIRS
-    assert "crossing_angular_resolution" in _GATE_DIRS
-    assert "aspect_ratio" in _GATE_DIRS
-    assert "homogeneity" in _GATE_DIRS
-    assert "species_drawn" not in _GATE_DIRS
-    assert "reactions_drawn" not in _GATE_DIRS
-    assert len(_GATE_DIRS) == 11
+    assert "angular_resolution" in HUB_DIRS
+    assert "crossing_angular_resolution" in HUB_DIRS
+    assert "aspect_ratio" in HUB_DIRS
+    assert "homogeneity" in HUB_DIRS
+    assert "species_drawn" not in HUB_DIRS
+    assert "reactions_drawn" not in HUB_DIRS
+    assert len(HUB_DIRS) == 11
 
 
 def test_split_e_coli_core_no_regression():
@@ -56,7 +57,7 @@ def test_split_e_coli_core_no_regression():
     assert report["hubs_after"] == 5
     assert cofactor_hubs(out, model)["hub_count"] == 5
     after = score_map(pathway, out)
-    assert no_regression(before, after)
+    assert metrics_not_worse(before, after, HUB_DIRS, METRIC_EPS)
     clones = (out[0].get("metadata") or {}).get("hub_split_clones") or []
     assert clones
     # Pin reader keeps the original hub glyph for split metabolites.
@@ -84,4 +85,4 @@ def test_split_iIT341_no_regression():
     assert report["hubs_after"] == 7
     assert cofactor_hubs(out, model)["hub_count"] == 7
     after = score_map(pathway, out)
-    assert no_regression(before, after)
+    assert metrics_not_worse(before, after, HUB_DIRS, METRIC_EPS)
