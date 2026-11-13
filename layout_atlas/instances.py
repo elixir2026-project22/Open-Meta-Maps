@@ -16,8 +16,12 @@ Operations on the scene made by `drawing.display_scene` (the hashed drawing file
   split               reactions of one metabolite that are further than NEAR from every existing instance are grouped (single linkage,
                       LINK px); a group of >= MIN_CLUSTER reactions (or one reaction farther than FAR) gets a new instance at its centre.
                       Reason `long_edge_split`.  At most MAX_NEW new instances per metabolite.
+  bridge share        after proximity reuse/split, a shared `m:` glyph keeps only the attachments that bridge otherwise-separate reaction
+                      components (union-find over non-currency edges excluding that metabolite).  Non-bridging attachments become local
+                      `inst:` clones beside their reaction.  Reason `bridge_local`.  Packing may still use shared identities as junctions;
+                      this pass is the principled share-vs-local policy.
   island attach       an isolated non-curated reaction may attach to a nearby instance of a participant (up to RESCUE px) so packing keeps
-                      connectivity.
+                      connectivity — but only when that attachment bridges components (same rule as bridge share).
   structure-local     after packing (compose pipeline), a reaction inside a curated structure prefers that structure's own `copy:` of the
                       metabolite.  When the structure has no suitable copy and the reaction still has a far link to another structure's
                       `copy:`, a new movable `inst:` is placed next to the structure — replacing the island-proximity stretch onto a foreign
@@ -98,6 +102,60 @@ def _clusters(points, link):
     for i in range(n):
         groups[find(i)].append(i)
     return sorted(groups.values(), key=lambda g: g[0])
+
+
+def _uf_find(parent, x):
+    parent.setdefault(x, x)
+    while parent[x] != x:
+        parent[x] = parent[parent[x]]
+        x = parent[x]
+    return x
+
+
+def _uf_union(parent, a, b):
+    ra, rb = _uf_find(parent, a), _uf_find(parent, b)
+    if ra != rb:
+        parent[rb] = ra
+        return True
+    return False
+
+
+def _components_excluding_metabolite(model, parts, mid, cur):
+    """Union-find over reactions via non-currency participant edges, excluding ``mid``.
+
+    Metabolite identity nodes (``M:<id>``) link reactions that share any other
+    non-currency metabolite, matching the spanning ``joins`` idea: a share of
+    ``mid`` is useful only when it merges otherwise-separate components.
+    """
+    parent = {}
+    for r in model['reactions']:
+        rid = r['id']
+        _uf_find(parent, 'R:' + rid)
+        for m in r['metabolites']:
+            if m in cur or m == mid:
+                continue
+            key = parts.get((rid, m))
+            if key is None or str(key).startswith('side:'):
+                continue
+            _uf_union(parent, 'R:' + rid, 'M:' + m)
+    return parent
+
+
+def share_joins(model, parts, mid, cur, candidate_rids):
+    """Which reactions may share one glyph of ``mid`` (bridge otherwise-separate parts).
+
+    Candidates are considered in the given order (caller should sort by priority).
+    The first attachment always opens the shared box; later ones join only when
+    ``find(M:mid) != find(R:rid)`` before the union — same greedy spanning rule as
+    the automatic-layout ``joins`` set.  Non-members should get local ``inst:``.
+    """
+    parent = _components_excluding_metabolite(model, parts, mid, cur)
+    joins = set()
+    for rid in candidate_rids:
+        if _uf_find(parent, 'M:' + mid) != _uf_find(parent, 'R:' + rid):
+            _uf_union(parent, 'M:' + mid, 'R:' + rid)
+            joins.add(rid)
+    return joins
 
 
 def _degree_threshold(model, cur, pct, floor):
@@ -641,9 +699,62 @@ def optimize(model, scene, blocks, cur, summary=True, reuse=True, split=True):
         if added:
             per_metabolite[mid] = added
 
-    # 2b. a reaction outside the curated structures whose every glyph is private (shared with no other reaction) is attached to the nearest
-    # instance that another reaction uses, whatever the usual NEAR rule says: an island is worse than a longer line.  Far stretches onto a
-    # foreign curated copy are corrected after packing by structure_local.
+    # 2b. Bridge-only share: keep `m:` attachments that merge otherwise-separate components; else local inst:.
+    bridge_shared = 0
+    bridge_local = 0
+    for mid in sorted({m for (_, m), key in parts.items() if key == 'm:' + m and m not in cur}):
+        shared_key = 'm:' + mid
+        if shared_key not in pos:
+            continue
+        holders = [rid for (rid, m), key in parts.items() if m == mid and key == shared_key]
+        if len(holders) < 2:
+            if holders:
+                bridge_shared += 1
+            continue
+        # Prefer reactions closer to the shared glyph as spanning joins (stable, geometry-aware).
+        here = np.array(pos[shared_key], float)
+
+        def _join_priority(rid):
+            rp = np.array(pos.get('r:' + rid, here), float)
+            return (float(np.hypot(*(rp - here))), rid)
+
+        ordered = sorted(holders, key=_join_priority)
+        joins = share_joins(model, parts, mid, cur, ordered)
+        bridge_shared += len(joins)
+        non = [rid for rid in ordered if rid not in joins]
+        if not non:
+            continue
+        max_new = HUB_MAX_NEW if mid in hub_mets else MAX_NEW
+        # Count existing long_edge / bridge locals for this mid so we respect the cap.
+        already = sum(1 for k, m2 in copies.items() if m2 == mid and k.startswith('inst:') and reasons.get(k) in ('long_edge_split', 'bridge_local'))
+        for rid in non:
+            if already >= max_new:
+                # Cap exceeded: still prefer a private glyph over a non-bridging share.
+                key = f'inst:{mid}:bridge:{rid}'
+            else:
+                key = f'inst:{mid}:{already}'
+                already += 1
+            n = 0
+            base = key
+            while key in pos:
+                n += 1
+                key = f'{base}:{n}'
+            centre = np.array(pos['r:' + rid], float)
+            pos[key] = (centre + LOCAL_OFFSET).tolist()
+            labels[key], copies[key] = mid, mid
+            reasons[key] = 'bridge_local'
+            _detach_protected(scene, rid, mid)
+            parts[rid, mid] = key
+            report['added'] += 1
+            bridge_local += 1
+            per_metabolite[mid] = per_metabolite.get(mid, 0) + 1
+    report['bridge_shares'] = bridge_shared
+    report['bridge_local'] = bridge_local
+
+    # 2c. a reaction outside the curated structures whose every glyph is private (shared with no other reaction) is attached to the nearest
+    # instance that another reaction uses, whatever the usual NEAR rule says: an island is worse than a longer line — but only when the
+    # attachment bridges components (same share policy).  Far stretches onto a foreign curated copy are corrected after packing by
+    # structure_local.
     holders = defaultdict(set)
     for (rid, mid), key in parts.items():
         holders[key].add(rid)
@@ -661,12 +772,25 @@ def optimize(model, scene, blocks, cur, summary=True, reuse=True, split=True):
             if not options:
                 continue
             dist = [float(np.hypot(*(np.array(pos[t], float) - rp))) for t in options]
-            j = int(np.argmin(dist))
-            if dist[j] <= RESCUE:
+            ranked = sorted(range(len(options)), key=lambda i: dist[i])
+            for j in ranked:
+                if dist[j] > RESCUE:
+                    break
+                target = options[j]
+                # Sharing onto an existing multi-holder (or shared m:) must bridge components.
+                if target.startswith('m:') or len(holders[target] - {rid}) >= 1:
+                    peers = sorted(holders[target] - {rid})
+                    # Probe: would rid join if peers are already on the shared box?
+                    probe = share_joins(model, parts, mid, cur, peers + [rid])
+                    if rid not in probe:
+                        continue
                 holders[k].discard(rid)
-                parts[rid, mid] = options[j]
-                holders[options[j]].add(rid)
+                parts[rid, mid] = target
+                holders[target].add(rid)
                 done = True
+                break
+            if done:
+                break
         rescued += done
     report['isolated_reactions_attached'] = rescued
 

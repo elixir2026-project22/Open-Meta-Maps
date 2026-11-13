@@ -42,6 +42,15 @@ def test_gate_columns_cover_directed_metrics():
     assert len(HUB_DIRS) == 11
 
 
+def test_angle_candidates_include_fallback_rotations():
+    from split_cofactor_hubs import _FALLBACK_ROTATIONS, _angle_candidates
+
+    # Empty movers → still expose fallbacks so stubborn hubs can retry small angles.
+    angles = _angle_candidates([{}, {"nodes": {}, "reactions": {}}], movers=[], glyph="1", rid_to_key={})
+    for ang in _FALLBACK_ROTATIONS:
+        assert ang in angles
+
+
 def test_split_e_coli_core_no_regression():
     raw = load_escher(EXAMPLE_RESULTS / "e_coli_core" / "OpenMetaMaps_e_coli_core_result.json")
     model = load_model(EXAMPLES / "e_coli_core.xml")
@@ -54,8 +63,10 @@ def test_split_e_coli_core_no_regression():
     )
     assert report["accepted"]
     assert report["hubs_before"] == 6
-    assert report["hubs_after"] == 5
-    assert cofactor_hubs(out, model)["hub_count"] == 5
+    # Fallback angles + multi-pass clear more exchange hubs toward cofactors-as-clones.
+    assert report["hubs_after"] == 2
+    assert cofactor_hubs(out, model)["hub_count"] == 2
+    assert report["hubs_after"] < report["hubs_before"]
     after = score_map(pathway, out)
     assert metrics_not_worse(before, after, HUB_DIRS, METRIC_EPS)
     clones = (out[0].get("metadata") or {}).get("hub_split_clones") or []
@@ -82,7 +93,8 @@ def test_split_iIT341_no_regression():
     )
     assert report["accepted"]
     assert report["hubs_before"] == 9
-    assert report["hubs_after"] == 7
-    assert cofactor_hubs(out, model)["hub_count"] == 7
+    assert report["hubs_after"] == 5
+    assert cofactor_hubs(out, model)["hub_count"] == 5
+    assert report["hubs_after"] < report["hubs_before"]
     after = score_map(pathway, out)
     assert metrics_not_worse(before, after, HUB_DIRS, METRIC_EPS)
