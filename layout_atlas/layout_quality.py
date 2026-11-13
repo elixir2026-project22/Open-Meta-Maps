@@ -199,6 +199,132 @@ def curves_through_nodes_report(data, skip_edges=None) -> dict:
     return dict(count=int(node_hits), reactions=rids, hits=hit_points)
 
 
+# Escher default radii (escher 1.8) — layout-benchmark ``rule_lines_through_nodes`` uses these.
+ESCHER_PRIMARY_RADIUS = 20.0
+ESCHER_SECONDARY_RADIUS = 10.0
+
+
+def _polyline_pierces_disk(pts, cx, cy, radius) -> bool:
+    """True if a marker polyline's interior meets the open disk (strictly inside radius).
+
+    Same predicate as shapely ``LineString.intersects(disk) and not touches`` for a
+    true circle: min distance from centre to the polyline is strictly less than
+    ``radius``. Pure numpy — no shapely (eval-only optional dep).
+    """
+    if radius <= 0 or len(pts) < 2:
+        return False
+    r2 = float(radius) * float(radius)
+    ax = float(pts[0][0])
+    ay = float(pts[0][1])
+    for i in range(1, len(pts)):
+        bx = float(pts[i][0])
+        by = float(pts[i][1])
+        abx, aby = bx - ax, by - ay
+        lab2 = abx * abx + aby * aby
+        if lab2 < 1e-18:
+            d2 = (cx - ax) * (cx - ax) + (cy - ay) * (cy - ay)
+        else:
+            t = ((cx - ax) * abx + (cy - ay) * aby) / lab2
+            if t < 0.0:
+                t = 0.0
+            elif t > 1.0:
+                t = 1.0
+            px, py = ax + t * abx, ay + t * aby
+            d2 = (cx - px) * (cx - px) + (cy - py) * (cy - py)
+        if d2 < r2:
+            return True
+        ax, ay = bx, by
+    return False
+
+
+def official_lines_through_nodes_report(data, skip_edges=None) -> dict:
+    """Official-style (line, species) through-node pairs on marker polylines.
+
+    Matches layout-benchmark ``rules.lines_through_nodes`` / pathway-scorer core.js:
+    polyline = midmarker → multimarkers → metabolite (Bezier handles ignored),
+    species circles at Escher primary/secondary radii, interior intersection only.
+    ``skip_edges`` is accepted for API symmetry but does not drop edges — the
+    official rule counts every drawn participant line.
+
+    Pure geometry (numpy + networkx + scipy cKDTree); does **not** import shapely,
+    so default Mac ``compose`` / ``draw_map`` works without ``requirements-eval.txt``.
+    """
+    import networkx as nx
+    from scipy.spatial import cKDTree
+
+    del skip_edges  # official count is whole-map; kept for call-site symmetry
+    body = data[1]
+    nodes, reactions = body["nodes"], body["reactions"]
+    species, pos, radii = [], {}, {}
+    for nid, n in nodes.items():
+        if n.get("node_type") != "metabolite":
+            continue
+        primary = bool(n.get("node_is_primary", True))
+        r = ESCHER_PRIMARY_RADIUS if primary else ESCHER_SECONDARY_RADIUS
+        pos[nid] = (float(n["x"]), float(n["y"]))
+        radii[nid] = r
+        species.append(nid)
+    if not species:
+        return dict(count=0, reactions=[], pairs=[])
+
+    xy = np.array([pos[n] for n in species], float)
+    rad = np.array([radii[n] for n in species], float)
+    tree = cKDTree(xy)
+    max_r = float(rad.max()) if len(rad) else 0.0
+    pairs = []
+    hit_rids = set()
+    for rx in reactions.values():
+        rid = rx.get("bigg_id")
+        seg = nx.Graph()
+        for s in rx.get("segments", {}).values():
+            seg.add_edge(s["from_node_id"], s["to_node_id"])
+        mid = next(
+            (n for n in seg if nodes.get(n, {}).get("node_type") == "midmarker"),
+            None,
+        )
+        if mid is None or mid not in nodes:
+            continue
+        pos[mid] = (float(nodes[mid]["x"]), float(nodes[mid]["y"]))
+        for nid in list(seg.nodes()):
+            if nodes.get(nid, {}).get("node_type") != "metabolite" or nid not in pos:
+                continue
+            try:
+                pathn = nx.shortest_path(seg, mid, nid)
+            except (nx.NetworkXNoPath, nx.NodeNotFound):
+                continue
+            pts = [(float(nodes[p]["x"]), float(nodes[p]["y"])) for p in pathn if p in nodes]
+            if len(pts) < 2:
+                continue
+            pts_arr = np.asarray(pts, float)
+            if float(np.sum(np.hypot(*np.diff(pts_arr, axis=0).T))) == 0.0:
+                continue
+            ends = {mid, nid}
+            # Candidates near the polyline bbox (centre + half-diagonal + max radius).
+            lo = pts_arr.min(axis=0)
+            hi = pts_arr.max(axis=0)
+            center = 0.5 * (lo + hi)
+            half = 0.5 * float(np.hypot(*(hi - lo))) + max_r
+            for k in tree.query_ball_point(center, half):
+                sk = species[k]
+                if sk in ends:
+                    continue
+                cx, cy = float(xy[k, 0]), float(xy[k, 1])
+                if _polyline_pierces_disk(pts, cx, cy, float(rad[k])):
+                    pairs.append(dict(
+                        reaction=rid,
+                        metabolite=nodes[nid].get("bigg_id"),
+                        through=nodes[sk].get("bigg_id"),
+                    ))
+                    if rid:
+                        hit_rids.add(rid)
+    return dict(count=len(pairs), reactions=sorted(hit_rids), pairs=pairs)
+
+
+def official_lines_through_nodes_count(data, skip_edges=None) -> int:
+    """Official ``rule_lines_through_nodes`` pair count (Escher marker polylines)."""
+    return int(official_lines_through_nodes_report(data, skip_edges)["count"])
+
+
 def evaluate(data, skip_edges=None, orientation_kinds=None, max_issues=4000, structures=None):
     """-> (summary, issues).  `summary` holds the six core indicators, the details and the worst local regions; `issues` lists where the problems are.
 
