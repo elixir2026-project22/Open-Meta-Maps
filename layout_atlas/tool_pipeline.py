@@ -1841,9 +1841,19 @@ def run_job(folder):
                 if r not in best or LEVEL_RANK[level] < LEVEL_RANK[best[r]]:
                     best[r] = level
         counts = Counter(LEVEL_NAMES[v] for v in best.values())
+        kind_of = {r['id']: reaction_kind(r) for r in model['reactions']}
+        kind_totals = Counter(kind_of.values())
+        kind_curated = Counter(kind_of[rid] for rid in used)
         covered = dict(expert_module_reactions=len(used), complete_equation=counts['complete_equation'], reference_supported=counts['reference_supported'],
                        ec_topology=counts['ec_topology'], geometry_only=counts['geometry_only'], bridge_reactions=len(bridge_ids),
-                       algorithm_completed=len(allids) - len(used) - len(bridge_ids), total=len(allids))
+                       algorithm_completed=len(allids) - len(used) - len(bridge_ids), total=len(allids),
+                       by_kind=dict(
+                           metabolic=dict(total=kind_totals['metabolic'], curated=kind_curated['metabolic'],
+                                          coverage=round(kind_curated['metabolic'] / kind_totals['metabolic'], 4) if kind_totals['metabolic'] else None),
+                           transport=dict(total=kind_totals['transport'], curated=kind_curated['transport'],
+                                          coverage=round(kind_curated['transport'] / kind_totals['transport'], 4) if kind_totals['transport'] else None),
+                           exchange=dict(total=kind_totals['exchange'], curated=kind_curated['exchange'],
+                                         coverage=round(kind_curated['exchange'] / kind_totals['exchange'], 4) if kind_totals['exchange'] else None)))
         modules = []
         codes = module_codes(blocks)
         for b in sorted(blocks, key=lambda b: (-len(b['reaction_ids']), b['id'])):
