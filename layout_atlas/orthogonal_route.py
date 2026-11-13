@@ -32,9 +32,7 @@ import numpy as np
 import edge_routing as er
 import line_render
 from core import CURRENCY
-
-# Local accept gates: layout_quality_evaluator.ORTHO_DIRS + METRIC_EPS.
-
+from layout_quality_evaluator import METRIC_EPS, ORTHO_DIRS, metrics_not_worse
 
 STUB_MAX = 90.0          # px: short cofactor spokes stay as stubs
 LONG_EDGE = 160.0        # px: long algorithm edges always get orthogonal routes
@@ -322,8 +320,6 @@ def _gate_metrics(data, pathway=None):
 
 def _gate_ok(pre, cur, eps=None):
     """True when no gated metric is worse than ``pre`` beyond ``eps``."""
-    from layout_quality_evaluator import METRIC_EPS, ORTHO_DIRS, metrics_not_worse
-
     if not pre or not cur:
         return False
     return metrics_not_worse(pre, cur, ORTHO_DIRS, METRIC_EPS if eps is None else eps)
@@ -759,7 +755,6 @@ def apply_orthogonal(data, skip_edges=(), only=None, bezier_stub_fn=None, gem_pa
             if edge_key in key_index:
                 trial = list(lengths)
                 trial[key_index[edge_key]] = plen
-                from layout_quality_evaluator import METRIC_EPS
                 if _length_deviation(trial) > pre_dev + METRIC_EPS:
                     report['unresolved'] += 1
                     continue
@@ -791,7 +786,6 @@ def apply_orthogonal(data, skip_edges=(), only=None, bezier_stub_fn=None, gem_pa
     report['gate_after'] = {k: (None if v is None else round(v, 6)) for k, v in after_gate.items()}
     report['gate_ok'] = _gate_ok(pre_gate, after_gate)
     # Hard length-cap check on the final map (independent of gate metric rounding).
-    from layout_quality_evaluator import METRIC_EPS
     if report['length_deviation_after'] > pre_dev + METRIC_EPS:
         report['gate_ok'] = False
     if not report['gate_ok']:

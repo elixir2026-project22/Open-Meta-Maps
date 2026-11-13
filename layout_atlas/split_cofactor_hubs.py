@@ -20,11 +20,6 @@ from layout_gate import CrossingIndex, score_map, score_trial
 from layout_quality_evaluator import HUB_DIRS, METRIC_EPS, metrics_not_worse
 
 
-def no_regression(before, after, tol=None):
-    """Hub-split no-regression via the shared evaluator tolerance and directions."""
-    return metrics_not_worse(before, after, HUB_DIRS, METRIC_EPS if tol is None else tol)
-
-
 def _midmarker(nodes, rx):
     for seg in (rx.get("segments") or {}).values():
         for nid in (seg.get("from_node_id"), seg.get("to_node_id")):
@@ -281,8 +276,8 @@ def apply_gated(map_json, model, pathway, curated=(), cur=None, log=None):
             )
             if (
                 after is None
-                or not no_regression(original_score, after)
-                or not no_regression(current_score, after)
+                or not metrics_not_worse(original_score, after, HUB_DIRS, METRIC_EPS)
+                or not metrics_not_worse(current_score, after, HUB_DIRS, METRIC_EPS)
             ):
                 continue
             current = trial
