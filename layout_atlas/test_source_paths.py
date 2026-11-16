@@ -136,8 +136,50 @@ def test_bare_glyph_keys_on_e_coli_modules_reuse():
     print(f"PASS e_coli module curve reuse: reused={reused} checked={checked}")
 
 
+def test_collapse_high_bow_becomes_straight():
+    """High-bow collapsed cubics must not stamp decorative humps."""
+    # first b1 + last b2 both ~40 px off a 148 px chord → ratio > 0.12.
+    segs = [
+        ['C', 30.0, 40.0, 50.0, 50.0, 70.0, 40.0],
+        ['C', 90.0, 40.0, 110.0, 40.0, 148.0, 0.0],
+    ]
+    out = sp._collapse_chain_segs(segs)
+    assert out == [['L', 148.0, 0.0]], out
+
+
+def test_write_curves_drops_stale_endpoint_bezier():
+    """After arm-compact, mismatched chain end → straight mid→met (no hump)."""
+    data = [{}, {
+        'nodes': {
+            'mid': {'node_type': 'midmarker', 'x': 100.0, 'y': 100.0},
+            # Live met pulled in by compact_long_arms; chain still aims at +250.
+            'met': {'node_type': 'metabolite', 'bigg_id': '6pgc_c',
+                    'x': 220.0, 'y': 100.0},
+        },
+        'reactions': {
+            'r': {'bigg_id': 'PGL', 'segments': {
+                '0': {'from_node_id': 'mid', 'to_node_id': 'met',
+                      'b1': None, 'b2': None},
+            }},
+        },
+    }]
+    found = [dict(
+        reaction='PGL', metabolite='6pgc_c',
+        # Mild on-chord cubic — only the endpoint mismatch should force straight.
+        segs=[['C', 80.0, 0.0, 160.0, 0.0, 250.0, 0.0]],
+        status='preserved', shift_px=0.0,
+        source=dict(map='x', reaction='y', glyph='z', segments=[]),
+    )]
+    written = sp.write_curves_to_escher(data, found)
+    assert len(written) == 1
+    seg = next(iter(data[1]['reactions']['r']['segments'].values()))
+    assert seg.get('b1') is None and seg.get('b2') is None, seg
+
+
 if __name__ == "__main__":
     test_mapping_accepts_bare_and_prefixed_glyph_keys()
     test_bare_glyph_keys_on_e_coli_modules_reuse()
+    test_collapse_high_bow_becomes_straight()
+    test_write_curves_drops_stale_endpoint_bezier()
     test_every_escher_block_reuses_curves_on_e_coli_core()
     print("ok")

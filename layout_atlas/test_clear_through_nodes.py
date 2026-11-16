@@ -382,3 +382,70 @@ def test_straighten_preserved_corridor():
         and s.get("b1") is None for s in segs.values()
     )
     assert not any(str(k).startswith("es_s") for k in segs)
+
+
+def test_straighten_meaningless_wandering_bezier():
+    """High-bow CS→accoa Bezier (clear_through S-detour) collapses to straight."""
+    # Chord ~1000 px horizontal; controls pull ~700 px off-chord (dev_ratio≫0.22).
+    data = [{
+        "metadata": {"preserved_edges": [], "canvas": {"width": 4000, "height": 2000}},
+    }, {
+        "nodes": {
+            "mid": {"node_type": "midmarker", "x": 3600.0, "y": 4300.0},
+            "accoa": {"node_type": "metabolite", "bigg_id": "accoa_c",
+                      "x": 2600.0, "y": 4350.0, "node_is_primary": True},
+        },
+        "reactions": {
+            "r": {"bigg_id": "CS", "metabolites": [
+                {"bigg_id": "accoa_c", "coefficient": -1.0},
+            ], "segments": {
+                "es_s1": {
+                    "from_node_id": "mid", "to_node_id": "accoa",
+                    "b1": {"x": 3400.0, "y": 3600.0},
+                    "b2": {"x": 2800.0, "y": 3600.0},
+                },
+            }},
+        },
+    }]
+    # Empty map: official through gate has nothing to regress.
+    rep = edge_style.straighten_meaningless_detours(data, skip_edges=[], gate_official=False)
+    assert rep["straightened"] >= 1, rep
+    seg = next(iter(data[1]["reactions"]["r"]["segments"].values()))
+    assert seg.get("from_node_id") == "mid" and seg.get("to_node_id") == "accoa"
+    assert seg.get("b1") is None and seg.get("b2") is None
+
+
+def test_straighten_meaningless_trapezoid_hump():
+    """Trapezoid plateau via multimarker (PGL→6pgc style) collapses to straight."""
+    data = [{
+        "metadata": {"preserved_edges": []},
+    }, {
+        "nodes": {
+            "mid": {"node_type": "midmarker", "x": 3389.8, "y": 2543.3},
+            "mm": {"node_type": "multimarker", "x": 3463.7, "y": 2578.3},
+            "met": {"node_type": "metabolite", "bigg_id": "6pgc_c",
+                    "x": 3537.7, "y": 2543.3, "node_is_primary": True},
+        },
+        "reactions": {
+            "r": {"bigg_id": "PGL", "segments": {
+                "es_s1": {
+                    "from_node_id": "mid", "to_node_id": "mm",
+                    "b1": {"x": 3418.4, "y": 2543.3},
+                    "b2": {"x": 3435.1, "y": 2578.3},
+                },
+                "es_s2": {
+                    "from_node_id": "mm", "to_node_id": "met",
+                    "b1": {"x": 3492.3, "y": 2578.3},
+                    "b2": {"x": 3509.1, "y": 2543.3},
+                },
+            }},
+        },
+    }]
+    rep = edge_style.straighten_meaningless_detours(data, skip_edges=[], gate_official=False)
+    assert rep["straightened"] >= 1, rep
+    segs = data[1]["reactions"]["r"]["segments"]
+    assert any(
+        s.get("from_node_id") == "mid" and s.get("to_node_id") == "met"
+        and s.get("b1") is None for s in segs.values()
+    )
+    assert not any(str(k).startswith("es_s") for k in segs)

@@ -385,22 +385,59 @@ def adjust_chain(segs, delta, max_shift=40.0, max_turn_deg=40.0):
     return segs[:-1] + [last], shift
 
 
+def _cubic_max_dev_ratio(c1, c2, end, samples=16):
+    """Max perpendicular deviation of a mid-relative cubic ÷ chord (0 = colinear)."""
+    ex, ey = float(end[0]), float(end[1])
+    chord = math.hypot(ex, ey)
+    if chord < 1e-6:
+        return 0.0
+    x1, y1 = float(c1[0]), float(c1[1])
+    x2, y2 = float(c2[0]), float(c2[1])
+    max_dev = 0.0
+    for i in range(samples + 1):
+        t = i / samples
+        omt = 1.0 - t
+        px = (omt ** 3) * 0.0 + 3 * (omt ** 2) * t * x1 + 3 * omt * (t ** 2) * x2 + (t ** 3) * ex
+        py = (omt ** 3) * 0.0 + 3 * (omt ** 2) * t * y1 + 3 * omt * (t ** 2) * y2 + (t ** 3) * ey
+        # distance to chord from (0,0) to end
+        tt = (px * ex + py * ey) / (chord * chord)
+        qx, qy = tt * ex, tt * ey
+        max_dev = max(max_dev, math.hypot(px - qx, py - qy))
+    return max_dev / chord
+
+
+# Collapsed / stamped source cubics above this bow look like decorative trapezoid
+# humps once endpoints move (compact_long_arms) — prefer a straight chord.
+_SOURCE_BOW_MAX = 0.12
+# Live metabolite may drift after scene-time adjust; beyond this, controls aim at
+# a stale end and the drawn cubic becomes a meaningless hump.
+_SOURCE_END_MATCH_PX = 8.0
+
+
 def _collapse_chain_segs(segs):
     """One mid→metabolite segment that keeps source curve controls when possible.
 
     Multi-step Escher chains would otherwise insert a multimarker per step and make
     final-geometry evaluation scale poorly on GEMs. A single cubic (first-step b1,
     last-step b2) or a straight chord stays lean while still carrying reused geometry.
+    High-bow collapses (trapezoid humps with empty space under the plateau) fall
+    back to a straight chord — decorative source bends are not a layout win.
     """
     if not segs:
         return segs
     if len(segs) == 1:
+        seg = segs[0]
+        if seg[0] == 'C' and _cubic_max_dev_ratio(seg[1:3], seg[3:5], seg[5:7]) > _SOURCE_BOW_MAX:
+            return [['L', *seg[5:7]]]
         return segs
     end = segs[-1][-2:]
     curved = [s for s in segs if s[0] == 'C']
     if not curved:
         return [['L', *end]]
-    return [['C', *curved[0][1:3], *curved[-1][3:5], *end]]
+    cubic = ['C', *curved[0][1:3], *curved[-1][3:5], *end]
+    if _cubic_max_dev_ratio(cubic[1:3], cubic[3:5], cubic[5:7]) > _SOURCE_BOW_MAX:
+        return [['L', *end]]
+    return [cubic]
 
 
 def write_curves_to_escher(data, found):
@@ -409,6 +446,8 @@ def write_curves_to_escher(data, found):
     For every reused chain the routed segments from the reaction's midmarker to the metabolite node are replaced by one source-derived
     segment (straight or a single cubic). Multi-step source chains are collapsed first so GEM evaluation stays tractable.
     Segment direction stays midmarker -> metabolite, as in the routed export.
+    When the live metabolite has moved far from the chain end (post-scene arm
+    compact), stamp a straight mid→met instead of a stale-control Bezier hump.
     Returns the entries that were written (others keep their routed segments).
     """
     body = data[1]
@@ -448,7 +487,16 @@ def write_curves_to_escher(data, found):
             if not any(b in (s['from_node_id'], s['to_node_id']) for r2 in reactions.values() for s in r2['segments'].values()):
                 nodes.pop(b, None)
         seg = chain_segs[0]
-        if seg[0] == 'C':
+        nx, ny = float(nodes[end_id]['x']), float(nodes[end_id]['y'])
+        end_mismatch = math.hypot(nx - ex, ny - ey)
+        # Prefer straight when controls target a stale end or the collapsed cubic
+        # is already a decorative bow (trapezoid hump over empty space).
+        use_curve = (
+            seg[0] == 'C'
+            and end_mismatch <= _SOURCE_END_MATCH_PX
+            and _cubic_max_dev_ratio(seg[1:3], seg[3:5], seg[5:7]) <= _SOURCE_BOW_MAX
+        )
+        if use_curve:
             b1, b2 = dict(x=round(mx + seg[1], 2), y=round(my + seg[2], 2)), dict(x=round(mx + seg[3], 2), y=round(my + seg[4], 2))
         else:
             b1 = b2 = None

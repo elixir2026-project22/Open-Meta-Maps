@@ -1377,6 +1377,254 @@ def straighten_preserved_spokes(data, skip_edges=None, ring_only=True):
     return dict(straightened=len(details), details=details, ring_only=ring_only)
 
 
+# clear_through / edge_style can accept long S-corridor or template bows that
+# clear a through-node but wander far off the chord (CS→accoa, PPCK→oaa, …).
+# Those are not intentional wins vs stable straight routes.
+# Currency stubs keep their curated side-bows; only main-metabolite / corridor
+# detours are straightened.
+_MEANINGLESS_DEV_RATIO = 0.18
+_MEANINGLESS_PATH_RATIO = 1.35
+_MEANINGLESS_MIN_CHORD = 80.0
+_MEANINGLESS_CORRIDOR_DEV = 0.15
+
+
+def _sample_mid_to_met_path(rx, mid, met_id, nodes, n_per=12):
+    """Sample points along the unique mid→…→met segment chain (Bezier-aware).
+
+    Returns ``(pts, n_segments, has_multimarker)`` or ``None``.
+    """
+    segs = rx.get('segments') or {}
+    out = defaultdict(list)
+    for key, s in segs.items():
+        out[s['from_node_id']].append((key, s))
+    # BFS for a simple path of segment keys mid → met_id
+    queue = [(mid, [])]
+    seen = {mid}
+    found = None
+    while queue and found is None:
+        u, path = queue.pop(0)
+        for key, s in out.get(u, []):
+            v = s['to_node_id']
+            if v in seen and v != met_id:
+                continue
+            nxt = path + [(key, s)]
+            if v == met_id:
+                found = nxt
+                break
+            if nodes.get(v, {}).get('node_type') == 'multimarker':
+                seen.add(v)
+                queue.append((v, nxt))
+    if not found:
+        # Direct mid→met only?
+        for key, s in segs.items():
+            if s.get('from_node_id') == mid and s.get('to_node_id') == met_id:
+                found = [(key, s)]
+                break
+    if not found:
+        return None
+    pts = []
+    has_multi = False
+    for i, (_key, s) in enumerate(found):
+        a = np.array([nodes[s['from_node_id']]['x'], nodes[s['from_node_id']]['y']], float)
+        b = np.array([nodes[s['to_node_id']]['x'], nodes[s['to_node_id']]['y']], float)
+        if i == 0:
+            pts.append(a)
+        if nodes.get(s['to_node_id'], {}).get('node_type') == 'multimarker':
+            has_multi = True
+        c1 = s.get('b1')
+        c2 = s.get('b2')
+        if c1 and c2:
+            ctrl1 = np.array([c1['x'], c1['y']], float)
+            ctrl2 = np.array([c2['x'], c2['y']], float)
+            smp = _bezier(a, ctrl1, ctrl2, b, n=n_per)
+            pts.extend(list(smp[1:]))
+        else:
+            pts.append(b)
+    return np.asarray(pts, float), len(found), has_multi
+
+
+def _path_detour_metrics(pts):
+    """Return (chord, path_len, max_dev, dev_ratio, path_ratio) for a polyline."""
+    if pts is None or len(pts) < 2:
+        return None
+    start, end = pts[0], pts[-1]
+    chord = float(np.hypot(*(end - start)))
+    if chord < 1e-6:
+        return None
+    path_len = float(np.sum(np.hypot(*(np.diff(pts, axis=0).T))))
+    d = end - start
+    max_dev = 0.0
+    for p in pts:
+        t = float(np.dot(p - start, d) / (chord * chord))
+        q = start + t * d
+        max_dev = max(max_dev, float(np.hypot(*(p - q))))
+    return dict(
+        chord=chord,
+        path_len=path_len,
+        max_dev=max_dev,
+        dev_ratio=max_dev / chord,
+        path_ratio=path_len / chord,
+    )
+
+
+def _iter_mid_met_pairs(data):
+    """Yield (rid, met_bigg, mid, met_id) for every mid→met segment path."""
+    body = data[1]
+    nodes = body.get('nodes') or {}
+    for rx in (body.get('reactions') or {}).values():
+        rid = rx.get('bigg_id')
+        segs = rx.get('segments') or {}
+        mid = next(
+            (s['from_node_id'] for s in segs.values()
+             if nodes.get(s['from_node_id'], {}).get('node_type') == 'midmarker'),
+            None,
+        )
+        if mid is None:
+            continue
+        # Collect metabolite tips reachable from mid via direct / multimarker chains.
+        out = defaultdict(list)
+        for key, s in segs.items():
+            out[s['from_node_id']].append((key, s))
+        seen_nodes = {mid}
+        stack = [mid]
+        tip_mets = {}
+        while stack:
+            u = stack.pop()
+            for _key, s in out.get(u, []):
+                v = s['to_node_id']
+                n = nodes.get(v) or {}
+                if n.get('node_type') == 'metabolite' and n.get('bigg_id'):
+                    tip_mets.setdefault(n['bigg_id'], []).append(v)
+                elif n.get('node_type') == 'multimarker' and v not in seen_nodes:
+                    seen_nodes.add(v)
+                    stack.append(v)
+        mx, my = float(nodes[mid]['x']), float(nodes[mid]['y'])
+        for met, cands in tip_mets.items():
+            met_id = min(
+                cands,
+                key=lambda nid: (float(nodes[nid]['x']) - mx) ** 2 + (float(nodes[nid]['y']) - my) ** 2,
+            )
+            yield rid, met, mid, met_id
+
+
+def straighten_meaningless_detours(data, skip_edges=None, gate_official=True,
+                                   max_dev_ratio=_MEANINGLESS_DEV_RATIO,
+                                   max_path_ratio=_MEANINGLESS_PATH_RATIO,
+                                   min_chord=_MEANINGLESS_MIN_CHORD):
+    """Collapse high-bow / high-detour mid→met routes to straight chords.
+
+    Targets clear_through corridor / random-S bows and stale source-path humps
+    that wander far off the chord with no packing reason (vs stable straight).
+    When ``gate_official`` is True, each straighten is kept only if official
+    through-node count does not rise.
+    """
+    import copy as _copy
+    import layout_quality as lq
+
+    skip = list(skip_edges) if skip_edges is not None else list(
+        ((data[0] or {}).get('metadata') or {}).get('preserved_edges') or []
+    ) + list(((data[0] or {}).get('metadata') or {}).get('source_paths') or [])
+    # source_paths entries may be dicts
+    skip_pairs = []
+    for e in skip:
+        if isinstance(e, (list, tuple)) and len(e) >= 2:
+            skip_pairs.append((e[0], e[1]))
+        elif isinstance(e, dict) and e.get('reaction') and e.get('metabolite'):
+            skip_pairs.append((e['reaction'], e['metabolite']))
+    off0 = lq.official_lines_through_nodes_count(data, skip_pairs) if gate_official else None
+    off_start = off0
+    # Cap total official rise so we can straighten a few severe wanderers /
+    # trapezoid humps (stable was straight) without reopening clear_through.
+    max_total_rise = 5
+    candidates = []
+    for rid, met, mid, met_id in _iter_mid_met_pairs(data):
+        rx, _, nodes = _reaction_mid_and_rx(data, rid)
+        if rx is None:
+            continue
+        sampled = _sample_mid_to_met_path(rx, mid, met_id, nodes)
+        if sampled is None:
+            continue
+        pts, n_segs, has_multi = sampled
+        metrics = _path_detour_metrics(pts)
+        if metrics is None or metrics['chord'] < min_chord:
+            continue
+        # Currency side-bows are intentional; only main-metabolite / corridor
+        # detours count as meaningless vs stable straight routes.
+        is_currency = _is_cur(met)
+        if is_currency:
+            # Curated cofactor side-bows are intentional; never treat as decorative.
+            continue
+        # Biomass fan-out bows are a separate layout problem; do not spend the
+        # official-through budget that clears TCA / PPP trapezoid humps.
+        if str(rid).startswith('BIOMASS'):
+            continue
+        wander = metrics['path_ratio'] >= max_path_ratio
+        main_hump = metrics['dev_ratio'] >= max_dev_ratio
+        corridor_hump = (
+            (has_multi or n_segs > 1)
+            and metrics['dev_ratio'] >= _MEANINGLESS_CORRIDOR_DEV
+        )
+        if not (wander or main_hump or corridor_hump):
+            continue
+        # Already a clean straight mid→met?
+        segs = rx.get('segments') or {}
+        direct = next(
+            (s for s in segs.values()
+             if s.get('from_node_id') == mid and s.get('to_node_id') == met_id
+             and s.get('b1') is None and s.get('b2') is None),
+            None,
+        )
+        if direct is not None and metrics['dev_ratio'] < 0.05 and n_segs == 1:
+            continue
+        candidates.append((
+            -metrics['path_ratio'], -metrics['dev_ratio'], -metrics['chord'],
+            rid, met, metrics,
+        ))
+    candidates.sort()
+    details, rejected = [], []
+    for _a, _b, _c, rid, met, metrics in candidates:
+        trial = _copy.deepcopy(data)
+        # Allow long inter-block spokes (CS→accoa ~1000 px); ring straighten caps at 800.
+        hit = _straighten_preserved_spoke(trial, rid, met, max_dist=5000.0)
+        if not hit:
+            rejected.append(dict(reaction=rid, metabolite=met, reason='no_path',
+                                 **{k: round(metrics[k], 3) for k in
+                                    ('chord', 'path_ratio', 'dev_ratio')}))
+            continue
+        if gate_official:
+            off1 = lq.official_lines_through_nodes_count(trial, skip_pairs)
+            # Prefer stable straight look: allow a small total official rise for
+            # the worst wanderers/humps first (sorted by -dev_ratio above).
+            if off1 > off_start + max_total_rise:
+                rejected.append(dict(
+                    reaction=rid, metabolite=met, reason='official_budget',
+                    before=off0, after=off1, off_start=off_start,
+                    max_total_rise=max_total_rise,
+                    **{k: round(metrics[k], 3) for k in
+                       ('chord', 'path_ratio', 'dev_ratio')}))
+                continue
+            if off1 > off0 and metrics['dev_ratio'] < 0.20 and metrics['path_ratio'] < 1.25:
+                # Tiny bows: not worth even +1 through.
+                rejected.append(dict(
+                    reaction=rid, metabolite=met, reason='official_regression_mild',
+                    before=off0, after=off1,
+                    **{k: round(metrics[k], 3) for k in
+                       ('chord', 'path_ratio', 'dev_ratio')}))
+                continue
+            off0 = off1
+        data[0], data[1] = trial[0], trial[1]
+        hit = dict(hit, reason='straighten_meaningless',
+                   **{k: round(metrics[k], 3) for k in
+                      ('chord', 'path_ratio', 'dev_ratio')})
+        details.append(hit)
+    return dict(
+        straightened=len(details), details=details, rejected=rejected,
+        max_dev_ratio=max_dev_ratio, max_path_ratio=max_path_ratio,
+        gate_official=bool(gate_official),
+        max_total_rise=max_total_rise if gate_official else 0,
+    )
+
+
 def repair_missing_preserved_spokes(data, skip_edges=None, gate_official=True):
     """Reconnect preserved spokes left as incomplete multimarker detours.
 
@@ -1691,6 +1939,9 @@ def clear_through_nodes(data, skip_edges=None, log=None, mode=None, gem_path=Non
         report['after_official'] = before_off['count']
         report['after_crossings'] = before_cross
         report['preserved_repair_post'] = repair_missing_preserved_spokes(data, skip)
+        report['preserved_straighten'] = straighten_preserved_spokes(data, skip)
+        report['meaningless_straighten'] = straighten_meaningless_detours(
+            data, skip, gate_official=True)
         report['seconds'] = round(time.time() - t0, 2)
         return report
 
@@ -1779,6 +2030,41 @@ def clear_through_nodes(data, skip_edges=None, log=None, mode=None, gem_path=Non
                 # Skip CrossingIndex rebuild when official did not improve.
                 if official_drop <= 0:
                     continue
+                # Reject decorative clear_through S-corridors / random bows that
+                # wander far off the chord — not an intentional win vs stable
+                # straight routes (CS→accoa, PPCK→oaa, …).
+                detour_ok = True
+                if not _is_cur(met):
+                    rx_t, mid_t, nodes_t = _reaction_mid_and_rx(trial, rid)
+                    if rx_t is not None and mid_t is not None:
+                        cands = [
+                            nid for nid, n in nodes_t.items()
+                            if n.get('node_type') == 'metabolite'
+                            and n.get('bigg_id') == met
+                        ]
+                        if cands:
+                            mx = float(nodes_t[mid_t]['x'])
+                            my = float(nodes_t[mid_t]['y'])
+                            met_id = min(
+                                cands,
+                                key=lambda nid: (
+                                    (float(nodes_t[nid]['x']) - mx) ** 2
+                                    + (float(nodes_t[nid]['y']) - my) ** 2
+                                ),
+                            )
+                            sampled = _sample_mid_to_met_path(
+                                rx_t, mid_t, met_id, nodes_t)
+                            metrics = (
+                                _path_detour_metrics(sampled[0])
+                                if sampled is not None else None
+                            )
+                            if metrics and (
+                                metrics['path_ratio'] >= 1.5
+                                or metrics['dev_ratio'] >= 0.45
+                            ):
+                                detour_ok = False
+                if not detour_ok:
+                    continue
                 after_cross = int(lq.CrossingIndex(trial, skip).headline())
                 cross_delta = after_cross - live_cross
                 cross_ok = cross_delta <= 0 or (official_drop >= 1 and cross_delta <= 1)
@@ -1845,6 +2131,11 @@ def clear_through_nodes(data, skip_edges=None, log=None, mode=None, gem_path=Non
     # Collapse remaining preserved corridors back to straight mid→met so the
     # TCA ring reads closed like stable (not multimarker detours).
     report['preserved_straighten'] = straighten_preserved_spokes(data, skip)
+    # Drop decorative clear_through / Bezier bows that wander far off the chord
+    # (CS→accoa, PPCK→oaa, trapezoid humps) when a straight spoke does not raise
+    # official through-node count — not an intentional win vs stable.
+    report['meaningless_straighten'] = straighten_meaningless_detours(
+        data, skip, gate_official=True)
     after = lq.curves_through_nodes_report(data, skip)
     after_off = lq.official_lines_through_nodes_report(data, skip)
     after_cross = int(lq.CrossingIndex(data, skip).headline())
